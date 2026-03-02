@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import {
   Brain,
-  ArrowLeft,
   Plus,
   Target,
   Gauge,
@@ -76,136 +74,108 @@ function PolarityBar({ label, value }: { label: string; value: number }) {
 
 export default function ContextsPage() {
   return (
-    <div className="relative min-h-screen bg-[oklch(0.08_0.02_270)]">
-      {/* Subtle gradient bg */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute -left-1/4 -top-1/4 h-[600px] w-[600px] rounded-full opacity-[0.05]"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.78 0.15 195), transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute -bottom-1/4 -right-1/4 h-[500px] w-[500px] rounded-full opacity-[0.04]"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.65 0.25 290), transparent 70%)",
-          }}
+    <div className="mx-auto max-w-5xl px-6 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
+              <Brain className="h-6 w-6 text-blue-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-white">Contextos</h1>
+              <p className="mt-1 text-sm text-white/40">
+                Mapeie e decomponha contextos semanticos — tokens, intencoes, polaridade e dominio
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white/70 backdrop-blur-sm transition-all hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Contexto
+          </button>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/60 px-4 py-3 backdrop-blur-xl">
+        <Search className="h-4 w-4 text-white/20" />
+        <input
+          type="text"
+          placeholder="Buscar contextos por texto, intencao ou dominio..."
+          className="w-full bg-transparent text-sm text-white placeholder:text-white/20 outline-none"
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="mb-4 inline-flex items-center gap-1.5 text-xs text-white/30 transition-colors hover:text-white/60"
+      {/* Context cards */}
+      <div className="space-y-3">
+        {SAMPLE_CONTEXTS.map((ctx) => (
+          <div
+            key={ctx.id}
+            className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
           >
-            <ArrowLeft className="h-3 w-3" />
-            Dashboard
-          </Link>
-
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                <Brain className="h-6 w-6 text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-white">Contextos</h1>
-                <p className="mt-1 text-sm text-white/40">
-                  Mapeie e decomponha contextos semanticos — tokens, intencoes, polaridade e dominio
-                </p>
-              </div>
+            {/* Top row */}
+            <div className="mb-3 flex items-start justify-between">
+              <p className="flex-1 text-sm font-medium text-white/90">
+                &ldquo;{ctx.input}&rdquo;
+              </p>
+              <span className="ml-4 shrink-0 text-[10px] text-white/25">
+                {ctx.createdAt}
+              </span>
             </div>
 
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white/70 transition-all hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
-            >
-              <Plus className="h-4 w-4" />
-              Novo Contexto
-            </button>
+            {/* Badges row */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase ${
+                  INTENT_COLORS[ctx.intent] || INTENT_COLORS.question
+                }`}
+              >
+                <Target className="h-3 w-3" />
+                {ctx.intent}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                <Gauge className="h-3 w-3" />
+                {(ctx.confidence * 100).toFixed(0)}% confianca
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                {ctx.tokenCount} tokens
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                {ctx.agentsRequired} agentes
+              </span>
+            </div>
+
+            {/* Bottom: domains + polarity */}
+            <div className="flex items-end justify-between gap-6">
+              {/* Domains */}
+              <div className="flex items-center gap-1.5">
+                <Tags className="h-3 w-3 text-white/25" />
+                {ctx.domains.map((d) => (
+                  <span
+                    key={d}
+                    className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-white/40"
+                  >
+                    {d}
+                  </span>
+                ))}
+              </div>
+
+              {/* Mini polarity */}
+              <div className="w-48 space-y-1">
+                <PolarityBar
+                  label="Complexidade"
+                  value={ctx.polarity.complexity}
+                />
+                <PolarityBar label="Urgencia" value={ctx.polarity.urgency} />
+                <PolarityBar label="Certeza" value={ctx.polarity.certainty} />
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3">
-          <Search className="h-4 w-4 text-white/20" />
-          <input
-            type="text"
-            placeholder="Buscar contextos por texto, intencao ou dominio..."
-            className="w-full bg-transparent text-sm text-white placeholder:text-white/20 outline-none"
-          />
-        </div>
-
-        {/* Context cards */}
-        <div className="space-y-3">
-          {SAMPLE_CONTEXTS.map((ctx) => (
-            <div
-              key={ctx.id}
-              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all hover:border-white/[0.1] hover:bg-white/[0.05]"
-            >
-              {/* Top row */}
-              <div className="mb-3 flex items-start justify-between">
-                <p className="flex-1 text-sm font-medium text-white/90">
-                  &ldquo;{ctx.input}&rdquo;
-                </p>
-                <span className="ml-4 shrink-0 text-[10px] text-white/25">
-                  {ctx.createdAt}
-                </span>
-              </div>
-
-              {/* Badges row */}
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase ${
-                    INTENT_COLORS[ctx.intent] || INTENT_COLORS.question
-                  }`}
-                >
-                  <Target className="h-3 w-3" />
-                  {ctx.intent}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  <Gauge className="h-3 w-3" />
-                  {(ctx.confidence * 100).toFixed(0)}% confianca
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  {ctx.tokenCount} tokens
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  {ctx.agentsRequired} agentes
-                </span>
-              </div>
-
-              {/* Bottom: domains + polarity */}
-              <div className="flex items-end justify-between gap-6">
-                {/* Domains */}
-                <div className="flex items-center gap-1.5">
-                  <Tags className="h-3 w-3 text-white/25" />
-                  {ctx.domains.map((d) => (
-                    <span
-                      key={d}
-                      className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-white/40"
-                    >
-                      {d}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Mini polarity */}
-                <div className="w-48 space-y-1">
-                  <PolarityBar
-                    label="Complexidade"
-                    value={ctx.polarity.complexity}
-                  />
-                  <PolarityBar label="Urgencia" value={ctx.polarity.urgency} />
-                  <PolarityBar label="Certeza" value={ctx.polarity.certainty} />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );

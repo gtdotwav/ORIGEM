@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import {
   Bot,
-  ArrowLeft,
   Code2,
   Pen,
   Search,
@@ -130,121 +128,93 @@ export default function AgentsPage() {
   );
 
   return (
-    <div className="relative min-h-screen bg-[oklch(0.08_0.02_270)]">
-      {/* Subtle gradient bg */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute -left-1/4 top-1/3 h-[500px] w-[500px] rounded-full opacity-[0.05]"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.78 0.2 145), transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute -right-1/4 -top-1/4 h-[600px] w-[600px] rounded-full opacity-[0.04]"
-          style={{
-            background:
-              "radial-gradient(circle, oklch(0.70 0.22 340), transparent 70%)",
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-5xl px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="mb-4 inline-flex items-center gap-1.5 text-xs text-white/30 transition-colors hover:text-white/60"
-          >
-            <ArrowLeft className="h-3 w-3" />
-            Dashboard
-          </Link>
-
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                <Bot className="h-6 w-6 text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-white">Agentes</h1>
-                <p className="mt-1 text-sm text-white/40">
-                  Configure e gerencie agentes especializados — 7 templates, {totalActive} instancias ativas
-                </p>
-              </div>
+    <div className="mx-auto max-w-5xl px-6 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
+              <Bot className="h-6 w-6 text-blue-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-white">Agentes</h1>
+              <p className="mt-1 text-sm text-white/40">
+                Configure e gerencie agentes especializados — 7 templates, {totalActive} instancias ativas
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Agent grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {AGENT_TEMPLATES.map((agent) => (
-            <div
-              key={agent.id}
-              className={`group rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all hover:border-white/[0.1] hover:bg-white/[0.05] ${agent.glowColor}`}
-            >
-              {/* Icon + name */}
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border ${agent.borderColor} ${agent.bgColor}`}
-                  >
-                    <agent.icon className={`h-5 w-5 ${agent.color}`} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-white/90">
-                      {agent.name}
-                    </h3>
-                    <p className="text-[10px] text-white/35">{agent.role}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="rounded-lg p-1.5 text-white/15 transition-colors hover:bg-white/[0.06] hover:text-white/40"
+      {/* Agent grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {AGENT_TEMPLATES.map((agent) => (
+          <div
+            key={agent.id}
+            className={`group rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70 ${agent.glowColor}`}
+          >
+            {/* Icon + name */}
+            <div className="mb-3 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl border ${agent.borderColor} ${agent.bgColor}`}
                 >
-                  <Settings2 className="h-3.5 w-3.5" />
-                </button>
+                  <agent.icon className={`h-5 w-5 ${agent.color}`} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white/90">
+                    {agent.name}
+                  </h3>
+                  <p className="text-[10px] text-white/35">{agent.role}</p>
+                </div>
               </div>
+              <button
+                type="button"
+                className="rounded-lg p-1.5 text-white/15 transition-colors hover:bg-white/[0.06] hover:text-white/40"
+              >
+                <Settings2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
-              <p className="mb-4 text-xs leading-relaxed text-white/35">
-                {agent.description}
-              </p>
+            <p className="mb-4 text-xs leading-relaxed text-white/35">
+              {agent.description}
+            </p>
 
-              {/* Capabilities */}
-              <div className="mb-4 flex flex-wrap gap-1">
-                {agent.capabilities.map((cap) => (
+            {/* Capabilities */}
+            <div className="mb-4 flex flex-wrap gap-1">
+              {agent.capabilities.map((cap) => (
+                <span
+                  key={cap}
+                  className="rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-white/30"
+                >
+                  {cap}
+                </span>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between border-t border-white/[0.05] pt-3">
+              <div className="flex items-center gap-1.5">
+                <Zap className={`h-3 w-3 ${agent.activeInstances > 0 ? agent.color : "text-white/15"}`} />
+                <span className="text-[11px] text-white/30">
+                  {agent.activeInstances > 0
+                    ? `${agent.activeInstances} ativa${agent.activeInstances > 1 ? "s" : ""}`
+                    : "Inativo"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                {agent.outputTypes.map((t) => (
                   <span
-                    key={cap}
-                    className="rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-white/30"
+                    key={t}
+                    className="rounded bg-white/[0.04] px-1 py-0.5 text-[8px] uppercase text-white/25"
                   >
-                    {cap}
+                    {t}
                   </span>
                 ))}
               </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between border-t border-white/[0.05] pt-3">
-                <div className="flex items-center gap-1.5">
-                  <Zap className={`h-3 w-3 ${agent.activeInstances > 0 ? agent.color : "text-white/15"}`} />
-                  <span className="text-[11px] text-white/30">
-                    {agent.activeInstances > 0
-                      ? `${agent.activeInstances} ativa${agent.activeInstances > 1 ? "s" : ""}`
-                      : "Inativo"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {agent.outputTypes.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded bg-white/[0.04] px-1 py-0.5 text-[8px] uppercase text-white/25"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

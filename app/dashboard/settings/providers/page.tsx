@@ -17,10 +17,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  Key,
 } from "lucide-react";
-import { GlassCard } from "@/components/shared/glass-card";
-import { GradientText } from "@/components/shared/gradient-text";
-import { StatusPulse } from "@/components/shared/status-pulse";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -81,7 +79,6 @@ export default function ProvidersPage() {
 
   const testConnection = async (name: ProviderName) => {
     updateState(name, { status: "testing" });
-    // Simulated test — will be replaced with real API call
     await new Promise((r) => setTimeout(r, 1500));
     const hasKey = states[name].apiKey.length > 10;
     updateState(name, {
@@ -90,15 +87,20 @@ export default function ProvidersPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-2xl font-bold">
-          <GradientText>AI Providers</GradientText>
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Connect your API keys to power ORIGEM&apos;s decomposition
-          engine and agent orchestration.
-        </p>
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
+            <Key className="h-6 w-6 text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-white">AI Providers</h1>
+            <p className="mt-1 text-sm text-white/40">
+              Connect your API keys to power ORIGEM&apos;s decomposition engine and agent orchestration
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -107,10 +109,9 @@ export default function ProvidersPage() {
           const Icon = ICON_MAP[provider.icon] ?? Box;
 
           return (
-            <GlassCard
+            <div
               key={provider.name}
-              hover
-              className="relative"
+              className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
             >
               {/* Header */}
               <div className="mb-3 flex items-center justify-between">
@@ -127,31 +128,31 @@ export default function ProvidersPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-foreground/90">
+                    <h3 className="text-sm font-semibold text-white/90">
                       {provider.displayName}
                     </h3>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-[10px] text-white/30">
                       {provider.models.length} model
                       {provider.models.length !== 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>
-                <StatusPulse
-                  status={
+                <div
+                  className={`h-2 w-2 rounded-full ${
                     state.status === "success"
-                      ? "success"
+                      ? "bg-green-400 shadow-[0_0_6px_oklch(0.78_0.2_145/0.4)]"
                       : state.status === "error"
-                        ? "error"
+                        ? "bg-red-400"
                         : state.status === "testing"
-                          ? "active"
-                          : "idle"
-                  }
+                          ? "bg-yellow-400 animate-pulse"
+                          : "bg-white/10"
+                  }`}
                 />
               </div>
 
               {/* API Key Input */}
               <div className="mb-3">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/25">
                   API Key
                 </label>
                 <div className="relative">
@@ -164,8 +165,8 @@ export default function ProvidersPage() {
                         status: "idle",
                       })
                     }
-                    placeholder={`sk-...`}
-                    className="pr-10 font-mono text-xs bg-black/20 border-white/5"
+                    placeholder="sk-..."
+                    className="pr-10 font-mono text-xs bg-black/20 border-white/[0.06] text-white placeholder:text-white/20"
                   />
                   <button
                     type="button"
@@ -174,7 +175,7 @@ export default function ProvidersPage() {
                         showKey: !state.showKey,
                       })
                     }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50"
                   >
                     {state.showKey ? (
                       <EyeOff className="h-3.5 w-3.5" />
@@ -187,7 +188,7 @@ export default function ProvidersPage() {
 
               {/* Model Selector */}
               <div className="mb-3">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/25">
                   Default Model
                 </label>
                 <Select
@@ -198,7 +199,7 @@ export default function ProvidersPage() {
                     })
                   }
                 >
-                  <SelectTrigger className="text-xs bg-black/20 border-white/5">
+                  <SelectTrigger className="text-xs bg-black/20 border-white/[0.06] text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -219,7 +220,7 @@ export default function ProvidersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full gap-2 border-white/5 text-xs"
+                className="w-full gap-2 border-white/[0.06] bg-white/[0.03] text-xs text-white/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
                 onClick={() => testConnection(provider.name)}
                 disabled={
                   !state.apiKey || state.status === "testing"
@@ -228,9 +229,9 @@ export default function ProvidersPage() {
                 {state.status === "testing" ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
                 ) : state.status === "success" ? (
-                  <CheckCircle2 className="h-3 w-3 text-neon-green" />
+                  <CheckCircle2 className="h-3 w-3 text-green-400" />
                 ) : state.status === "error" ? (
-                  <XCircle className="h-3 w-3 text-destructive" />
+                  <XCircle className="h-3 w-3 text-red-400" />
                 ) : null}
                 {state.status === "testing"
                   ? "Testing..."
@@ -240,7 +241,7 @@ export default function ProvidersPage() {
                       ? "Failed — Retry"
                       : "Test Connection"}
               </Button>
-            </GlassCard>
+            </div>
           );
         })}
       </div>
