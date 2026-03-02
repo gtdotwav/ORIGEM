@@ -38,7 +38,7 @@ const NAV_ITEMS = [
   {
     label: "Space",
     description: "Canvas infinito para orquestracao visual",
-    href: "/dashboard/orchestra/new",
+    href: "/dashboard/space",
     icon: Orbit,
   },
   {
