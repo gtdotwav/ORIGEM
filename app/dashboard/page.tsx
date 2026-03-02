@@ -99,7 +99,7 @@ export default function DashboardPage() {
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
 
       {/* Brand badge + nav — top center */}
-      <div className="relative z-10 flex w-full flex-col items-center pt-8">
+      <div className="relative z-20 flex w-full flex-col items-center pt-8">
         <div ref={navRef} className="relative">
           <button
             type="button"
@@ -117,13 +117,13 @@ export default function DashboardPage() {
             />
           </button>
 
-          {/* Dropdown */}
+          {/* Dropdown — 2-col grid, compact */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-3 w-[340px] -translate-x-1/2 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-2 shadow-2xl backdrop-blur-xl">
+            <div className="absolute left-1/2 top-full mt-3 w-[520px] -translate-x-1/2 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-3 shadow-2xl backdrop-blur-xl">
               {/* Arrow indicator */}
               <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/[0.08] bg-neutral-900/95" />
 
-              <div className="relative space-y-0.5">
+              <div className="relative grid grid-cols-2 gap-1">
                 {NAV_ITEMS.map((item) => (
                   <Link
                     key={item.href}
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                       <p className="text-sm font-medium text-white/90">
                         {item.label}
                       </p>
-                      <p className="text-xs text-white/40 leading-relaxed">
+                      <p className="text-[11px] leading-snug text-white/40">
                         {item.description}
                       </p>
                     </div>
@@ -147,19 +147,20 @@ export default function DashboardPage() {
               </div>
 
               {/* Separator + bottom links */}
-              <div className="mt-1 border-t border-white/[0.06] pt-1">
-                <div className="flex items-center gap-1 px-1">
+              <div className="mt-1.5 border-t border-white/[0.06] pt-1.5">
+                <div className="flex items-center justify-center gap-4 px-1">
                   <Link
                     href="/dashboard/settings"
                     onClick={() => setNavOpen(false)}
-                    className="flex-1 rounded-lg px-3 py-2 text-center text-xs text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60"
+                    className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
                   >
                     Settings
                   </Link>
+                  <span className="text-white/10">|</span>
                   <Link
                     href="/dashboard/settings/providers"
                     onClick={() => setNavOpen(false)}
-                    className="flex-1 rounded-lg px-3 py-2 text-center text-xs text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60"
+                    className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
                   >
                     Providers
                   </Link>
