@@ -1,0 +1,344 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ======================================================
+   ORIGEM — Cosmic Dark Theme
+   Psychosemantic AI Engine
+   ====================================================== */
+
+:root {
+  /* Force dark — ORIGEM is always dark */
+  --background: oklch(0.08 0.02 270);
+  --foreground: oklch(0.95 0.01 270);
+  --card: oklch(0.12 0.02 270);
+  --card-foreground: oklch(0.95 0.01 270);
+  --popover: oklch(0.10 0.02 270);
+  --popover-foreground: oklch(0.95 0.01 270);
+  --primary: oklch(0.75 0.15 195);
+  --primary-foreground: oklch(0.08 0.02 270);
+  --secondary: oklch(0.18 0.02 270);
+  --secondary-foreground: oklch(0.85 0.01 270);
+  --muted: oklch(0.15 0.02 270);
+  --muted-foreground: oklch(0.55 0.02 270);
+  --accent: oklch(0.65 0.25 290);
+  --accent-foreground: oklch(0.95 0.01 270);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.95 0.01 0);
+  --border: oklch(0.22 0.02 270);
+  --input: oklch(0.18 0.02 270);
+  --ring: oklch(0.75 0.15 195);
+
+  /* Neon accent palette */
+  --neon-cyan: oklch(0.78 0.15 195);
+  --neon-purple: oklch(0.65 0.25 290);
+  --neon-green: oklch(0.78 0.2 145);
+  --neon-orange: oklch(0.75 0.18 55);
+  --neon-pink: oklch(0.70 0.22 340);
+  --neon-blue: oklch(0.65 0.2 250);
+  --neon-white: oklch(0.95 0.02 270);
+
+  /* Glass surfaces */
+  --glass-bg: oklch(0.12 0.02 270 / 0.6);
+  --glass-border: oklch(1 0 0 / 0.08);
+  --glass-highlight: oklch(1 0 0 / 0.04);
+  --glass-blur: 20px;
+
+  /* Canvas */
+  --canvas-bg: oklch(0.06 0.02 270);
+  --canvas-grid: oklch(1 0 0 / 0.03);
+  --canvas-grid-accent: oklch(1 0 0 / 0.06);
+  --canvas-dot: oklch(1 0 0 / 0.08);
+
+  /* Sidebar */
+  --sidebar: oklch(0.10 0.02 270);
+  --sidebar-foreground: oklch(0.85 0.01 270);
+  --sidebar-primary: oklch(0.75 0.15 195);
+  --sidebar-primary-foreground: oklch(0.08 0.02 270);
+  --sidebar-accent: oklch(0.15 0.03 270);
+  --sidebar-accent-foreground: oklch(0.90 0.01 270);
+  --sidebar-border: oklch(0.18 0.02 270);
+  --sidebar-ring: oklch(0.75 0.15 195);
+
+  /* Chart colors mapped to neons */
+  --chart-1: var(--neon-cyan);
+  --chart-2: var(--neon-purple);
+  --chart-3: var(--neon-green);
+  --chart-4: var(--neon-orange);
+  --chart-5: var(--neon-pink);
+
+  --radius: 0.75rem;
+}
+
+/* Dark class mirrors root (always dark) */
+.dark {
+  --background: oklch(0.08 0.02 270);
+  --foreground: oklch(0.95 0.01 270);
+  --card: oklch(0.12 0.02 270);
+  --card-foreground: oklch(0.95 0.01 270);
+  --popover: oklch(0.10 0.02 270);
+  --popover-foreground: oklch(0.95 0.01 270);
+  --primary: oklch(0.75 0.15 195);
+  --primary-foreground: oklch(0.08 0.02 270);
+  --secondary: oklch(0.18 0.02 270);
+  --secondary-foreground: oklch(0.85 0.01 270);
+  --muted: oklch(0.15 0.02 270);
+  --muted-foreground: oklch(0.55 0.02 270);
+  --accent: oklch(0.65 0.25 290);
+  --accent-foreground: oklch(0.95 0.01 270);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.95 0.01 0);
+  --border: oklch(0.22 0.02 270);
+  --input: oklch(0.18 0.02 270);
+  --ring: oklch(0.75 0.15 195);
+  --sidebar: oklch(0.10 0.02 270);
+  --sidebar-foreground: oklch(0.85 0.01 270);
+  --sidebar-primary: oklch(0.75 0.15 195);
+  --sidebar-primary-foreground: oklch(0.08 0.02 270);
+  --sidebar-accent: oklch(0.15 0.03 270);
+  --sidebar-accent-foreground: oklch(0.90 0.01 270);
+  --sidebar-border: oklch(0.18 0.02 270);
+  --sidebar-ring: oklch(0.75 0.15 195);
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback", system-ui,
+    sans-serif;
+  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Neon colors available in Tailwind */
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-purple: var(--neon-purple);
+  --color-neon-green: var(--neon-green);
+  --color-neon-orange: var(--neon-orange);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-blue: var(--neon-blue);
+  --color-neon-white: var(--neon-white);
+
+  /* Glass */
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-glass-highlight: var(--glass-highlight);
+
+  /* Canvas */
+  --color-canvas-bg: var(--canvas-bg);
+  --color-canvas-grid: var(--canvas-grid);
+  --color-canvas-dot: var(--canvas-dot);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ======================================================
+   ORIGEM — Custom Utilities
+   ====================================================== */
+
+/* Glassmorphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-subtle {
+  background: oklch(0.10 0.02 270 / 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 0.05);
+}
+
+/* Neon glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px oklch(0.78 0.15 195 / 0.3),
+    0 0 60px oklch(0.78 0.15 195 / 0.1);
+}
+.glow-purple {
+  box-shadow: 0 0 20px oklch(0.65 0.25 290 / 0.3),
+    0 0 60px oklch(0.65 0.25 290 / 0.1);
+}
+.glow-green {
+  box-shadow: 0 0 20px oklch(0.78 0.2 145 / 0.3),
+    0 0 60px oklch(0.78 0.2 145 / 0.1);
+}
+.glow-orange {
+  box-shadow: 0 0 20px oklch(0.75 0.18 55 / 0.3),
+    0 0 60px oklch(0.75 0.18 55 / 0.1);
+}
+.glow-pink {
+  box-shadow: 0 0 20px oklch(0.70 0.22 340 / 0.3),
+    0 0 60px oklch(0.70 0.22 340 / 0.1);
+}
+.glow-blue {
+  box-shadow: 0 0 20px oklch(0.65 0.2 250 / 0.3),
+    0 0 60px oklch(0.65 0.2 250 / 0.1);
+}
+
+/* Neon text glow */
+.text-glow-cyan {
+  text-shadow: 0 0 10px oklch(0.78 0.15 195 / 0.5),
+    0 0 30px oklch(0.78 0.15 195 / 0.2);
+}
+.text-glow-purple {
+  text-shadow: 0 0 10px oklch(0.65 0.25 290 / 0.5),
+    0 0 30px oklch(0.65 0.25 290 / 0.2);
+}
+
+/* Animated gradient border */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  --gradient-angle: 0deg;
+  border-image: conic-gradient(
+      from var(--gradient-angle),
+      var(--neon-cyan),
+      var(--neon-purple),
+      var(--neon-pink),
+      var(--neon-cyan)
+    )
+    1;
+  animation: gradient-rotate 4s linear infinite;
+}
+
+@keyframes gradient-rotate {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+/* Status pulse animation */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Floating animation for canvas nodes */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Starfield twinkle */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0.02 270);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.4 0.02 270);
+}
+
+/* React Flow overrides for ORIGEM */
+.react-flow__background {
+  background-color: var(--canvas-bg) !important;
+}
+
+.react-flow__minimap {
+  background-color: oklch(0.10 0.02 270 / 0.8) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 12px !important;
+}
+
+.react-flow__controls {
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: var(--glass-bg) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  fill: oklch(0.7 0.01 270) !important;
+}
+
+.react-flow__controls-button:hover {
+  background: oklch(0.18 0.02 270 / 0.8) !important;
+  fill: oklch(0.9 0.01 270) !important;
+}
