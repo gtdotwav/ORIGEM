@@ -1,66 +1,133 @@
 "use client";
 
-import { Plus, Orbit, Zap, Brain } from "lucide-react";
-import { GlassCard } from "@/components/shared/glass-card";
-import { GradientText } from "@/components/shared/gradient-text";
-import { CosmicBackground } from "@/components/shared/cosmic-background";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
+import {
+  ImageIcon,
+  Settings,
+  Send,
+  Atom,
+} from "lucide-react";
+
+const SUGGESTIONS = [
+  "Decompose a concept",
+  "Create a context map",
+  "Orchestrate agents",
+  "Analyze semantics",
+];
 
 export default function DashboardPage() {
+  const [input, setInput] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState(
+    "/images/background.png"
+  );
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
-    <div className="relative flex h-full flex-col items-center justify-center p-8">
-      <CosmicBackground starCount={100} />
+    <main
+      className="relative flex min-h-screen flex-col items-center justify-between bg-cover bg-center bg-no-repeat px-4 py-8"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+      }}
+    >
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
 
-      <div className="relative z-10 flex max-w-2xl flex-col items-center text-center">
-        <h1 className="mb-3 text-4xl font-bold tracking-tight">
-          <GradientText variant="primary">ORIGEM</GradientText>
-        </h1>
-        <p className="mb-8 max-w-md text-sm text-muted-foreground">
-          Decompose language into atomic meaning. Orchestrate AI agents
-          on an infinite canvas. Return to the psychosemantic origin.
-        </p>
-
-        <Button
-          size="lg"
-          className="mb-12 gap-2 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20 border border-neon-cyan/20"
-        >
-          <Plus className="h-4 w-4" />
-          New Session
-        </Button>
-
-        {/* Feature cards */}
-        <div className="grid w-full grid-cols-3 gap-4">
-          <GlassCard neon="cyan" hover className="text-center">
-            <Brain className="mx-auto mb-2 h-6 w-6 text-neon-cyan" />
-            <h3 className="mb-1 text-xs font-semibold text-foreground/80">
-              Decompose
-            </h3>
-            <p className="text-[10px] text-muted-foreground">
-              Atomic linguistic analysis with semantic weight and polarity
-            </p>
-          </GlassCard>
-
-          <GlassCard neon="purple" hover className="text-center">
-            <Zap className="mx-auto mb-2 h-6 w-6 text-neon-purple" />
-            <h3 className="mb-1 text-xs font-semibold text-foreground/80">
-              Orchestrate
-            </h3>
-            <p className="text-[10px] text-muted-foreground">
-              AI agents work in parallel, spawning and branching
-            </p>
-          </GlassCard>
-
-          <GlassCard neon="green" hover className="text-center">
-            <Orbit className="mx-auto mb-2 h-6 w-6 text-neon-green" />
-            <h3 className="mb-1 text-xs font-semibold text-foreground/80">
-              Visualize
-            </h3>
-            <p className="text-[10px] text-muted-foreground">
-              Infinite canvas with live agent nodes and output branches
-            </p>
-          </GlassCard>
+      {/* Brand badge — top center */}
+      <div className="relative z-10 flex w-full flex-col items-center pt-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
+          <Atom className="h-4 w-4 text-blue-400" />
+          <span className="text-sm font-medium text-white/90">
+            ORIGEM
+          </span>
         </div>
       </div>
-    </div>
+
+      {/* Central chat card */}
+      <div className="relative z-10 flex w-full max-w-[640px] flex-col items-center">
+        <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/80 p-6 shadow-2xl backdrop-blur-xl">
+          {/* Greeting */}
+          <div className="mb-1 flex items-center gap-2">
+            <Atom className="h-4 w-4 text-blue-400" />
+            <span className="text-sm text-white/70">
+              Welcome to ORIGEM
+            </span>
+          </div>
+
+          <h1 className="mb-5 text-2xl font-semibold text-white">
+            What can I help you today?
+          </h1>
+
+          {/* Input field */}
+          <div className="mb-3 rounded-xl bg-white/[0.06] px-4 py-3">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask me anything..."
+              className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && input.trim()) {
+                  // Will navigate to chat session
+                }
+              }}
+            />
+          </div>
+
+          {/* Controls row */}
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-xs text-white/30">ORIGEM 1.0</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Suggestion badges */}
+          <div className="flex flex-wrap gap-2">
+            {SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => setInput(suggestion)}
+                className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/50 transition-all hover:border-white/15 hover:bg-white/[0.08] hover:text-white/70"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-10 pb-4 text-center">
+        <div className="mb-1 flex items-center justify-center gap-3 text-xs text-white/25">
+          <a href="#" className="transition-colors hover:text-white/40">
+            Privacy Policy
+          </a>
+          <span>•</span>
+          <a href="#" className="transition-colors hover:text-white/40">
+            Terms & Conditions
+          </a>
+        </div>
+        <p className="text-[10px] text-white/15">
+          Psychosemantic AI Engine
+        </p>
+      </div>
+    </main>
   );
 }
