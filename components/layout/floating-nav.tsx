@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Atom,
   ChevronDown,
+  LayoutDashboard,
   Brain,
   FolderKanban,
   Bot,
@@ -16,6 +17,12 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
+  {
+    label: "Dashboard",
+    description: "Centro de controle operacional",
+    href: "/dashboard/control",
+    icon: LayoutDashboard,
+  },
   {
     label: "Contextos",
     description: "Mapeie e decomponha contextos semanticos",

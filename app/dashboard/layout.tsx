@@ -2,7 +2,6 @@
 
 import { FloatingNav } from "@/components/layout/floating-nav";
 import { BackendSessionBootstrap } from "@/components/layout/backend-session-bootstrap";
-import { HologramBackground } from "@/components/shared/hologram-background";
 
 export default function DashboardLayout({
   children,
@@ -10,12 +9,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-screen flex-col bg-[#04070d]">
+    <main
+      className="relative flex min-h-screen flex-col bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('/images/background.png')",
+      }}
+    >
       <BackendSessionBootstrap />
-      <HologramBackground />
 
       {/* Gradient overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/20" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
 
       {/* Floating nav — always visible */}
       <FloatingNav />
