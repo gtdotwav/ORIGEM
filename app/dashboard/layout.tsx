@@ -1,6 +1,7 @@
 "use client";
 
 import { FloatingNav } from "@/components/layout/floating-nav";
+import { BackendSessionBootstrap } from "@/components/layout/backend-session-bootstrap";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,8 @@ export default function DashboardLayout({
         backgroundImage: "url('/images/background.png')",
       }}
     >
+      <BackendSessionBootstrap />
+
       {/* Gradient overlay */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
 

@@ -13,6 +13,11 @@ import {
 } from "lucide-react";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
+import {
+  ensureSessionRecord,
+  hydrateSessionSnapshot,
+  persistSessionSnapshot,
+} from "@/lib/chat-backend-client";
 import { cn } from "@/lib/utils";
 import {
   createMessage,
@@ -107,6 +112,12 @@ export default function ChatPage() {
 
   const selectedLanguage = runtime?.language ?? "pt-BR";
 
+  const persistSnapshotQuietly = () => {
+    void persistSessionSnapshot(sessionId).catch((error) => {
+      console.error("Failed to persist session snapshot", error);
+    });
+  };
+
   const currentSession = useMemo(
     () => sessions.find((session) => session.id === sessionId),
     [sessions, sessionId]
@@ -139,9 +150,29 @@ export default function ChatPage() {
 
     const hasSession = sessions.some((session) => session.id === sessionId);
     if (!hasSession) {
-      addSession(createSession(sessionId, `Sessao ${sessionId.slice(0, 8)}`));
+      const created = createSession(sessionId, `Sessao ${sessionId.slice(0, 8)}`);
+      addSession(created);
+      void ensureSessionRecord(sessionId, created.title).catch((error) => {
+        console.error("Failed to create backend session record", error);
+      });
     }
+
+    void hydrateSessionSnapshot(sessionId).catch((error) => {
+      console.error("Failed to hydrate session snapshot", error);
+    });
   }, [sessionId, sessions, setCurrentSession, addSession, ensureSessionRuntime]);
+
+  useEffect(() => {
+    if (!sessionId || !runtime?.isRunning) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      persistSnapshotQuietly();
+    }, 900);
+
+    return () => clearInterval(timer);
+  }, [sessionId, runtime?.isRunning]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -176,6 +207,7 @@ export default function ChatPage() {
       await runChatOrchestration(sessionId, text, {
         language: selectedLanguage,
       });
+      persistSnapshotQuietly();
     } finally {
       setIsSending(false);
     }
@@ -197,6 +229,7 @@ export default function ChatPage() {
     );
 
     setNoteInput("");
+    persistSnapshotQuietly();
   };
 
   const liveProgress = runtime?.overallProgress ?? progress;
@@ -320,6 +353,7 @@ export default function ChatPage() {
                                       }
                                     )
                                   );
+                                  persistSnapshotQuietly();
                                 }}
                               />
                             )}
@@ -412,8 +446,10 @@ export default function ChatPage() {
               <select
                 value={selectedLanguage}
                 onChange={(e) =>
-                  setLanguage(sessionId, e.target.value as RuntimeLanguage)
-                }
+                  {
+                    setLanguage(sessionId, e.target.value as RuntimeLanguage);
+                    persistSnapshotQuietly();
+                  }}
                 className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white outline-none"
               >
                 {LANGUAGE_OPTIONS.map((option) => (
@@ -449,6 +485,7 @@ export default function ChatPage() {
                         }
                         reorderTasks(sessionId, draggedTaskId, task.id);
                         setDraggedTaskId(null);
+                        persistSnapshotQuietly();
                       }}
                       className="cursor-grab rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 active:cursor-grabbing"
                     >

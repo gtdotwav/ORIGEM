@@ -46,6 +46,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 interface ProviderCardState {
   apiKey: string;
+  savedKeyHint: string | null;
   selectedModel: string;
   showKey: boolean;
   status: "idle" | "testing" | "success" | "error";
@@ -53,12 +54,17 @@ interface ProviderCardState {
   isDirty: boolean;
 }
 
-interface StoredProviderSettings {
-  apiKey: string;
+interface ProviderRecord {
+  provider: ProviderName;
+  hasApiKey: boolean;
+  keyHint: string | null;
   selectedModel: string;
+  updatedAt: number;
 }
 
-const STORAGE_KEY = "origem-provider-settings-v1";
+interface ProviderListResponse {
+  providers: ProviderRecord[];
+}
 
 export default function ProvidersPage() {
   const [states, setStates] = useState<
@@ -68,6 +74,7 @@ export default function ProvidersPage() {
     for (const provider of PROVIDER_CATALOG) {
       initial[provider.name] = {
         apiKey: "",
+        savedKeyHint: null,
         selectedModel: provider.models[0]?.id ?? "",
         showKey: false,
         status: "idle",
@@ -89,66 +96,90 @@ export default function ProvidersPage() {
   };
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let alive = true;
 
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return;
-    }
+    const load = async () => {
+      try {
+        const response = await fetch("/api/settings/providers", {
+          method: "GET",
+          cache: "no-store",
+        });
 
-    try {
-      const parsed = JSON.parse(raw) as Partial<
-        Record<ProviderName, StoredProviderSettings>
-      >;
-
-      setStates((prev) => {
-        const next = { ...prev };
-        for (const provider of PROVIDER_CATALOG) {
-          const saved = parsed[provider.name];
-          if (!saved) {
-            continue;
-          }
-          next[provider.name] = {
-            ...next[provider.name],
-            apiKey: saved.apiKey ?? "",
-            selectedModel:
-              saved.selectedModel ||
-              provider.models[0]?.id ||
-              next[provider.name].selectedModel,
-            isDirty: false,
-            saveStatus: "saved",
-          };
+        if (!response.ok || !alive) {
+          return;
         }
-        return next;
-      });
-    } catch {
-      // Ignore invalid persisted data and keep defaults.
-    }
+
+        const data = (await response.json()) as ProviderListResponse;
+        const recordsByProvider = new Map<ProviderName, ProviderRecord>();
+
+        for (const record of data.providers) {
+          recordsByProvider.set(record.provider, record);
+        }
+
+        setStates((prev) => {
+          const next = { ...prev };
+
+          for (const provider of PROVIDER_CATALOG) {
+            const saved = recordsByProvider.get(provider.name);
+            if (!saved) {
+              continue;
+            }
+
+            next[provider.name] = {
+              ...next[provider.name],
+              apiKey: "",
+              savedKeyHint: saved.hasApiKey ? saved.keyHint : null,
+              selectedModel:
+                saved.selectedModel ||
+                provider.models[0]?.id ||
+                next[provider.name].selectedModel,
+              isDirty: false,
+              saveStatus: "saved",
+            };
+          }
+
+          return next;
+        });
+      } catch (error) {
+        console.error("Failed to load provider settings", error);
+      }
+    };
+
+    void load();
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const saveProviderConfig = async (name: ProviderName) => {
     updateState(name, { saveStatus: "saving" });
 
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      const parsed = raw
-        ? (JSON.parse(raw) as Partial<
-            Record<ProviderName, StoredProviderSettings>
-          >)
-        : {};
-
-      const next: Partial<Record<ProviderName, StoredProviderSettings>> = {
-        ...parsed,
-        [name]: {
+      const response = await fetch("/api/settings/providers", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider: name,
           apiKey: states[name].apiKey,
           selectedModel: states[name].selectedModel,
-        },
-      };
+        }),
+      });
 
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      if (!response.ok) {
+        updateState(name, { saveStatus: "error" });
+        return;
+      }
+
       updateState(name, {
+        apiKey: "",
+        savedKeyHint: (() => {
+          const currentApiKey = states[name].apiKey.trim();
+          const tail = currentApiKey.slice(-4);
+          return tail ? `••••${tail}` : states[name].savedKeyHint;
+        })(),
         isDirty: false,
         saveStatus: "saved",
       });
@@ -159,9 +190,10 @@ export default function ProvidersPage() {
 
   const testConnection = async (name: ProviderName) => {
     const apiKey = states[name].apiKey;
+    const hasSavedKey = Boolean(states[name].savedKeyHint);
     updateState(name, { status: "testing" });
     await new Promise((r) => setTimeout(r, 1500));
-    const hasKey = apiKey.length > 10;
+    const hasKey = apiKey.length > 10 || hasSavedKey;
     updateState(name, {
       status: hasKey ? "success" : "error",
     });
@@ -240,15 +272,21 @@ export default function ProvidersPage() {
                   <Input
                     type={state.showKey ? "text" : "password"}
                     value={state.apiKey}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value;
                       updateState(provider.name, {
-                        apiKey: e.target.value,
+                        apiKey: value,
+                        savedKeyHint: value ? null : state.savedKeyHint,
                         status: "idle",
                         saveStatus: "idle",
                         isDirty: true,
-                      })
+                      });
+                    }}
+                    placeholder={
+                      state.savedKeyHint
+                        ? `Key salva no backend (${state.savedKeyHint})`
+                        : "sk-..."
                     }
-                    placeholder="sk-..."
                     className="pr-10 font-mono text-xs bg-black/20 border-white/[0.06] text-white placeholder:text-white/20"
                   />
                   <button
@@ -307,7 +345,10 @@ export default function ProvidersPage() {
                   size="sm"
                   className="gap-2 border-neon-cyan/25 bg-neon-cyan/10 text-xs text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/20 hover:text-neon-cyan"
                   onClick={() => void saveProviderConfig(provider.name)}
-                  disabled={!state.apiKey || state.saveStatus === "saving"}
+                  disabled={
+                    (!state.apiKey.trim() && !state.savedKeyHint) ||
+                    state.saveStatus === "saving"
+                  }
                 >
                   {state.saveStatus === "saving" && (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -332,7 +373,10 @@ export default function ProvidersPage() {
                   size="sm"
                   className="gap-2 border-white/[0.06] bg-white/[0.03] text-xs text-white/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
                   onClick={() => testConnection(provider.name)}
-                  disabled={!state.apiKey || state.status === "testing"}
+                  disabled={
+                    (!state.apiKey.trim() && !state.savedKeyHint) ||
+                    state.status === "testing"
+                  }
                 >
                   {state.status === "testing" ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -355,7 +399,9 @@ export default function ProvidersPage() {
                 {state.isDirty
                   ? "Alteracoes pendentes. Clique em Salvar Key."
                   : state.saveStatus === "saved"
-                    ? "Configuracao persistida localmente."
+                    ? `Configuracao protegida no backend${
+                        state.savedKeyHint ? ` (${state.savedKeyHint})` : "."
+                      }`
                     : "Chave salva apenas apos confirmar no botao."}
               </p>
             </div>

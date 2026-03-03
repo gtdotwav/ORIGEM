@@ -711,6 +711,7 @@ export async function runChatOrchestration(
     {
       kickoff: true,
       runId,
+      decompositionId: decomposition.id,
     }
   );
 
@@ -832,6 +833,7 @@ export async function runChatOrchestration(
       strategy: group.strategy,
       language: selectedLanguage,
       runId,
+      decompositionId: decomposition.id,
       journeyNextStep: nextJourneyStep?.key ?? null,
     }
   );

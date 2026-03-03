@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 import { useSessionStore } from "@/stores/session-store";
 import {
+  ensureSessionRecord,
+  persistSessionSnapshot,
+} from "@/lib/chat-backend-client";
+import {
   createId,
   createMessage,
   createSession,
@@ -51,10 +55,17 @@ export default function DashboardPage() {
     setInput("");
     setSending(true);
 
+    try {
+      await ensureSessionRecord(sessionId, session.title);
+    } catch (error) {
+      console.error("Failed to create backend session record", error);
+    }
+
     router.push(`/dashboard/chat/${sessionId}`);
 
     try {
       await runChatOrchestration(sessionId, text);
+      await persistSessionSnapshot(sessionId);
     } finally {
       setSending(false);
     }
