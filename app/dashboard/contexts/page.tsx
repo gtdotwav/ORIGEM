@@ -9,13 +9,31 @@ import {
   Gauge,
   Loader2,
   Search,
+  Send,
   Tags,
   Target,
 } from "lucide-react";
-import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
+import {
+  hydrateSessionSnapshot,
+  persistSessionSnapshot,
+} from "@/lib/chat-backend-client";
+import { createMessage } from "@/lib/chat-orchestrator";
 import { useDecompositionStore } from "@/stores/decomposition-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
-import type { DecompositionResult, Intent } from "@/types/decomposition";
+import type {
+  DecompositionResult,
+  Intent,
+  TaskRoutingResult,
+} from "@/types/decomposition";
+import type { Message } from "@/types/session";
+
+type ConnectionKey =
+  | "agents"
+  | "projects"
+  | "groups"
+  | "flows"
+  | "orchestra";
 
 const INTENT_COLORS: Record<Intent, string> = {
   create: "text-green-400 bg-green-400/10 border-green-400/20",
@@ -30,6 +48,59 @@ const INTENT_COLORS: Record<Intent, string> = {
   execute: "text-emerald-300 bg-emerald-300/10 border-emerald-300/20",
 };
 
+const CONNECTION_META: Record<
+  ConnectionKey,
+  {
+    label: string;
+    description: string;
+    className: string;
+    href: (sessionId: string, contextId: string) => string;
+  }
+> = {
+  agents: {
+    label: "Agentes",
+    description: "Delegar direcao por agente especialista.",
+    className: "text-cyan-300 border-cyan-300/30 bg-cyan-300/10",
+    href: (sessionId, contextId) =>
+      `/dashboard/agents?sessionId=${encodeURIComponent(
+        sessionId
+      )}&contextId=${encodeURIComponent(contextId)}`,
+  },
+  projects: {
+    label: "Projetos",
+    description: "Traduzir contexto em objetivo executavel.",
+    className: "text-blue-300 border-blue-300/30 bg-blue-300/10",
+    href: (sessionId, contextId) =>
+      `/dashboard/projects?sessionId=${encodeURIComponent(
+        sessionId
+      )}&contextId=${encodeURIComponent(contextId)}`,
+  },
+  groups: {
+    label: "Grupos",
+    description: "Definir consenso/paralelo/sequencial.",
+    className: "text-green-300 border-green-300/30 bg-green-300/10",
+    href: (sessionId, contextId) =>
+      `/dashboard/groups?sessionId=${encodeURIComponent(
+        sessionId
+      )}&contextId=${encodeURIComponent(contextId)}`,
+  },
+  flows: {
+    label: "Fluxos",
+    description: "Orquestrar x, y, z e consolidar pipeline.",
+    className: "text-orange-300 border-orange-300/30 bg-orange-300/10",
+    href: (sessionId, contextId) =>
+      `/dashboard/flows?sessionId=${encodeURIComponent(
+        sessionId
+      )}&contextId=${encodeURIComponent(contextId)}`,
+  },
+  orchestra: {
+    label: "Orquestra",
+    description: "Rodar engrenagem visual com conexoes finais.",
+    className: "text-fuchsia-300 border-fuchsia-300/30 bg-fuchsia-300/10",
+    href: (sessionId) => `/dashboard/orchestra/${encodeURIComponent(sessionId)}`,
+  },
+};
+
 function getMetadataDecompositionId(
   metadata: Record<string, unknown> | undefined
 ): string | null {
@@ -39,6 +110,88 @@ function getMetadataDecompositionId(
 
 function formatIntent(intent: Intent) {
   return intent.replace(/_/g, " ");
+}
+
+function formatMessageTime(date: Date) {
+  return new Date(date).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatExecutionStrategy(strategy: TaskRoutingResult["executionStrategy"]) {
+  if (strategy === "consensus") {
+    return "consenso";
+  }
+  if (strategy === "parallel") {
+    return "paralelo";
+  }
+  if (strategy === "sequential") {
+    return "sequencial";
+  }
+  return "pipeline";
+}
+
+function detectConnectionTargets(text: string): ConnectionKey[] {
+  const normalized = text.toLowerCase();
+  const targets: ConnectionKey[] = [];
+
+  if (/agente|agent|critic|designer|builder|planner/.test(normalized)) {
+    targets.push("agents");
+  }
+  if (/projeto|project|roadmap|objetivo/.test(normalized)) {
+    targets.push("projects");
+  }
+  if (/grupo|group|consenso|consensus|paralelo|sequencial/.test(normalized)) {
+    targets.push("groups");
+  }
+  if (/fluxo|flow|pipeline|integrar|juntar|agregar/.test(normalized)) {
+    targets.push("flows");
+  }
+  if (/orquestra|orchestra|canvas/.test(normalized)) {
+    targets.push("orchestra");
+  }
+
+  if (targets.length === 0) {
+    return ["agents", "projects", "groups", "flows"];
+  }
+
+  return Array.from(new Set(targets));
+}
+
+function getConnectionsForContext(result: DecompositionResult): ConnectionKey[] {
+  const base: ConnectionKey[] = ["agents", "projects", "groups", "flows"];
+
+  if (result.taskRouting.executionStrategy === "consensus") {
+    base.unshift("groups");
+  }
+
+  return Array.from(new Set([...base, "orchestra"]));
+}
+
+function buildContextRoutingMessage(
+  result: DecompositionResult,
+  instruction: string,
+  targets: ConnectionKey[]
+) {
+  const agents =
+    result.taskRouting.requiredAgents
+      .map((requirement) => requirement.templateId)
+      .slice(0, 5)
+      .join(", ") || "sem sugestoes";
+
+  const steps = targets.map((target) => CONNECTION_META[target].label).join(" -> ");
+
+  return [
+    `Direcao contextual registrada para este contexto.`,
+    `Instrucao recebida: "${instruction}"`,
+    `Roteamento ativo: ${steps}.`,
+    `Agentes alvo sugeridos: ${agents}.`,
+    `Estrategia de grupos: ${formatExecutionStrategy(
+      result.taskRouting.executionStrategy
+    )}.`,
+    `Nos fluxos, consolide entregas x, y, z antes da agregacao final.`,
+  ].join("\n\n");
 }
 
 function PolarityBar({ label, value }: { label: string; value: number }) {
@@ -75,20 +228,46 @@ function matchesSearch(result: DecompositionResult, search: string) {
   );
 }
 
+function getContextMessages(
+  messages: Message[],
+  sessionId: string,
+  contextId: string
+) {
+  return messages
+    .filter((message) => {
+      if (message.sessionId !== sessionId) {
+        return false;
+      }
+
+      if (message.decompositionId === contextId) {
+        return true;
+      }
+
+      return getMetadataDecompositionId(message.metadata) === contextId;
+    })
+    .sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+}
+
 function ContextsPageContent() {
   const searchParams = useSearchParams();
   const querySessionId = searchParams.get("sessionId");
   const [search, setSearch] = useState("");
   const [isHydrating, setIsHydrating] = useState(false);
+  const [expandedContextId, setExpandedContextId] = useState<string | null>(null);
+  const [contextInstruction, setContextInstruction] = useState("");
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
   const sessions = useSessionStore((state) => state.sessions);
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
+  const addMessage = useSessionStore((state) => state.addMessage);
   const decompositions = useDecompositionStore((state) => state.decompositions);
   const activeDecompositionId = useDecompositionStore(
     (state) => state.activeDecompositionId
   );
+  const addRuntimeNote = useRuntimeStore((state) => state.addNote);
 
   const targetSessionId = querySessionId ?? currentSessionId ?? null;
   const targetSession = targetSessionId
@@ -142,6 +321,20 @@ function ContextsPageContent() {
     search,
   ]);
 
+  const expandedContext = useMemo(
+    () =>
+      contextResults.find((context) => context.id === expandedContextId) ?? null,
+    [contextResults, expandedContextId]
+  );
+
+  const contextThread = useMemo(() => {
+    if (!targetSessionId || !expandedContext) {
+      return [];
+    }
+
+    return getContextMessages(messages, targetSessionId, expandedContext.id);
+  }, [messages, targetSessionId, expandedContext]);
+
   useEffect(() => {
     if (!targetSessionId || contextResults.length > 0 || isHydrating) {
       return;
@@ -163,6 +356,65 @@ function ContextsPageContent() {
       });
   }, [targetSessionId, contextResults.length, isHydrating]);
 
+  useEffect(() => {
+    if (!contextResults.length) {
+      setExpandedContextId(null);
+      return;
+    }
+
+    setExpandedContextId((previous) => {
+      if (previous && contextResults.some((result) => result.id === previous)) {
+        return previous;
+      }
+      return contextResults[0].id;
+    });
+  }, [contextResults]);
+
+  const handleSendContextInstruction = () => {
+    if (!targetSessionId || !expandedContext) {
+      return;
+    }
+
+    const text = contextInstruction.trim();
+    if (!text) {
+      return;
+    }
+
+    const targets = detectConnectionTargets(text);
+
+    addMessage(
+      createMessage(targetSessionId, "user", text, {
+        contextChat: true,
+        decompositionId: expandedContext.id,
+        routeTargets: targets,
+      })
+    );
+
+    addMessage(
+      createMessage(
+        targetSessionId,
+        "assistant",
+        buildContextRoutingMessage(expandedContext, text, targets),
+        {
+          contextChat: true,
+          contextRouting: true,
+          decompositionId: expandedContext.id,
+          routeTargets: targets,
+        }
+      )
+    );
+
+    addRuntimeNote(
+      targetSessionId,
+      `[Contexto ${expandedContext.id.slice(0, 8)}] ${text}`
+    );
+
+    setContextInstruction("");
+    void persistSessionSnapshot(targetSessionId).catch((error) => {
+      console.error("Failed to persist context instruction", error);
+    });
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="mb-8">
@@ -174,7 +426,7 @@ function ContextsPageContent() {
             <div>
               <h1 className="text-2xl font-semibold text-white">Contextos</h1>
               <p className="mt-1 text-sm text-white/40">
-                Contexto semantico real da sessao para orientar a trilha didatica.
+                Clique em um contexto para expandir e conversar dentro do plano.
               </p>
               {targetSession ? (
                 <p className="mt-1 text-xs text-white/35">
@@ -225,65 +477,185 @@ function ContextsPageContent() {
         </div>
       ) : (
         <div className="space-y-3">
-          {contextResults.map((result) => (
-            <div
-              key={result.id}
-              className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
-            >
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <p className="flex-1 text-sm font-medium text-white/90">
-                  &ldquo;{result.inputText}&rdquo;
-                </p>
-                <span className="shrink-0 text-[10px] text-white/25">
-                  {new Date(result.timestamp).toLocaleString("pt-BR")}
-                </span>
-              </div>
+          {contextResults.map((result) => {
+            const isExpanded = expandedContextId === result.id;
+            const connections = getConnectionsForContext(result);
+            const suggestedAgents = result.taskRouting.requiredAgents
+              .map((requirement) => requirement.templateId)
+              .slice(0, 4);
 
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase ${
-                    INTENT_COLORS[result.intent.primary]
-                  }`}
-                >
-                  <Target className="h-3 w-3" />
-                  {formatIntent(result.intent.primary)}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  <Gauge className="h-3 w-3" />
-                  {Math.round(result.intent.confidence * 100)}% confianca
-                </span>
-                <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  {result.tokens.length} tokens
-                </span>
-                <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
-                  {result.taskRouting.requiredAgents.length} agentes sugeridos
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Tags className="h-3 w-3 text-white/25" />
-                  {result.context.domains.map((domain) => (
-                    <span
-                      key={`${result.id}-${domain.domain}`}
-                      className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-white/40"
-                    >
-                      {domain.domain}
-                    </span>
-                  ))}
+            return (
+              <div
+                key={result.id}
+                className={`rounded-2xl border bg-neutral-900/60 p-5 backdrop-blur-xl transition-all ${
+                  isExpanded
+                    ? "border-neon-cyan/35 bg-neutral-900/75"
+                    : "border-white/[0.06] hover:border-white/[0.1] hover:bg-neutral-900/70"
+                }`}
+              >
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <p className="flex-1 text-sm font-medium text-white/90">
+                    &ldquo;{result.inputText}&rdquo;
+                  </p>
+                  <span className="shrink-0 text-[10px] text-white/25">
+                    {new Date(result.timestamp).toLocaleString("pt-BR")}
+                  </span>
                 </div>
 
-                <div className="w-full max-w-60 space-y-1">
-                  <PolarityBar
-                    label="Complexidade"
-                    value={result.polarity.complexity}
-                  />
-                  <PolarityBar label="Urgencia" value={result.polarity.urgency} />
-                  <PolarityBar label="Certeza" value={result.polarity.certainty} />
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase ${
+                      INTENT_COLORS[result.intent.primary]
+                    }`}
+                  >
+                    <Target className="h-3 w-3" />
+                    {formatIntent(result.intent.primary)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                    <Gauge className="h-3 w-3" />
+                    {Math.round(result.intent.confidence * 100)}% confianca
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                    {result.tokens.length} tokens
+                  </span>
+                  <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/50">
+                    estrategia:{" "}
+                    {formatExecutionStrategy(result.taskRouting.executionStrategy)}
+                  </span>
                 </div>
+
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Tags className="h-3 w-3 text-white/25" />
+                    {result.context.domains.map((domain) => (
+                      <span
+                        key={`${result.id}-${domain.domain}`}
+                        className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-white/40"
+                      >
+                        {domain.domain}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="w-full max-w-60 space-y-1">
+                    <PolarityBar
+                      label="Complexidade"
+                      value={result.polarity.complexity}
+                    />
+                    <PolarityBar label="Urgencia" value={result.polarity.urgency} />
+                    <PolarityBar label="Certeza" value={result.polarity.certainty} />
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-3">
+                  <p className="text-xs text-white/45">
+                    Agentes sugeridos:{" "}
+                    {suggestedAgents.length ? suggestedAgents.join(", ") : "sem sugestoes"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedContextId((previous) =>
+                        previous === result.id ? null : result.id
+                      )
+                    }
+                    className="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+                  >
+                    {isExpanded ? "Fechar chat do contexto" : "Abrir chat do contexto"}
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="mt-4 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+                    <div className="mb-2">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-white/45">
+                        Conexoes seguintes deste contexto
+                      </p>
+                      <p className="mt-1 text-xs text-white/50">
+                        Continue dando direcao aqui e avance para as etapas conectadas.
+                      </p>
+                    </div>
+
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {connections.map((connection) => {
+                        const meta = CONNECTION_META[connection];
+                        const href = targetSessionId
+                          ? meta.href(targetSessionId, result.id)
+                          : "#";
+
+                        return (
+                          <Link
+                            key={`${result.id}-${connection}`}
+                            href={href}
+                            className={`rounded-lg border px-2.5 py-1 text-[11px] transition-all hover:opacity-90 ${meta.className}`}
+                          >
+                            {meta.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mb-3 max-h-56 space-y-2 overflow-y-auto rounded-lg border border-white/[0.06] bg-black/25 p-2.5">
+                      {contextThread.length === 0 ? (
+                        <p className="text-xs text-white/45">
+                          Ainda nao ha conversa especifica deste contexto.
+                        </p>
+                      ) : (
+                        contextThread.map((message) => {
+                          const isUser = message.role === "user";
+
+                          return (
+                            <div
+                              key={message.id}
+                              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[92%] rounded-xl border px-2.5 py-2 ${
+                                  isUser
+                                    ? "border-neon-cyan/35 bg-neon-cyan/10 text-white"
+                                    : "border-white/[0.08] bg-white/[0.03] text-white/80"
+                                }`}
+                              >
+                                <p className="whitespace-pre-wrap text-[11px] leading-relaxed">
+                                  {message.content}
+                                </p>
+                                <span className="mt-1 block text-[10px] text-white/35">
+                                  {formatMessageTime(message.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="rounded-lg border border-white/[0.08] bg-black/30 p-2">
+                      <textarea
+                        value={contextInstruction}
+                        onChange={(event) => setContextInstruction(event.target.value)}
+                        placeholder="Ex: no consenso, o Critic valida risco e o Builder executa no projeto X. Depois, no fluxo, junte x,y,z."
+                        className="h-20 w-full resize-none bg-transparent text-xs text-white placeholder:text-white/30 outline-none"
+                      />
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <p className="text-[10px] text-white/35">
+                          Esta instrucao entra no plano da sessao e segue para agentes/grupos/fluxos.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleSendContextInstruction}
+                          disabled={!contextInstruction.trim() || !targetSessionId}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                          Enviar direcao
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
