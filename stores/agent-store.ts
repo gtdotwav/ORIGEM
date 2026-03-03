@@ -18,6 +18,7 @@ interface AgentState {
   addOutput: (agentId: string, output: AgentOutput) => void;
   setGroups: (groups: AgentGroup[]) => void;
   addGroup: (group: AgentGroup) => void;
+  updateGroup: (id: string, updates: Partial<AgentGroup>) => void;
   setActiveAgent: (id: string | null) => void;
   getAgent: (id: string) => AgentInstance | undefined;
   clear: () => void;
@@ -54,6 +55,12 @@ export const useAgentStore = create<AgentState>()(
       setGroups: (groups) => set({ groups }),
       addGroup: (group) =>
         set((s) => ({ groups: [...s.groups, group] })),
+      updateGroup: (id, updates) =>
+        set((s) => ({
+          groups: s.groups.map((group) =>
+            group.id === id ? { ...group, ...updates } : group
+          ),
+        })),
       setActiveAgent: (id) => set({ activeAgentId: id }),
       getAgent: (id) => get().agents.find((a) => a.id === id),
       clear: () =>

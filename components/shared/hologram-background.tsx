@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -87,9 +87,10 @@ interface BeamProps {
   radius: number;
   seed: number;
   width: number;
+  motionScale: number;
 }
 
-function BeamTrail({ side, spread, radius, seed, width }: BeamProps) {
+function BeamTrail({ side, spread, radius, seed, width, motionScale }: BeamProps) {
   const groupRef = useRef<THREE.Group>(null);
   const coreMaterialRef = useRef<THREE.ShaderMaterial>(null);
   const haloMaterialRef = useRef<THREE.ShaderMaterial>(null);
@@ -125,18 +126,19 @@ function BeamTrail({ side, spread, radius, seed, width }: BeamProps) {
 
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
+    const animatedTime = elapsed * Math.max(motionScale, 0.22);
 
     if (groupRef.current) {
-      groupRef.current.rotation.z = Math.sin(elapsed * 0.22 + seed) * 0.035;
-      groupRef.current.rotation.y = Math.sin(elapsed * 0.14 + seed) * 0.035;
+      groupRef.current.rotation.z = Math.sin(animatedTime * 0.22 + seed) * 0.035;
+      groupRef.current.rotation.y = Math.sin(animatedTime * 0.14 + seed) * 0.035;
     }
 
     if (coreMaterialRef.current) {
-      coreMaterialRef.current.uniforms.uTime.value = elapsed;
+      coreMaterialRef.current.uniforms.uTime.value = animatedTime;
     }
 
     if (haloMaterialRef.current) {
-      haloMaterialRef.current.uniforms.uTime.value = elapsed;
+      haloMaterialRef.current.uniforms.uTime.value = animatedTime;
     }
   });
 
@@ -175,9 +177,10 @@ interface ShaftProps {
   height: number;
   seed: number;
   opacity: number;
+  motionScale: number;
 }
 
-function LightShaft({ x, y, width, height, seed, opacity }: ShaftProps) {
+function LightShaft({ x, y, width, height, seed, opacity, motionScale }: ShaftProps) {
   const ref = useRef<THREE.ShaderMaterial>(null);
   const uniforms = useMemo(
     () => ({
@@ -189,7 +192,8 @@ function LightShaft({ x, y, width, height, seed, opacity }: ShaftProps) {
 
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.uniforms.uTime.value = clock.getElapsedTime() + seed;
+      ref.current.uniforms.uTime.value =
+        clock.getElapsedTime() * Math.max(motionScale, 0.25) + seed;
     }
   });
 
@@ -209,7 +213,7 @@ function LightShaft({ x, y, width, height, seed, opacity }: ShaftProps) {
   );
 }
 
-function Orb() {
+function Orb({ motionScale }: { motionScale: number }) {
   const glowRef = useRef<THREE.ShaderMaterial>(null);
 
   const glowUniforms = useMemo(
@@ -222,7 +226,8 @@ function Orb() {
 
   useFrame(({ clock }) => {
     if (glowRef.current) {
-      glowRef.current.uniforms.uTime.value = clock.getElapsedTime();
+      glowRef.current.uniforms.uTime.value =
+        clock.getElapsedTime() * Math.max(motionScale, 0.25);
     }
   });
 
@@ -255,7 +260,7 @@ function Orb() {
   );
 }
 
-function HologramCore() {
+function HologramCore({ motionScale }: { motionScale: number }) {
   const sceneRef = useRef<THREE.Group>(null);
   const { mouse, viewport } = useThree();
 
@@ -264,10 +269,10 @@ function HologramCore() {
       return;
     }
 
-    const targetX = (mouse.x * viewport.width) / 840;
-    const targetY = (mouse.y * viewport.height) / 1200;
+    const targetX = ((mouse.x * viewport.width) / 840) * motionScale;
+    const targetY = ((mouse.y * viewport.height) / 1200) * motionScale;
 
-    sceneRef.current.rotation.y += 0.00028;
+    sceneRef.current.rotation.y += 0.00028 * Math.max(motionScale, 0.2);
     sceneRef.current.position.x = THREE.MathUtils.lerp(
       sceneRef.current.position.x,
       targetX,
@@ -288,32 +293,69 @@ function HologramCore() {
       <pointLight color="#04585c" position={[0, -2.4, 2.6]} intensity={3.2} />
 
       <group ref={sceneRef} position={[0, 0.12, 0]}>
-        <BeamTrail side={-1} spread={0.03} radius={1} seed={0.2} width={0.021} />
-        <BeamTrail side={-1} spread={0.19} radius={1} seed={1.1} width={0.013} />
-        <BeamTrail side={1} spread={0.06} radius={1} seed={2.2} width={0.02} />
-        <BeamTrail side={1} spread={0.17} radius={1} seed={3.3} width={0.014} />
-        <BeamTrail side={-1} spread={0.32} radius={1} seed={4.2} width={0.011} />
+        <BeamTrail side={-1} spread={0.03} radius={1} seed={0.2} width={0.021} motionScale={motionScale} />
+        <BeamTrail side={-1} spread={0.19} radius={1} seed={1.1} width={0.013} motionScale={motionScale} />
+        <BeamTrail side={1} spread={0.06} radius={1} seed={2.2} width={0.02} motionScale={motionScale} />
+        <BeamTrail side={1} spread={0.17} radius={1} seed={3.3} width={0.014} motionScale={motionScale} />
+        <BeamTrail side={-1} spread={0.32} radius={1} seed={4.2} width={0.011} motionScale={motionScale} />
 
-        <Orb />
+        <Orb motionScale={motionScale} />
 
-        <LightShaft x={-0.35} y={-1.64} width={0.9} height={2.35} seed={0.4} opacity={0.33} />
-        <LightShaft x={0.31} y={-1.52} width={0.78} height={2.1} seed={1.9} opacity={0.27} />
+        <LightShaft x={-0.35} y={-1.64} width={0.9} height={2.35} seed={0.4} opacity={0.33} motionScale={motionScale} />
+        <LightShaft x={0.31} y={-1.52} width={0.78} height={2.1} seed={1.9} opacity={0.27} motionScale={motionScale} />
       </group>
     </>
   );
 }
 
 export function HologramBackground() {
+  const [motionScale, setMotionScale] = useState(1);
+  const [canvasDpr, setCanvasDpr] = useState<[number, number]>([1, 1.7]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateQuality = () => {
+      const reduceMotion = motionQuery.matches;
+      const compactViewport = window.innerWidth < 980;
+
+      setMotionScale(reduceMotion ? 0 : 1);
+      setCanvasDpr(compactViewport ? [1, 1.35] : [1, 1.7]);
+    };
+
+    updateQuality();
+
+    window.addEventListener("resize", updateQuality);
+    motionQuery.addEventListener("change", updateQuality);
+
+    return () => {
+      window.removeEventListener("resize", updateQuality);
+      motionQuery.removeEventListener("change", updateQuality);
+    };
+  }, []);
+
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-[#020608]" />
-      <Canvas
-        dpr={[1, 1.7]}
-        camera={{ position: [0, 0.18, 5.2], fov: 41 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      >
-        <HologramCore />
-      </Canvas>
+      {motionScale > 0 ? (
+        <Canvas
+          dpr={canvasDpr}
+          camera={{ position: [0, 0.18, 5.2], fov: 41 }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          performance={{ min: 0.55 }}
+        >
+          <HologramCore motionScale={motionScale} />
+        </Canvas>
+      ) : (
+        <div className="absolute inset-0">
+          <div className="absolute left-1/2 top-[48%] h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/20 bg-black/55 shadow-[0_0_80px_rgba(0,238,221,0.2)]" />
+          <div className="absolute left-1/2 top-[36%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/10 blur-[80px]" />
+        </div>
+      )}
       <div className="hologram-aurora absolute inset-0" />
       <div className="hologram-noise absolute inset-0" />
       <div className="hologram-scanlines absolute inset-0" />

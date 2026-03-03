@@ -18,6 +18,7 @@ import {
   persistSessionSnapshot,
 } from "@/lib/chat-backend-client";
 import { createMessage } from "@/lib/chat-orchestrator";
+import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
@@ -27,6 +28,7 @@ import type {
   TaskRoutingResult,
 } from "@/types/decomposition";
 import type { Message } from "@/types/session";
+import type { RuntimeFunctionKey } from "@/types/runtime";
 
 type ConnectionKey =
   | "agents"
@@ -97,7 +99,10 @@ const CONNECTION_META: Record<
     label: "Orquestra",
     description: "Rodar engrenagem visual com conexoes finais.",
     className: "text-fuchsia-300 border-fuchsia-300/30 bg-fuchsia-300/10",
-    href: (sessionId) => `/dashboard/orchestra/${encodeURIComponent(sessionId)}`,
+    href: (sessionId, contextId) =>
+      `/dashboard/orchestra/${encodeURIComponent(
+        sessionId
+      )}?contextId=${encodeURIComponent(contextId)}`,
   },
 };
 
@@ -157,6 +162,54 @@ function detectConnectionTargets(text: string): ConnectionKey[] {
   }
 
   return Array.from(new Set(targets));
+}
+
+function detectPreferredStrategy(text: string): "consensus" | "parallel" | "sequential" | null {
+  const normalized = text.toLowerCase();
+
+  if (/consenso|consensus|votacao|votação/.test(normalized)) {
+    return "consensus";
+  }
+
+  if (/paralelo|parallel/.test(normalized)) {
+    return "parallel";
+  }
+
+  if (/sequencial|sequential|cadeia/.test(normalized)) {
+    return "sequential";
+  }
+
+  return null;
+}
+
+function detectFunctionPriorityOrder(text: string): RuntimeFunctionKey[] {
+  const normalized = text.toLowerCase();
+  const matches: Array<{ key: RuntimeFunctionKey; index: number }> = [
+    {
+      key: "contexts",
+      index: normalized.search(/contexto|context|semantico|semântico/),
+    },
+    {
+      key: "projects",
+      index: normalized.search(/projeto|project|roadmap|objetivo/),
+    },
+    {
+      key: "agents",
+      index: normalized.search(/agente|agent|deleg/),
+    },
+    {
+      key: "groups",
+      index: normalized.search(/grupo|group|consenso|paralelo|sequencial/),
+    },
+    {
+      key: "aggregation",
+      index: normalized.search(/agrega|sintese|síntese|orquestra|final/),
+    },
+  ]
+    .filter((item) => item.index >= 0)
+    .sort((a, b) => a.index - b.index);
+
+  return Array.from(new Set(matches.map((match) => match.key)));
 }
 
 function getConnectionsForContext(result: DecompositionResult): ConnectionKey[] {
@@ -267,7 +320,15 @@ function ContextsPageContent() {
   const activeDecompositionId = useDecompositionStore(
     (state) => state.activeDecompositionId
   );
+  const groups = useAgentStore((state) => state.groups);
+  const updateGroup = useAgentStore((state) => state.updateGroup);
   const addRuntimeNote = useRuntimeStore((state) => state.addNote);
+  const applyFunctionPriorities = useRuntimeStore(
+    (state) => state.applyFunctionPriorities
+  );
+  const markJourneyStepVisited = useRuntimeStore(
+    (state) => state.markJourneyStepVisited
+  );
 
   const targetSessionId = querySessionId ?? currentSessionId ?? null;
   const targetSession = targetSessionId
@@ -370,6 +431,14 @@ function ContextsPageContent() {
     });
   }, [contextResults]);
 
+  useEffect(() => {
+    if (!targetSessionId || contextResults.length === 0) {
+      return;
+    }
+
+    markJourneyStepVisited(targetSessionId, "contexts");
+  }, [contextResults.length, markJourneyStepVisited, targetSessionId]);
+
   const handleSendContextInstruction = () => {
     if (!targetSessionId || !expandedContext) {
       return;
@@ -381,6 +450,9 @@ function ContextsPageContent() {
     }
 
     const targets = detectConnectionTargets(text);
+    const preferredStrategy = detectPreferredStrategy(text);
+    const functionPriorityOrder = detectFunctionPriorityOrder(text);
+    const appliedAdjustments: string[] = [];
 
     addMessage(
       createMessage(targetSessionId, "user", text, {
@@ -403,6 +475,45 @@ function ContextsPageContent() {
         }
       )
     );
+
+    if (preferredStrategy) {
+      const sessionGroups = groups.filter(
+        (group) => group.sessionId === targetSessionId
+      );
+
+      if (sessionGroups.length > 0) {
+        for (const group of sessionGroups) {
+          updateGroup(group.id, { strategy: preferredStrategy });
+        }
+        appliedAdjustments.push(
+          `estrategia de grupo atualizada para ${preferredStrategy}`
+        );
+      }
+    }
+
+    if (functionPriorityOrder.length > 0) {
+      applyFunctionPriorities(targetSessionId, functionPriorityOrder);
+      appliedAdjustments.push(
+        `ordem de funcoes aplicada: ${functionPriorityOrder.join(" -> ")}`
+      );
+    }
+
+    if (appliedAdjustments.length > 0) {
+      addMessage(
+        createMessage(
+          targetSessionId,
+          "system",
+          `Ajustes aplicados no plano: ${appliedAdjustments.join(" | ")}.`,
+          {
+            contextChat: true,
+            contextRouting: true,
+            contextAdjustment: true,
+            decompositionId: expandedContext.id,
+            routeTargets: targets,
+          }
+        )
+      );
+    }
 
     addRuntimeNote(
       targetSessionId,

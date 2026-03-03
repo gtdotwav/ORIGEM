@@ -1,211 +1,414 @@
 "use client";
 
+import Link from "next/link";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
-  Users,
-  Plus,
+  ArrowLeft,
+  ArrowRight,
   Layers,
-  ArrowDownUp,
+  Loader2,
+  Sparkles,
+  Users,
   Vote,
-  Clock,
-  Zap,
 } from "lucide-react";
+import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
+import {
+  getContextDirections,
+  getJourneyStepHref,
+  getLatestSessionId,
+  getSelectedContext,
+  getSessionContexts,
+} from "@/lib/session-journey";
+import { useAgentStore } from "@/stores/agent-store";
+import { useDecompositionStore } from "@/stores/decomposition-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
+import { useSessionStore } from "@/stores/session-store";
+import type { AgentGroup } from "@/types/agent";
 
-const STRATEGY_INFO = {
+type GroupStrategy = AgentGroup["strategy"];
+
+const STRATEGY_META: Record<
+  GroupStrategy,
+  {
+    label: string;
+    className: string;
+    Icon: typeof Vote;
+    description: string;
+  }
+> = {
   parallel: {
-    icon: Layers,
     label: "Paralelo",
-    description: "Todos os agentes executam simultaneamente",
-    color: "text-cyan-400",
-    bgColor: "bg-cyan-400/10",
-    borderColor: "border-cyan-400/20",
+    className: "text-cyan-200 border-cyan-300/30 bg-cyan-300/10",
+    Icon: Layers,
+    description: "Executa agentes simultaneamente.",
   },
   sequential: {
-    icon: ArrowDownUp,
     label: "Sequencial",
-    description: "Agentes executam em cadeia, passando outputs adiante",
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-    borderColor: "border-purple-400/20",
+    className: "text-purple-200 border-purple-300/30 bg-purple-300/10",
+    Icon: Sparkles,
+    description: "Passa output de um agente para o seguinte.",
   },
   consensus: {
-    icon: Vote,
     label: "Consenso",
-    description: "Agentes votam e convergem em uma resposta final",
-    color: "text-orange-400",
-    bgColor: "bg-orange-400/10",
-    borderColor: "border-orange-400/20",
+    className: "text-orange-200 border-orange-300/30 bg-orange-300/10",
+    Icon: Vote,
+    description: "Converge decisoes entre agentes antes do final.",
   },
 };
 
-const SAMPLE_GROUPS = [
-  {
-    id: "grp-1",
-    name: "Code Review Pipeline",
-    strategy: "sequential" as const,
-    agents: [
-      { name: "Coder", color: "bg-green-400" },
-      { name: "Critic", color: "bg-pink-400" },
-      { name: "Synthesizer", color: "bg-white/60" },
-    ],
-    status: "active" as const,
-    executionCount: 12,
-    lastRun: "3 min atras",
-  },
-  {
-    id: "grp-2",
-    name: "Research & Analysis",
-    strategy: "parallel" as const,
-    agents: [
-      { name: "Researcher", color: "bg-cyan-400" },
-      { name: "Writer", color: "bg-purple-400" },
-    ],
-    status: "active" as const,
-    executionCount: 8,
-    lastRun: "20 min atras",
-  },
-  {
-    id: "grp-3",
-    name: "Design Consensus",
-    strategy: "consensus" as const,
-    agents: [
-      { name: "Designer", color: "bg-orange-400" },
-      { name: "Critic", color: "bg-pink-400" },
-      { name: "Planner", color: "bg-blue-400" },
-    ],
-    status: "idle" as const,
-    executionCount: 4,
-    lastRun: "2h atras",
-  },
-  {
-    id: "grp-4",
-    name: "Full Stack Build",
-    strategy: "sequential" as const,
-    agents: [
-      { name: "Planner", color: "bg-blue-400" },
-      { name: "Coder", color: "bg-green-400" },
-      { name: "Designer", color: "bg-orange-400" },
-      { name: "Critic", color: "bg-pink-400" },
-    ],
-    status: "idle" as const,
-    executionCount: 2,
-    lastRun: "1 dia atras",
-  },
-];
+interface GroupView {
+  id: string;
+  name: string;
+  strategy: GroupStrategy;
+  agentIds: string[];
+  isVirtual: boolean;
+}
 
-export default function GroupsPage() {
+function GroupsPageContent() {
+  const searchParams = useSearchParams();
+  const querySessionId = searchParams.get("sessionId");
+  const queryContextId = searchParams.get("contextId");
+
+  const [isHydrating, setIsHydrating] = useState(false);
+  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
+
+  const sessions = useSessionStore((state) => state.sessions);
+  const currentSessionId = useSessionStore((state) => state.currentSessionId);
+  const messages = useSessionStore((state) => state.messages);
+
+  const decompositions = useDecompositionStore((state) => state.decompositions);
+  const activeDecompositionId = useDecompositionStore(
+    (state) => state.activeDecompositionId
+  );
+
+  const agents = useAgentStore((state) => state.agents);
+  const groups = useAgentStore((state) => state.groups);
+
+  const runtimeSessions = useRuntimeStore((state) => state.sessions);
+  const markJourneyStepVisited = useRuntimeStore(
+    (state) => state.markJourneyStepVisited
+  );
+
+  const latestSessionId = useMemo(() => getLatestSessionId(sessions), [sessions]);
+  const targetSessionId = querySessionId ?? currentSessionId ?? latestSessionId;
+
+  const contexts = useMemo(
+    () =>
+      getSessionContexts(
+        targetSessionId,
+        messages,
+        decompositions,
+        activeDecompositionId
+      ),
+    [targetSessionId, messages, decompositions, activeDecompositionId]
+  );
+
+  const selectedContext = useMemo(
+    () => getSelectedContext(contexts, queryContextId),
+    [contexts, queryContextId]
+  );
+
+  const runtime = targetSessionId ? runtimeSessions[targetSessionId] : undefined;
+  const runtimeTasks = runtime?.tasks ?? [];
+
+  const sessionAgents = useMemo(
+    () =>
+      targetSessionId
+        ? agents.filter((agent) => agent.sessionId === targetSessionId)
+        : [],
+    [agents, targetSessionId]
+  );
+
+  const sessionGroups = useMemo(
+    () =>
+      targetSessionId
+        ? groups.filter((group) => group.sessionId === targetSessionId)
+        : [],
+    [groups, targetSessionId]
+  );
+
+  const groupDirections = useMemo(
+    () =>
+      getContextDirections(messages, targetSessionId, {
+        contextId: selectedContext?.id,
+        target: "groups",
+      }).slice(0, 5),
+    [messages, selectedContext?.id, targetSessionId]
+  );
+
+  const effectiveGroups = useMemo<GroupView[]>(() => {
+    if (sessionGroups.length > 0) {
+      return sessionGroups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        strategy: group.strategy,
+        agentIds: group.agentIds,
+        isVirtual: false,
+      }));
+    }
+
+    if (!targetSessionId || runtimeTasks.length === 0) {
+      return [];
+    }
+
+    const strategyFromContext = selectedContext?.taskRouting.executionStrategy;
+    const strategy: GroupStrategy =
+      strategyFromContext === "consensus"
+        ? "consensus"
+        : strategyFromContext === "parallel"
+        ? "parallel"
+        : "sequential";
+
+    return [
+      {
+        id: `group-virtual-${targetSessionId}`,
+        name: "Core Workflow",
+        strategy,
+        agentIds: Array.from(new Set(runtimeTasks.map((task) => task.agentId))),
+        isVirtual: true,
+      },
+    ];
+  }, [runtimeTasks, selectedContext?.taskRouting.executionStrategy, sessionGroups, targetSessionId]);
+
+  const shouldHydrate =
+    Boolean(targetSessionId) &&
+    !isHydrating &&
+    effectiveGroups.length === 0 &&
+    runtimeTasks.length === 0 &&
+    contexts.length === 0;
+
+  useEffect(() => {
+    if (!targetSessionId || !shouldHydrate) {
+      return;
+    }
+
+    if (hydratedSessionIdsRef.current.has(targetSessionId)) {
+      return;
+    }
+
+    hydratedSessionIdsRef.current.add(targetSessionId);
+    setIsHydrating(true);
+
+    void hydrateSessionSnapshot(targetSessionId)
+      .catch((error) => {
+        console.error("Failed to hydrate session on groups page", error);
+      })
+      .finally(() => {
+        setIsHydrating(false);
+      });
+  }, [shouldHydrate, targetSessionId, isHydrating]);
+
+  useEffect(() => {
+    if (!targetSessionId) {
+      return;
+    }
+
+    markJourneyStepVisited(targetSessionId, "groups");
+  }, [markJourneyStepVisited, targetSessionId]);
+
+  const agentById = useMemo(
+    () => new Map(sessionAgents.map((agent) => [agent.id, agent])),
+    [sessionAgents]
+  );
+
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
-              <Users className="h-6 w-6 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Grupos</h1>
-              <p className="mt-1 text-sm text-white/40">
-                Coordene grupos de agentes — paralelo, sequencial ou consenso
-              </p>
-            </div>
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+            <Users className="h-5 w-5 text-green-300" />
           </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Grupos de Execucao</h1>
+            <p className="mt-1 text-sm text-white/50">
+              Colaboracao de agentes organizada para cumprir o plano do projeto.
+            </p>
+          </div>
+        </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white/70 backdrop-blur-sm transition-all hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Grupo
-          </button>
+        <div className="flex items-center gap-2">
+          {targetSessionId ? (
+            <Link
+              href={getJourneyStepHref(
+                "projects",
+                targetSessionId,
+                selectedContext?.id
+              )}
+              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Projetos
+            </Link>
+          ) : null}
+          {targetSessionId ? (
+            <Link
+              href={getJourneyStepHref("flows", targetSessionId, selectedContext?.id)}
+              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+            >
+              Ir para Fluxos
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : null}
         </div>
       </div>
 
-      {/* Strategy legend */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        {Object.entries(STRATEGY_INFO).map(([key, strat]) => (
-          <div
-            key={key}
-            className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-neutral-900/60 px-4 py-3 backdrop-blur-xl"
-          >
-            <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${strat.borderColor} ${strat.bgColor}`}
-            >
-              <strat.icon className={`h-4 w-4 ${strat.color}`} />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-white/70">{strat.label}</p>
-              <p className="text-[10px] text-white/30">{strat.description}</p>
-            </div>
+      {isHydrating ? (
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+          <div className="inline-flex items-center gap-2 text-sm text-white/70">
+            <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+            Carregando grupos da sessao...
           </div>
-        ))}
-      </div>
-
-      {/* Groups */}
-      <div className="space-y-3">
-        {SAMPLE_GROUPS.map((group) => {
-          const strat = STRATEGY_INFO[group.strategy];
-          return (
-            <div
-              key={group.id}
-              className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
-            >
-              {/* Top */}
-              <div className="mb-4 flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-white/90">
-                    {group.name}
-                  </h3>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${strat.borderColor} ${strat.bgColor} ${strat.color}`}
-                    >
-                      <strat.icon className="h-3 w-3" />
-                      {strat.label}
-                    </span>
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[10px] ${
-                        group.status === "active"
-                          ? "bg-green-400/10 text-green-400"
-                          : "bg-white/[0.04] text-white/30"
-                      }`}
-                    >
-                      {group.status === "active" ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <p className="flex items-center gap-1 text-[11px] text-white/25">
-                    <Clock className="h-3 w-3" />
-                    {group.lastRun}
-                  </p>
-                  <p className="mt-0.5 flex items-center gap-1 text-[10px] text-white/20">
-                    <Zap className="h-3 w-3" />
-                    {group.executionCount} execucoes
-                  </p>
-                </div>
-              </div>
-
-              {/* Agent chain */}
-              <div className="flex items-center gap-1">
-                {group.agents.map((agent, i) => (
-                  <div key={agent.name} className="flex items-center gap-1">
-                    <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5">
-                      <div className={`h-2 w-2 rounded-full ${agent.color}`} />
-                      <span className="text-xs text-white/60">{agent.name}</span>
-                    </div>
-                    {i < group.agents.length - 1 && (
-                      <span className="mx-1 text-white/15">
-                        {group.strategy === "parallel" ? "+" : "\u2192"}
-                      </span>
-                    )}
+        </div>
+      ) : !targetSessionId ? (
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
+          Nenhuma sessao ativa encontrada. Inicie no chat para montar grupos.
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+            <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              Direcoes para grupos
+            </p>
+            {groupDirections.length === 0 ? (
+              <p className="mt-2 text-sm text-white/50">
+                Sem direcoes adicionais para grupos neste contexto.
+              </p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {groupDirections.map((direction) => (
+                  <div
+                    key={direction.id}
+                    className="rounded-lg border border-green-300/20 bg-green-300/10 px-3 py-2"
+                  >
+                    <p className="text-sm text-green-100/90">{direction.text}</p>
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          {effectiveGroups.length === 0 ? (
+            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+              <p className="text-sm text-white/65">
+                Ainda nao ha grupos definidos. Volte ao contexto e direcione uma estrategia de colaboracao.
+              </p>
             </div>
-          );
-        })}
+          ) : (
+            <div className="space-y-3">
+              {effectiveGroups.map((group) => {
+                const meta = STRATEGY_META[group.strategy];
+                const members = group.agentIds
+                  .map((agentId) => agentById.get(agentId))
+                  .filter((agent): agent is NonNullable<typeof agent> => Boolean(agent));
+                const relatedTasks = runtimeTasks.filter((task) =>
+                  group.agentIds.includes(task.agentId)
+                );
+
+                return (
+                  <div
+                    key={group.id}
+                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4"
+                  >
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="text-base font-semibold text-white/90">{group.name}</p>
+                        <p className="text-xs text-white/45">
+                          {group.isVirtual
+                            ? "grupo sintetico gerado a partir das tarefas"
+                            : "grupo registrado na sessao"}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs ${meta.className}`}
+                      >
+                        <meta.Icon className="h-3.5 w-3.5" />
+                        {meta.label}
+                      </span>
+                    </div>
+
+                    <p className="mb-3 text-xs text-white/55">{meta.description}</p>
+
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {members.length === 0 ? (
+                        <span className="rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-1 text-xs text-white/45">
+                          Sem membros mapeados
+                        </span>
+                      ) : (
+                        members.map((member) => (
+                          <span
+                            key={member.id}
+                            className="rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-1 text-xs text-white/70"
+                          >
+                            {member.name}
+                          </span>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 rounded-lg border border-white/[0.08] bg-black/25 p-2.5">
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-white/40">
+                        Funcoes cobertas
+                      </p>
+                      {relatedTasks.length === 0 ? (
+                        <p className="text-xs text-white/45">Sem funcoes vinculadas ainda.</p>
+                      ) : (
+                        relatedTasks
+                          .sort((a, b) => a.priority - b.priority)
+                          .map((task) => (
+                            <div key={task.id} className="text-xs text-white/70">
+                              {task.priority}. {task.title} · {task.agentName} · {task.progress}%
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-4 rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
+            <div className="inline-flex items-center gap-1.5 text-sm text-neon-cyan">
+              <Sparkles className="h-4 w-4" />
+              Proxima etapa recomendada
+            </div>
+            <p className="mt-1 text-xs text-white/70">
+              Executar pipeline completo e acompanhar cada estagio da engrenagem em tempo real.
+            </p>
+            <div className="mt-2">
+              <Link
+                href={getJourneyStepHref("flows", targetSessionId, selectedContext?.id)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+              >
+                Abrir Fluxos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function GroupsPageFallback() {
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+        <div className="inline-flex items-center gap-2 text-sm text-white/70">
+          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+          Carregando grupos...
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function GroupsPage() {
+  return (
+    <Suspense fallback={<GroupsPageFallback />}>
+      <GroupsPageContent />
+    </Suspense>
   );
 }

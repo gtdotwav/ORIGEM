@@ -66,8 +66,8 @@ export default function DashboardPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(0,0,0,0.38)_82%)]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[640px] pb-2">
-        <div className="flex justify-end">
+      <div className="relative z-10 w-full max-w-[640px] pb-3">
+        <div className="flex justify-center">
           <Link
             href="/dashboard/control"
             className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"

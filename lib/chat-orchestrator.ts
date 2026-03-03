@@ -107,6 +107,14 @@ const STAGE_BY_FUNCTION: Record<
   aggregation: "aggregating",
 };
 
+const JOURNEY_STEP_BY_FUNCTION: Record<RuntimeFunctionKey, "contexts" | "agents" | "projects" | "groups" | "flows"> = {
+  contexts: "contexts",
+  projects: "projects",
+  agents: "agents",
+  groups: "groups",
+  aggregation: "flows",
+};
+
 const TASK_TEMPLATES: Array<{
   functionKey: RuntimeFunctionKey;
   labels: Record<RuntimeLanguage, string>;
@@ -779,6 +787,7 @@ export async function runChatOrchestration(
 
   const decomposition = buildDecomposition(prompt);
   decompositionStore.addDecomposition(decomposition);
+  runtimeStore.markJourneyStepVisited(sessionId, "contexts");
   pipelineStore.addEvent({
     type: "decomposition",
     data: {
@@ -872,6 +881,10 @@ export async function runChatOrchestration(
       status: "done",
       progress: 100,
     });
+    runtimeStore.markJourneyStepVisited(
+      sessionId,
+      JOURNEY_STEP_BY_FUNCTION[nextTask.functionKey]
+    );
 
     const updatedRuntime = runtimeStore.getSession(sessionId);
     const doneCount =
@@ -935,7 +948,10 @@ export async function runChatOrchestration(
 
   const metrics = getSessionMetricSnapshot(sessionId, decomposition.id, tasks);
   const finalRuntime = runtimeStore.getSession(sessionId);
-  const finalTasks = finalRuntime?.tasks ?? [];
+  const finalTasks =
+    finalRuntime?.tasks && finalRuntime.tasks.length > 0
+      ? finalRuntime.tasks
+      : tasks;
   const noteCount = finalRuntime?.notes.length ?? 0;
   const nextJourneyStep =
     finalRuntime && finalRuntime.journeyCursor < JOURNEY_STEPS.length

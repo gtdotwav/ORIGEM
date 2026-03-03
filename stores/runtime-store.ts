@@ -3,6 +3,7 @@ import { devtools, persist } from "zustand/middleware";
 import { JOURNEY_ORDER } from "@/lib/journey";
 import type {
   JourneyStepKey,
+  RuntimeFunctionKey,
   RuntimeLanguage,
   RuntimeNote,
   RuntimeTask,
@@ -31,6 +32,10 @@ interface RuntimeState {
     sessionId: string,
     draggedTaskId: string,
     targetTaskId: string
+  ) => void;
+  applyFunctionPriorities: (
+    sessionId: string,
+    priorityOrder: RuntimeFunctionKey[]
   ) => void;
   addNote: (sessionId: string, text: string, taskId?: string) => RuntimeNote;
   markJourneyStepVisited: (
@@ -204,6 +209,48 @@ export const useRuntimeStore = create<RuntimeState>()(
           tasks.splice(targetIndex, 0, draggedTask);
 
           const normalized = tasks.map((task, index) => ({
+            ...task,
+            priority: index + 1,
+          }));
+
+          return {
+            sessions: {
+              ...state.sessions,
+              [sessionId]: {
+                ...current,
+                tasks: normalized,
+                updatedAt: Date.now(),
+              },
+            },
+          };
+        }),
+
+      applyFunctionPriorities: (sessionId, priorityOrder) =>
+        set((state) => {
+          const current = state.sessions[sessionId];
+          if (!current || current.tasks.length === 0 || priorityOrder.length === 0) {
+            return state;
+          }
+
+          const rankByFunction = new Map(
+            priorityOrder.map((functionKey, index) => [functionKey, index])
+          );
+          const fallbackRankStart = priorityOrder.length + 1;
+
+          const sorted = [...current.tasks].sort((left, right) => {
+            const leftRank =
+              rankByFunction.get(left.functionKey) ?? fallbackRankStart + left.priority;
+            const rightRank =
+              rankByFunction.get(right.functionKey) ?? fallbackRankStart + right.priority;
+
+            if (leftRank !== rightRank) {
+              return leftRank - rightRank;
+            }
+
+            return left.priority - right.priority;
+          });
+
+          const normalized = sorted.map((task, index) => ({
             ...task,
             priority: index + 1,
           }));

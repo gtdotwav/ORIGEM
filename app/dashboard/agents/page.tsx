@@ -1,221 +1,421 @@
 "use client";
 
+import Link from "next/link";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
+  ArrowLeft,
+  ArrowRight,
   Bot,
-  Code2,
-  Pen,
-  Search,
-  Palette,
-  ShieldAlert,
-  Map,
+  Brain,
+  CheckCircle2,
+  Loader2,
   Sparkles,
-  Zap,
-  Settings2,
 } from "lucide-react";
+import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
+import {
+  getContextDirections,
+  getJourneyStepHref,
+  getLatestSessionId,
+  getSelectedContext,
+  getSessionContexts,
+} from "@/lib/session-journey";
+import { useAgentStore } from "@/stores/agent-store";
+import { useDecompositionStore } from "@/stores/decomposition-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
+import { useSessionStore } from "@/stores/session-store";
 
-const AGENT_TEMPLATES = [
-  {
-    id: "coder",
-    name: "Coder",
-    role: "Engenheiro de Software",
-    description:
-      "Gera, refatora e depura codigo. Domina multiplas linguagens e frameworks.",
-    icon: Code2,
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-    borderColor: "border-green-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.78_0.2_145/0.12)]",
-    capabilities: ["Code generation", "Debugging", "Refactoring", "Testing"],
-    outputTypes: ["code", "text"],
-    activeInstances: 3,
-  },
-  {
-    id: "writer",
-    name: "Writer",
-    role: "Redator & Copywriter",
-    description:
-      "Produz textos, documentacao, artigos e conteudo criativo com precisao.",
-    icon: Pen,
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-    borderColor: "border-purple-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.65_0.25_290/0.12)]",
-    capabilities: ["Content writing", "Documentation", "Copywriting", "Editing"],
-    outputTypes: ["text", "html"],
-    activeInstances: 1,
-  },
-  {
-    id: "researcher",
-    name: "Researcher",
-    role: "Analista de Pesquisa",
-    description:
-      "Investiga, compara e sintetiza informacoes de multiplas fontes e dominios.",
-    icon: Search,
-    color: "text-cyan-400",
-    bgColor: "bg-cyan-400/10",
-    borderColor: "border-cyan-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.78_0.15_195/0.12)]",
-    capabilities: ["Research", "Analysis", "Comparison", "Synthesis"],
-    outputTypes: ["text", "thought"],
-    activeInstances: 2,
-  },
-  {
-    id: "designer",
-    name: "Designer",
-    role: "Designer Visual & UX",
-    description:
-      "Cria interfaces, layouts, design systems e prototipos visuais com HTML/CSS.",
-    icon: Palette,
-    color: "text-orange-400",
-    bgColor: "bg-orange-400/10",
-    borderColor: "border-orange-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.75_0.18_55/0.12)]",
-    capabilities: ["UI Design", "Prototyping", "HTML/CSS", "Design Systems"],
-    outputTypes: ["html", "code", "image"],
-    activeInstances: 0,
-  },
-  {
-    id: "critic",
-    name: "Critic",
-    role: "Revisor & Avaliador",
-    description:
-      "Avalia qualidade, identifica problemas e sugere melhorias em outputs de outros agentes.",
-    icon: ShieldAlert,
-    color: "text-pink-400",
-    bgColor: "bg-pink-400/10",
-    borderColor: "border-pink-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.70_0.22_340/0.12)]",
-    capabilities: ["Code review", "Quality check", "Security audit", "Feedback"],
-    outputTypes: ["text", "thought"],
-    activeInstances: 1,
-  },
-  {
-    id: "planner",
-    name: "Planner",
-    role: "Estrategista & Planejador",
-    description:
-      "Planeja arquiteturas, define estrategias e cria roadmaps de execucao.",
-    icon: Map,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-    borderColor: "border-blue-400/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.65_0.2_250/0.12)]",
-    capabilities: ["Architecture", "Strategy", "Roadmaps", "Task breakdown"],
-    outputTypes: ["text", "thought"],
-    activeInstances: 0,
-  },
-  {
-    id: "synthesizer",
-    name: "Synthesizer",
-    role: "Sintetizador Final",
-    description:
-      "Combina outputs de multiplos agentes em uma resposta coesa e unificada.",
-    icon: Sparkles,
-    color: "text-white/80",
-    bgColor: "bg-white/[0.06]",
-    borderColor: "border-white/20",
-    glowColor: "hover:shadow-[0_0_30px_oklch(0.95_0.02_270/0.08)]",
-    capabilities: ["Aggregation", "Merging", "Summarization", "Formatting"],
-    outputTypes: ["text", "html", "code"],
-    activeInstances: 0,
-  },
-];
+const STATUS_META = {
+  idle: "text-white/55 border-white/[0.15] bg-white/[0.06]",
+  thinking: "text-cyan-200 border-cyan-300/30 bg-cyan-300/10",
+  working: "text-amber-200 border-amber-300/30 bg-amber-300/10",
+  done: "text-green-200 border-green-300/30 bg-green-300/10",
+  error: "text-red-200 border-red-300/30 bg-red-300/10",
+} as const;
 
-export default function AgentsPage() {
-  const totalActive = AGENT_TEMPLATES.reduce(
-    (sum, a) => sum + a.activeInstances,
-    0
+const FUNCTION_LABEL: Record<string, string> = {
+  contexts: "Contextos",
+  projects: "Projetos",
+  agents: "Agentes",
+  groups: "Grupos",
+  aggregation: "Agregacao final",
+};
+
+function formatDateTime(value: Date) {
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function AgentsPageContent() {
+  const searchParams = useSearchParams();
+  const querySessionId = searchParams.get("sessionId");
+  const queryContextId = searchParams.get("contextId");
+
+  const [isHydrating, setIsHydrating] = useState(false);
+  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
+
+  const sessions = useSessionStore((state) => state.sessions);
+  const currentSessionId = useSessionStore((state) => state.currentSessionId);
+  const messages = useSessionStore((state) => state.messages);
+
+  const decompositions = useDecompositionStore((state) => state.decompositions);
+  const activeDecompositionId = useDecompositionStore(
+    (state) => state.activeDecompositionId
   );
 
+  const agents = useAgentStore((state) => state.agents);
+  const runtimeSessions = useRuntimeStore((state) => state.sessions);
+  const markJourneyStepVisited = useRuntimeStore(
+    (state) => state.markJourneyStepVisited
+  );
+
+  const latestSessionId = useMemo(() => getLatestSessionId(sessions), [sessions]);
+  const targetSessionId = querySessionId ?? currentSessionId ?? latestSessionId;
+
+  const targetSession = useMemo(() => {
+    if (!targetSessionId) {
+      return null;
+    }
+
+    return sessions.find((session) => session.id === targetSessionId) ?? null;
+  }, [sessions, targetSessionId]);
+
+  const contexts = useMemo(
+    () =>
+      getSessionContexts(
+        targetSessionId,
+        messages,
+        decompositions,
+        activeDecompositionId
+      ),
+    [targetSessionId, messages, decompositions, activeDecompositionId]
+  );
+
+  const selectedContext = useMemo(
+    () => getSelectedContext(contexts, queryContextId),
+    [contexts, queryContextId]
+  );
+
+  const sessionAgents = useMemo(
+    () =>
+      targetSessionId
+        ? agents
+            .filter((agent) => agent.sessionId === targetSessionId)
+            .sort((a, b) => {
+              const left = Number(a.config?.priority ?? Number.MAX_SAFE_INTEGER);
+              const right = Number(b.config?.priority ?? Number.MAX_SAFE_INTEGER);
+              return left - right;
+            })
+        : [],
+    [agents, targetSessionId]
+  );
+
+  const runtime = targetSessionId ? runtimeSessions[targetSessionId] : undefined;
+  const runtimeTasks = runtime?.tasks ?? [];
+
+  const contextDirections = useMemo(
+    () =>
+      getContextDirections(messages, targetSessionId, {
+        contextId: selectedContext?.id,
+        target: "agents",
+      }).slice(0, 5),
+    [messages, selectedContext?.id, targetSessionId]
+  );
+
+  const shouldHydrate =
+    Boolean(targetSessionId) &&
+    !isHydrating &&
+    sessionAgents.length === 0 &&
+    runtimeTasks.length === 0 &&
+    contexts.length === 0;
+
+  useEffect(() => {
+    if (!targetSessionId || !shouldHydrate) {
+      return;
+    }
+
+    if (hydratedSessionIdsRef.current.has(targetSessionId)) {
+      return;
+    }
+
+    hydratedSessionIdsRef.current.add(targetSessionId);
+    setIsHydrating(true);
+
+    void hydrateSessionSnapshot(targetSessionId)
+      .catch((error) => {
+        console.error("Failed to hydrate session on agents page", error);
+      })
+      .finally(() => {
+        setIsHydrating(false);
+      });
+  }, [shouldHydrate, targetSessionId, isHydrating]);
+
+  useEffect(() => {
+    if (!targetSessionId) {
+      return;
+    }
+
+    markJourneyStepVisited(targetSessionId, "agents");
+  }, [markJourneyStepVisited, targetSessionId]);
+
+  const activeAgentCount = sessionAgents.filter(
+    (agent) => agent.status === "thinking" || agent.status === "working"
+  ).length;
+
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
-              <Bot className="h-6 w-6 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Agentes</h1>
-              <p className="mt-1 text-sm text-white/40">
-                Configure e gerencie agentes especializados — 7 templates, {totalActive} instancias ativas
-              </p>
-            </div>
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+            <Bot className="h-5 w-5 text-cyan-300" />
           </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Agentes Conectados</h1>
+            <p className="mt-1 text-sm text-white/50">
+              Direcao herdada do contexto e delegacao real por funcao.
+            </p>
+            {targetSession ? (
+              <p className="mt-1 text-xs text-white/35">
+                Sessao: {targetSession.title} · atualizada em{" "}
+                {formatDateTime(targetSession.updatedAt)}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {targetSessionId ? (
+            <Link
+              href={getJourneyStepHref(
+                "contexts",
+                targetSessionId,
+                selectedContext?.id
+              )}
+              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Contexto
+            </Link>
+          ) : null}
+          {targetSessionId ? (
+            <Link
+              href={getJourneyStepHref(
+                "projects",
+                targetSessionId,
+                selectedContext?.id
+              )}
+              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+            >
+              Ir para Projetos
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : null}
         </div>
       </div>
 
-      {/* Agent grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {AGENT_TEMPLATES.map((agent) => (
-          <div
-            key={agent.id}
-            className={`group rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70 ${agent.glowColor}`}
-          >
-            {/* Icon + name */}
-            <div className="mb-3 flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl border ${agent.borderColor} ${agent.bgColor}`}
-                >
-                  <agent.icon className={`h-5 w-5 ${agent.color}`} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white/90">
-                    {agent.name}
-                  </h3>
-                  <p className="text-[10px] text-white/35">{agent.role}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="rounded-lg p-1.5 text-white/15 transition-colors hover:bg-white/[0.06] hover:text-white/40"
-              >
-                <Settings2 className="h-3.5 w-3.5" />
-              </button>
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+          <p className="text-[11px] uppercase tracking-wide text-white/35">Agentes</p>
+          <p className="mt-1 text-xl font-semibold text-white">{sessionAgents.length}</p>
+          <p className="text-xs text-white/45">{activeAgentCount} em execucao</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+          <p className="text-[11px] uppercase tracking-wide text-white/35">Funcoes delegadas</p>
+          <p className="mt-1 text-xl font-semibold text-white">
+            {new Set(runtimeTasks.map((task) => task.functionKey)).size}
+          </p>
+          <p className="text-xs text-white/45">{runtimeTasks.length} tarefas mapeadas</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+          <p className="text-[11px] uppercase tracking-wide text-white/35">Direcoes de contexto</p>
+          <p className="mt-1 text-xl font-semibold text-white">{contextDirections.length}</p>
+          <p className="text-xs text-white/45">
+            {selectedContext ? `contexto ${selectedContext.id.slice(0, 8)}` : "geral"}
+          </p>
+        </div>
+      </div>
+
+      {isHydrating ? (
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+          <div className="inline-flex items-center gap-2 text-sm text-white/70">
+            <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+            Carregando estado de agentes da sessao...
+          </div>
+        </div>
+      ) : !targetSessionId ? (
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
+          Nenhuma sessao ativa encontrada. Inicie pelo chat para delegar os agentes.
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+            <div className="mb-2 inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/40">
+              <Brain className="h-3.5 w-3.5" />
+              Direcoes vindas do contexto
             </div>
-
-            <p className="mb-4 text-xs leading-relaxed text-white/35">
-              {agent.description}
-            </p>
-
-            {/* Capabilities */}
-            <div className="mb-4 flex flex-wrap gap-1">
-              {agent.capabilities.map((cap) => (
-                <span
-                  key={cap}
-                  className="rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-white/30"
-                >
-                  {cap}
-                </span>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between border-t border-white/[0.05] pt-3">
-              <div className="flex items-center gap-1.5">
-                <Zap className={`h-3 w-3 ${agent.activeInstances > 0 ? agent.color : "text-white/15"}`} />
-                <span className="text-[11px] text-white/30">
-                  {agent.activeInstances > 0
-                    ? `${agent.activeInstances} ativa${agent.activeInstances > 1 ? "s" : ""}`
-                    : "Inativo"}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                {agent.outputTypes.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded bg-white/[0.04] px-1 py-0.5 text-[8px] uppercase text-white/25"
+            {contextDirections.length === 0 ? (
+              <p className="text-sm text-white/50">
+                Sem direcao manual para agentes neste contexto ainda.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {contextDirections.map((direction) => (
+                  <div
+                    key={direction.id}
+                    className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-3 py-2"
                   >
-                    {t}
-                  </span>
+                    <p className="text-sm text-cyan-100/90">{direction.text}</p>
+                    <p className="mt-1 text-[11px] text-cyan-100/60">
+                      {direction.routeTargets.join(" · ")} ·{" "}
+                      {new Date(direction.createdAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          {sessionAgents.length === 0 ? (
+            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+              <p className="text-sm text-white/65">
+                Ainda nao existem agentes para esta sessao. Volte ao chat e envie uma solicitacao para disparar a delegacao.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {sessionAgents.map((agent) => {
+                const assignedTasks = runtimeTasks
+                  .filter((task) => task.agentId === agent.id)
+                  .sort((a, b) => a.priority - b.priority);
+                const avgProgress =
+                  assignedTasks.length === 0
+                    ? agent.status === "done"
+                      ? 100
+                      : 0
+                    : Math.round(
+                        assignedTasks.reduce((sum, task) => sum + task.progress, 0) /
+                          assignedTasks.length
+                      );
+                const latestOutput = agent.outputs[agent.outputs.length - 1];
+
+                return (
+                  <div
+                    key={agent.id}
+                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4"
+                  >
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-base font-semibold text-white/90">{agent.name}</p>
+                        <p className="text-xs text-white/45">{agent.role}</p>
+                      </div>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[11px] ${STATUS_META[agent.status]}`}
+                      >
+                        {agent.status}
+                      </span>
+                    </div>
+
+                    <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                      <div
+                        className="h-full rounded-full bg-neon-cyan/70 transition-all"
+                        style={{ width: `${avgProgress}%` }}
+                      />
+                    </div>
+
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {assignedTasks.length === 0 ? (
+                        <span className="rounded-md border border-white/[0.10] bg-white/[0.04] px-2 py-1 text-[11px] text-white/45">
+                          sem funcao atribuida
+                        </span>
+                      ) : (
+                        assignedTasks.map((task) => (
+                          <span
+                            key={task.id}
+                            className="rounded-md border border-white/[0.10] bg-white/[0.04] px-2 py-1 text-[11px] text-white/65"
+                          >
+                            {FUNCTION_LABEL[task.functionKey] ?? task.functionKey} · {task.progress}%
+                          </span>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="grid gap-1 text-xs text-white/55">
+                      <p>
+                        Modelo: {agent.model} · Provider: {agent.provider}
+                      </p>
+                      <p>Outputs: {agent.outputs.length}</p>
+                      {latestOutput ? (
+                        <p className="text-white/45">
+                          Ultimo output: {latestOutput.content.slice(0, 92)}
+                          {latestOutput.content.length > 92 ? "..." : ""}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-4 rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
+            <div className="inline-flex items-center gap-1.5 text-sm text-neon-cyan">
+              <Sparkles className="h-4 w-4" />
+              Proxima etapa recomendada
+            </div>
+            <p className="mt-1 text-xs text-white/70">
+              Consolidar o plano em projeto executavel com base na delegacao atual.
+            </p>
+            <div className="mt-2">
+              <Link
+                href={getJourneyStepHref(
+                  "projects",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+              >
+                Abrir Projetos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
-        ))}
+
+          {runtime?.isRunning ? (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-green-300/25 bg-green-300/10 px-2.5 py-1.5 text-xs text-green-200">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              A orquestracao continua ativa em tempo real.
+            </div>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
+function AgentsPageFallback() {
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+        <div className="inline-flex items-center gap-2 text-sm text-white/70">
+          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+          Carregando agentes...
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function AgentsPage() {
+  return (
+    <Suspense fallback={<AgentsPageFallback />}>
+      <AgentsPageContent />
+    </Suspense>
   );
 }
