@@ -1,6 +1,8 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
+import { JOURNEY_ORDER } from "@/lib/journey";
 import type {
+  JourneyStepKey,
   RuntimeLanguage,
   RuntimeNote,
   RuntimeTask,
@@ -31,6 +33,10 @@ interface RuntimeState {
     targetTaskId: string
   ) => void;
   addNote: (sessionId: string, text: string, taskId?: string) => RuntimeNote;
+  markJourneyStepVisited: (
+    sessionId: string,
+    stepKey: JourneyStepKey
+  ) => void;
   setOverallProgress: (sessionId: string, progress: number) => void;
   setRunning: (sessionId: string, running: boolean) => void;
   completeRun: (sessionId: string) => void;
@@ -56,6 +62,8 @@ function createDefaultSessionRuntime(sessionId: string): SessionRuntime {
     isRunning: false,
     tasks: [],
     notes: [],
+    journeyCursor: 0,
+    journeyVisited: [],
     overallProgress: 0,
     updatedAt: Date.now(),
   };
@@ -63,7 +71,8 @@ function createDefaultSessionRuntime(sessionId: string): SessionRuntime {
 
 export const useRuntimeStore = create<RuntimeState>()(
   devtools(
-    (set, get) => ({
+    persist(
+      (set, get) => ({
       sessions: {},
 
       ensureSession: (sessionId) =>
@@ -247,6 +256,35 @@ export const useRuntimeStore = create<RuntimeState>()(
         return note;
       },
 
+      markJourneyStepVisited: (sessionId, stepKey) =>
+        set((state) => {
+          const current =
+            state.sessions[sessionId] ?? createDefaultSessionRuntime(sessionId);
+
+          const visitedSet = new Set(current.journeyVisited);
+          visitedSet.add(stepKey);
+
+          let nextCursor = current.journeyCursor;
+          while (
+            nextCursor < JOURNEY_ORDER.length &&
+            visitedSet.has(JOURNEY_ORDER[nextCursor])
+          ) {
+            nextCursor += 1;
+          }
+
+          return {
+            sessions: {
+              ...state.sessions,
+              [sessionId]: {
+                ...current,
+                journeyVisited: Array.from(visitedSet),
+                journeyCursor: nextCursor,
+                updatedAt: Date.now(),
+              },
+            },
+          };
+        }),
+
       setOverallProgress: (sessionId, progress) =>
         set((state) => {
           const current = state.sessions[sessionId];
@@ -312,8 +350,15 @@ export const useRuntimeStore = create<RuntimeState>()(
           };
         }),
 
-      getSession: (sessionId) => get().sessions[sessionId],
-    }),
-    { name: "runtime-store" }
+        getSession: (sessionId) => get().sessions[sessionId],
+      }),
+      {
+        name: "runtime-store",
+        partialize: (state) => ({
+          sessions: state.sessions,
+        }),
+      }
+    ),
+    { name: "runtime-store-devtools" }
   )
 );

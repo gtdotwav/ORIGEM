@@ -19,6 +19,7 @@ import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { JOURNEY_STEPS } from "@/lib/journey";
 
 interface MetricSnapshot {
   contexts: number;
@@ -552,12 +553,48 @@ function createAgentOutput(
   };
 }
 
+function buildKickoffMessage(
+  language: RuntimeLanguage,
+  intent: Intent,
+  tasks: RuntimeTask[]
+) {
+  const assignmentLines = tasks
+    .map((task, index) => `${index + 1}. ${task.title} -> ${task.agentName}`)
+    .join("\n");
+
+  if (language === "en-US") {
+    return [
+      `Great. I understood your request with intent: ${intent}.`,
+      `I will execute everything inside this chat and stream progress in real time.`,
+      `Execution plan by delegated function:\n${assignmentLines}`,
+      `While I work, you can reorder priorities, send notes, and adjust response language.`,
+    ].join("\n\n");
+  }
+
+  if (language === "es-ES") {
+    return [
+      `Perfecto. Entendi tu solicitud con intencion: ${intent}.`,
+      `Voy a ejecutar todo aqui en el chat y mostrar progreso en tiempo real.`,
+      `Plan de ejecucion por funcion delegada:\n${assignmentLines}`,
+      `Mientras ejecuto, puedes cambiar prioridades, enviar notas y ajustar el idioma de respuesta.`,
+    ].join("\n\n");
+  }
+
+  return [
+    `Perfeito. Entendi sua solicitacao com intencao: ${intent}.`,
+    `Vou desenvolver aqui no chat e mostrar progresso em tempo real.`,
+    `Plano de execucao por funcao delegada:\n${assignmentLines}`,
+    `Enquanto executo, voce pode reordenar prioridades, enviar notas e alterar a linguagem da resposta.`,
+  ].join("\n\n");
+}
+
 function buildAssistantResponse(
   language: RuntimeLanguage,
   intent: Intent,
   metrics: MetricSnapshot,
   tasks: RuntimeTask[],
-  noteCount: number
+  noteCount: number,
+  nextStepLabel: string | null
 ) {
   const assignments = tasks
     .map((task) => `${task.title} -> ${task.agentName}`)
@@ -565,31 +602,40 @@ function buildAssistantResponse(
 
   if (language === "en-US") {
     return [
-      `Intent detected: ${intent}.`,
-      `Real-time orchestration completed with delegated functions per agent.`,
-      `Assignments: ${assignments}.`,
-      `Live distribution: contexts ${metrics.contexts}, projects ${metrics.projects}, agents ${metrics.agents}, groups ${metrics.groups}.`,
+      `Execution complete. Intent detected: ${intent}.`,
+      `Every function was delegated and executed by the proper agent directly in this chat.`,
+      `Delegation map: ${assignments}.`,
+      `Live distribution now: contexts ${metrics.contexts}, projects ${metrics.projects}, agents ${metrics.agents}, groups ${metrics.groups}.`,
       `Notes received during execution: ${noteCount}.`,
-    ].join(" ");
+      nextStepLabel
+        ? `Next connected step: ${nextStepLabel}. Use the button below to continue the engine path.`
+        : `All connected steps are completed. Use the button below to open orchestra.`,
+    ].join("\n\n");
   }
 
   if (language === "es-ES") {
     return [
-      `Intencion detectada: ${intent}.`,
-      `La orquestacion en tiempo real finalizo con delegacion por agente.`,
-      `Asignaciones: ${assignments}.`,
-      `Distribucion viva: contextos ${metrics.contexts}, proyectos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
+      `Ejecucion completada. Intencion detectada: ${intent}.`,
+      `Cada funcion fue delegada y ejecutada por su agente dentro del chat.`,
+      `Mapa de delegacion: ${assignments}.`,
+      `Distribucion en vivo: contextos ${metrics.contexts}, proyectos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
       `Notas recibidas durante la ejecucion: ${noteCount}.`,
-    ].join(" ");
+      nextStepLabel
+        ? `Siguiente paso conectado: ${nextStepLabel}. Usa el boton abajo para continuar la engranaje.`
+        : `Todos los pasos conectados fueron completados. Usa el boton para abrir orquestra.`,
+    ].join("\n\n");
   }
 
   return [
-    `Intencao detectada: ${intent}.`,
-    `Orquestracao em tempo real concluida com delegacao por agente.`,
-    `Delegacoes: ${assignments}.`,
-    `Distribuicao ao vivo: contextos ${metrics.contexts}, projetos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
+    `Execucao concluida. Intencao detectada: ${intent}.`,
+    `Cada funcao foi delegada e executada pelo agente certo, aqui no chat.`,
+    `Mapa de delegacao: ${assignments}.`,
+    `Distribuicao ao vivo agora: contextos ${metrics.contexts}, projetos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
     `Notas recebidas durante a execucao: ${noteCount}.`,
-  ].join(" ");
+    nextStepLabel
+      ? `Proxima etapa conectada: ${nextStepLabel}. Use o botao abaixo para seguir a engrenagem.`
+      : `Todas as etapas conectadas foram concluidas. Use o botao para abrir a orquestra.`,
+  ].join("\n\n");
 }
 
 function getPipelineProgressFromRuntime(sessionId: string) {
@@ -653,6 +699,22 @@ export async function runChatOrchestration(
   const runId = createId("run");
   const tasks = createRuntimeTasks(agents, selectedLanguage);
   runtimeStore.startRun(sessionId, runId, tasks, selectedLanguage);
+
+  const kickoffMessage = createMessage(
+    sessionId,
+    "assistant",
+    buildKickoffMessage(
+      selectedLanguage,
+      decomposition.intent.primary,
+      tasks
+    ),
+    {
+      kickoff: true,
+      runId,
+    }
+  );
+
+  sessionStore.addMessage(kickoffMessage);
 
   pipelineStore.setStage("routing");
   pipelineStore.setProgress(28);
@@ -747,6 +809,10 @@ export async function runChatOrchestration(
   const finalRuntime = runtimeStore.getSession(sessionId);
   const finalTasks = finalRuntime?.tasks ?? [];
   const noteCount = finalRuntime?.notes.length ?? 0;
+  const nextJourneyStep =
+    finalRuntime && finalRuntime.journeyCursor < JOURNEY_STEPS.length
+      ? JOURNEY_STEPS[finalRuntime.journeyCursor]
+      : null;
 
   const assistantMessage = createMessage(
     sessionId,
@@ -756,14 +822,17 @@ export async function runChatOrchestration(
       decomposition.intent.primary,
       metrics,
       finalTasks,
-      noteCount
+      noteCount,
+      nextJourneyStep?.label ?? null
     ),
     {
       includeDistribution: true,
+      includeJourney: true,
       intent: decomposition.intent.primary,
       strategy: group.strategy,
       language: selectedLanguage,
       runId,
+      journeyNextStep: nextJourneyStep?.key ?? null,
     }
   );
 

@@ -11,6 +11,7 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
 import { cn } from "@/lib/utils";
 import {
@@ -49,6 +50,14 @@ function shouldRenderDistribution(metadata: Record<string, unknown> | undefined)
 
 function isNoteMessage(metadata: Record<string, unknown> | undefined) {
   return metadata?.note === true;
+}
+
+function isJourneySystemMessage(metadata: Record<string, unknown> | undefined) {
+  return metadata?.journeyStep === true;
+}
+
+function shouldRenderJourney(metadata: Record<string, unknown> | undefined) {
+  return metadata?.includeJourney === true;
 }
 
 function formatMessageTime(date: Date) {
@@ -114,6 +123,11 @@ export default function ChatPage() {
         ),
     [messages, sessionId]
   );
+
+  const latestAssistantMessageId = useMemo(() => {
+    const reversed = [...sessionMessages].reverse();
+    return reversed.find((message) => message.role === "assistant")?.id ?? null;
+  }, [sessionMessages]);
 
   useEffect(() => {
     if (!sessionId) {
@@ -239,6 +253,8 @@ export default function ChatPage() {
                   {sessionMessages.map((message) => {
                     const isUser = message.role === "user";
                     const isNote = message.role === "system" && isNoteMessage(message.metadata);
+                    const isJourneyStepUpdate =
+                      message.role === "system" && isJourneySystemMessage(message.metadata);
 
                     if (isNote) {
                       return (
@@ -246,6 +262,19 @@ export default function ChatPage() {
                           <div className="max-w-[88%] rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2">
                             <p className="text-xs text-amber-100/90">{message.content}</p>
                             <span className="mt-1 block text-[10px] text-amber-100/55">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    if (isJourneyStepUpdate) {
+                      return (
+                        <div key={message.id} className="flex justify-center">
+                          <div className="max-w-[88%] rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2">
+                            <p className="text-xs text-cyan-100/90">{message.content}</p>
+                            <span className="mt-1 block text-[10px] text-cyan-100/55">
                               {formatMessageTime(message.createdAt)}
                             </span>
                           </div>
@@ -269,10 +298,31 @@ export default function ChatPage() {
                               : "border-white/[0.09] bg-black/35 text-white/85"
                           )}
                         >
-                          <p className="text-sm leading-relaxed">{message.content}</p>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {message.content}
+                          </p>
                           {!isUser && shouldRenderDistribution(message.metadata) && (
                             <RealtimeDistributionBubble sessionId={sessionId} />
                           )}
+                          {!isUser &&
+                            shouldRenderJourney(message.metadata) &&
+                            latestAssistantMessageId === message.id && (
+                              <JourneyConnectorCard
+                                sessionId={sessionId}
+                                onStepOpen={(step) => {
+                                  addMessage(
+                                    createMessage(
+                                      sessionId,
+                                      "system",
+                                      `Etapa aberta: ${step.label}. Revise essa fase e volte ao chat para continuar a proxima conexao.`,
+                                      {
+                                        journeyStep: true,
+                                      }
+                                    )
+                                  );
+                                }}
+                              />
+                            )}
                           <span className="mt-2 block text-[10px] text-white/35">
                             {formatMessageTime(message.createdAt)}
                           </span>

@@ -54,6 +54,13 @@ const STATUS_STYLES = {
   blocked: "text-red-300 border-red-300/30 bg-red-300/10",
 } as const;
 
+const STATUS_LABELS = {
+  pending: "pendente",
+  running: "executando",
+  done: "ok",
+  blocked: "bloqueado",
+} as const;
+
 export function RealtimeDistributionBubble({
   sessionId,
   showTaskList = true,
@@ -180,7 +187,7 @@ export function RealtimeDistributionBubble({
                     STATUS_STYLES[task.status]
                   }`}
                 >
-                  {task.status}
+                  {STATUS_LABELS[task.status]}
                 </span>
               </div>
             </div>

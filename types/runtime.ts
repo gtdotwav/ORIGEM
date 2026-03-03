@@ -9,6 +9,14 @@ export type RuntimeFunctionKey =
 
 export type RuntimeTaskStatus = "pending" | "running" | "done" | "blocked";
 
+export type JourneyStepKey =
+  | "contexts"
+  | "agents"
+  | "projects"
+  | "groups"
+  | "flows"
+  | "orchestra";
+
 export interface RuntimeTask {
   id: string;
   title: string;
@@ -36,6 +44,8 @@ export interface SessionRuntime {
   isRunning: boolean;
   tasks: RuntimeTask[];
   notes: RuntimeNote[];
+  journeyCursor: number;
+  journeyVisited: JourneyStepKey[];
   overallProgress: number;
   updatedAt: number;
 }
