@@ -5,7 +5,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   ArrowUpRight,
+  GripVertical,
   Loader2,
+  MessageSquarePlus,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -17,28 +19,36 @@ import {
   runChatOrchestration,
   toSessionTitle,
 } from "@/lib/chat-orchestrator";
-import { useAgentStore } from "@/stores/agent-store";
-import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import type { RuntimeLanguage, RuntimeTask } from "@/types/runtime";
 
 const STAGE_LABELS: Record<string, string> = {
   idle: "Aguardando",
   intake: "Intake",
   decomposing: "Decompondo",
   routing: "Roteando",
-  spawning: "Criando agentes",
+  spawning: "Delegando",
   executing: "Executando",
-  branching: "Ramificando",
+  branching: "Ajustando",
   aggregating: "Agregando",
   complete: "Concluido",
   error: "Erro",
 };
 
-function shouldRenderDistribution(
-  metadata: Record<string, unknown> | undefined
-) {
+const LANGUAGE_OPTIONS: { value: RuntimeLanguage; label: string }[] = [
+  { value: "pt-BR", label: "Portugues" },
+  { value: "en-US", label: "English" },
+  { value: "es-ES", label: "Espanol" },
+];
+
+function shouldRenderDistribution(metadata: Record<string, unknown> | undefined) {
   return metadata?.includeDistribution === true;
+}
+
+function isNoteMessage(metadata: Record<string, unknown> | undefined) {
+  return metadata?.note === true;
 }
 
 function formatMessageTime(date: Date) {
@@ -48,9 +58,25 @@ function formatMessageTime(date: Date) {
   });
 }
 
+function getTaskStatusLabel(status: RuntimeTask["status"]) {
+  if (status === "running") {
+    return "Em execucao";
+  }
+  if (status === "done") {
+    return "Concluida";
+  }
+  if (status === "blocked") {
+    return "Bloqueada";
+  }
+
+  return "Pendente";
+}
+
 export default function ChatPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [input, setInput] = useState("");
+  const [noteInput, setNoteInput] = useState("");
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -63,12 +89,14 @@ export default function ChatPage() {
 
   const stage = usePipelineStore((s) => s.stage);
   const progress = usePipelineStore((s) => s.progress);
-  const contextCount = useDecompositionStore(
-    (s) => Object.keys(s.decompositions).length
-  );
-  const projectCount = useSessionStore((s) => s.sessions.length);
-  const agentCount = useAgentStore((s) => s.agents.length);
-  const groupCount = useAgentStore((s) => s.groups.length);
+
+  const runtime = useRuntimeStore((s) => s.sessions[sessionId]);
+  const ensureSessionRuntime = useRuntimeStore((s) => s.ensureSession);
+  const setLanguage = useRuntimeStore((s) => s.setLanguage);
+  const reorderTasks = useRuntimeStore((s) => s.reorderTasks);
+  const addRuntimeNote = useRuntimeStore((s) => s.addNote);
+
+  const selectedLanguage = runtime?.language ?? "pt-BR";
 
   const currentSession = useMemo(
     () => sessions.find((session) => session.id === sessionId),
@@ -93,19 +121,20 @@ export default function ChatPage() {
     }
 
     setCurrentSession(sessionId);
+    ensureSessionRuntime(sessionId);
 
     const hasSession = sessions.some((session) => session.id === sessionId);
     if (!hasSession) {
       addSession(createSession(sessionId, `Sessao ${sessionId.slice(0, 8)}`));
     }
-  }, [sessionId, sessions, setCurrentSession, addSession]);
+  }, [sessionId, sessions, setCurrentSession, addSession, ensureSessionRuntime]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-  }, [sessionMessages.length, isSending, stage]);
+  }, [sessionMessages.length, isSending, stage, runtime?.overallProgress]);
 
   const sendMessage = async () => {
     const text = input.trim();
@@ -130,11 +159,34 @@ export default function ChatPage() {
     setIsSending(true);
 
     try {
-      await runChatOrchestration(sessionId, text);
+      await runChatOrchestration(sessionId, text, {
+        language: selectedLanguage,
+      });
     } finally {
       setIsSending(false);
     }
   };
+
+  const sendNote = () => {
+    const note = noteInput.trim();
+    if (!note || !sessionId) {
+      return;
+    }
+
+    const runningTask = runtime?.tasks.find((task) => task.status === "running");
+    addRuntimeNote(sessionId, note, runningTask?.id);
+
+    addMessage(
+      createMessage(sessionId, "system", `Nota enviada: ${note}`, {
+        note: true,
+      })
+    );
+
+    setNoteInput("");
+  };
+
+  const liveProgress = runtime?.overallProgress ?? progress;
+  const showLiveRuntimeBubble = Boolean(runtime?.isRunning) && !isSending;
 
   return (
     <div className="mx-auto flex h-[calc(100vh-130px)] w-full max-w-6xl flex-col px-4 pb-6 pt-4 md:px-6">
@@ -166,12 +218,12 @@ export default function ChatPage() {
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
           <div
             className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${liveProgress}%` }}
           />
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
         <section className="min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl">
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
@@ -179,13 +231,27 @@ export default function ChatPage() {
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
                   <Sparkles className="h-5 w-5 text-neon-cyan/80" />
                   <p className="text-sm text-white/55">
-                    Envie sua primeira mensagem para disparar o fluxo completo.
+                    Envie sua primeira mensagem para disparar delegacao de contexto, projeto, agentes e grupos.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {sessionMessages.map((message) => {
                     const isUser = message.role === "user";
+                    const isNote = message.role === "system" && isNoteMessage(message.metadata);
+
+                    if (isNote) {
+                      return (
+                        <div key={message.id} className="flex justify-center">
+                          <div className="max-w-[88%] rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2">
+                            <p className="text-xs text-amber-100/90">{message.content}</p>
+                            <span className="mt-1 block text-[10px] text-amber-100/55">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
 
                     return (
                       <div
@@ -204,10 +270,9 @@ export default function ChatPage() {
                           )}
                         >
                           <p className="text-sm leading-relaxed">{message.content}</p>
-                          {!isUser &&
-                            shouldRenderDistribution(message.metadata) && (
-                              <RealtimeDistributionBubble />
-                            )}
+                          {!isUser && shouldRenderDistribution(message.metadata) && (
+                            <RealtimeDistributionBubble sessionId={sessionId} />
+                          )}
                           <span className="mt-2 block text-[10px] text-white/35">
                             {formatMessageTime(message.createdAt)}
                           </span>
@@ -218,9 +283,30 @@ export default function ChatPage() {
 
                   {isSending && (
                     <div className="flex justify-start">
-                      <div className="inline-flex items-center gap-2 rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-2.5 text-xs text-white/65">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
-                        Processando contexto, agentes e grupos...
+                      <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
+                        <div className="inline-flex items-center gap-2 text-xs text-white/65">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
+                          Processando e delegando em tempo real...
+                        </div>
+                        <RealtimeDistributionBubble
+                          sessionId={sessionId}
+                          showTaskList={false}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {showLiveRuntimeBubble && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
+                        <div className="inline-flex items-center gap-2 text-xs text-white/65">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
+                          Distribuicao em execucao...
+                        </div>
+                        <RealtimeDistributionBubble
+                          sessionId={sessionId}
+                          showTaskList={false}
+                        />
                       </div>
                     </div>
                   )}
@@ -258,26 +344,120 @@ export default function ChatPage() {
           </div>
         </section>
 
-        <aside className="hidden min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl lg:flex lg:flex-col">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
-            Estado Global
-          </p>
-          <p className="mt-1 text-sm text-white/65">
-            Distribuicao sincronizada com o chat.
-          </p>
+        <aside className="min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                Controle da Execucao
+              </p>
+              <p className="mt-1 text-sm text-white/65">
+                Ajuste linguagem, prioridade e notas durante o processamento.
+              </p>
+            </div>
 
-          <div className="mt-4 space-y-2.5">
-            <div className="rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs text-white/70">
-              Contextos: {contextCount}
+            <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+              <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+                Linguagem da resposta
+              </label>
+              <select
+                value={selectedLanguage}
+                onChange={(e) =>
+                  setLanguage(sessionId, e.target.value as RuntimeLanguage)
+                }
+                className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white outline-none"
+              >
+                {LANGUAGE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs text-white/70">
-              Projetos: {projectCount}
+
+            <div className="mb-3 min-h-0 flex-1 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wide text-white/35">
+                  Prioridade das funcoes (drag and drop)
+                </p>
+                <span className="text-[10px] text-white/30">
+                  {runtime?.tasks.length ?? 0} itens
+                </span>
+              </div>
+
+              <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
+                {runtime?.tasks.length ? (
+                  runtime.tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      draggable
+                      onDragStart={() => setDraggedTaskId(task.id)}
+                      onDragEnd={() => setDraggedTaskId(null)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => {
+                        if (!draggedTaskId) {
+                          return;
+                        }
+                        reorderTasks(sessionId, draggedTaskId, task.id);
+                        setDraggedTaskId(null);
+                      }}
+                      className="cursor-grab rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 active:cursor-grabbing"
+                    >
+                      <div className="flex items-start gap-2">
+                        <GripVertical className="mt-0.5 h-3.5 w-3.5 text-white/30" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[11px] text-white/80">
+                            {task.priority}. {task.title}
+                          </p>
+                          <p className="text-[10px] text-white/40">
+                            {task.agentName} · {getTaskStatusLabel(task.status)} · {task.progress}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-white/40">
+                    As funcoes delegadas aparecerao aqui assim que voce enviar a mensagem.
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs text-white/70">
-              Agentes: {agentCount}
-            </div>
-            <div className="rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-xs text-white/70">
-              Grupos: {groupCount}
+
+            <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
+              <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+                Notas para execucao
+              </label>
+              <textarea
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="Ex: priorize seguranca e responda com exemplos"
+                className="h-20 w-full resize-none rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white placeholder:text-white/25 outline-none"
+              />
+              <button
+                type="button"
+                onClick={sendNote}
+                disabled={!noteInput.trim()}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/25 bg-amber-300/10 px-2.5 py-1.5 text-xs font-medium text-amber-200 transition-all hover:border-amber-300/45 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <MessageSquarePlus className="h-3.5 w-3.5" />
+                Enviar nota
+              </button>
+
+              {runtime?.notes.length ? (
+                <div className="mt-2 space-y-1.5 border-t border-white/[0.06] pt-2">
+                  {runtime.notes
+                    .slice(-3)
+                    .reverse()
+                    .map((note) => (
+                      <div
+                        key={note.id}
+                        className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1"
+                      >
+                        <p className="text-[11px] text-white/70">{note.text}</p>
+                      </div>
+                    ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </aside>

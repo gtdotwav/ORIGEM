@@ -9,9 +9,15 @@ import type {
   TokenAnalysis,
 } from "@/types/decomposition";
 import type { Message, Session } from "@/types/session";
+import type {
+  RuntimeFunctionKey,
+  RuntimeLanguage,
+  RuntimeTask,
+} from "@/types/runtime";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
 
 interface MetricSnapshot {
@@ -19,6 +25,10 @@ interface MetricSnapshot {
   projects: number;
   agents: number;
   groups: number;
+}
+
+interface OrchestrationRunOptions {
+  language?: RuntimeLanguage;
 }
 
 const AGENT_BLUEPRINTS: Record<
@@ -83,6 +93,71 @@ const DOMAIN_KEYWORDS: Record<string, string[]> = {
   data: ["dados", "dataset", "analytics", "etl", "pipeline"],
   ai: ["ai", "agent", "modelo", "llm", "prompt", "chat"],
   product: ["produto", "roadmap", "projeto", "feature"],
+};
+
+const STAGE_BY_FUNCTION: Record<
+  RuntimeFunctionKey,
+  "decomposing" | "routing" | "spawning" | "executing" | "aggregating"
+> = {
+  contexts: "decomposing",
+  projects: "routing",
+  agents: "spawning",
+  groups: "executing",
+  aggregation: "aggregating",
+};
+
+const TASK_TEMPLATES: Array<{
+  functionKey: RuntimeFunctionKey;
+  labels: Record<RuntimeLanguage, string>;
+}> = [
+  {
+    functionKey: "contexts",
+    labels: {
+      "pt-BR": "Mapear contexto semantico",
+      "en-US": "Map semantic context",
+      "es-ES": "Mapear contexto semántico",
+    },
+  },
+  {
+    functionKey: "projects",
+    labels: {
+      "pt-BR": "Definir objetivo de projeto",
+      "en-US": "Define project objective",
+      "es-ES": "Definir objetivo del proyecto",
+    },
+  },
+  {
+    functionKey: "agents",
+    labels: {
+      "pt-BR": "Delegar funcoes para agentes",
+      "en-US": "Delegate functions to agents",
+      "es-ES": "Delegar funciones a agentes",
+    },
+  },
+  {
+    functionKey: "groups",
+    labels: {
+      "pt-BR": "Sincronizar grupos de execucao",
+      "en-US": "Synchronize execution groups",
+      "es-ES": "Sincronizar grupos de ejecución",
+    },
+  },
+  {
+    functionKey: "aggregation",
+    labels: {
+      "pt-BR": "Agregacao e resposta final",
+      "en-US": "Aggregate and deliver final answer",
+      "es-ES": "Agregar y entregar respuesta final",
+    },
+  },
+];
+
+const FUNCTION_AGENT_PREFERENCE: Record<RuntimeFunctionKey, string[]> = {
+  contexts: ["Researcher", "Analyst", "Planner"],
+  projects: ["Planner", "Builder", "Operator"],
+  agents: ["Builder", "Operator", "Designer", "Debugger"],
+  groups: ["Critic", "Judge", "Synthesizer"],
+  aggregation: ["Synthesizer", "Editor", "Analyst", "Planner"],
 };
 
 function delay(ms: number) {
@@ -371,7 +446,7 @@ function ensureAgentsForSession(
   const group: AgentGroup = {
     id: createId("group"),
     sessionId,
-    name: `${toSessionTitle(intent)} workflow`,
+    name: `${intent} workflow`,
     strategy: mappedStrategy,
     agentIds: agents.map((agent) => agent.id),
     createdAt: now,
@@ -382,21 +457,6 @@ function ensureAgentsForSession(
   return {
     agents,
     group,
-  };
-}
-
-function createAgentOutput(
-  sessionId: string,
-  agent: AgentInstance,
-  prompt: string
-): AgentOutput {
-  return {
-    id: createId("output"),
-    agentId: agent.id,
-    sessionId,
-    type: "thought",
-    content: `${agent.name} processou: ${prompt.slice(0, 120)}`,
-    createdAt: new Date(),
   };
 }
 
@@ -413,42 +473,164 @@ function getMetricSnapshot(): MetricSnapshot {
   };
 }
 
-function buildAssistantResponse(
+function pickAgentForFunction(
+  agents: AgentInstance[],
+  functionKey: RuntimeFunctionKey,
+  usedAgentIds: Set<string>
+): AgentInstance {
+  const preferredNames = FUNCTION_AGENT_PREFERENCE[functionKey] ?? [];
+
+  for (const name of preferredNames) {
+    const preferredAgent = agents.find(
+      (agent) => agent.name === name && !usedAgentIds.has(agent.id)
+    );
+
+    if (preferredAgent) {
+      usedAgentIds.add(preferredAgent.id);
+      return preferredAgent;
+    }
+  }
+
+  const fallbackUnused = agents.find((agent) => !usedAgentIds.has(agent.id));
+  if (fallbackUnused) {
+    usedAgentIds.add(fallbackUnused.id);
+    return fallbackUnused;
+  }
+
+  return agents[0];
+}
+
+function createRuntimeTasks(
+  agents: AgentInstance[],
+  language: RuntimeLanguage
+): RuntimeTask[] {
+  const usedAgentIds = new Set<string>();
+
+  return TASK_TEMPLATES.map((template, index) => {
+    const agent = pickAgentForFunction(agents, template.functionKey, usedAgentIds);
+
+    return {
+      id: createId("task"),
+      title: template.labels[language],
+      functionKey: template.functionKey,
+      agentId: agent.id,
+      agentName: agent.name,
+      priority: index + 1,
+      status: "pending",
+      progress: 0,
+      notes: [],
+    };
+  });
+}
+
+function createAgentOutput(
+  sessionId: string,
+  agent: AgentInstance,
+  task: RuntimeTask,
   prompt: string,
+  language: RuntimeLanguage
+): AgentOutput {
+  const languageName =
+    language === "en-US"
+      ? "English"
+      : language === "es-ES"
+      ? "Espanol"
+      : "Portugues";
+
+  return {
+    id: createId("output"),
+    agentId: agent.id,
+    sessionId,
+    type: "thought",
+    content: `${task.title} executada por ${agent.name} em ${languageName}: ${prompt.slice(0, 120)}${prompt.length > 120 ? "..." : ""}`,
+    metadata: {
+      functionKey: task.functionKey,
+      language,
+      taskId: task.id,
+    },
+    createdAt: new Date(),
+  };
+}
+
+function buildAssistantResponse(
+  language: RuntimeLanguage,
   intent: Intent,
-  agentCount: number,
-  strategy: AgentGroup["strategy"],
-  metrics: MetricSnapshot
+  metrics: MetricSnapshot,
+  tasks: RuntimeTask[],
+  noteCount: number
 ) {
+  const assignments = tasks
+    .map((task) => `${task.title} -> ${task.agentName}`)
+    .join(" | ");
+
+  if (language === "en-US") {
+    return [
+      `Intent detected: ${intent}.`,
+      `Real-time orchestration completed with delegated functions per agent.`,
+      `Assignments: ${assignments}.`,
+      `Live distribution: contexts ${metrics.contexts}, projects ${metrics.projects}, agents ${metrics.agents}, groups ${metrics.groups}.`,
+      `Notes received during execution: ${noteCount}.`,
+    ].join(" ");
+  }
+
+  if (language === "es-ES") {
+    return [
+      `Intencion detectada: ${intent}.`,
+      `La orquestacion en tiempo real finalizo con delegacion por agente.`,
+      `Asignaciones: ${assignments}.`,
+      `Distribucion viva: contextos ${metrics.contexts}, proyectos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
+      `Notas recibidas durante la ejecucion: ${noteCount}.`,
+    ].join(" ");
+  }
+
   return [
     `Intencao detectada: ${intent}.`,
-    `Pipeline executado com ${agentCount} agentes em estrategia ${strategy}.`,
-    `Contexto processado: \"${prompt.slice(0, 120)}${prompt.length > 120 ? "..." : ""}\".`,
-    `Distribuicao atual -> contextos: ${metrics.contexts}, projetos: ${metrics.projects}, agentes: ${metrics.agents}, grupos: ${metrics.groups}.`,
+    `Orquestracao em tempo real concluida com delegacao por agente.`,
+    `Delegacoes: ${assignments}.`,
+    `Distribuicao ao vivo: contextos ${metrics.contexts}, projetos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
+    `Notas recebidas durante a execucao: ${noteCount}.`,
   ].join(" ");
+}
+
+function getPipelineProgressFromRuntime(sessionId: string) {
+  const runtimeStore = useRuntimeStore.getState();
+  const runtime = runtimeStore.getSession(sessionId);
+
+  return runtime?.overallProgress ?? 0;
 }
 
 export async function runChatOrchestration(
   sessionId: string,
-  prompt: string
+  prompt: string,
+  options?: OrchestrationRunOptions
 ): Promise<void> {
   const pipelineStore = usePipelineStore.getState();
   const sessionStore = useSessionStore.getState();
   const decompositionStore = useDecompositionStore.getState();
   const agentStore = useAgentStore.getState();
+  const runtimeStore = useRuntimeStore.getState();
+
+  runtimeStore.ensureSession(sessionId);
+
+  const selectedLanguage =
+    options?.language ?? runtimeStore.getSession(sessionId)?.language ?? "pt-BR";
+
+  runtimeStore.setLanguage(sessionId, selectedLanguage);
+  runtimeStore.setDistributionReady(sessionId, false);
+  runtimeStore.setRunning(sessionId, true);
 
   pipelineStore.setStage("intake");
-  pipelineStore.setProgress(12);
+  pipelineStore.setProgress(8);
   pipelineStore.addEvent({
     type: "stage_change",
     data: { stage: "intake", sessionId },
     timestamp: Date.now(),
   });
 
-  await delay(140);
+  await delay(120);
 
   pipelineStore.setStage("decomposing");
-  pipelineStore.setProgress(36);
+  pipelineStore.setProgress(20);
 
   const decomposition = buildDecomposition(prompt);
   decompositionStore.addDecomposition(decomposition);
@@ -461,90 +643,127 @@ export async function runChatOrchestration(
     timestamp: Date.now(),
   });
 
-  await delay(140);
-
-  pipelineStore.setStage("routing");
-  pipelineStore.setProgress(58);
+  await delay(120);
 
   const { agents, group } = ensureAgentsForSession(
     sessionId,
     decomposition.intent.primary
   );
 
+  const runId = createId("run");
+  const tasks = createRuntimeTasks(agents, selectedLanguage);
+  runtimeStore.startRun(sessionId, runId, tasks, selectedLanguage);
+
+  pipelineStore.setStage("routing");
+  pipelineStore.setProgress(28);
   pipelineStore.addEvent({
     type: "routing",
     data: {
       groupId: group.id,
       strategy: group.strategy,
       agentCount: agents.length,
+      runId,
     },
     timestamp: Date.now(),
   });
 
-  await delay(120);
+  for (;;) {
+    const runtime = runtimeStore.getSession(sessionId);
+    const nextTask = runtime?.tasks.find((task) => task.status === "pending");
 
-  pipelineStore.setStage("spawning");
-  pipelineStore.setProgress(72);
+    if (!runtime || !nextTask) {
+      break;
+    }
 
-  agents.forEach((agent) => {
-    agentStore.updateAgent(agent.id, {
-      status: "working",
-      updatedAt: new Date(),
+    const stage = STAGE_BY_FUNCTION[nextTask.functionKey];
+    pipelineStore.setStage(stage);
+    runtimeStore.updateTask(sessionId, nextTask.id, {
+      status: "running",
+      progress: Math.max(nextTask.progress, 6),
     });
-    pipelineStore.addEvent({
-      type: "agent_spawned",
-      data: {
-        agentId: agent.id,
-        name: agent.name,
-      },
-      timestamp: Date.now(),
-    });
-  });
 
-  await delay(120);
+    const currentAgent = agents.find((agent) => agent.id === nextTask.agentId);
+    if (currentAgent) {
+      agentStore.updateAgent(currentAgent.id, {
+        status: "working",
+        updatedAt: new Date(),
+      });
+    }
 
-  pipelineStore.setStage("executing");
-  pipelineStore.setProgress(84);
+    for (const step of [22, 46, 68, 86, 100]) {
+      await delay(90);
+      runtimeStore.updateTask(sessionId, nextTask.id, {
+        progress: step,
+      });
 
-  agents.forEach((agent) => {
-    const output = createAgentOutput(sessionId, agent, prompt);
-    agentStore.addOutput(agent.id, output);
-    agentStore.updateAgent(agent.id, {
+      pipelineStore.setProgress(
+        Math.max(10, getPipelineProgressFromRuntime(sessionId))
+      );
+    }
+
+    runtimeStore.updateTask(sessionId, nextTask.id, {
       status: "done",
-      updatedAt: new Date(),
+      progress: 100,
     });
 
-    pipelineStore.addEvent({
-      type: "agent_output",
-      data: {
-        agentId: agent.id,
-        outputId: output.id,
-      },
-      timestamp: Date.now(),
-    });
-  });
+    if (currentAgent) {
+      const output = createAgentOutput(
+        sessionId,
+        currentAgent,
+        nextTask,
+        prompt,
+        selectedLanguage
+      );
 
-  await delay(120);
+      agentStore.addOutput(currentAgent.id, output);
+      agentStore.updateAgent(currentAgent.id, {
+        status: "done",
+        updatedAt: new Date(),
+      });
+
+      pipelineStore.addEvent({
+        type: "agent_output",
+        data: {
+          agentId: currentAgent.id,
+          outputId: output.id,
+          functionKey: nextTask.functionKey,
+          runId,
+        },
+        timestamp: Date.now(),
+      });
+    }
+
+    pipelineStore.setProgress(
+      Math.max(12, getPipelineProgressFromRuntime(sessionId))
+    );
+  }
+
+  runtimeStore.completeRun(sessionId);
 
   pipelineStore.setStage("aggregating");
-  pipelineStore.setProgress(95);
+  pipelineStore.setProgress(96);
 
   const metrics = getMetricSnapshot();
+  const finalRuntime = runtimeStore.getSession(sessionId);
+  const finalTasks = finalRuntime?.tasks ?? [];
+  const noteCount = finalRuntime?.notes.length ?? 0;
 
   const assistantMessage = createMessage(
     sessionId,
     "assistant",
     buildAssistantResponse(
-      prompt,
+      selectedLanguage,
       decomposition.intent.primary,
-      agents.length,
-      group.strategy,
-      metrics
+      metrics,
+      finalTasks,
+      noteCount
     ),
     {
       includeDistribution: true,
       intent: decomposition.intent.primary,
       strategy: group.strategy,
+      language: selectedLanguage,
+      runId,
     }
   );
 
@@ -558,12 +777,15 @@ export async function runChatOrchestration(
     data: {
       sessionId,
       assistantMessageId: assistantMessage.id,
+      runId,
     },
     timestamp: Date.now(),
   });
 
   pipelineStore.setStage("complete");
   pipelineStore.setProgress(100);
+
+  runtimeStore.setRunning(sessionId, false);
 
   setTimeout(() => {
     const latest = usePipelineStore.getState();
