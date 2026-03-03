@@ -59,7 +59,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-between px-4 py-8">
+    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-[40%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/12 blur-[90px]" />
+        <div className="absolute left-[55%] top-[58%] h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/10 blur-[90px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.55)_78%)]" />
+      </div>
+
       <div className="w-full max-w-[640px] pb-2 text-right">
         <Link
           href="/dashboard/control"
@@ -75,6 +81,7 @@ export default function DashboardPage() {
 
       {/* Central chat card */}
       <div className="relative z-10 flex w-full max-w-[640px] flex-col items-center">
+        <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-cyan-300/10 bg-cyan-300/5 blur-2xl" />
         <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/80 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
