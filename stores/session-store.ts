@@ -13,6 +13,7 @@ interface SessionState {
   setCurrentSession: (id: string | null) => void;
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
+  getMessagesBySession: (sessionId: string) => Message[];
   updateSession: (id: string, updates: Partial<Session>) => void;
   removeSession: (id: string) => void;
   setLoading: (loading: boolean) => void;
@@ -20,7 +21,7 @@ interface SessionState {
 
 export const useSessionStore = create<SessionState>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       sessions: [],
       currentSessionId: null,
       messages: [],
@@ -33,6 +34,14 @@ export const useSessionStore = create<SessionState>()(
       setMessages: (messages) => set({ messages }),
       addMessage: (message) =>
         set((s) => ({ messages: [...s.messages, message] })),
+      getMessagesBySession: (sessionId) =>
+        get()
+          .messages.filter((message) => message.sessionId === sessionId)
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() -
+              new Date(b.createdAt).getTime()
+          ),
       updateSession: (id, updates) =>
         set((s) => ({
           sessions: s.sessions.map((sess) =>
@@ -42,6 +51,7 @@ export const useSessionStore = create<SessionState>()(
       removeSession: (id) =>
         set((s) => ({
           sessions: s.sessions.filter((sess) => sess.id !== id),
+          messages: s.messages.filter((message) => message.sessionId !== id),
           currentSessionId:
             s.currentSessionId === id ? null : s.currentSessionId,
         })),

@@ -1,11 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   ImageIcon,
   Settings,
   Atom,
+  Send,
 } from "lucide-react";
+import { useSessionStore } from "@/stores/session-store";
+import {
+  createId,
+  createMessage,
+  createSession,
+  runChatOrchestration,
+} from "@/lib/chat-orchestrator";
 
 const SUGGESTIONS = [
   "Decompose a concept",
@@ -16,11 +25,40 @@ const SUGGESTIONS = [
 
 export default function DashboardPage() {
   const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const addSession = useSessionStore((s) => s.addSession);
+  const addMessage = useSessionStore((s) => s.addMessage);
+  const setCurrentSession = useSessionStore((s) => s.setCurrentSession);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  const startSessionFromHome = async () => {
+    const text = input.trim();
+    if (!text || sending) {
+      return;
+    }
+
+    const sessionId = createId("session");
+    const session = createSession(sessionId, text);
+
+    addSession(session);
+    setCurrentSession(sessionId);
+    addMessage(createMessage(sessionId, "user", text));
+    setInput("");
+    setSending(true);
+
+    router.push(`/dashboard/chat/${sessionId}`);
+
+    try {
+      await runChatOrchestration(sessionId, text);
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-between px-4 py-8">
@@ -52,8 +90,9 @@ export default function DashboardPage() {
               placeholder="Ask me anything..."
               className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
               onKeyDown={(e) => {
-                if (e.key === "Enter" && input.trim()) {
-                  // Will navigate to chat session
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void startSessionFromHome();
                 }
               }}
             />
@@ -62,7 +101,7 @@ export default function DashboardPage() {
           {/* Controls row */}
           <div className="mb-4 flex items-center justify-between">
             <span className="text-xs text-white/30">ORIGEM 1.0</span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
@@ -74,6 +113,15 @@ export default function DashboardPage() {
                 className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
               >
                 <Settings className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => void startSessionFromHome()}
+                disabled={!input.trim() || sending}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {sending ? "Enviando..." : "Enviar"}
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Brain,
   Sparkles,
@@ -49,7 +49,16 @@ interface ProviderCardState {
   selectedModel: string;
   showKey: boolean;
   status: "idle" | "testing" | "success" | "error";
+  saveStatus: "idle" | "saving" | "saved" | "error";
+  isDirty: boolean;
 }
+
+interface StoredProviderSettings {
+  apiKey: string;
+  selectedModel: string;
+}
+
+const STORAGE_KEY = "origem-provider-settings-v1";
 
 export default function ProvidersPage() {
   const [states, setStates] = useState<
@@ -62,6 +71,8 @@ export default function ProvidersPage() {
         selectedModel: provider.models[0]?.id ?? "",
         showKey: false,
         status: "idle",
+        saveStatus: "idle",
+        isDirty: false,
       };
     }
     return initial;
@@ -77,10 +88,80 @@ export default function ProvidersPage() {
     }));
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<
+        Record<ProviderName, StoredProviderSettings>
+      >;
+
+      setStates((prev) => {
+        const next = { ...prev };
+        for (const provider of PROVIDER_CATALOG) {
+          const saved = parsed[provider.name];
+          if (!saved) {
+            continue;
+          }
+          next[provider.name] = {
+            ...next[provider.name],
+            apiKey: saved.apiKey ?? "",
+            selectedModel:
+              saved.selectedModel ||
+              provider.models[0]?.id ||
+              next[provider.name].selectedModel,
+            isDirty: false,
+            saveStatus: "saved",
+          };
+        }
+        return next;
+      });
+    } catch {
+      // Ignore invalid persisted data and keep defaults.
+    }
+  }, []);
+
+  const saveProviderConfig = async (name: ProviderName) => {
+    updateState(name, { saveStatus: "saving" });
+
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const parsed = raw
+        ? (JSON.parse(raw) as Partial<
+            Record<ProviderName, StoredProviderSettings>
+          >)
+        : {};
+
+      const next: Partial<Record<ProviderName, StoredProviderSettings>> = {
+        ...parsed,
+        [name]: {
+          apiKey: states[name].apiKey,
+          selectedModel: states[name].selectedModel,
+        },
+      };
+
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      updateState(name, {
+        isDirty: false,
+        saveStatus: "saved",
+      });
+    } catch {
+      updateState(name, { saveStatus: "error" });
+    }
+  };
+
   const testConnection = async (name: ProviderName) => {
+    const apiKey = states[name].apiKey;
     updateState(name, { status: "testing" });
     await new Promise((r) => setTimeout(r, 1500));
-    const hasKey = states[name].apiKey.length > 10;
+    const hasKey = apiKey.length > 10;
     updateState(name, {
       status: hasKey ? "success" : "error",
     });
@@ -163,6 +244,8 @@ export default function ProvidersPage() {
                       updateState(provider.name, {
                         apiKey: e.target.value,
                         status: "idle",
+                        saveStatus: "idle",
+                        isDirty: true,
                       })
                     }
                     placeholder="sk-..."
@@ -196,6 +279,8 @@ export default function ProvidersPage() {
                   onValueChange={(v) =>
                     updateState(provider.name, {
                       selectedModel: v,
+                      saveStatus: "idle",
+                      isDirty: true,
                     })
                   }
                 >
@@ -216,31 +301,63 @@ export default function ProvidersPage() {
                 </Select>
               </div>
 
-              {/* Test Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 border-white/[0.06] bg-white/[0.03] text-xs text-white/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
-                onClick={() => testConnection(provider.name)}
-                disabled={
-                  !state.apiKey || state.status === "testing"
-                }
-              >
-                {state.status === "testing" ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : state.status === "success" ? (
-                  <CheckCircle2 className="h-3 w-3 text-green-400" />
-                ) : state.status === "error" ? (
-                  <XCircle className="h-3 w-3 text-red-400" />
-                ) : null}
-                {state.status === "testing"
-                  ? "Testing..."
-                  : state.status === "success"
-                    ? "Connected"
-                    : state.status === "error"
-                      ? "Failed — Retry"
-                      : "Test Connection"}
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-neon-cyan/25 bg-neon-cyan/10 text-xs text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/20 hover:text-neon-cyan"
+                  onClick={() => void saveProviderConfig(provider.name)}
+                  disabled={!state.apiKey || state.saveStatus === "saving"}
+                >
+                  {state.saveStatus === "saving" && (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  )}
+                  {state.saveStatus === "saved" && !state.isDirty && (
+                    <CheckCircle2 className="h-3 w-3 text-green-400" />
+                  )}
+                  {state.saveStatus === "error" && (
+                    <XCircle className="h-3 w-3 text-red-400" />
+                  )}
+                  {state.saveStatus === "saving"
+                    ? "Salvando..."
+                    : state.saveStatus === "saved" && !state.isDirty
+                      ? "Salvo"
+                      : state.saveStatus === "error"
+                        ? "Falhou"
+                        : "Salvar Key"}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-white/[0.06] bg-white/[0.03] text-xs text-white/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
+                  onClick={() => testConnection(provider.name)}
+                  disabled={!state.apiKey || state.status === "testing"}
+                >
+                  {state.status === "testing" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : state.status === "success" ? (
+                    <CheckCircle2 className="h-3 w-3 text-green-400" />
+                  ) : state.status === "error" ? (
+                    <XCircle className="h-3 w-3 text-red-400" />
+                  ) : null}
+                  {state.status === "testing"
+                    ? "Testing..."
+                    : state.status === "success"
+                      ? "Connected"
+                      : state.status === "error"
+                        ? "Failed — Retry"
+                        : "Test Connection"}
+                </Button>
+              </div>
+
+              <p className="mt-2 text-[10px] text-white/35">
+                {state.isDirty
+                  ? "Alteracoes pendentes. Clique em Salvar Key."
+                  : state.saveStatus === "saved"
+                    ? "Configuracao persistida localmente."
+                    : "Chave salva apenas apos confirmar no botao."}
+              </p>
             </div>
           );
         })}
