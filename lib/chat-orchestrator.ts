@@ -461,16 +461,51 @@ function ensureAgentsForSession(
   };
 }
 
-function getMetricSnapshot(): MetricSnapshot {
-  const decompositions = useDecompositionStore.getState().decompositions;
-  const sessions = useSessionStore.getState().sessions;
+function getSessionMetricSnapshot(
+  sessionId: string,
+  decompositionId: string,
+  tasks: RuntimeTask[]
+): MetricSnapshot {
+  const decompositionState = useDecompositionStore.getState();
+  const sessionState = useSessionStore.getState();
   const agentState = useAgentStore.getState();
 
+  const sessionMessages = sessionState.messages.filter(
+    (message) => message.sessionId === sessionId
+  );
+  const decompositionIds = new Set<string>();
+
+  for (const message of sessionMessages) {
+    if (message.decompositionId) {
+      decompositionIds.add(message.decompositionId);
+    }
+    const metadataDecompositionId = message.metadata?.decompositionId;
+    if (typeof metadataDecompositionId === "string") {
+      decompositionIds.add(metadataDecompositionId);
+    }
+  }
+
+  if (decompositionState.decompositions[decompositionId]) {
+    decompositionIds.add(decompositionId);
+  }
+
+  const sessionAgents = agentState.agents.filter(
+    (agent) => agent.sessionId === sessionId
+  );
+  const sessionGroups = agentState.groups.filter(
+    (group) => group.sessionId === sessionId
+  );
+
   return {
-    contexts: Object.keys(decompositions).length,
-    projects: sessions.length,
-    agents: agentState.agents.length,
-    groups: agentState.groups.length,
+    contexts: Math.max(decompositionIds.size, 1),
+    projects: sessionState.sessions.some((session) => session.id === sessionId)
+      ? 1
+      : 0,
+    agents: Math.max(
+      sessionAgents.length,
+      new Set(tasks.map((task) => task.agentId)).size
+    ),
+    groups: Math.max(sessionGroups.length, 1),
   };
 }
 
@@ -558,15 +593,23 @@ function buildKickoffMessage(
   intent: Intent,
   tasks: RuntimeTask[]
 ) {
-  const assignmentLines = tasks
-    .map((task, index) => `${index + 1}. ${task.title} -> ${task.agentName}`)
-    .join("\n");
+  const assignmentLines =
+    tasks.length > 0
+      ? tasks
+          .map((task, index) => `${index + 1}. ${task.title} -> ${task.agentName}`)
+          .join("\n")
+      : language === "en-US"
+      ? "Delegation is being rebuilt."
+      : language === "es-ES"
+      ? "La delegacion se esta reconstruyendo."
+      : "A delegacao esta sendo reconstruida.";
 
   if (language === "en-US") {
     return [
       `Great. I understood your request with intent: ${intent}.`,
       `I will execute everything inside this chat and stream progress in real time.`,
       `Execution plan by delegated function:\n${assignmentLines}`,
+      `Didactic path in progress: Contexts -> Agents -> Projects -> Groups -> Flows -> Orchestra.`,
       `While I work, you can reorder priorities, send notes, and adjust response language.`,
     ].join("\n\n");
   }
@@ -576,6 +619,7 @@ function buildKickoffMessage(
       `Perfecto. Entendi tu solicitud con intencion: ${intent}.`,
       `Voy a ejecutar todo aqui en el chat y mostrar progreso en tiempo real.`,
       `Plan de ejecucion por funcion delegada:\n${assignmentLines}`,
+      `Ruta didactica activa: Contextos -> Agentes -> Proyectos -> Grupos -> Flujos -> Orquestra.`,
       `Mientras ejecuto, puedes cambiar prioridades, enviar notas y ajustar el idioma de respuesta.`,
     ].join("\n\n");
   }
@@ -584,8 +628,41 @@ function buildKickoffMessage(
     `Perfeito. Entendi sua solicitacao com intencao: ${intent}.`,
     `Vou desenvolver aqui no chat e mostrar progresso em tempo real.`,
     `Plano de execucao por funcao delegada:\n${assignmentLines}`,
+    `Trilha didatica ativa: Contextos -> Agentes -> Projetos -> Grupos -> Fluxos -> Orquestra.`,
     `Enquanto executo, voce pode reordenar prioridades, enviar notas e alterar a linguagem da resposta.`,
   ].join("\n\n");
+}
+
+function buildTaskCheckpointMessage(
+  language: RuntimeLanguage,
+  task: RuntimeTask,
+  doneCount: number,
+  totalCount: number
+) {
+  if (language === "en-US") {
+    return [
+      `Step ${doneCount}/${totalCount} completed.`,
+      `Function: ${task.title}.`,
+      `Responsible agent: ${task.agentName}.`,
+      `Continuing to the next delegated function.`,
+    ].join(" ");
+  }
+
+  if (language === "es-ES") {
+    return [
+      `Paso ${doneCount}/${totalCount} completado.`,
+      `Funcion: ${task.title}.`,
+      `Agente responsable: ${task.agentName}.`,
+      `Continuando para la siguiente funcion delegada.`,
+    ].join(" ");
+  }
+
+  return [
+    `Etapa ${doneCount}/${totalCount} concluida.`,
+    `Funcao: ${task.title}.`,
+    `Agente responsavel: ${task.agentName}.`,
+    `Seguindo para a proxima funcao delegada.`,
+  ].join(" ");
 }
 
 function buildAssistantResponse(
@@ -596,15 +673,35 @@ function buildAssistantResponse(
   noteCount: number,
   nextStepLabel: string | null
 ) {
-  const assignments = tasks
-    .map((task) => `${task.title} -> ${task.agentName}`)
-    .join(" | ");
+  const assignments =
+    tasks.length > 0
+      ? tasks.map((task) => `${task.title} -> ${task.agentName}`).join(" | ")
+      : language === "en-US"
+      ? "Delegation was rebuilt during execution."
+      : language === "es-ES"
+      ? "La delegacion fue reconstruida durante la ejecucion."
+      : "A delegacao foi reconstruida durante a execucao.";
+
+  const taskSummary =
+    tasks.length > 0
+      ? tasks
+          .map((task, index) => {
+            const status = task.status === "done" ? "OK" : task.status.toUpperCase();
+            return `${index + 1}. ${task.title} [${task.agentName}] - ${status}`;
+          })
+          .join("\n")
+      : language === "en-US"
+      ? "No task summary available."
+      : language === "es-ES"
+      ? "No hay resumen de tareas disponible."
+      : "Nao ha resumo de tarefas disponivel.";
 
   if (language === "en-US") {
     return [
       `Execution complete. Intent detected: ${intent}.`,
       `Every function was delegated and executed by the proper agent directly in this chat.`,
       `Delegation map: ${assignments}.`,
+      `Task-by-task trace:\n${taskSummary}`,
       `Live distribution now: contexts ${metrics.contexts}, projects ${metrics.projects}, agents ${metrics.agents}, groups ${metrics.groups}.`,
       `Notes received during execution: ${noteCount}.`,
       nextStepLabel
@@ -618,6 +715,7 @@ function buildAssistantResponse(
       `Ejecucion completada. Intencion detectada: ${intent}.`,
       `Cada funcion fue delegada y ejecutada por su agente dentro del chat.`,
       `Mapa de delegacion: ${assignments}.`,
+      `Trazado por tareas:\n${taskSummary}`,
       `Distribucion en vivo: contextos ${metrics.contexts}, proyectos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
       `Notas recibidas durante la ejecucion: ${noteCount}.`,
       nextStepLabel
@@ -630,6 +728,7 @@ function buildAssistantResponse(
     `Execucao concluida. Intencao detectada: ${intent}.`,
     `Cada funcao foi delegada e executada pelo agente certo, aqui no chat.`,
     `Mapa de delegacao: ${assignments}.`,
+    `Rastro por tarefa:\n${taskSummary}`,
     `Distribuicao ao vivo agora: contextos ${metrics.contexts}, projetos ${metrics.projects}, agentes ${metrics.agents}, grupos ${metrics.groups}.`,
     `Notas recebidas durante a execucao: ${noteCount}.`,
     nextStepLabel
@@ -731,7 +830,12 @@ export async function runChatOrchestration(
   });
 
   for (;;) {
-    const runtime = runtimeStore.getSession(sessionId);
+    let runtime = runtimeStore.getSession(sessionId);
+    if (!runtime || runtime.tasks.length === 0) {
+      runtimeStore.startRun(sessionId, runId, tasks, selectedLanguage);
+      runtime = runtimeStore.getSession(sessionId);
+    }
+
     const nextTask = runtime?.tasks.find((task) => task.status === "pending");
 
     if (!runtime || !nextTask) {
@@ -768,6 +872,29 @@ export async function runChatOrchestration(
       status: "done",
       progress: 100,
     });
+
+    const updatedRuntime = runtimeStore.getSession(sessionId);
+    const doneCount =
+      updatedRuntime?.tasks.filter((task) => task.status === "done").length ?? 0;
+
+    sessionStore.addMessage(
+      createMessage(
+        sessionId,
+        "system",
+        buildTaskCheckpointMessage(
+          selectedLanguage,
+          nextTask,
+          doneCount,
+          Math.max(tasks.length, 1)
+        ),
+        {
+          checkpoint: true,
+          runId,
+          functionKey: nextTask.functionKey,
+          taskId: nextTask.id,
+        }
+      )
+    );
 
     if (currentAgent) {
       const output = createAgentOutput(
@@ -806,7 +933,7 @@ export async function runChatOrchestration(
   pipelineStore.setStage("aggregating");
   pipelineStore.setProgress(96);
 
-  const metrics = getMetricSnapshot();
+  const metrics = getSessionMetricSnapshot(sessionId, decomposition.id, tasks);
   const finalRuntime = runtimeStore.getSession(sessionId);
   const finalTasks = finalRuntime?.tasks ?? [];
   const noteCount = finalRuntime?.notes.length ?? 0;

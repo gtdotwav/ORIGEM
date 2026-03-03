@@ -25,6 +25,7 @@ import {
   runChatOrchestration,
   toSessionTitle,
 } from "@/lib/chat-orchestrator";
+import { useAgentStore } from "@/stores/agent-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
@@ -93,6 +94,7 @@ export default function ChatPage() {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hydratedSessionIdRef = useRef<string | null>(null);
 
   const sessions = useSessionStore((s) => s.sessions);
   const messages = useSessionStore((s) => s.messages);
@@ -109,6 +111,8 @@ export default function ChatPage() {
   const setLanguage = useRuntimeStore((s) => s.setLanguage);
   const reorderTasks = useRuntimeStore((s) => s.reorderTasks);
   const addRuntimeNote = useRuntimeStore((s) => s.addNote);
+  const agents = useAgentStore((s) => s.agents);
+  const groups = useAgentStore((s) => s.groups);
 
   const selectedLanguage = runtime?.language ?? "pt-BR";
 
@@ -145,6 +149,10 @@ export default function ChatPage() {
       return;
     }
 
+    if (hydratedSessionIdRef.current === sessionId) {
+      return;
+    }
+
     setCurrentSession(sessionId);
     ensureSessionRuntime(sessionId);
 
@@ -157,10 +165,42 @@ export default function ChatPage() {
       });
     }
 
+    const hasLocalMessages = messages.some(
+      (message) => message.sessionId === sessionId
+    );
+    const localRuntime = useRuntimeStore.getState().sessions[sessionId];
+    const hasLocalRuntimeState =
+      Boolean(localRuntime?.runId) ||
+      Boolean(localRuntime?.isRunning) ||
+      Boolean(localRuntime?.tasks.length);
+    const hasLocalAgents = agents.some((agent) => agent.sessionId === sessionId);
+    const hasLocalGroups = groups.some((group) => group.sessionId === sessionId);
+
+    hydratedSessionIdRef.current = sessionId;
+
+    if (
+      hasLocalMessages ||
+      hasLocalRuntimeState ||
+      hasLocalAgents ||
+      hasLocalGroups
+    ) {
+      return;
+    }
+
     void hydrateSessionSnapshot(sessionId).catch((error) => {
       console.error("Failed to hydrate session snapshot", error);
+      hydratedSessionIdRef.current = null;
     });
-  }, [sessionId, sessions, setCurrentSession, addSession, ensureSessionRuntime]);
+  }, [
+    sessionId,
+    sessions,
+    messages,
+    agents,
+    groups,
+    setCurrentSession,
+    addSession,
+    ensureSessionRuntime,
+  ]);
 
   useEffect(() => {
     if (!sessionId || !runtime?.isRunning) {
