@@ -61,19 +61,21 @@ export default function DashboardPage() {
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-[40%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/12 blur-[90px]" />
-        <div className="absolute left-[55%] top-[58%] h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/10 blur-[90px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.55)_78%)]" />
+        <div className="absolute left-1/2 top-[40%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/14 blur-[88px]" />
+        <div className="absolute left-[55%] top-[58%] h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/12 blur-[88px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(0,0,0,0.38)_82%)]" />
       </div>
 
-      <div className="w-full max-w-[640px] pb-2 text-right">
-        <Link
-          href="/dashboard/control"
-          className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
-        >
-          <LayoutDashboard className="h-3.5 w-3.5" />
-          Dashboard de Controle
-        </Link>
+      <div className="relative z-10 w-full max-w-[640px] pb-2">
+        <div className="flex justify-end">
+          <Link
+            href="/dashboard/control"
+            className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            Dashboard de Controle
+          </Link>
+        </div>
       </div>
 
       {/* Spacer to push chat card to center */}

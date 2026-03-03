@@ -2,15 +2,12 @@
 
 import Link from "next/link";
 import { ArrowRight, LogIn } from "lucide-react";
+import { HologramBackground } from "@/components/shared/hologram-background";
 
 export default function LoginPage() {
   return (
-    <main
-      className="relative flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4"
-      style={{
-        backgroundImage: "url('/images/background.png')",
-      }}
-    >
+    <main className="relative flex min-h-screen items-center justify-center bg-[#04070d] px-4">
+      <HologramBackground />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/65 to-black/30" />
 
       <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
@@ -25,13 +22,15 @@ export default function LoginPage() {
           no dashboard.
         </p>
 
-        <Link
-          href="/dashboard"
-          className="mt-6 inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
-        >
-          Ir para Dashboard
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        <div className="mt-6 flex justify-end">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+          >
+            Ir para Dashboard
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </main>
   );

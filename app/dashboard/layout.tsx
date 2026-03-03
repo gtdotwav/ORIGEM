@@ -15,7 +15,7 @@ export default function DashboardLayout({
       <HologramBackground />
 
       {/* Gradient overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/20" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/10" />
 
       {/* Floating nav — always visible */}
       <FloatingNav />
