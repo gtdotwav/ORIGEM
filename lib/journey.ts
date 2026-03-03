@@ -14,35 +14,40 @@ export const JOURNEY_STEPS: JourneyStepDescriptor[] = [
     label: "Contextos",
     description: "Mapear intencao, dominio e requisitos semanticos.",
     cta: "Abrir Contextos",
-    href: () => "/dashboard/contexts",
+    href: (sessionId) =>
+      `/dashboard/contexts?sessionId=${encodeURIComponent(sessionId)}`,
   },
   {
     key: "agents",
     label: "Agentes",
     description: "Selecionar e ajustar os agentes responsaveis por cada funcao.",
     cta: "Abrir Agentes",
-    href: () => "/dashboard/agents",
+    href: (sessionId) =>
+      `/dashboard/agents?sessionId=${encodeURIComponent(sessionId)}`,
   },
   {
     key: "projects",
     label: "Projetos",
     description: "Consolidar a estrategia em um projeto executavel.",
     cta: "Abrir Projetos",
-    href: () => "/dashboard/projects",
+    href: (sessionId) =>
+      `/dashboard/projects?sessionId=${encodeURIComponent(sessionId)}`,
   },
   {
     key: "groups",
     label: "Grupos",
     description: "Definir como os agentes colaboram em paralelo/sequencia.",
     cta: "Abrir Grupos",
-    href: () => "/dashboard/groups",
+    href: (sessionId) =>
+      `/dashboard/groups?sessionId=${encodeURIComponent(sessionId)}`,
   },
   {
     key: "flows",
     label: "Fluxos",
     description: "Ativar pipeline de execucao e checkpoints da engrenagem.",
     cta: "Abrir Fluxos",
-    href: () => "/dashboard/flows",
+    href: (sessionId) =>
+      `/dashboard/flows?sessionId=${encodeURIComponent(sessionId)}`,
   },
   {
     key: "orchestra",
