@@ -18,7 +18,6 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { HologramBackground } from "@/components/shared/hologram-background";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
@@ -186,9 +185,7 @@ export default function DashboardControlPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-80px)]">
-      <HologramBackground />
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-8 pt-4 md:px-6">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 md:px-6">
       <div className="mb-5 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -471,7 +468,6 @@ export default function DashboardControlPage() {
             </button>
           </div>
         </aside>
-      </div>
       </div>
     </div>
   );
