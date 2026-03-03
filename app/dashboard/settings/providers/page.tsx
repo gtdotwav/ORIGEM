@@ -18,6 +18,7 @@ import {
   XCircle,
   Loader2,
   Key,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +32,7 @@ import {
 import { PROVIDER_CATALOG } from "@/config/providers";
 import type { ProviderName } from "@/types/provider";
 
-const ICON_MAP: Record<string, React.ElementType> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   Brain,
   Sparkles,
   Gem,

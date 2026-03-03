@@ -342,3 +342,55 @@
   background: oklch(0.18 0.02 270 / 0.8) !important;
   fill: oklch(0.9 0.01 270) !important;
 }
+
+/* Hologram background overlays */
+@keyframes hologram-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.2%, -0.8%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes hologram-scan {
+  0% {
+    background-position: 0 -100%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+.hologram-grid {
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.11) 1px, transparent 1px);
+  background-size: 56px 56px;
+  animation: hologram-drift 18s ease-in-out infinite;
+}
+
+.hologram-scanlines {
+  opacity: 0.15;
+  mix-blend-mode: screen;
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  animation: hologram-scan 8s linear infinite;
+}
+
+.hologram-vignette {
+  background:
+    radial-gradient(circle at 50% 45%, transparent 35%, rgba(0, 0, 0, 0.66) 100%),
+    radial-gradient(circle at 85% 12%, rgba(0, 240, 255, 0.14), transparent 45%),
+    radial-gradient(circle at 12% 88%, rgba(139, 92, 246, 0.16), transparent 45%);
+}
