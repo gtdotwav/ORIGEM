@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Atom, Send, Loader2, MessageCircle, Workflow, History } from "lucide-react";
+import { ImageIcon, Settings, Atom, Send, Loader2, MessageCircle, Workflow, History, Plug } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
+import { ConnectorsPanel } from "@/components/chat/connectors-panel";
 import { Switch } from "@/components/ui/switch";
 import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
@@ -66,6 +67,7 @@ export default function DashboardPage() {
   const setChatMode = usePersonaStore((s) => s.setChatMode);
   const isEcosystem = chatMode === "ecosystem";
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [connectorsOpen, setConnectorsOpen] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -171,20 +173,35 @@ export default function DashboardPage() {
       {/* Subtle radial focus — complements layout HologramBackground */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_20%,rgba(0,0,0,0.35)_75%)]" />
 
-      {/* Floating chat history button — left side */}
-      <button
-        type="button"
-        onClick={() => setHistoryOpen(!historyOpen)}
-        className="fixed left-3 top-1/2 z-40 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/[0.08] bg-neutral-950/80 text-white/30 shadow-lg backdrop-blur-xl transition-all hover:border-white/[0.14] hover:text-white/50"
-        title="Historico de chats"
-      >
-        <History className="h-3.5 w-3.5" />
-      </button>
+      {/* Left toolbar — vertical button strip */}
+      <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-white/[0.06] bg-neutral-950/80 p-1 shadow-lg backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); }}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          title="Historico"
+        >
+          <History className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => { setConnectorsOpen(!connectorsOpen); setHistoryOpen(false); }}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          title="Conectores"
+        >
+          <Plug className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       <ChatHistoryPanel
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         onCreateCanvas={() => router.push("/dashboard/canvas")}
+      />
+
+      <ConnectorsPanel
+        open={connectorsOpen}
+        onClose={() => setConnectorsOpen(false)}
       />
 
       {/* Spacer to push chat card to center */}
