@@ -977,3 +977,32 @@
     radial-gradient(circle at 50% 30%, rgba(45, 249, 255, 0.18), rgba(45, 249, 255, 0) 45%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.84));
 }
+
+/* ======================================================
+   React Flow — ORIGEM Theme Overrides
+   ====================================================== */
+.origem-flow .react-flow__edge-path {
+  stroke: oklch(0.78 0.15 195 / 0.5);
+  stroke-width: 2;
+}
+.origem-flow .react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: react-flow-dash 0.5s linear infinite;
+}
+@keyframes react-flow-dash {
+  to { stroke-dashoffset: -10; }
+}
+.origem-flow .react-flow__handle {
+  background: oklch(0.78 0.15 195);
+  border-color: oklch(0.78 0.15 195 / 0.3);
+}
+.origem-flow .react-flow__selection {
+  background: oklch(0.78 0.15 195 / 0.08);
+  border: 1px solid oklch(0.78 0.15 195 / 0.3);
+}
+.origem-flow .react-flow__pane {
+  cursor: grab;
+}
+.origem-flow .react-flow__pane:active {
+  cursor: grabbing;
+}

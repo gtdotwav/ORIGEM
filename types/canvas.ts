@@ -9,7 +9,8 @@ export type OrigemNodeType =
   | "image"
   | "thought"
   | "spawn"
-  | "group";
+  | "group"
+  | "chat-session";
 
 export type OrigemEdgeType = "flow" | "branch" | "group" | "spawn";
 
@@ -64,12 +65,23 @@ export interface GroupNodeData {
   [key: string]: unknown;
 }
 
+export interface ChatSessionNodeData {
+  type: "chat-session";
+  sessionId: string;
+  title: string;
+  messageCount: number;
+  status: "active" | "completed" | "archived";
+  lastUpdated: string;
+  [key: string]: unknown;
+}
+
 export type OrigemNodeData =
   | InputNodeData
   | ContextNodeData
   | AgentNodeData
   | OutputNodeData
-  | GroupNodeData;
+  | GroupNodeData
+  | ChatSessionNodeData;
 
 export type OrigemNode = Node<OrigemNodeData>;
 export type OrigemEdge = Edge & { type?: OrigemEdgeType };

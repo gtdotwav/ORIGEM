@@ -14,6 +14,7 @@ import {
   Orbit,
   Users,
   GitBranch,
+  Workflow,
   LogIn,
   Sparkles,
   Settings,
@@ -83,6 +84,13 @@ const NAV_ITEMS: NavItem[] = [
     href: "/dashboard/flows",
     icon: GitBranch,
     color: "cyan",
+  },
+  {
+    label: "Canvas",
+    description: "Fluxos visuais de chat",
+    href: "/dashboard/canvas",
+    icon: Workflow,
+    color: "orange",
   },
   {
     label: "Workspaces",

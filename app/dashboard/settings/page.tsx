@@ -9,6 +9,7 @@ import {
   Monitor,
   Palette,
   Settings,
+  SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EcosystemConfig } from "@/components/chat/ecosystem-config";
 
 const SECTIONS = [
   {
@@ -59,15 +61,25 @@ const SECTIONS = [
     borderClass: "border-green-300/15 hover:border-green-300/30",
     badge: "Next.js 16",
   },
+  {
+    title: "Controle de Execucao",
+    description:
+      "Configure o provedor e modelo padrao do modo 360, linguagem das respostas e parametros de execucao dos agentes.",
+    icon: SlidersHorizontal,
+    iconClass: "text-amber-300",
+    borderClass: "border-amber-300/15 hover:border-amber-300/30",
+  },
 ];
 
 export default function SettingsPage() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [language, setLanguage] = useState("pt-BR");
+  const [runtimeLanguage, setRuntimeLanguage] = useState("pt-BR");
 
   useEffect(() => {
     setReducedMotion(localStorage.getItem("origem-reduced-motion") === "true");
     setLanguage(localStorage.getItem("origem-language") ?? "pt-BR");
+    setRuntimeLanguage(localStorage.getItem("origem-default-runtime-language") ?? "pt-BR");
   }, []);
 
   const handleMotionToggle = (checked: boolean) => {
@@ -87,6 +99,12 @@ export default function SettingsPage() {
     setLanguage(value);
     localStorage.setItem("origem-language", value);
     toast.success(`Idioma alterado para ${LANG_LABELS[value] ?? value}`);
+  };
+
+  const handleRuntimeLanguageChange = (value: string) => {
+    setRuntimeLanguage(value);
+    localStorage.setItem("origem-default-runtime-language", value);
+    toast.success(`Linguagem de resposta padrao: ${LANG_LABELS[value] ?? value}`);
   };
 
   return (
@@ -150,6 +168,35 @@ export default function SettingsPage() {
                         <SelectItem value="es-ES" className="text-xs text-white/70">Espanhol (ES)</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+
+                {section.title === "Controle de Execucao" && (
+                  <div className="mt-3 space-y-3">
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                        Configuracao do Ecossistema 360
+                      </p>
+                      <EcosystemConfig />
+                    </div>
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                        Linguagem padrao das respostas
+                      </p>
+                      <Select value={runtimeLanguage} onValueChange={handleRuntimeLanguageChange}>
+                        <SelectTrigger className="h-8 w-48 border-white/[0.08] bg-white/[0.04] text-xs text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl">
+                          <SelectItem value="pt-BR" className="text-xs text-white/70">Portugues (BR)</SelectItem>
+                          <SelectItem value="en-US" className="text-xs text-white/70">Ingles (US)</SelectItem>
+                          <SelectItem value="es-ES" className="text-xs text-white/70">Espanhol (ES)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <p className="text-[10px] leading-relaxed text-white/30">
+                      Prioridade de funcoes e notas de execucao sao configuradas por sessao, dentro do painel de Canvas/Orquestra de cada chat.
+                    </p>
                   </div>
                 )}
 

@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Copy,
-  GripVertical,
+  History,
   Loader2,
-  MessageSquarePlus,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -19,8 +18,8 @@ import { AgentTaskCards } from "@/components/chat/agent-task-cards";
 import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
-import { EcosystemConfig } from "@/components/chat/ecosystem-config";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
+import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import {
   ensureSessionRecord,
   hydrateSessionSnapshot,
@@ -39,7 +38,6 @@ import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
 import { usePersonaStore } from "@/stores/persona-store";
-import type { RuntimeLanguage, RuntimeTask } from "@/types/runtime";
 
 const STAGE_LABELS: Record<string, string> = {
   idle: "Aguardando",
@@ -53,12 +51,6 @@ const STAGE_LABELS: Record<string, string> = {
   complete: "Concluido",
   error: "Erro",
 };
-
-const LANGUAGE_OPTIONS: { value: RuntimeLanguage; label: string }[] = [
-  { value: "pt-BR", label: "Portugues (BR)" },
-  { value: "en-US", label: "Ingles (US)" },
-  { value: "es-ES", label: "Espanhol (ES)" },
-];
 
 interface ImageAttachmentMetadata {
   name: string;
@@ -112,27 +104,12 @@ function formatMessageTime(date: Date) {
   });
 }
 
-function getTaskStatusLabel(status: RuntimeTask["status"]) {
-  if (status === "running") {
-    return "Em execucao";
-  }
-  if (status === "done") {
-    return "Concluida";
-  }
-  if (status === "blocked") {
-    return "Bloqueada";
-  }
-
-  return "Pendente";
-}
-
 export default function ChatPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const router = useRouter();
   const [input, setInput] = useState("");
-  const [noteInput, setNoteInput] = useState("");
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
@@ -149,9 +126,6 @@ export default function ChatPage() {
 
   const runtime = useRuntimeStore((s) => s.sessions[sessionId]);
   const ensureSessionRuntime = useRuntimeStore((s) => s.ensureSession);
-  const setLanguage = useRuntimeStore((s) => s.setLanguage);
-  const reorderTasks = useRuntimeStore((s) => s.reorderTasks);
-  const addRuntimeNote = useRuntimeStore((s) => s.addNote);
   const agents = useAgentStore((s) => s.agents);
   const groups = useAgentStore((s) => s.groups);
   const chatMode = usePersonaStore((s) => s.chatMode);
@@ -301,419 +275,275 @@ export default function ChatPage() {
     }
   };
 
-  const sendNote = () => {
-    const note = noteInput.trim();
-    if (!note || !sessionId) {
-      return;
-    }
-
-    const runningTask = runtime?.tasks.find((task) => task.status === "running");
-    addRuntimeNote(sessionId, note, runningTask?.id);
-
-    addMessage(
-      createMessage(sessionId, "system", `Nota enviada: ${note}`, {
-        note: true,
-      })
-    );
-
-    setNoteInput("");
-    persistSnapshotQuietly();
-    toast.success("Nota enviada.");
-  };
-
   const liveProgress = runtime?.overallProgress ?? progress;
   const showLiveRuntimeBubble = Boolean(runtime?.isRunning) && !isSending;
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-130px)] w-full max-w-6xl flex-col px-4 pb-6 pt-4 md:px-6">
-      <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-              Sessao de Chat
-            </p>
-            <h1 className="text-lg font-semibold text-white/90">
-              {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
-            </h1>
+    <div className="mx-auto flex h-[calc(100vh-130px)] w-full max-w-4xl flex-col px-4 pb-6 pt-4 md:px-6">
+      {/* Floating history button */}
+      <button
+        type="button"
+        onClick={() => setHistoryOpen(!historyOpen)}
+        className="fixed right-4 top-1/2 z-40 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/[0.10] bg-neutral-900/80 text-white/40 shadow-lg backdrop-blur-xl transition-all hover:border-neon-cyan/30 hover:bg-neutral-900/90 hover:text-neon-cyan"
+        title="Historico de chats"
+      >
+        <History className="h-4.5 w-4.5" />
+      </button>
+
+      <ChatHistoryPanel
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        currentSessionId={sessionId}
+        onCreateCanvas={() => {
+          setHistoryOpen(false);
+          router.push("/dashboard/canvas");
+        }}
+      />
+
+      {/* Header with glow */}
+      <div className="relative mb-4">
+        <div className="pointer-events-none absolute -inset-6 rounded-[32px] border border-neon-cyan/6 bg-neon-cyan/3 blur-xl" />
+        <div className="relative rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 shadow-2xl backdrop-blur-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-white/30">
+                Sessao de Chat
+              </p>
+              <h1 className="text-lg font-semibold text-white/90">
+                {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1 text-xs text-white/70">
+                Etapa: {STAGE_LABELS[stage] ?? stage}
+              </span>
+              <Link
+                href={`/dashboard/orchestra/${sessionId}`}
+                className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+              >
+                Canvas
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1 text-xs text-white/70">
-              Etapa: {STAGE_LABELS[stage] ?? stage}
-            </span>
-            <Link
-              href={`/dashboard/orchestra/${sessionId}`}
-              className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
-            >
-              Canvas
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+            <div
+              className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
+              style={{ width: `${liveProgress}%` }}
+            />
           </div>
-        </div>
-
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
-          <div
-            className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
-            style={{ width: `${liveProgress}%` }}
-          />
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
-        <section className="min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl">
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
-              {sessionMessages.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-                  <Sparkles className="h-5 w-5 text-neon-cyan/80" />
-                  <p className="text-sm text-white/55">
-                    Envie sua primeira mensagem para disparar delegacao de contexto, projeto, agentes e grupos.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {sessionMessages.map((message) => {
-                    const isUser = message.role === "user";
-                    const isNote = message.role === "system" && isNoteMessage(message.metadata);
-                    const isJourneyStepUpdate =
-                      message.role === "system" && isJourneySystemMessage(message.metadata);
-                    const imageAttachment = getImageAttachment(message.metadata);
+      {/* Chat area — full width */}
+      <section className="min-h-0 flex-1 rounded-2xl border border-white/[0.08] bg-neutral-900/70 shadow-2xl backdrop-blur-xl">
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
+            {sessionMessages.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                <Sparkles className="h-5 w-5 text-neon-cyan/80" />
+                <p className="text-sm text-white/55">
+                  Envie sua primeira mensagem para disparar delegacao de contexto, projeto, agentes e grupos.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {sessionMessages.map((message) => {
+                  const isUser = message.role === "user";
+                  const isNote = message.role === "system" && isNoteMessage(message.metadata);
+                  const isJourneyStepUpdate =
+                    message.role === "system" && isJourneySystemMessage(message.metadata);
+                  const imageAttachment = getImageAttachment(message.metadata);
 
-                    if (isNote) {
-                      return (
-                        <div key={message.id} className="flex justify-center">
-                          <div className="max-w-[88%] rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2">
-                            <p className="text-xs text-amber-100/90">{message.content}</p>
-                            <span className="mt-1 block text-[10px] text-amber-100/55">
-                              {formatMessageTime(message.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (isJourneyStepUpdate) {
-                      return (
-                        <div key={message.id} className="flex justify-center">
-                          <div className="max-w-[88%] rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2">
-                            <p className="text-xs text-cyan-100/90">{message.content}</p>
-                            <span className="mt-1 block text-[10px] text-cyan-100/55">
-                              {formatMessageTime(message.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-
+                  if (isNote) {
                     return (
-                      <div
-                        key={message.id}
-                        className={cn(
-                          "flex w-full animate-message-in",
-                          isUser ? "justify-end" : "justify-start"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "group relative max-w-[88%] rounded-2xl border px-4 py-3",
-                            isUser
-                              ? "border-neon-cyan/30 bg-neon-cyan/10 text-white"
-                              : "border-white/[0.09] bg-black/35 text-white/85"
-                          )}
-                        >
-                          {!isUser && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                void navigator.clipboard.writeText(message.content);
-                                toast.success("Copiado!");
-                              }}
-                              className="absolute right-2 top-2 rounded-md p-1 text-white/20 opacity-0 transition-all hover:bg-white/[0.06] hover:text-white/50 group-hover:opacity-100"
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                            </button>
-                          )}
-                          {imageAttachment ? (
-                            <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.12] bg-black/20">
-                              <img
-                                src={imageAttachment.dataUrl}
-                                alt={imageAttachment.name}
-                                className="max-h-64 w-full object-cover"
-                              />
-                              <div className="px-2.5 py-1.5 text-[10px] text-white/60">
-                                {imageAttachment.name}
-                              </div>
-                            </div>
-                          ) : null}
-                          {isUser ? (
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                              {message.content}
-                            </p>
-                          ) : (
-                            <MarkdownRenderer content={message.content} />
-                          )}
-                          {!isUser &&
-                            Array.isArray(
-                              (message.metadata as Record<string, unknown> | undefined)
-                                ?.criticResults
-                            ) && (
-                              <CriticAnnotations
-                                results={
-                                  (message.metadata as Record<string, unknown>)
-                                    .criticResults as import("@/types/chat").CriticResult[]
-                                }
-                              />
-                            )}
-                          {!isUser && shouldRenderDistribution(message.metadata) && (
-                            <AgentTaskCards
-                              sessionId={sessionId}
-                              intent={
-                                (message.metadata as Record<string, unknown>)
-                                  ?.intent as import("@/types/decomposition").Intent | undefined
-                              }
-                            />
-                          )}
-                          {!isUser &&
-                            shouldRenderJourney(message.metadata) &&
-                            latestAssistantMessageId === message.id && (
-                              <JourneyConnectorCard
-                                sessionId={sessionId}
-                                onStepOpen={(step) => {
-                                  addMessage(
-                                    createMessage(
-                                      sessionId,
-                                      "system",
-                                      `Etapa aberta: ${step.label}. Revise essa fase e volte ao chat para continuar a proxima conexao.`,
-                                      {
-                                        journeyStep: true,
-                                      }
-                                    )
-                                  );
-                                  persistSnapshotQuietly();
-                                }}
-                              />
-                            )}
-                          <span className="mt-2 block text-[10px] text-white/35">
+                      <div key={message.id} className="flex justify-center">
+                        <div className="max-w-[88%] rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2">
+                          <p className="text-xs text-amber-100/90">{message.content}</p>
+                          <span className="mt-1 block text-[10px] text-amber-100/55">
                             {formatMessageTime(message.createdAt)}
                           </span>
                         </div>
                       </div>
                     );
-                  })}
+                  }
 
-                  {isSending && (
-                    <div className="flex justify-start">
-                      <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
-                        <div className="inline-flex items-center gap-2 text-xs text-white/65">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
-                          Processando e delegando em tempo real...
+                  if (isJourneyStepUpdate) {
+                    return (
+                      <div key={message.id} className="flex justify-center">
+                        <div className="max-w-[88%] rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2">
+                          <p className="text-xs text-cyan-100/90">{message.content}</p>
+                          <span className="mt-1 block text-[10px] text-cyan-100/55">
+                            {formatMessageTime(message.createdAt)}
+                          </span>
                         </div>
-                        <AgentTaskCards sessionId={sessionId} />
                       </div>
-                    </div>
-                  )}
+                    );
+                  }
 
-                  {showLiveRuntimeBubble && (
-                    <div className="flex justify-start">
-                      <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
-                        <div className="inline-flex items-center gap-2 text-xs text-white/65">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
-                          Distribuicao em execucao...
-                        </div>
-                        <AgentTaskCards sessionId={sessionId} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div ref={bottomRef} />
-            </div>
-
-            <form
-              className="border-t border-white/[0.07] p-3 md:p-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void sendMessage();
-              }}
-            >
-              <div className="mb-2">
-                <LLMSelector />
-              </div>
-              <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/30 p-2.5">
-                <AIVoiceInput
-                  onStop={(dur) => {
-                    if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
-                  }}
-                />
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Digite sua mensagem..."
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
-                />
-                <CriticPanel />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || isSending}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  Enviar
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-        {(() => {
-          const controlPanel = (
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="mb-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
-                  Controle da Execucao
-                </p>
-                <p className="mt-1 text-sm text-white/65">
-                  Ajuste linguagem, prioridade e notas durante o processamento.
-                </p>
-              </div>
-
-              {chatMode === "ecosystem" && (
-                <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
-                  <EcosystemConfig />
-                </div>
-              )}
-
-              <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
-                <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
-                  Linguagem da resposta
-                </label>
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) =>
-                    {
-                      setLanguage(sessionId, e.target.value as RuntimeLanguage);
-                      persistSnapshotQuietly();
-                    }}
-                  className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white outline-none"
-                >
-                  {LANGUAGE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-3 min-h-0 flex-1 rounded-xl border border-white/[0.08] bg-black/30 p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-wide text-white/35">
-                    Prioridade das funcoes (drag and drop)
-                  </p>
-                  <span className="text-[10px] text-white/30">
-                    {runtime?.tasks.length ?? 0} itens
-                  </span>
-                </div>
-
-                <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
-                  {runtime?.tasks.length ? (
-                    runtime.tasks.map((task) => (
+                  return (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        "flex w-full animate-message-in",
+                        isUser ? "justify-end" : "justify-start"
+                      )}
+                    >
                       <div
-                        key={task.id}
-                        draggable
-                        onDragStart={() => setDraggedTaskId(task.id)}
-                        onDragEnd={() => {
-                          setDraggedTaskId(null);
-                          setDragOverTaskId(null);
-                        }}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          setDragOverTaskId(task.id);
-                        }}
-                        onDragLeave={() => setDragOverTaskId(null)}
-                        onDrop={() => {
-                          if (!draggedTaskId) {
-                            return;
-                          }
-                          reorderTasks(sessionId, draggedTaskId, task.id);
-                          setDraggedTaskId(null);
-                          setDragOverTaskId(null);
-                          persistSnapshotQuietly();
-                        }}
                         className={cn(
-                          "cursor-grab rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 transition-all duration-150 active:cursor-grabbing",
-                          draggedTaskId === task.id && "scale-95 opacity-50 border-neon-cyan/30",
-                          dragOverTaskId === task.id && draggedTaskId !== task.id && "border-t-2 border-t-neon-cyan"
+                          "group relative max-w-[88%] rounded-2xl border px-4 py-3",
+                          isUser
+                            ? "border-neon-cyan/30 bg-neon-cyan/10 text-white"
+                            : "border-white/[0.09] bg-black/35 text-white/85"
                         )}
                       >
-                        <div className="flex items-start gap-2">
-                          <GripVertical className="mt-0.5 h-3.5 w-3.5 text-white/30" />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[11px] text-white/80">
-                              {task.priority}. {task.title}
-                            </p>
-                            <p className="text-[10px] text-white/40">
-                              {task.agentName} · {getTaskStatusLabel(task.status)} · {task.progress}%
-                            </p>
+                        {!isUser && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void navigator.clipboard.writeText(message.content);
+                              toast.success("Copiado!");
+                            }}
+                            className="absolute right-2 top-2 rounded-md p-1 text-white/20 opacity-0 transition-all hover:bg-white/[0.06] hover:text-white/50 group-hover:opacity-100"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        {imageAttachment ? (
+                          <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.12] bg-black/20">
+                            <img
+                              src={imageAttachment.dataUrl}
+                              alt={imageAttachment.name}
+                              className="max-h-64 w-full object-cover"
+                            />
+                            <div className="px-2.5 py-1.5 text-[10px] text-white/60">
+                              {imageAttachment.name}
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
+                        {isUser ? (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {message.content}
+                          </p>
+                        ) : (
+                          <MarkdownRenderer content={message.content} />
+                        )}
+                        {!isUser &&
+                          Array.isArray(
+                            (message.metadata as Record<string, unknown> | undefined)
+                              ?.criticResults
+                          ) && (
+                            <CriticAnnotations
+                              results={
+                                (message.metadata as Record<string, unknown>)
+                                  .criticResults as import("@/types/chat").CriticResult[]
+                              }
+                            />
+                          )}
+                        {!isUser && shouldRenderDistribution(message.metadata) && (
+                          <AgentTaskCards
+                            sessionId={sessionId}
+                            intent={
+                              (message.metadata as Record<string, unknown>)
+                                ?.intent as import("@/types/decomposition").Intent | undefined
+                            }
+                          />
+                        )}
+                        {!isUser &&
+                          shouldRenderJourney(message.metadata) &&
+                          latestAssistantMessageId === message.id && (
+                            <JourneyConnectorCard
+                              sessionId={sessionId}
+                              onStepOpen={(step) => {
+                                addMessage(
+                                  createMessage(
+                                    sessionId,
+                                    "system",
+                                    `Etapa aberta: ${step.label}. Revise essa fase e volte ao chat para continuar a proxima conexao.`,
+                                    {
+                                      journeyStep: true,
+                                    }
+                                  )
+                                );
+                                persistSnapshotQuietly();
+                              }}
+                            />
+                          )}
+                        <span className="mt-2 block text-[10px] text-white/35">
+                          {formatMessageTime(message.createdAt)}
+                        </span>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-white/40">
-                      As funcoes delegadas aparecerao aqui assim que voce enviar a mensagem.
-                    </p>
-                  )}
-                </div>
-              </div>
+                    </div>
+                  );
+                })}
 
-              <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
-                <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
-                  Notas para execucao
-                </label>
-                <textarea
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                  placeholder="Ex: priorize seguranca e responda com exemplos"
-                  className="h-20 w-full resize-none rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white placeholder:text-white/25 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={sendNote}
-                  disabled={!noteInput.trim()}
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/25 bg-amber-300/10 px-2.5 py-1.5 text-xs font-medium text-amber-200 transition-all hover:border-amber-300/45 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <MessageSquarePlus className="h-3.5 w-3.5" />
-                  Enviar nota
-                </button>
-
-                {runtime?.notes.length ? (
-                  <div className="mt-2 space-y-1.5 border-t border-white/[0.06] pt-2">
-                    {runtime.notes
-                      .slice(-3)
-                      .reverse()
-                      .map((note) => (
-                        <div
-                          key={note.id}
-                          className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1"
-                        >
-                          <p className="text-[11px] text-white/70">{note.text}</p>
-                        </div>
-                      ))}
+                {isSending && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
+                      <div className="inline-flex items-center gap-2 text-xs text-white/65">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
+                        Processando e delegando em tempo real...
+                      </div>
+                      <AgentTaskCards sessionId={sessionId} />
+                    </div>
                   </div>
-                ) : null}
-              </div>
-            </div>
-          );
+                )}
 
-          return (
-            <aside className="hidden min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl lg:block">
-              {controlPanel}
-            </aside>
-          );
-        })()}
-      </div>
+                {showLiveRuntimeBubble && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[88%] rounded-2xl border border-white/[0.09] bg-black/35 px-4 py-3">
+                      <div className="inline-flex items-center gap-2 text-xs text-white/65">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
+                        Distribuicao em execucao...
+                      </div>
+                      <AgentTaskCards sessionId={sessionId} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+          <form
+            className="border-t border-white/[0.07] p-3 md:p-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void sendMessage();
+            }}
+          >
+            <div className="mb-2">
+              <LLMSelector />
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/30 p-2.5">
+              <AIVoiceInput
+                onStop={(dur) => {
+                  if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
+                }}
+              />
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Digite sua mensagem..."
+                className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+              />
+              <CriticPanel />
+              <button
+                type="submit"
+                disabled={!input.trim() || isSending}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Enviar
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }
