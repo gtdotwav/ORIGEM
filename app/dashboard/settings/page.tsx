@@ -11,6 +11,7 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -73,11 +74,19 @@ export default function SettingsPage() {
     setReducedMotion(checked);
     localStorage.setItem("origem-reduced-motion", String(checked));
     document.documentElement.classList.toggle("reduce-motion", checked);
+    toast.success(checked ? "Animacoes reduzidas" : "Animacoes restauradas");
+  };
+
+  const LANG_LABELS: Record<string, string> = {
+    "pt-BR": "Portugues (BR)",
+    "en-US": "English (US)",
+    "es-ES": "Espanol (ES)",
   };
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
     localStorage.setItem("origem-language", value);
+    toast.success(`Idioma alterado para ${LANG_LABELS[value] ?? value}`);
   };
 
   return (

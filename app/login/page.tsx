@@ -2,9 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, GithubIcon, BrainCircuit } from "lucide-react";
 import { Particles } from "@/components/ui/particles";
+import { toast } from "sonner";
 
 const GoogleIcon = (props: React.ComponentProps<"svg">) => (
   <svg
@@ -18,6 +20,13 @@ const GoogleIcon = (props: React.ComponentProps<"svg">) => (
 );
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  const handleOAuth = (provider: string) => {
+    toast.info(`Autenticacao via ${provider} em breve. Redirecionando ao dashboard...`);
+    setTimeout(() => router.push("/dashboard"), 1500);
+  };
+
   return (
     <div className="relative md:h-screen md:overflow-hidden w-full bg-background">
       <Particles
@@ -63,6 +72,7 @@ export default function LoginPage() {
               type="button"
               size="lg"
               className="w-full h-12 bg-white/[0.06] border border-white/[0.10] text-foreground hover:bg-white/[0.10] hover:border-white/[0.15] backdrop-blur-sm"
+              onClick={() => handleOAuth("Google")}
             >
               <GoogleIcon className="me-2 size-4" />
               Continuar com Google
@@ -71,6 +81,7 @@ export default function LoginPage() {
               type="button"
               size="lg"
               className="w-full h-12 bg-white/[0.06] border border-white/[0.10] text-foreground hover:bg-white/[0.10] hover:border-white/[0.15] backdrop-blur-sm"
+              onClick={() => handleOAuth("GitHub")}
             >
               <GithubIcon strokeWidth={2.5} className="me-2 size-4" />
               Continuar com GitHub
@@ -94,22 +105,8 @@ export default function LoginPage() {
               Acessar Dashboard
             </Link>
           </Button>
-          <p className="text-muted-foreground mt-8 text-sm leading-relaxed">
-            Ao continuar, voce concorda com nossos{" "}
-            <a
-              href="#"
-              className="hover:text-primary underline underline-offset-4"
-            >
-              Termos de Servico
-            </a>{" "}
-            e{" "}
-            <a
-              href="#"
-              className="hover:text-primary underline underline-offset-4"
-            >
-              Politica de Privacidade
-            </a>
-            .
+          <p className="text-muted-foreground mt-8 text-xs leading-relaxed">
+            Ao continuar, voce concorda com os termos de uso da plataforma ORIGEM.
           </p>
         </div>
       </div>
