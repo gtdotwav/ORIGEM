@@ -31,6 +31,7 @@ import {
   Plus,
   Sparkles,
   Filter,
+  Baby,
 } from "lucide-react";
 
 const navItems = [
@@ -47,6 +48,7 @@ const navItems = [
   { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
   { label: "Apps", href: "/dashboard/apps", icon: Sparkles },
   { label: "Celebridade IA", href: "/dashboard/apps/celebrity-chat", icon: MessageSquare },
+  { label: "ORIGEM Kids", href: "/dashboard/kids", icon: Baby },
 ];
 
 const actionItems = [

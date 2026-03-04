@@ -19,6 +19,7 @@ import {
   Settings,
   Palette,
   Key,
+  Baby,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -96,6 +97,13 @@ const NAV_ITEMS: NavItem[] = [
     href: "/dashboard/apps",
     icon: Sparkles,
     color: "pink",
+  },
+  {
+    label: "Kids",
+    description: "Aprendizado e diversao para criancas",
+    href: "/dashboard/kids",
+    icon: Baby,
+    color: "green",
   },
 ];
 
