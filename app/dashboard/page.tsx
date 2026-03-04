@@ -7,6 +7,9 @@ import { ImageIcon, Settings, Atom, Send, LayoutDashboard, Loader2, MessageCircl
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { TierSelector } from "@/components/chat/tier-selector";
+import { AIVoiceInput } from "@/components/ui/ai-voice-input";
+import { CriticPanel } from "@/components/chat/critic-panel";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -225,9 +228,9 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Controls row */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+          {/* Mode toggle + Tier selector */}
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <MessageCircle
                   className={cn(
@@ -267,7 +270,20 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            {!isEcosystem && (
+              <div className="h-4 w-px bg-white/[0.08]" />
+            )}
+            {!isEcosystem && <TierSelector />}
+          </div>
+
+          {/* Controls row */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <AIVoiceInput
+                onStop={(dur) => {
+                  if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
+                }}
+              />
               <button
                 type="button"
                 onClick={openImagePicker}
@@ -277,6 +293,7 @@ export default function DashboardPage() {
               >
                 <ImageIcon className="h-4 w-4" />
               </button>
+              <CriticPanel />
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/settings/providers")}
@@ -285,16 +302,16 @@ export default function DashboardPage() {
               >
                 <Settings className="h-4 w-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => void startSessionFromHome()}
-                disabled={!input.trim() || sending || uploadingImage}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Send className="h-3.5 w-3.5" />
-                {sending || uploadingImage ? "Enviando..." : "Enviar"}
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={() => void startSessionFromHome()}
+              disabled={!input.trim() || sending || uploadingImage}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send className="h-3.5 w-3.5" />
+              {sending || uploadingImage ? "Enviando..." : "Enviar"}
+            </button>
           </div>
 
           <input

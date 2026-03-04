@@ -18,6 +18,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
+import { TierSelector } from "@/components/chat/tier-selector";
+import { AIVoiceInput } from "@/components/ui/ai-voice-input";
+import { CriticPanel } from "@/components/chat/critic-panel";
+import { EcosystemConfig } from "@/components/chat/ecosystem-config";
+import { CriticAnnotations } from "@/components/chat/critic-annotations";
 import {
   ensureSessionRecord,
   hydrateSessionSnapshot,
@@ -449,6 +454,18 @@ export default function ChatPage() {
                           ) : (
                             <MarkdownRenderer content={message.content} />
                           )}
+                          {!isUser &&
+                            Array.isArray(
+                              (message.metadata as Record<string, unknown> | undefined)
+                                ?.criticResults
+                            ) && (
+                              <CriticAnnotations
+                                results={
+                                  (message.metadata as Record<string, unknown>)
+                                    .criticResults as import("@/types/chat").CriticResult[]
+                                }
+                              />
+                            )}
                           {!isUser && shouldRenderDistribution(message.metadata) && (
                             <RealtimeDistributionBubble sessionId={sessionId} />
                           )}
@@ -522,14 +539,25 @@ export default function ChatPage() {
                 void sendMessage();
               }}
             >
+              {chatMode === "direct" && (
+                <div className="mb-2">
+                  <TierSelector />
+                </div>
+              )}
               <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/30 p-2.5">
+                <AIVoiceInput
+                  onStop={(dur) => {
+                    if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
+                  }}
+                />
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Digite sua mensagem para acionar todas as funcionalidades..."
+                  placeholder="Digite sua mensagem..."
                   className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
                 />
+                <CriticPanel />
                 <button
                   type="submit"
                   disabled={!input.trim() || isSending}
@@ -554,6 +582,12 @@ export default function ChatPage() {
                   Ajuste linguagem, prioridade e notas durante o processamento.
                 </p>
               </div>
+
+              {chatMode === "ecosystem" && (
+                <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+                  <EcosystemConfig />
+                </div>
+              )}
 
               <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
                 <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
