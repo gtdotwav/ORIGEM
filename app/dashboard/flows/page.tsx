@@ -273,7 +273,7 @@ function FlowsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
           <div className="inline-flex items-center gap-2 text-sm text-white/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando fluxo da sessao...
@@ -285,7 +285,7 @@ function FlowsPageContent() {
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs uppercase tracking-[0.14em] text-white/40">
                 Estado do pipeline
@@ -320,7 +320,7 @@ function FlowsPageContent() {
           </div>
 
           <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
-            <section className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+            <section className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
               <p className="mb-2 text-xs uppercase tracking-[0.14em] text-white/40">
                 Funcoes em execucao
               </p>
@@ -357,7 +357,7 @@ function FlowsPageContent() {
             </section>
 
             <aside className="space-y-3">
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
                 <p className="text-xs uppercase tracking-[0.14em] text-white/40">
                   Direcoes para fluxo
                 </p>
@@ -379,7 +379,7 @@ function FlowsPageContent() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
                 <p className="text-xs uppercase tracking-[0.14em] text-white/40">
                   Eventos recentes
                 </p>
@@ -435,7 +435,7 @@ function FlowsPageContent() {
 function FlowsPageFallback() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
         <div className="inline-flex items-center gap-2 text-sm text-white/70">
           <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
           Carregando fluxos...

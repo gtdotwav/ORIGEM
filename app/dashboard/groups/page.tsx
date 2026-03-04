@@ -254,7 +254,7 @@ function GroupsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
           <div className="inline-flex items-center gap-2 text-sm text-white/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando grupos da sessao...
@@ -266,7 +266,7 @@ function GroupsPageContent() {
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
             <p className="text-xs uppercase tracking-[0.14em] text-white/40">
               Direcoes para grupos
             </p>
@@ -289,7 +289,7 @@ function GroupsPageContent() {
           </div>
 
           {effectiveGroups.length === 0 ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
               <p className="text-sm text-white/65">
                 Ainda nao ha grupos definidos. Volte ao contexto e direcione uma estrategia de colaboracao.
               </p>
@@ -308,7 +308,7 @@ function GroupsPageContent() {
                 return (
                   <div
                     key={group.id}
-                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4"
+                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl"
                   >
                     <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                       <div>
@@ -395,7 +395,7 @@ function GroupsPageContent() {
 function GroupsPageFallback() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
         <div className="inline-flex items-center gap-2 text-sm text-white/70">
           <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
           Carregando grupos...

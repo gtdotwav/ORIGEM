@@ -204,9 +204,9 @@ export default function ProvidersPage() {
     <div className="mx-auto max-w-4xl px-6 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
-            <Key className="h-6 w-6 text-blue-400" />
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+            <Key className="h-5 w-5 text-neon-cyan" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-white">AI Providers</h1>
@@ -225,7 +225,7 @@ export default function ProvidersPage() {
           return (
             <div
               key={provider.name}
-              className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
+              className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl transition-all hover:border-white/[0.14] hover:bg-neutral-900/80"
             >
               {/* Header */}
               <div className="mb-3 flex items-center justify-between">

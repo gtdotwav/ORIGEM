@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import {
   Orbit,
   Plus,
@@ -8,83 +9,109 @@ import {
   Clock,
   Layers,
   GitFork,
+  Bot,
 } from "lucide-react";
+import { useSessionStore } from "@/stores/session-store";
+import { useAgentStore } from "@/stores/agent-store";
+import { useDecompositionStore } from "@/stores/decomposition-store";
 
-const SAMPLE_CANVASES = [
-  {
-    id: "canvas-1",
-    title: "Auth System Architecture",
-    nodeCount: 14,
-    edgeCount: 18,
-    agentCount: 5,
-    lastEdited: "5 min atras",
-    preview: {
-      inputNode: "OAuth2 + refresh tokens",
-      agents: ["Coder", "Planner", "Critic"],
-    },
-  },
-  {
-    id: "canvas-2",
-    title: "Landing Page Design",
-    nodeCount: 9,
-    edgeCount: 11,
-    agentCount: 3,
-    lastEdited: "1h atras",
-    preview: {
-      inputNode: "Modern landing with animations",
-      agents: ["Designer", "Coder"],
-    },
-  },
-  {
-    id: "canvas-3",
-    title: "Data Pipeline Flow",
-    nodeCount: 22,
-    edgeCount: 28,
-    agentCount: 6,
-    lastEdited: "2 dias atras",
-    preview: {
-      inputNode: "Real-time ETL processing",
-      agents: ["Planner", "Coder", "Researcher"],
-    },
-  },
-];
+function formatTime(date: Date) {
+  const now = Date.now();
+  const diff = now - new Date(date).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "agora";
+  if (minutes < 60) return `${minutes} min atras`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h atras`;
+  const days = Math.floor(hours / 24);
+  return `${days}d atras`;
+}
+
+interface CanvasView {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  agentNames: string[];
+  nodeCount: number;
+  edgeCount: number;
+}
 
 export default function SpacePage() {
+  const sessions = useSessionStore((state) => state.sessions);
+  const messages = useSessionStore((state) => state.messages);
+  const agents = useAgentStore((state) => state.agents);
+  const decompositions = useDecompositionStore((state) => state.decompositions);
+
+  const canvases = useMemo<CanvasView[]>(() => {
+    return [...sessions]
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      )
+      .slice(0, 12)
+      .map((session) => {
+        const sessionAgents = agents.filter(
+          (a) => a.sessionId === session.id
+        );
+        const sessionMessages = messages.filter(
+          (m) => m.sessionId === session.id
+        );
+        const decompositionIds = new Set<string>();
+        for (const msg of sessionMessages) {
+          if (msg.decompositionId) decompositionIds.add(msg.decompositionId);
+        }
+
+        const contextCount = decompositionIds.size;
+        const nodeCount = 1 + contextCount + sessionAgents.length;
+        const edgeCount = contextCount + sessionAgents.length;
+
+        return {
+          id: session.id,
+          title: session.title,
+          updatedAt: session.updatedAt,
+          agentNames: sessionAgents
+            .map((a) => a.name)
+            .slice(0, 4),
+          nodeCount,
+          edgeCount,
+        };
+      });
+  }, [sessions, messages, agents, decompositions]);
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
-              <Orbit className="h-6 w-6 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Space</h1>
-              <p className="mt-1 text-sm text-white/40">
-                Canvas infinito para orquestracao visual — nodes, agentes e fluxos em tempo real
-              </p>
-            </div>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+            <Orbit className="h-5 w-5 text-fuchsia-300" />
           </div>
-
-          <Link
-            href="/dashboard/orchestra/new"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white/70 backdrop-blur-sm transition-all hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Canvas
-          </Link>
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Space</h1>
+            <p className="mt-1 text-sm text-white/50">
+              Canvas infinito para orquestracao visual — nodes, agentes e
+              fluxos em tempo real
+            </p>
+          </div>
         </div>
+
+        <Link
+          href="/dashboard/orchestra/new"
+          className="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/25 bg-fuchsia-300/10 px-4 py-2.5 text-sm text-fuchsia-200 transition-all hover:border-fuchsia-300/50 hover:bg-fuchsia-300/20 hover:text-white"
+        >
+          <Plus className="h-4 w-4" />
+          Novo Canvas
+        </Link>
       </div>
 
       {/* New canvas hero */}
       <Link
         href="/dashboard/orchestra/new"
-        className="group mb-6 flex items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-900/40 py-16 backdrop-blur-sm transition-all hover:border-blue-400/20 hover:bg-blue-400/[0.03]"
+        className="group mb-6 flex items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-900/40 py-14 backdrop-blur-sm transition-all hover:border-fuchsia-300/25 hover:bg-fuchsia-300/[0.03]"
       >
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] transition-all group-hover:border-blue-400/20 group-hover:bg-blue-400/10">
-            <Orbit className="h-8 w-8 text-white/20 transition-colors group-hover:text-blue-400" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] transition-all group-hover:border-fuchsia-300/25 group-hover:bg-fuchsia-300/10">
+            <Orbit className="h-7 w-7 text-white/20 transition-colors group-hover:text-fuchsia-300" />
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-white/50 transition-colors group-hover:text-white/80">
@@ -98,74 +125,105 @@ export default function SpacePage() {
       </Link>
 
       {/* Recent canvases */}
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-medium text-white/50">Canvases recentes</h2>
-        <span className="text-[10px] text-white/20">
-          {SAMPLE_CANVASES.length} canvases
-        </span>
-      </div>
+      {canvases.length > 0 && (
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-white/50">
+              Sessoes recentes no canvas
+            </h2>
+            <span className="text-[10px] text-white/20">
+              {canvases.length} sessoes
+            </span>
+          </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SAMPLE_CANVASES.map((canvas) => (
-          <Link
-            key={canvas.id}
-            href={`/dashboard/orchestra/${canvas.id}`}
-            className="group rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-5 backdrop-blur-xl transition-all hover:border-white/[0.1] hover:bg-neutral-900/70"
-          >
-            {/* Canvas preview placeholder */}
-            <div className="mb-4 flex h-28 items-center justify-center rounded-xl border border-white/[0.04] bg-white/[0.02]">
-              <div className="flex items-center gap-3 text-white/15">
-                {/* Mini node visualization */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="h-5 w-14 rounded border border-cyan-400/20 bg-cyan-400/10" />
-                  <div className="h-px w-px" />
-                  <div className="flex gap-2">
-                    <div className="h-4 w-4 rounded-full border border-green-400/20 bg-green-400/10" />
-                    <div className="h-4 w-4 rounded-full border border-purple-400/20 bg-purple-400/10" />
-                    <div className="h-4 w-4 rounded-full border border-orange-400/20 bg-orange-400/10" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {canvases.map((canvas) => (
+              <Link
+                key={canvas.id}
+                href={`/dashboard/orchestra/${canvas.id}`}
+                className="group rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl transition-all hover:border-fuchsia-300/20 hover:bg-neutral-900/80"
+              >
+                {/* Canvas preview placeholder */}
+                <div className="mb-4 flex h-28 items-center justify-center rounded-xl border border-white/[0.04] bg-white/[0.02]">
+                  <div className="flex items-center gap-3 text-white/15">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="h-5 w-14 rounded border border-neon-cyan/20 bg-neon-cyan/10" />
+                      <div className="h-px w-px" />
+                      <div className="flex gap-2">
+                        <div className="h-4 w-4 rounded-full border border-green-400/20 bg-green-400/10" />
+                        <div className="h-4 w-4 rounded-full border border-purple-400/20 bg-purple-400/10" />
+                        {canvas.agentNames.length > 2 && (
+                          <div className="h-4 w-4 rounded-full border border-orange-400/20 bg-orange-400/10" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Title + expand */}
-            <div className="mb-2 flex items-start justify-between">
-              <h3 className="text-sm font-semibold text-white/90">
-                {canvas.title}
-              </h3>
-              <Maximize2 className="h-3.5 w-3.5 text-white/15 transition-colors group-hover:text-white/40" />
-            </div>
+                {/* Title + expand */}
+                <div className="mb-2 flex items-start justify-between">
+                  <h3 className="text-sm font-semibold text-white/90">
+                    {canvas.title}
+                  </h3>
+                  <Maximize2 className="h-3.5 w-3.5 text-white/15 transition-colors group-hover:text-white/40" />
+                </div>
 
-            {/* Agent pills */}
-            <div className="mb-3 flex flex-wrap gap-1">
-              {canvas.preview.agents.map((agent) => (
-                <span
-                  key={agent}
-                  className="rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/35"
-                >
-                  {agent}
-                </span>
-              ))}
-            </div>
+                {/* Agent pills */}
+                <div className="mb-3 flex flex-wrap gap-1">
+                  {canvas.agentNames.length > 0 ? (
+                    canvas.agentNames.map((name) => (
+                      <span
+                        key={name}
+                        className="inline-flex items-center gap-1 rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/40"
+                      >
+                        <Bot className="h-2.5 w-2.5" />
+                        {name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/25">
+                      sem agentes
+                    </span>
+                  )}
+                </div>
 
-            {/* Stats */}
-            <div className="flex items-center gap-3 border-t border-white/[0.05] pt-3">
-              <span className="flex items-center gap-1 text-[10px] text-white/25">
-                <Layers className="h-3 w-3" />
-                {canvas.nodeCount} nodes
-              </span>
-              <span className="flex items-center gap-1 text-[10px] text-white/25">
-                <GitFork className="h-3 w-3" />
-                {canvas.edgeCount} edges
-              </span>
-              <span className="ml-auto flex items-center gap-1 text-[10px] text-white/20">
-                <Clock className="h-3 w-3" />
-                {canvas.lastEdited}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
+                {/* Stats */}
+                <div className="flex items-center gap-3 border-t border-white/[0.05] pt-3">
+                  <span className="flex items-center gap-1 text-[10px] text-white/25">
+                    <Layers className="h-3 w-3" />
+                    {canvas.nodeCount} nodes
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] text-white/25">
+                    <GitFork className="h-3 w-3" />
+                    {canvas.edgeCount} edges
+                  </span>
+                  <span className="ml-auto flex items-center gap-1 text-[10px] text-white/20">
+                    <Clock className="h-3 w-3" />
+                    {formatTime(canvas.updatedAt)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
+      {canvases.length === 0 && (
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
+          <p className="text-sm text-white/65">
+            Nenhuma sessao disponivel. Inicie uma conversa no chat para criar
+            seu primeiro canvas.
+          </p>
+          <div className="mt-3">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+            >
+              Ir para Home
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

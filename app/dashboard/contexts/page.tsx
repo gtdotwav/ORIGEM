@@ -530,9 +530,9 @@ function ContextsPageContent() {
     <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm">
-              <Brain className="h-6 w-6 text-blue-400" />
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+              <Brain className="h-5 w-5 text-cyan-300" />
             </div>
             <div>
               <h1 className="text-2xl font-semibold text-white">Contextos</h1>
@@ -559,7 +559,7 @@ function ContextsPageContent() {
         </div>
       </div>
 
-      <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/60 px-4 py-3 backdrop-blur-xl">
+      <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/[0.08] bg-neutral-900/70 px-4 py-3 backdrop-blur-xl">
         <Search className="h-4 w-4 text-white/20" />
         <input
           type="text"
@@ -571,14 +571,14 @@ function ContextsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-6 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
           <div className="inline-flex items-center gap-2 text-sm text-white/65">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando contexto da sessao...
           </div>
         </div>
       ) : contextResults.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-6 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
           <p className="text-sm text-white/65">
             Nenhum contexto encontrado para esta sessao ainda.
           </p>
@@ -598,10 +598,10 @@ function ContextsPageContent() {
             return (
               <div
                 key={result.id}
-                className={`rounded-2xl border bg-neutral-900/60 p-5 backdrop-blur-xl transition-all ${
+                className={`rounded-2xl border bg-neutral-900/70 p-5 backdrop-blur-xl transition-all ${
                   isExpanded
-                    ? "border-neon-cyan/35 bg-neutral-900/75"
-                    : "border-white/[0.06] hover:border-white/[0.1] hover:bg-neutral-900/70"
+                    ? "border-neon-cyan/35 bg-neutral-900/80"
+                    : "border-white/[0.08] hover:border-white/[0.14] hover:bg-neutral-900/80"
                 }`}
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
@@ -776,7 +776,7 @@ function ContextsPageContent() {
 function ContextsPageFallback() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.06] bg-neutral-900/60 p-6 backdrop-blur-xl">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
         <div className="inline-flex items-center gap-2 text-sm text-white/65">
           <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
           Carregando contexto da sessao...

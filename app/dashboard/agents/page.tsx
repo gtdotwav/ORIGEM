@@ -218,19 +218,19 @@ function AgentsPageContent() {
       </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
           <p className="text-[11px] uppercase tracking-wide text-white/35">Agentes</p>
           <p className="mt-1 text-xl font-semibold text-white">{sessionAgents.length}</p>
           <p className="text-xs text-white/45">{activeAgentCount} em execucao</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
           <p className="text-[11px] uppercase tracking-wide text-white/35">Funcoes delegadas</p>
           <p className="mt-1 text-xl font-semibold text-white">
             {new Set(runtimeTasks.map((task) => task.functionKey)).size}
           </p>
           <p className="text-xs text-white/45">{runtimeTasks.length} tarefas mapeadas</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
           <p className="text-[11px] uppercase tracking-wide text-white/35">Direcoes de contexto</p>
           <p className="mt-1 text-xl font-semibold text-white">{contextDirections.length}</p>
           <p className="text-xs text-white/45">
@@ -240,7 +240,7 @@ function AgentsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
           <div className="inline-flex items-center gap-2 text-sm text-white/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando estado de agentes da sessao...
@@ -252,7 +252,7 @@ function AgentsPageContent() {
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
             <div className="mb-2 inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/40">
               <Brain className="h-3.5 w-3.5" />
               Direcoes vindas do contexto
@@ -283,7 +283,7 @@ function AgentsPageContent() {
           </div>
 
           {sessionAgents.length === 0 ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
               <p className="text-sm text-white/65">
                 Ainda nao existem agentes para esta sessao. Volte ao chat e envie uma solicitacao para disparar a delegacao.
               </p>
@@ -308,7 +308,7 @@ function AgentsPageContent() {
                 return (
                   <div
                     key={agent.id}
-                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4"
+                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl"
                   >
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <div>
@@ -402,7 +402,7 @@ function AgentsPageContent() {
 function AgentsPageFallback() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
         <div className="inline-flex items-center gap-2 text-sm text-white/70">
           <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
           Carregando agentes...

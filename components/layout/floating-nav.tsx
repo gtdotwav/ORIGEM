@@ -120,7 +120,7 @@ export function FloatingNav() {
 
           {/* Dropdown — 2-col grid, compact */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-3 w-[520px] -translate-x-1/2 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-3 shadow-2xl backdrop-blur-xl">
+            <div className="absolute left-1/2 top-full mt-3 w-[520px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
               {/* Arrow indicator */}
               <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/[0.08] bg-neutral-900/95" />
 

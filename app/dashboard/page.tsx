@@ -144,11 +144,8 @@ export default function DashboardPage() {
 
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-[40%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/14 blur-[88px]" />
-        <div className="absolute left-[55%] top-[58%] h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/12 blur-[88px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(0,0,0,0.38)_82%)]" />
-      </div>
+      {/* Subtle radial focus — complements layout HologramBackground */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_20%,rgba(0,0,0,0.35)_75%)]" />
 
       <div className="relative z-10 w-full max-w-[640px] pb-3">
         <div className="flex justify-center">
@@ -167,8 +164,8 @@ export default function DashboardPage() {
 
       {/* Central chat card */}
       <div className="relative z-10 flex w-full max-w-[640px] flex-col items-center">
-        <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-cyan-300/10 bg-cyan-300/5 blur-2xl" />
-        <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/80 p-6 shadow-2xl backdrop-blur-xl">
+        <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-neon-cyan/8 bg-neon-cyan/4 blur-2xl" />
+        <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
             <Atom className="h-4 w-4 text-blue-400" />
