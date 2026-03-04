@@ -1014,3 +1014,68 @@ export async function runChatOrchestration(
     }
   }, 700);
 }
+
+/* ------------------------------------------------------------------ */
+/*  Simple chat mode — conversational response without full pipeline  */
+/* ------------------------------------------------------------------ */
+
+const SIMPLE_RESPONSES: Array<{ keywords: string[]; response: string }> = [
+  {
+    keywords: ["conceito", "decompor", "decomposicao"],
+    response:
+      "Claro! Para decompor um conceito, podemos comecar identificando os elementos fundamentais e suas relacoes. Qual conceito voce gostaria de explorar? Posso ajudar a mapear as dimensoes semanticas, os contextos de uso e as conexoes com outros conceitos.",
+  },
+  {
+    keywords: ["mapa", "contexto", "mapear"],
+    response:
+      "Vamos criar um mapa de contexto! Descreva o tema central que deseja mapear e eu ajudarei a identificar os nos semanticos, as conexoes e as camadas de significado.",
+  },
+  {
+    keywords: ["agente", "orquestrar", "delegar"],
+    response:
+      "Posso ajudar com a orquestracao! Descreva a tarefa que precisa executar e eu sugerirei quais agentes especializados seriam mais adequados e qual estrategia usar.",
+  },
+  {
+    keywords: ["analise", "semantica", "analisar"],
+    response:
+      "Vamos fazer uma analise semantica! Compartilhe o texto ou conceito que deseja analisar. Examinarei os significados implicitos e os padroes semanticos para extrair insights.",
+  },
+  {
+    keywords: ["projeto", "plano", "planejamento"],
+    response:
+      "Otimo! Me conte mais sobre o projeto que deseja iniciar. Posso ajudar a estruturar as etapas, definir objetivos claros e criar um plano de execucao eficiente.",
+  },
+  {
+    keywords: ["ideia", "criar", "novo"],
+    response:
+      "Adorei! Vamos explorar essa ideia juntos. Me de mais detalhes sobre o que voce tem em mente e podemos construir a solucao passo a passo.",
+  },
+];
+
+function generateSimpleResponse(prompt: string): string {
+  const lower = prompt.toLowerCase();
+  const match = SIMPLE_RESPONSES.find((r) =>
+    r.keywords.some((kw) => lower.includes(kw))
+  );
+  if (match) return match.response;
+  return `Entendi! Voce mencionou: "${prompt.length > 80 ? prompt.slice(0, 80) + "..." : prompt}". Me conte mais detalhes e vamos construir a solucao juntos no modo de conversa direta.`;
+}
+
+export async function runSimpleChat(
+  sessionId: string,
+  prompt: string
+): Promise<void> {
+  const sessionStore = useSessionStore.getState();
+  const runtimeStore = useRuntimeStore.getState();
+
+  runtimeStore.ensureSession(sessionId);
+  runtimeStore.setRunning(sessionId, true);
+
+  await delay(600 + Math.random() * 800);
+
+  const response = generateSimpleResponse(prompt);
+  sessionStore.addMessage(createMessage(sessionId, "assistant", response));
+  sessionStore.updateSession(sessionId, { updatedAt: new Date() });
+
+  runtimeStore.setRunning(sessionId, false);
+}
