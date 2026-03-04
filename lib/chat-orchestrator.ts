@@ -1019,46 +1019,83 @@ export async function runChatOrchestration(
 /*  Simple chat mode — conversational response without full pipeline  */
 /* ------------------------------------------------------------------ */
 
-const SIMPLE_RESPONSES: Array<{ keywords: string[]; response: string }> = [
+const FACTUAL_RESPONSES: Array<{ test: (q: string) => boolean; answer: string }> = [
+  {
+    test: (q) => /quantas?\s+pessoas|popula[cç][aã]o/.test(q) && /brasil/.test(q),
+    answer: "O Brasil tem aproximadamente **215,3 milhoes de habitantes** (estimativa IBGE 2024). E o sexto pais mais populoso do mundo, atras de India, China, EUA, Indonesia e Paquistao. A maior concentracao esta no Sudeste, especialmente em Sao Paulo e Rio de Janeiro.",
+  },
+  {
+    test: (q) => /capital\s+d[oe]/.test(q) && /brasil/.test(q),
+    answer: "A capital do Brasil e **Brasilia**, localizada no Distrito Federal. Foi inaugurada em 21 de abril de 1960, projetada por Lucio Costa (urbanismo) e Oscar Niemeyer (arquitetura).",
+  },
+  {
+    test: (q) => /quantos?\s+estados/.test(q) && /brasil/.test(q),
+    answer: "O Brasil possui **26 estados** e **1 Distrito Federal**, totalizando 27 unidades federativas. O maior em area e o Amazonas, e o mais populoso e Sao Paulo.",
+  },
+  {
+    test: (q) => /(?:o que|que)\s+[eé]/.test(q) && /(?:ia|inteligencia artificial)/.test(q),
+    answer: "**Inteligencia Artificial (IA)** e um campo da ciencia da computacao que desenvolve sistemas capazes de realizar tarefas que normalmente requerem inteligencia humana — como aprendizado, raciocinio, percepcao e tomada de decisao. Inclui subcampos como machine learning, processamento de linguagem natural (NLP), visao computacional e redes neurais.",
+  },
+  {
+    test: (q) => /(?:o que|que)\s+[eé]/.test(q) && /origem/.test(q),
+    answer: "**ORIGEM** e uma plataforma de inteligencia artificial psicossemantica. Ela decompoe conceitos, orquestra agentes especializados e cria mapas de contexto para resolver problemas complexos. No modo 360, ativa todo o ecossistema de decomposicao, delegacao e sintese.",
+  },
+];
+
+const TOPIC_RESPONSES: Array<{ keywords: string[]; response: string }> = [
   {
     keywords: ["conceito", "decompor", "decomposicao"],
-    response:
-      "Claro! Para decompor um conceito, podemos comecar identificando os elementos fundamentais e suas relacoes. Qual conceito voce gostaria de explorar? Posso ajudar a mapear as dimensoes semanticas, os contextos de uso e as conexoes com outros conceitos.",
+    response: "Para decompor um conceito, identificamos seus elementos fundamentais e relacoes. Qual conceito voce quer explorar? Posso mapear dimensoes semanticas, contextos de uso e conexoes.\n\n> **Dica**: No modo **360**, a decomposicao e feita automaticamente por agentes especializados.",
   },
   {
     keywords: ["mapa", "contexto", "mapear"],
-    response:
-      "Vamos criar um mapa de contexto! Descreva o tema central que deseja mapear e eu ajudarei a identificar os nos semanticos, as conexoes e as camadas de significado.",
+    response: "Vamos criar um mapa de contexto! Descreva o tema central e eu ajudarei a identificar nos semanticos, conexoes e camadas de significado.\n\n> **Dica**: No modo **360**, o mapeamento gera automaticamente projetos e tarefas delegadas.",
   },
   {
     keywords: ["agente", "orquestrar", "delegar"],
-    response:
-      "Posso ajudar com a orquestracao! Descreva a tarefa que precisa executar e eu sugerirei quais agentes especializados seriam mais adequados e qual estrategia usar.",
-  },
-  {
-    keywords: ["analise", "semantica", "analisar"],
-    response:
-      "Vamos fazer uma analise semantica! Compartilhe o texto ou conceito que deseja analisar. Examinarei os significados implicitos e os padroes semanticos para extrair insights.",
+    response: "Posso ajudar com orquestracao! Descreva a tarefa e eu sugerirei quais agentes especializados usar e qual estrategia de execucao adotar.\n\n> **Dica**: No modo **360**, os agentes sao delegados e executados automaticamente.",
   },
   {
     keywords: ["projeto", "plano", "planejamento"],
-    response:
-      "Otimo! Me conte mais sobre o projeto que deseja iniciar. Posso ajudar a estruturar as etapas, definir objetivos claros e criar um plano de execucao eficiente.",
+    response: "Me conte mais sobre o projeto! Posso ajudar a estruturar etapas, definir objetivos e criar um plano de execucao eficiente.\n\n> **Dica**: No modo **360**, o planejamento gera contextos, agentes e pipeline automaticamente.",
   },
   {
-    keywords: ["ideia", "criar", "novo"],
-    response:
-      "Adorei! Vamos explorar essa ideia juntos. Me de mais detalhes sobre o que voce tem em mente e podemos construir a solucao passo a passo.",
+    keywords: ["ideia", "criar", "novo", "inventar"],
+    response: "Adorei! Me de mais detalhes sobre sua ideia e vamos construir juntos, passo a passo.\n\n> **Dica**: No modo **360**, sua ideia e decomposta, delegada a agentes e sintetizada automaticamente.",
+  },
+  {
+    keywords: ["ajuda", "ajudar", "help"],
+    response: "Claro! Estou aqui para ajudar. Voce pode me perguntar qualquer coisa — desde questoes factuais ate planejamento de projetos e decomposicao de conceitos.\n\nNo modo **Chat**, respondo diretamente. No modo **360**, ativo o ecossistema completo com agentes, decomposicao e pipeline.",
+  },
+  {
+    keywords: ["ola", "oi", "bom dia", "boa tarde", "boa noite", "hey"],
+    response: "Ola! Bem-vindo ao ORIGEM. Como posso ajudar? Pode fazer perguntas, pedir analises ou explorar conceitos comigo.\n\nEstou no modo **Chat** — respostas diretas e conversacionais.",
   },
 ];
 
 function generateSimpleResponse(prompt: string): string {
-  const lower = prompt.toLowerCase();
-  const match = SIMPLE_RESPONSES.find((r) =>
+  const lower = prompt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // 1. Check factual knowledge base
+  const factual = FACTUAL_RESPONSES.find((r) => r.test(lower));
+  if (factual) return factual.answer;
+
+  // 2. Check topic patterns
+  const topic = TOPIC_RESPONSES.find((r) =>
     r.keywords.some((kw) => lower.includes(kw))
   );
-  if (match) return match.response;
-  return `Entendi! Voce mencionou: "${prompt.length > 80 ? prompt.slice(0, 80) + "..." : prompt}". Me conte mais detalhes e vamos construir a solucao juntos no modo de conversa direta.`;
+  if (topic) return topic.response;
+
+  // 3. Detect question patterns and give helpful generic response
+  const isQuestion = lower.includes("?") ||
+    /^(qual|quanto|quantas|como|por que|porque|onde|quando|quem|o que|que)\b/.test(lower);
+
+  if (isQuestion) {
+    return `Essa e uma otima pergunta! No momento, estou operando no modo **Chat direto** sem conexao com LLM externo.\n\nPara perguntas factuais e analises profundas, recomendo:\n1. Conectar um provedor de IA em **Settings > Providers**\n2. Ou mudar para o modo **360** para acionar o ecossistema completo de decomposicao e analise.\n\nMesmo assim, posso ajudar com planejamento, decomposicao de conceitos e organizacao de ideias!`;
+  }
+
+  // 4. Default conversational response
+  return `Recebi sua mensagem! No modo **Chat**, respondo de forma direta e conversacional.\n\nPosso ajudar com:\n- Decomposicao de conceitos\n- Planejamento de projetos\n- Mapeamento de contextos\n- Perguntas sobre o ORIGEM\n\nPara analise profunda com agentes e pipeline, mude para o modo **360**.`;
 }
 
 export async function runSimpleChat(
@@ -1071,7 +1108,7 @@ export async function runSimpleChat(
   runtimeStore.ensureSession(sessionId);
   runtimeStore.setRunning(sessionId, true);
 
-  await delay(600 + Math.random() * 800);
+  await delay(400 + Math.random() * 600);
 
   const response = generateSimpleResponse(prompt);
   sessionStore.addMessage(createMessage(sessionId, "assistant", response));
