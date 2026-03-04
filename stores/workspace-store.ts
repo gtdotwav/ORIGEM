@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { Workspace } from "@/types/workspace";
 import { useSessionStore } from "@/stores/session-store";
+import { useProjectStore } from "@/stores/project-store";
 
 interface WorkspaceState {
   workspaces: Workspace[];
@@ -41,7 +42,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           const { sessions, updateSession } = useSessionStore.getState();
           for (const session of sessions) {
             if (session.workspaceId === id) {
-              updateSession(session.id, { workspaceId: undefined });
+              updateSession(session.id, { workspaceId: undefined, projectId: undefined });
+            }
+          }
+          const { projects, removeProject } = useProjectStore.getState();
+          for (const project of projects) {
+            if (project.workspaceId === id) {
+              removeProject(project.id);
             }
           }
         },
