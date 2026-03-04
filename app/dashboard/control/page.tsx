@@ -18,6 +18,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
@@ -30,6 +31,7 @@ import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 const SUGGESTIONS = [
   "Criar fluxo multiagente com consenso",
@@ -75,10 +77,11 @@ export default function DashboardControlPage() {
   const [sending, setSending] = useState(false);
   const [providerConnectedCount, setProviderConnectedCount] = useState(0);
   const [providerTotalCount, setProviderTotalCount] = useState(0);
+  const [sessionPage, setSessionPage] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const messages = useSessionStore((state) => state.messages);
   const addSession = useSessionStore((state) => state.addSession);
   const addMessage = useSessionStore((state) => state.addMessage);
@@ -158,6 +161,9 @@ export default function DashboardControlPage() {
   );
 
   const latestSessionId = latestSessions[0]?.id ?? null;
+
+  const PAGE_SIZE = 8;
+  const totalPages = Math.ceil(latestSessions.length / PAGE_SIZE);
 
   const startSessionFromDashboard = async () => {
     const text = input.trim();
@@ -314,12 +320,17 @@ export default function DashboardControlPage() {
           </div>
 
           {latestSessions.length === 0 ? (
-            <p className="rounded-xl border border-white/[0.06] bg-black/25 p-3 text-sm text-white/50">
-              Nenhuma sessao ativa ainda. Dispare uma instrução acima para iniciar o controle.
-            </p>
+            <CosmicEmptyState
+              icon={Sparkles}
+              title="Nenhuma sessao ativa"
+              description="Crie uma nova sessao no dashboard para iniciar a orquestracao."
+              neonColor="cyan"
+              action={{ label: "Ir ao dashboard", href: "/dashboard" }}
+            />
           ) : (
+            <>
             <div className="space-y-2.5">
-              {latestSessions.slice(0, 8).map((session) => {
+              {latestSessions.slice(sessionPage * PAGE_SIZE, (sessionPage + 1) * PAGE_SIZE).map((session) => {
                 const sessionMessages = messages.filter(
                   (message) => message.sessionId === session.id
                 );
@@ -389,6 +400,16 @@ export default function DashboardControlPage() {
                 );
               })}
             </div>
+            {totalPages > 1 && (
+              <div className="mt-3 flex items-center justify-between text-xs text-white/35">
+                <button type="button" disabled={sessionPage === 0} onClick={() => setSessionPage(p => p - 1)}
+                  className="transition-colors hover:text-white/60 disabled:opacity-30">Anterior</button>
+                <span>{sessionPage + 1} / {totalPages}</span>
+                <button type="button" disabled={sessionPage >= totalPages - 1} onClick={() => setSessionPage(p => p + 1)}
+                  className="transition-colors hover:text-white/60 disabled:opacity-30">Proxima</button>
+              </div>
+            )}
+            </>
           )}
         </section>
 

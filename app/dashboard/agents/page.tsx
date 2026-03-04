@@ -12,6 +12,8 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
+import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
@@ -24,6 +26,7 @@ import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 const STATUS_META = {
   idle: "text-white/55 border-white/[0.15] bg-white/[0.06]",
@@ -56,9 +59,10 @@ function AgentsPageContent() {
   const queryContextId = searchParams.get("contextId");
 
   const [isHydrating, setIsHydrating] = useState(false);
+  const [expandedOutputId, setExpandedOutputId] = useState<string | null>(null);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
 
@@ -167,7 +171,7 @@ function AgentsPageContent() {
   ).length;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
@@ -283,11 +287,15 @@ function AgentsPageContent() {
           </div>
 
           {sessionAgents.length === 0 ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-              <p className="text-sm text-white/65">
-                Ainda nao existem agentes para esta sessao. Volte ao chat e envie uma solicitacao para disparar a delegacao.
-              </p>
-            </div>
+            <CosmicEmptyState
+              icon={Bot}
+              title="Nenhum agente ativo"
+              description="Envie uma mensagem no chat para disparar delegacao de agentes."
+              action={{
+                label: "Voltar ao chat",
+                href: `/dashboard/chat/${targetSessionId}`,
+              }}
+            />
           ) : (
             <div className="grid gap-3 lg:grid-cols-2">
               {sessionAgents.map((agent) => {
@@ -316,7 +324,7 @@ function AgentsPageContent() {
                         <p className="text-xs text-white/45">{agent.role}</p>
                       </div>
                       <span
-                        className={`rounded-md border px-2 py-0.5 text-[11px] ${STATUS_META[agent.status]}`}
+                        className={`rounded-md border px-2 py-0.5 text-xs ${STATUS_META[agent.status]}`}
                       >
                         {agent.status}
                       </span>
@@ -352,10 +360,32 @@ function AgentsPageContent() {
                       </p>
                       <p>Outputs: {agent.outputs.length}</p>
                       {latestOutput ? (
-                        <p className="text-white/45">
-                          Ultimo output: {latestOutput.content.slice(0, 92)}
-                          {latestOutput.content.length > 92 ? "..." : ""}
-                        </p>
+                        <div className="text-white/45">
+                          <p>
+                            Ultimo output:{" "}
+                            {expandedOutputId === agent.id
+                              ? latestOutput.content
+                              : latestOutput.content.slice(0, 200)}
+                            {!expandedOutputId || expandedOutputId !== agent.id
+                              ? latestOutput.content.length > 200
+                                ? "..."
+                                : ""
+                              : ""}
+                          </p>
+                          {latestOutput.content.length > 200 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedOutputId((prev) =>
+                                  prev === agent.id ? null : agent.id
+                                )
+                              }
+                              className="mt-1 text-[11px] text-neon-cyan hover:text-neon-cyan/80 transition-colors"
+                            >
+                              {expandedOutputId === agent.id ? "Ver menos" : "Ver mais"}
+                            </button>
+                          )}
+                        </div>
                       ) : null}
                     </div>
                   </div>
@@ -401,12 +431,22 @@ function AgentsPageContent() {
 
 function AgentsPageFallback() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2 text-sm text-white/70">
-          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-          Carregando agentes...
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 flex items-start gap-3">
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-white/[0.04]" />
+        <div className="space-y-2">
+          <div className="h-5 w-48 animate-pulse rounded bg-white/[0.04]" />
+          <div className="h-3 w-64 animate-pulse rounded bg-white/[0.04]" />
         </div>
+      </div>
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <MetricSkeleton />
+        <MetricSkeleton />
+        <MetricSkeleton />
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <CardSkeleton />
+        <CardSkeleton />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,6 +11,14 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SECTIONS = [
   {
@@ -52,8 +61,27 @@ const SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [language, setLanguage] = useState("pt-BR");
+
+  useEffect(() => {
+    setReducedMotion(localStorage.getItem("origem-reduced-motion") === "true");
+    setLanguage(localStorage.getItem("origem-language") ?? "pt-BR");
+  }, []);
+
+  const handleMotionToggle = (checked: boolean) => {
+    setReducedMotion(checked);
+    localStorage.setItem("origem-reduced-motion", String(checked));
+    document.documentElement.classList.toggle("reduce-motion", checked);
+  };
+
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    localStorage.setItem("origem-language", value);
+  };
+
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-8 flex items-start gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
           <Settings className="h-5 w-5 text-white/60" />
@@ -90,6 +118,32 @@ export default function SettingsPage() {
                 <p className="text-xs leading-relaxed text-white/45">
                   {section.description}
                 </p>
+
+                {section.title === "Aparencia" && (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                    <span className="text-xs text-white/60">Reduzir animacoes</span>
+                    <Switch
+                      checked={reducedMotion}
+                      onCheckedChange={handleMotionToggle}
+                    />
+                  </div>
+                )}
+
+                {section.title === "Idioma" && (
+                  <div className="mt-3">
+                    <Select value={language} onValueChange={handleLanguageChange}>
+                      <SelectTrigger className="h-8 w-40 border-white/[0.08] bg-white/[0.04] text-xs text-white/70">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl">
+                        <SelectItem value="pt-BR" className="text-xs text-white/70">Portugues (BR)</SelectItem>
+                        <SelectItem value="en-US" className="text-xs text-white/70">English (US)</SelectItem>
+                        <SelectItem value="es-ES" className="text-xs text-white/70">Espanol (ES)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 {section.href && (
                   <Link
                     href={section.href}

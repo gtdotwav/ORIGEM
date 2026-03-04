@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`font-sans antialiased ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
       >
         {children}
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   )

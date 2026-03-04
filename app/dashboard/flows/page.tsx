@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -11,6 +11,8 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
+import { PipelineSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
@@ -23,6 +25,7 @@ import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type { PipelineEvent, PipelineStage } from "@/types/pipeline";
 
 const STAGE_LABELS: Record<PipelineStage, string> = {
@@ -115,7 +118,7 @@ function FlowsPageContent() {
   const [isHydrating, setIsHydrating] = useState(false);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
 
@@ -228,7 +231,7 @@ function FlowsPageContent() {
   const progress = runtime?.overallProgress ?? pipelineProgress;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
@@ -280,9 +283,12 @@ function FlowsPageContent() {
           </div>
         </div>
       ) : !targetSessionId ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
-          Nenhuma sessao ativa encontrada. Inicie no chat para disparar pipeline.
-        </div>
+        <CosmicEmptyState
+          icon={GitBranch}
+          title="Nenhum fluxo ativo"
+          description="Fluxos aparecem quando tarefas sao executadas no pipeline."
+          neonColor="orange"
+        />
       ) : (
         <>
           <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
@@ -300,20 +306,24 @@ function FlowsPageContent() {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {PIPELINE_ORDER.map((stage) => {
+            <div className="flex items-center gap-0 overflow-x-auto pb-1">
+              {PIPELINE_ORDER.map((stage, i) => {
                 const reached = PIPELINE_ORDER.indexOf(stage) <= PIPELINE_ORDER.indexOf(pipelineStage);
+                const isCurrent = stage === pipelineStage;
                 return (
-                  <span
-                    key={stage}
-                    className={`rounded-md border px-2 py-0.5 text-[11px] ${
-                      reached
-                        ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-                        : "border-white/[0.10] bg-white/[0.04] text-white/45"
-                    }`}
-                  >
-                    {STAGE_LABELS[stage]}
-                  </span>
+                  <Fragment key={stage}>
+                    {i > 0 && (
+                      <div className={`h-0.5 w-6 shrink-0 transition-colors ${reached ? "bg-neon-cyan/50" : "bg-white/[0.08]"}`} />
+                    )}
+                    <div className={`flex flex-col items-center gap-1 shrink-0 transition-transform ${isCurrent ? "scale-110" : ""}`}>
+                      <div className={`h-3 w-3 rounded-full border-2 transition-colors ${
+                        reached ? "border-neon-cyan bg-neon-cyan/30" : "border-white/20 bg-transparent"
+                      } ${isCurrent ? "ring-2 ring-neon-cyan/20" : ""}`} />
+                      <span className={`text-[9px] whitespace-nowrap ${reached ? "text-neon-cyan" : "text-white/35"}`}>
+                        {STAGE_LABELS[stage]}
+                      </span>
+                    </div>
+                  </Fragment>
                 );
               })}
             </div>
@@ -434,12 +444,13 @@ function FlowsPageContent() {
 
 function FlowsPageFallback() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2 text-sm text-white/70">
-          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-          Carregando fluxos...
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <PipelineSkeleton />
+      <div className="mt-3 space-y-2">
+        <TaskRowSkeleton />
+        <TaskRowSkeleton />
+        <TaskRowSkeleton />
+        <TaskRowSkeleton />
       </div>
     </div>
   );

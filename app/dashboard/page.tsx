@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Atom, Send, LayoutDashboard } from "lucide-react";
+import { ImageIcon, Settings, Atom, Send, LayoutDashboard, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import { toast } from "sonner";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
@@ -48,6 +51,10 @@ export default function DashboardPage() {
   const addSession = useSessionStore((s) => s.addSession);
   const addMessage = useSessionStore((s) => s.addMessage);
   const setCurrentSession = useSessionStore((s) => s.setCurrentSession);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const activeWsName = useWorkspaceStore((s) =>
+    s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.name
+  );
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -62,7 +69,7 @@ export default function DashboardPage() {
     }
 
     const sessionId = createId("session");
-    const session = createSession(sessionId, text);
+    const session = createSession(sessionId, text, activeWorkspaceId ?? undefined);
 
     addSession(session);
     setCurrentSession(sessionId);
@@ -99,12 +106,12 @@ export default function DashboardPage() {
     }
 
     if (!file.type.startsWith("image/")) {
-      window.alert("Selecione um arquivo de imagem valido.");
+      toast.error("Selecione um arquivo de imagem valido.");
       return;
     }
 
     if (file.size > MAX_IMAGE_BYTES) {
-      window.alert("A imagem deve ter ate 3MB para envio no chat.");
+      toast.error("A imagem deve ter ate 3 MB.");
       return;
     }
 
@@ -136,7 +143,7 @@ export default function DashboardPage() {
       });
     } catch (error) {
       console.error("Failed to upload image from dashboard", error);
-      window.alert("Nao foi possivel processar a imagem. Tente novamente.");
+      toast.error("Nao foi possivel processar a imagem. Tente novamente.");
     } finally {
       setUploadingImage(false);
     }
@@ -163,7 +170,12 @@ export default function DashboardPage() {
       <div className="flex-1" />
 
       {/* Central chat card */}
-      <div className="relative z-10 flex w-full max-w-[640px] flex-col items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative z-10 flex w-full max-w-[640px] flex-col items-center"
+      >
         <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-neon-cyan/8 bg-neon-cyan/4 blur-2xl" />
         <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
@@ -175,6 +187,14 @@ export default function DashboardPage() {
           <h1 className="mb-5 text-2xl font-semibold text-white">
             What can I help you today?
           </h1>
+
+          {/* Workspace indicator */}
+          {activeWsName && (
+            <div className="mb-2 flex items-center gap-2 text-xs text-neon-cyan/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan/50" />
+              Criando em: {activeWsName}
+            </div>
+          )}
 
           {/* Input field */}
           <div className="mb-3 rounded-xl bg-white/[0.06] px-4 py-3">
@@ -237,26 +257,37 @@ export default function DashboardPage() {
             }}
           />
 
+          {/* Upload indicator */}
+          {uploadingImage && (
+            <div className="mb-3 flex items-center gap-3 rounded-xl border border-neon-cyan/20 bg-neon-cyan/5 px-3 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+              <span className="text-xs text-neon-cyan">Processando imagem...</span>
+            </div>
+          )}
+
           {/* Suggestion badges */}
-          <div className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map((suggestion) => (
-              <button
+          <div className="flex flex-wrap gap-2 overflow-x-auto">
+            {SUGGESTIONS.map((suggestion, index) => (
+              <motion.button
                 key={suggestion}
                 type="button"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
                 onClick={() => setInput(suggestion)}
                 className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/50 transition-all hover:border-white/15 hover:bg-white/[0.08] hover:text-white/70"
               >
                 {suggestion}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">
         <div className="text-center">
-          <div className="mb-1 flex items-center justify-center gap-3 text-xs text-white/25">
+          <div className="mb-1 flex flex-col items-center gap-2 text-xs text-white/25 sm:flex-row sm:gap-3">
             <a href="#" className="transition-colors hover:text-white/40">
               Privacy Policy
             </a>

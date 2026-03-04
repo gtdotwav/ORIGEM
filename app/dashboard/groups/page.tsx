@@ -12,6 +12,8 @@ import {
   Users,
   Vote,
 } from "lucide-react";
+import { CardSkeleton } from "@/components/shared/cosmic-skeleton";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
@@ -24,6 +26,7 @@ import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type { AgentGroup } from "@/types/agent";
 
 type GroupStrategy = AgentGroup["strategy"];
@@ -73,7 +76,7 @@ function GroupsPageContent() {
   const [isHydrating, setIsHydrating] = useState(false);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
 
@@ -213,7 +216,7 @@ function GroupsPageContent() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
@@ -289,11 +292,12 @@ function GroupsPageContent() {
           </div>
 
           {effectiveGroups.length === 0 ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-              <p className="text-sm text-white/65">
-                Ainda nao ha grupos definidos. Volte ao contexto e direcione uma estrategia de colaboracao.
-              </p>
-            </div>
+            <CosmicEmptyState
+              icon={Users}
+              title="Nenhum grupo ativo"
+              description="Grupos sao criados automaticamente durante a orquestracao."
+              neonColor="green"
+            />
           ) : (
             <div className="space-y-3">
               {effectiveGroups.map((group) => {
@@ -394,12 +398,10 @@ function GroupsPageContent() {
 
 function GroupsPageFallback() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2 text-sm text-white/70">
-          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-          Carregando grupos...
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="space-y-3">
+        <CardSkeleton />
+        <CardSkeleton />
       </div>
     </div>
   );
