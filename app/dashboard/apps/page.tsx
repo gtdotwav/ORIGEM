@@ -1,9 +1,20 @@
 "use client";
 
-import { Sparkles, MessageSquare } from "lucide-react";
+import { Sparkles, Trash2 } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
+import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
+import { useCustomAppStore } from "@/stores/custom-app-store";
+
+const STATUS_BADGE: Record<string, string> = {
+  draft: "Rascunho",
+  active: "Ativo",
+  archived: "Arquivado",
+};
 
 export default function AppsPage() {
+  const customApps = useCustomAppStore((s) => s.apps);
+  const removeApp = useCustomAppStore((s) => s.removeApp);
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
@@ -31,12 +42,59 @@ export default function AppsPage() {
           badge="Novo"
         />
 
-        <div className="flex items-center justify-center rounded-2xl border border-dashed border-white/[0.06] bg-neutral-900/30 p-6">
-          <div className="text-center">
-            <MessageSquare className="mx-auto mb-2 h-6 w-6 text-white/10" />
-            <p className="text-xs text-white/20">Mais apps em breve</p>
+        {/* Custom apps */}
+        {customApps.map((app) => (
+          <div
+            key={app.id}
+            className="group relative rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl transition-all hover:border-white/[0.15]"
+          >
+            <button
+              type="button"
+              onClick={() => removeApp(app.id)}
+              className="absolute right-3 top-3 rounded-md p-1 text-white/15 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+              title="Remover app"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-xl">🚀</span>
+              <span className="rounded-md border border-neon-cyan/25 bg-neon-cyan/10 px-1.5 py-0.5 text-[9px] font-medium uppercase text-neon-cyan">
+                {STATUS_BADGE[app.status] ?? app.status}
+              </span>
+            </div>
+            <h3 className="mb-1 text-sm font-semibold text-white/90">
+              {app.name}
+            </h3>
+            <p className="mb-2 text-[11px] text-neon-cyan/70">
+              {app.intention}
+            </p>
+            <p className="text-xs text-white/40 line-clamp-2">
+              {app.description}
+            </p>
+            {app.advancedContext && (
+              <div className="mt-2 flex gap-2">
+                {app.advancedContext.urls.length > 0 && (
+                  <span className="text-[9px] text-white/25">
+                    {app.advancedContext.urls.length} sites
+                  </span>
+                )}
+                {app.advancedContext.media.length > 0 && (
+                  <span className="text-[9px] text-white/25">
+                    {app.advancedContext.media.length} midias
+                  </span>
+                )}
+                {app.advancedContext.sources.length > 0 && (
+                  <span className="text-[9px] text-white/25">
+                    {app.advancedContext.sources.length} fontes
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+        ))}
+
+        {/* Builder trigger */}
+        <AppBuilderDialog />
       </div>
     </div>
   );

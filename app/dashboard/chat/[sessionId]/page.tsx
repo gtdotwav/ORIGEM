@@ -18,7 +18,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
-import { TierSelector } from "@/components/chat/tier-selector";
+import { AgentTaskCards } from "@/components/chat/agent-task-cards";
+import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
 import { EcosystemConfig } from "@/components/chat/ecosystem-config";
@@ -467,7 +468,13 @@ export default function ChatPage() {
                               />
                             )}
                           {!isUser && shouldRenderDistribution(message.metadata) && (
-                            <RealtimeDistributionBubble sessionId={sessionId} />
+                            <AgentTaskCards
+                              sessionId={sessionId}
+                              intent={
+                                (message.metadata as Record<string, unknown>)
+                                  ?.intent as import("@/types/decomposition").Intent | undefined
+                              }
+                            />
                           )}
                           {!isUser &&
                             shouldRenderJourney(message.metadata) &&
@@ -504,10 +511,7 @@ export default function ChatPage() {
                           <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
                           Processando e delegando em tempo real...
                         </div>
-                        <RealtimeDistributionBubble
-                          sessionId={sessionId}
-                          showTaskList={false}
-                        />
+                        <AgentTaskCards sessionId={sessionId} />
                       </div>
                     </div>
                   )}
@@ -519,10 +523,7 @@ export default function ChatPage() {
                           <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
                           Distribuicao em execucao...
                         </div>
-                        <RealtimeDistributionBubble
-                          sessionId={sessionId}
-                          showTaskList={false}
-                        />
+                        <AgentTaskCards sessionId={sessionId} />
                       </div>
                     </div>
                   )}
@@ -539,11 +540,9 @@ export default function ChatPage() {
                 void sendMessage();
               }}
             >
-              {chatMode === "direct" && (
-                <div className="mb-2">
-                  <TierSelector />
-                </div>
-              )}
+              <div className="mb-2">
+                <LLMSelector />
+              </div>
               <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/30 p-2.5">
                 <AIVoiceInput
                   onStop={(dur) => {

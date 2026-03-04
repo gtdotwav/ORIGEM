@@ -1129,10 +1129,15 @@ export async function runSimpleChat(
         content: m.content,
       }));
 
+    const { ecosystemConfig } = useChatSettingsStore.getState();
+    const hasManualSelection = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+
     const { callChatCompletion } = await import("@/lib/chat-api");
     const result = await callChatCompletion({
       messages: history,
-      tier: selectedTier,
+      ...(hasManualSelection
+        ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+        : { tier: selectedTier }),
       systemPrompt:
         "Voce e o ORIGEM, uma plataforma de IA psicossemantica. Responda em portugues brasileiro de forma clara, util e objetiva.",
     });
