@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { History, X, ArrowUpRight, Trash2, Workflow } from "lucide-react";
+import {
+  ChevronLeft,
+  FileText,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Workflow,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -23,121 +30,117 @@ export function ChatHistoryPanel({
   const sessions = useSessionStore((s) => s.sessions);
   const removeSession = useSessionStore((s) => s.removeSession);
 
-  const looseSessions = sessions.filter((s) => !s.projectId);
+  const looseSessions = sessions
+    .filter((s) => !s.projectId)
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
   if (!open) return null;
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay — subtle, click to close */}
       <div
-        className="fixed inset-0 z-40 bg-black/40"
+        className="fixed inset-0 z-40 bg-black/30"
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Left sidebar panel — IDE style */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
+        initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed right-0 top-0 z-50 flex h-full w-80 flex-col border-l border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl"
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-white/[0.06] bg-neutral-950/98 backdrop-blur-2xl"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-          <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-neon-cyan" />
-            <h2 className="text-sm font-semibold text-white/80">Historico</h2>
-            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/35">
+        {/* Header — compact IDE toolbar */}
+        <div className="flex h-10 items-center justify-between border-b border-white/[0.05] px-3">
+          <div className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5 text-white/30" />
+            <span className="text-[11px] font-medium tracking-wide text-white/50">
+              HISTORICO
+            </span>
+            <span className="ml-1 rounded bg-white/[0.06] px-1 py-px text-[9px] tabular-nums text-white/25">
               {looseSessions.length}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+            className="rounded p-0.5 text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
           >
-            <X className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        {/* Session list */}
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        {/* Session list — file tree style */}
+        <div className="flex-1 overflow-y-auto py-1">
           {looseSessions.length === 0 ? (
-            <div className="flex flex-col items-center py-12 text-center">
-              <History className="mb-3 h-8 w-8 text-white/10" />
-              <p className="text-xs text-white/30">
-                Conversas avulsas aparecerao aqui
-              </p>
-              <p className="mt-1 text-[10px] text-white/20">
-                Chats que nao evoluiram para projetos
+            <div className="flex flex-col items-center px-3 py-10 text-center">
+              <MessageSquare className="mb-2 h-5 w-5 text-white/8" />
+              <p className="text-[11px] text-white/25">
+                Nenhuma conversa avulsa
               </p>
             </div>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-px px-1">
               {looseSessions.map((session) => {
                 const isCurrent = session.id === currentSessionId;
                 return (
                   <div
                     key={session.id}
                     className={cn(
-                      "group flex items-start gap-2 rounded-lg border p-2 transition-all",
+                      "group flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors",
                       isCurrent
-                        ? "border-neon-cyan/20 bg-neon-cyan/5"
-                        : "border-transparent hover:border-white/[0.06] hover:bg-white/[0.03]"
+                        ? "bg-neon-cyan/8 text-neon-cyan"
+                        : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
                     )}
                   >
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/dashboard/chat/${session.id}`}
-                        className="block"
-                        onClick={onClose}
-                      >
-                        <p
-                          className={cn(
-                            "truncate text-xs font-medium",
-                            isCurrent
-                              ? "text-neon-cyan"
-                              : "text-white/70 group-hover:text-white/90"
-                          )}
-                        >
-                          {session.title}
-                        </p>
-                        <p className="mt-0.5 text-[10px] text-white/25">
-                          {new Date(session.updatedAt).toLocaleDateString(
-                            "pt-BR",
-                            {
-                              day: "2-digit",
-                              month: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </p>
-                      </Link>
-                    </div>
-                    <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Link
-                        href={`/dashboard/chat/${session.id}`}
-                        className="rounded-md p-1 text-white/30 hover:bg-white/[0.06] hover:text-neon-cyan"
-                        title="Abrir chat"
-                        onClick={onClose}
-                      >
-                        <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                      {!isCurrent && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            removeSession(session.id);
-                            toast.success("Conversa removida");
-                          }}
-                          className="rounded-md p-1 text-white/30 hover:bg-white/[0.06] hover:text-red-400"
-                          title="Remover"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                    <MessageSquare
+                      className={cn(
+                        "h-3 w-3 shrink-0",
+                        isCurrent ? "text-neon-cyan/60" : "text-white/15"
                       )}
-                    </div>
+                    />
+                    <Link
+                      href={`/dashboard/chat/${session.id}`}
+                      className="min-w-0 flex-1"
+                      onClick={onClose}
+                    >
+                      <p className="truncate text-[11px] leading-tight">
+                        {session.title}
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-px text-[9px] tabular-nums",
+                          isCurrent ? "text-neon-cyan/30" : "text-white/15"
+                        )}
+                      >
+                        {new Date(session.updatedAt).toLocaleDateString(
+                          "pt-BR",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </p>
+                    </Link>
+                    {!isCurrent && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeSession(session.id);
+                          toast.success("Conversa removida");
+                        }}
+                        className="shrink-0 rounded p-0.5 text-white/0 transition-colors group-hover:text-white/20 hover:!text-red-400/70"
+                        title="Remover"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -145,8 +148,8 @@ export function ChatHistoryPanel({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="space-y-2 border-t border-white/[0.06] px-4 py-3">
+        {/* Footer — compact actions */}
+        <div className="space-y-1 border-t border-white/[0.05] px-2 py-2">
           {onCreateCanvas && (
             <button
               type="button"
@@ -154,15 +157,20 @@ export function ChatHistoryPanel({
                 onCreateCanvas();
                 onClose();
               }}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-neon-purple/30 bg-neon-purple/10 px-3 py-2 text-xs font-medium text-neon-purple transition-all hover:border-neon-purple/50 hover:bg-neon-purple/20"
+              className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-white/35 transition-colors hover:bg-neon-purple/8 hover:text-neon-purple/70"
             >
-              <Workflow className="h-3.5 w-3.5" />
-              Criar Canvas de Fluxos
+              <Workflow className="h-3 w-3" />
+              Canvas de Fluxos
             </button>
           )}
-          <p className="text-[10px] text-white/20">
-            Chats avulsos — sem projeto vinculado
-          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-white/35 transition-colors hover:bg-white/[0.04] hover:text-white/50"
+          >
+            <Plus className="h-3 w-3" />
+            Novo Chat
+          </button>
         </div>
       </motion.div>
     </>

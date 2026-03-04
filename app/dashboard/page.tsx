@@ -171,14 +171,14 @@ export default function DashboardPage() {
       {/* Subtle radial focus — complements layout HologramBackground */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_20%,rgba(0,0,0,0.35)_75%)]" />
 
-      {/* Floating chat history button */}
+      {/* Floating chat history button — left side */}
       <button
         type="button"
         onClick={() => setHistoryOpen(!historyOpen)}
-        className="fixed right-4 top-1/2 z-40 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border border-white/[0.10] bg-neutral-900/80 text-white/40 shadow-lg backdrop-blur-xl transition-all hover:border-neon-cyan/30 hover:bg-neutral-900/90 hover:text-neon-cyan"
+        className="fixed left-3 top-1/2 z-40 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/[0.08] bg-neutral-950/80 text-white/30 shadow-lg backdrop-blur-xl transition-all hover:border-white/[0.14] hover:text-white/50"
         title="Historico de chats"
       >
-        <History className="h-4.5 w-4.5" />
+        <History className="h-3.5 w-3.5" />
       </button>
 
       <ChatHistoryPanel
