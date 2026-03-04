@@ -172,6 +172,14 @@ export function FloatingNav() {
                   </Link>
                   <span className="text-white/10">|</span>
                   <Link
+                    href="/dashboard/design"
+                    onClick={() => setNavOpen(false)}
+                    className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
+                  >
+                    Design
+                  </Link>
+                  <span className="text-white/10">|</span>
+                  <Link
                     href="/dashboard/settings/providers"
                     onClick={() => setNavOpen(false)}
                     className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
