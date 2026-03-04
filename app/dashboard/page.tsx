@@ -96,6 +96,8 @@ export default function DashboardPage() {
         await runSimpleChat(sessionId, text);
       }
       await persistSessionSnapshot(sessionId);
+    } catch {
+      toast.error("Erro ao processar mensagem. Verifique suas configuracoes.");
     } finally {
       setSending(false);
     }

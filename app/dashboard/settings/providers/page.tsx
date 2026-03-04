@@ -235,9 +235,9 @@ export default function ProvidersPage() {
             <Key className="h-5 w-5 text-neon-cyan" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">AI Providers</h1>
+            <h1 className="text-2xl font-semibold text-white">Provedores de IA</h1>
             <p className="mt-1 text-sm text-white/40">
-              Connect your API keys to power ORIGEM&apos;s decomposition engine and agent orchestration
+              Conecte suas API keys para ativar o motor de decomposicao e orquestracao de agentes do ORIGEM
             </p>
           </div>
         </div>
@@ -337,7 +337,7 @@ export default function ProvidersPage() {
               {/* Model Selector */}
               <div className="mb-3">
                 <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/25">
-                  Default Model
+                  Modelo padrao
                 </label>
                 <Select
                   value={state.selectedModel}
@@ -413,12 +413,12 @@ export default function ProvidersPage() {
                     <XCircle className="h-3 w-3 text-red-400" />
                   ) : null}
                   {state.status === "testing"
-                    ? "Testing..."
+                    ? "Testando..."
                     : state.status === "success"
-                      ? "Connected"
+                      ? "Conectado"
                       : state.status === "error"
-                        ? "Failed — Retry"
-                        : "Test Connection"}
+                        ? "Falhou — Tentar"
+                        : "Testar Conexao"}
                 </Button>
               </div>
 

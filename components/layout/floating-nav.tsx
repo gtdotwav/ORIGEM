@@ -115,10 +115,10 @@ interface QuickLink {
 }
 
 const QUICK_LINKS: QuickLink[] = [
-  { label: "Home", href: "/dashboard", icon: Atom },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Inicio", href: "/dashboard", icon: Atom },
+  { label: "Configuracoes", href: "/dashboard/settings", icon: Settings },
   { label: "Design", href: "/dashboard/design", icon: Palette },
-  { label: "Providers", href: "/dashboard/settings/providers", icon: Key },
+  { label: "Provedores", href: "/dashboard/settings/providers", icon: Key },
 ];
 
 export function FloatingNav() {
