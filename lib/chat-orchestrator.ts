@@ -237,7 +237,7 @@ function detectIntent(prompt: string): Intent {
   if (/(criar|build|construir|develop|implementar)/.test(normalized)) {
     return "create";
   }
-  if (/(analisar|analisar|diagnosticar|debug|erro)/.test(normalized)) {
+  if (/(analisar|diagnosticar|debug|erro)/.test(normalized)) {
     return "analyze";
   }
   if (/(corrigir|fix|ajustar|resolver)/.test(normalized)) {

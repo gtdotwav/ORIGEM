@@ -17,9 +17,9 @@ const LANGUAGE_OPTIONS: Array<{
   value: RuntimeLanguage | "origem";
   label: string;
 }> = [
-  { value: "pt-BR", label: "Portugues" },
-  { value: "en-US", label: "English" },
-  { value: "es-ES", label: "Espanol" },
+  { value: "pt-BR", label: "Portugues (BR)" },
+  { value: "en-US", label: "Ingles (US)" },
+  { value: "es-ES", label: "Espanhol (ES)" },
   { value: "origem", label: "ORIGEM (Proprietaria)" },
 ];
 

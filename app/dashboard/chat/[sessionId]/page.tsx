@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
-import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
 import { AgentTaskCards } from "@/components/chat/agent-task-cards";
 import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
@@ -58,9 +57,9 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 const LANGUAGE_OPTIONS: { value: RuntimeLanguage; label: string }[] = [
-  { value: "pt-BR", label: "Portugues" },
-  { value: "en-US", label: "English" },
-  { value: "es-ES", label: "Espanol" },
+  { value: "pt-BR", label: "Portugues (BR)" },
+  { value: "en-US", label: "Ingles (US)" },
+  { value: "es-ES", label: "Espanhol (ES)" },
 ];
 
 interface ImageAttachmentMetadata {
@@ -333,7 +332,7 @@ export default function ChatPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-              Chat Session
+              Sessao de Chat
             </p>
             <h1 className="text-lg font-semibold text-white/90">
               {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
@@ -342,7 +341,7 @@ export default function ChatPage() {
 
           <div className="flex items-center gap-2">
             <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1 text-xs text-white/70">
-              Pipeline: {STAGE_LABELS[stage] ?? stage}
+              Etapa: {STAGE_LABELS[stage] ?? stage}
             </span>
             <Link
               href={`/dashboard/orchestra/${sessionId}`}

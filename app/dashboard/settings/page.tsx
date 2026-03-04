@@ -23,14 +23,14 @@ import {
 
 const SECTIONS = [
   {
-    title: "AI Providers",
+    title: "Provedores de IA",
     description:
       "Configure API keys para Claude, GPT, Gemini, Groq, Fireworks e outros. Necessario para ativar decomposicao e agentes.",
     href: "/dashboard/settings/providers",
     icon: Key,
     iconClass: "text-neon-cyan",
     borderClass: "border-neon-cyan/20 hover:border-neon-cyan/40",
-    cta: "Gerenciar Providers",
+    cta: "Gerenciar Provedores",
   },
   {
     title: "Aparencia",
@@ -79,8 +79,8 @@ export default function SettingsPage() {
 
   const LANG_LABELS: Record<string, string> = {
     "pt-BR": "Portugues (BR)",
-    "en-US": "English (US)",
-    "es-ES": "Espanol (ES)",
+    "en-US": "Ingles (US)",
+    "es-ES": "Espanhol (ES)",
   };
 
   const handleLanguageChange = (value: string) => {
@@ -96,7 +96,7 @@ export default function SettingsPage() {
           <Settings className="h-5 w-5 text-white/60" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Settings</h1>
+          <h1 className="text-2xl font-semibold text-white">Configuracoes</h1>
           <p className="mt-1 text-sm text-white/40">
             Configuracoes gerais da plataforma ORIGEM
           </p>
@@ -146,8 +146,8 @@ export default function SettingsPage() {
                       </SelectTrigger>
                       <SelectContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl">
                         <SelectItem value="pt-BR" className="text-xs text-white/70">Portugues (BR)</SelectItem>
-                        <SelectItem value="en-US" className="text-xs text-white/70">English (US)</SelectItem>
-                        <SelectItem value="es-ES" className="text-xs text-white/70">Espanol (ES)</SelectItem>
+                        <SelectItem value="en-US" className="text-xs text-white/70">Ingles (US)</SelectItem>
+                        <SelectItem value="es-ES" className="text-xs text-white/70">Espanhol (ES)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -172,12 +172,11 @@ export default function SettingsPage() {
       <div className="mt-6 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl">
         <div className="mb-3 inline-flex items-center gap-2 text-sm text-white/80">
           <Sparkles className="h-4 w-4 text-neon-cyan" />
-          About ORIGEM
+          Sobre ORIGEM
         </div>
         <p className="text-xs leading-relaxed text-white/45">
-          Psychosemantic AI Engine — Decompose language into atomic meaning,
-          orchestrate specialized agents, and visualize everything in an
-          infinite canvas.
+          Motor de IA Psicossemantica — Decomponha linguagem em significado atomico,
+          orquestre agentes especializados e visualize tudo em um canvas infinito.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">
