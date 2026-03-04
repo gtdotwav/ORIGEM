@@ -1108,11 +1108,67 @@ export async function runSimpleChat(
   runtimeStore.ensureSession(sessionId);
   runtimeStore.setRunning(sessionId, true);
 
-  await delay(400 + Math.random() * 600);
+  let response: string;
+  let metadata: Record<string, unknown> | undefined;
 
-  const response = generateSimpleResponse(prompt);
-  sessionStore.addMessage(createMessage(sessionId, "assistant", response));
+  try {
+    // Try real LLM call
+    const { useChatSettingsStore } = await import("@/stores/chat-settings-store");
+    const { selectedTier, getActiveCritics } = useChatSettingsStore.getState();
+
+    // Build conversation history for context
+    const history = sessionStore.messages
+      .filter((m) => m.sessionId === sessionId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+      .slice(-10)
+      .map((m) => ({
+        role: m.role as "user" | "assistant" | "system",
+        content: m.content,
+      }));
+
+    const { callChatCompletion } = await import("@/lib/chat-api");
+    const result = await callChatCompletion({
+      messages: history,
+      tier: selectedTier,
+      systemPrompt:
+        "Voce e o ORIGEM, uma plataforma de IA psicossemantica. Responda em portugues brasileiro de forma clara, util e objetiva.",
+    });
+
+    response = result.content;
+
+    // Run critic pipeline if critics are active
+    const activeCritics = getActiveCritics();
+    if (activeCritics.length > 0) {
+      try {
+        const { runCriticPipeline } = await import("@/lib/chat-api");
+        const criticResults = await runCriticPipeline(
+          response,
+          activeCritics,
+          selectedTier
+        );
+        if (criticResults.finalContent !== response) {
+          metadata = {
+            criticResults: criticResults.results,
+            originalResponse: response,
+          };
+          response = criticResults.finalContent;
+        } else {
+          metadata = { criticResults: criticResults.results };
+        }
+      } catch {
+        // Critic pipeline failed, use original response
+      }
+    }
+  } catch {
+    // Fallback to template response if no provider configured
+    await delay(400 + Math.random() * 600);
+    response = generateSimpleResponse(prompt);
+  }
+
+  sessionStore.addMessage(createMessage(sessionId, "assistant", response, metadata));
   sessionStore.updateSession(sessionId, { updatedAt: new Date() });
-
   runtimeStore.setRunning(sessionId, false);
 }
