@@ -10,11 +10,9 @@ import {
   Loader2,
   MessageSquarePlus,
   Send,
-  SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { AgentTaskCards } from "@/components/chat/agent-task-cards";
@@ -135,7 +133,7 @@ export default function ChatPage() {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [controlSheetOpen, setControlSheetOpen] = useState(false);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
 
@@ -710,25 +708,9 @@ export default function ChatPage() {
           );
 
           return (
-            <>
-              <aside className="hidden min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl lg:block">
-                {controlPanel}
-              </aside>
-
-              <Sheet open={controlSheetOpen} onOpenChange={setControlSheetOpen}>
-                <SheetTrigger asChild>
-                  <button
-                    type="button"
-                    className="fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-neon-cyan/30 bg-neutral-900/90 text-neon-cyan shadow-lg backdrop-blur-xl transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/10 lg:hidden"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-80 border-white/[0.08] bg-neutral-900/95 p-4 backdrop-blur-xl">
-                  {controlPanel}
-                </SheetContent>
-              </Sheet>
-            </>
+            <aside className="hidden min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl lg:block">
+              {controlPanel}
+            </aside>
           );
         })()}
       </div>
