@@ -20,10 +20,30 @@ const SUGGESTIONS = [
   "Analyze semantics",
 ];
 
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+interface ImageAttachmentMetadata {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function DashboardPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const addSession = useSessionStore((s) => s.addSession);
   const addMessage = useSessionStore((s) => s.addMessage);
@@ -33,8 +53,10 @@ export default function DashboardPage() {
     inputRef.current?.focus();
   }, []);
 
-  const startSessionFromHome = async () => {
-    const text = input.trim();
+  const startSessionFromHome = async (
+    options?: { prompt?: string; metadata?: Record<string, unknown> }
+  ) => {
+    const text = (options?.prompt ?? input).trim();
     if (!text || sending) {
       return;
     }
@@ -44,7 +66,7 @@ export default function DashboardPage() {
 
     addSession(session);
     setCurrentSession(sessionId);
-    addMessage(createMessage(sessionId, "user", text));
+    addMessage(createMessage(sessionId, "user", text, options?.metadata));
     setInput("");
     setSending(true);
 
@@ -55,6 +77,68 @@ export default function DashboardPage() {
       await persistSessionSnapshot(sessionId);
     } finally {
       setSending(false);
+    }
+  };
+
+  const openImagePicker = () => {
+    if (sending || uploadingImage) {
+      return;
+    }
+
+    imageInputRef.current?.click();
+  };
+
+  const handleImageSelected = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      window.alert("Selecione um arquivo de imagem valido.");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      window.alert("A imagem deve ter ate 3MB para envio no chat.");
+      return;
+    }
+
+    if (sending) {
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const typedPrompt = input.trim();
+      const prompt =
+        typedPrompt ||
+        `Analise a imagem anexada (${file.name}) e gere contexto, agentes, projeto e plano de execucao.`;
+
+      const metadata: { imageAttachment: ImageAttachmentMetadata } = {
+        imageAttachment: {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          dataUrl,
+        },
+      };
+
+      await startSessionFromHome({
+        prompt,
+        metadata,
+      });
+    } catch (error) {
+      console.error("Failed to upload image from dashboard", error);
+      window.alert("Nao foi possivel processar a imagem. Tente novamente.");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -119,27 +203,42 @@ export default function DashboardPage() {
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+                onClick={openImagePicker}
+                disabled={sending || uploadingImage}
+                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50 disabled:cursor-not-allowed disabled:opacity-40"
+                title="Enviar imagem"
               >
                 <ImageIcon className="h-4 w-4" />
               </button>
               <button
                 type="button"
+                onClick={() => router.push("/dashboard/settings/providers")}
                 className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+                title="Configuracoes"
               >
                 <Settings className="h-4 w-4" />
               </button>
               <button
                 type="button"
                 onClick={() => void startSessionFromHome()}
-                disabled={!input.trim() || sending}
+                disabled={!input.trim() || sending || uploadingImage}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Send className="h-3.5 w-3.5" />
-                {sending ? "Enviando..." : "Enviar"}
+                {sending || uploadingImage ? "Enviando..." : "Enviar"}
               </button>
             </div>
           </div>
+
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              void handleImageSelected(event);
+            }}
+          />
 
           {/* Suggestion badges */}
           <div className="flex flex-wrap gap-2">

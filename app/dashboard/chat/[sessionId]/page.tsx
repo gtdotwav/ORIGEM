@@ -50,6 +50,13 @@ const LANGUAGE_OPTIONS: { value: RuntimeLanguage; label: string }[] = [
   { value: "es-ES", label: "Espanol" },
 ];
 
+interface ImageAttachmentMetadata {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
+}
+
 function shouldRenderDistribution(metadata: Record<string, unknown> | undefined) {
   return metadata?.includeDistribution === true;
 }
@@ -64,6 +71,28 @@ function isJourneySystemMessage(metadata: Record<string, unknown> | undefined) {
 
 function shouldRenderJourney(metadata: Record<string, unknown> | undefined) {
   return metadata?.includeJourney === true;
+}
+
+function getImageAttachment(
+  metadata: Record<string, unknown> | undefined
+): ImageAttachmentMetadata | null {
+  const rawAttachment = metadata?.imageAttachment;
+
+  if (!rawAttachment || typeof rawAttachment !== "object") {
+    return null;
+  }
+
+  const attachment = rawAttachment as Partial<ImageAttachmentMetadata>;
+  if (
+    typeof attachment.name !== "string" ||
+    typeof attachment.type !== "string" ||
+    typeof attachment.size !== "number" ||
+    typeof attachment.dataUrl !== "string"
+  ) {
+    return null;
+  }
+
+  return attachment as ImageAttachmentMetadata;
 }
 
 function formatMessageTime(date: Date) {
@@ -328,6 +357,7 @@ export default function ChatPage() {
                     const isNote = message.role === "system" && isNoteMessage(message.metadata);
                     const isJourneyStepUpdate =
                       message.role === "system" && isJourneySystemMessage(message.metadata);
+                    const imageAttachment = getImageAttachment(message.metadata);
 
                     if (isNote) {
                       return (
@@ -371,6 +401,18 @@ export default function ChatPage() {
                               : "border-white/[0.09] bg-black/35 text-white/85"
                           )}
                         >
+                          {imageAttachment ? (
+                            <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.12] bg-black/20">
+                              <img
+                                src={imageAttachment.dataUrl}
+                                alt={imageAttachment.name}
+                                className="max-h-64 w-full object-cover"
+                              />
+                              <div className="px-2.5 py-1.5 text-[10px] text-white/60">
+                                {imageAttachment.name}
+                              </div>
+                            </div>
+                          ) : null}
                           <p className="text-sm leading-relaxed whitespace-pre-wrap">
                             {message.content}
                           </p>
