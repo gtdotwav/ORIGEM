@@ -3,17 +3,21 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Atom, Send, LayoutDashboard, Loader2 } from "lucide-react";
+import { ImageIcon, Settings, Atom, Send, LayoutDashboard, Loader2, MessageCircle, Workflow } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { usePersonaStore } from "@/stores/persona-store";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
   createMessage,
   createSession,
   runChatOrchestration,
+  runSimpleChat,
 } from "@/lib/chat-orchestrator";
 
 const SUGGESTIONS = [
@@ -55,6 +59,9 @@ export default function DashboardPage() {
   const activeWsName = useWorkspaceStore((s) =>
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.name
   );
+  const chatMode = usePersonaStore((s) => s.chatMode);
+  const setChatMode = usePersonaStore((s) => s.setChatMode);
+  const isEcosystem = chatMode === "ecosystem";
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -80,7 +87,11 @@ export default function DashboardPage() {
     router.push(`/dashboard/chat/${sessionId}`);
 
     try {
-      await runChatOrchestration(sessionId, text);
+      if (isEcosystem) {
+        await runChatOrchestration(sessionId, text);
+      } else {
+        await runSimpleChat(sessionId, text);
+      }
       await persistSessionSnapshot(sessionId);
     } finally {
       setSending(false);
@@ -216,7 +227,46 @@ export default function DashboardPage() {
 
           {/* Controls row */}
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-xs text-white/30">ORIGEM 1.0</span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5">
+                <MessageCircle
+                  className={cn(
+                    "h-3.5 w-3.5 transition-colors",
+                    !isEcosystem ? "text-neon-cyan" : "text-white/25"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-[11px] transition-colors",
+                    !isEcosystem ? "text-white/60" : "text-white/25"
+                  )}
+                >
+                  Chat
+                </span>
+              </div>
+              <Switch
+                checked={isEcosystem}
+                onCheckedChange={(checked) =>
+                  setChatMode(checked ? "ecosystem" : "direct")
+                }
+              />
+              <div className="flex items-center gap-1.5">
+                <Workflow
+                  className={cn(
+                    "h-3.5 w-3.5 transition-colors",
+                    isEcosystem ? "text-neon-purple" : "text-white/25"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-[11px] transition-colors",
+                    isEcosystem ? "text-white/60" : "text-white/25"
+                  )}
+                >
+                  360
+                </span>
+              </div>
+            </div>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
