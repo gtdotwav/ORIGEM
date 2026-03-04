@@ -17,10 +17,10 @@ import {
 } from "@/lib/chat-orchestrator";
 
 const SUGGESTIONS = [
-  "Decompose a concept",
-  "Create a context map",
-  "Orchestrate agents",
-  "Analyze semantics",
+  "Decompor um conceito",
+  "Criar mapa de contexto",
+  "Orquestrar agentes",
+  "Analisar semantica",
 ];
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
@@ -181,11 +181,11 @@ export default function DashboardPage() {
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
             <Atom className="h-4 w-4 text-blue-400" />
-            <span className="text-sm text-white/70">Welcome to ORIGEM</span>
+            <span className="text-sm text-white/70">Bem-vindo ao ORIGEM</span>
           </div>
 
           <h1 className="mb-5 text-2xl font-semibold text-white">
-            What can I help you today?
+            Como posso ajudar hoje?
           </h1>
 
           {/* Workspace indicator */}
@@ -203,7 +203,7 @@ export default function DashboardPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything..."
+              placeholder="Pergunte qualquer coisa..."
               className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -287,16 +287,7 @@ export default function DashboardPage() {
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">
         <div className="text-center">
-          <div className="mb-1 flex flex-col items-center gap-2 text-xs text-white/25 sm:flex-row sm:gap-3">
-            <a href="#" className="transition-colors hover:text-white/40">
-              Privacy Policy
-            </a>
-            <span>•</span>
-            <a href="#" className="transition-colors hover:text-white/40">
-              Terms & Conditions
-            </a>
-          </div>
-          <p className="text-[10px] text-white/15">Psychosemantic AI Engine</p>
+          <p className="text-[10px] text-white/15">ORIGEM — Psychosemantic AI Engine</p>
         </div>
       </div>
     </div>

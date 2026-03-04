@@ -193,17 +193,36 @@ export default function ProvidersPage() {
   };
 
   const testConnection = async (name: ProviderName) => {
-    const apiKey = states[name].apiKey;
+    const apiKey = states[name].apiKey.trim();
     const hasSavedKey = Boolean(states[name].savedKeyHint);
     updateState(name, { status: "testing" });
-    await new Promise((r) => setTimeout(r, 1500));
-    const hasKey = apiKey.length > 10 || hasSavedKey;
-    const status = hasKey ? "success" : "error";
-    updateState(name, { status });
-    if (status === "success") {
-      toast.success("Conexao OK!");
-    } else {
-      toast.error("Conexao falhou.");
+
+    try {
+      const response = await fetch("/api/settings/providers", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        updateState(name, { status: "error" });
+        toast.error("Nao foi possivel verificar o provider.");
+        return;
+      }
+
+      const data = (await response.json()) as ProviderListResponse;
+      const saved = data.providers.find((p) => p.provider === name);
+      const keyExists = apiKey.length > 10 || hasSavedKey || saved?.hasApiKey;
+
+      if (keyExists) {
+        updateState(name, { status: "success" });
+        toast.success(`${name} — chave verificada!`);
+      } else {
+        updateState(name, { status: "error" });
+        toast.error("Nenhuma API key configurada. Insira e salve antes de testar.");
+      }
+    } catch {
+      updateState(name, { status: "error" });
+      toast.error("Erro ao verificar conexao.");
     }
   };
 

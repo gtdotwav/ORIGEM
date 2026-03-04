@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Orbit,
   Plus,
@@ -11,10 +12,13 @@ import {
   GitFork,
   Bot,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
+import { createId, createSession } from "@/lib/chat-orchestrator";
 
 function formatTime(date: Date) {
   const now = Date.now();
@@ -38,10 +42,23 @@ interface CanvasView {
 }
 
 export default function SpacePage() {
+  const router = useRouter();
   const sessions = useWorkspaceFilteredSessions();
   const messages = useSessionStore((state) => state.messages);
+  const addSession = useSessionStore((s) => s.addSession);
+  const setCurrentSession = useSessionStore((s) => s.setCurrentSession);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const agents = useAgentStore((state) => state.agents);
   const decompositions = useDecompositionStore((state) => state.decompositions);
+
+  const handleNewCanvas = () => {
+    const sessionId = createId("session");
+    const session = createSession(sessionId, "Canvas em branco", activeWorkspaceId ?? undefined);
+    addSession(session);
+    setCurrentSession(sessionId);
+    toast.success("Canvas criado!");
+    router.push(`/dashboard/orchestra/${sessionId}`);
+  };
 
   const canvases = useMemo<CanvasView[]>(() => {
     return [...sessions]
@@ -96,19 +113,21 @@ export default function SpacePage() {
           </div>
         </div>
 
-        <Link
-          href="/dashboard/orchestra/new"
+        <button
+          type="button"
+          onClick={handleNewCanvas}
           className="inline-flex items-center gap-2 rounded-xl border border-fuchsia-300/25 bg-fuchsia-300/10 px-4 py-2.5 text-sm text-fuchsia-200 transition-all hover:border-fuchsia-300/50 hover:bg-fuchsia-300/20 hover:text-white"
         >
           <Plus className="h-4 w-4" />
           Novo Canvas
-        </Link>
+        </button>
       </div>
 
       {/* New canvas hero */}
-      <Link
-        href="/dashboard/orchestra/new"
-        className="group mb-6 flex items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-900/40 py-14 backdrop-blur-sm transition-all hover:border-fuchsia-300/25 hover:bg-fuchsia-300/[0.03]"
+      <button
+        type="button"
+        onClick={handleNewCanvas}
+        className="group mb-6 flex w-full items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-900/40 py-14 backdrop-blur-sm transition-all hover:border-fuchsia-300/25 hover:bg-fuchsia-300/[0.03]"
       >
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] transition-all group-hover:border-fuchsia-300/25 group-hover:bg-fuchsia-300/10">
@@ -123,7 +142,7 @@ export default function SpacePage() {
             </p>
           </div>
         </div>
-      </Link>
+      </button>
 
       {/* Recent canvases */}
       {canvases.length > 0 && (
