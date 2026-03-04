@@ -1,0 +1,133 @@
+"use client";
+
+import Link from "next/link";
+import { MoreHorizontal, Pencil, Archive, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { WORKSPACE_ICONS, WORKSPACE_COLORS } from "@/components/workspace/workspace-card";
+import { cn } from "@/lib/utils";
+import type { Project } from "@/types/project";
+
+function formatRelativeTime(date: Date | null) {
+  if (!date) return "Sem atividade";
+  const now = Date.now();
+  const diff = now - new Date(date).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "Agora";
+  if (minutes < 60) return `${minutes}min atras`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h atras`;
+  const days = Math.floor(hours / 24);
+  return `${days}d atras`;
+}
+
+interface ProjectCardProps {
+  project: Project;
+  sessionCount: number;
+  lastActivity: Date | null;
+  onEdit: (project: Project) => void;
+  onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+export function ProjectCard({
+  project,
+  sessionCount,
+  lastActivity,
+  onEdit,
+  onArchive,
+  onDelete,
+}: ProjectCardProps) {
+  const colors = WORKSPACE_COLORS[project.color];
+  const Icon = WORKSPACE_ICONS[project.icon];
+
+  return (
+    <div
+      className={cn(
+        "group relative rounded-xl border bg-black/25 p-3.5 transition-all",
+        colors.border,
+        colors.borderHover
+      )}
+    >
+      <div className="mb-2.5 flex items-start justify-between gap-2">
+        <Link
+          href={`/dashboard/workspaces/${project.workspaceId}/projects/${project.id}`}
+          className="flex items-center gap-2.5"
+        >
+          <div
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+              colors.border,
+              colors.bg
+            )}
+          >
+            <Icon className={cn("h-4 w-4", colors.text)} />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-white/85">
+              {project.name}
+            </p>
+            {project.description && (
+              <p className="truncate text-[11px] text-white/40">
+                {project.description}
+              </p>
+            )}
+          </div>
+        </Link>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="shrink-0 rounded-md p-1 text-white/25 opacity-0 transition-all hover:bg-white/[0.06] hover:text-white/50 group-hover:opacity-100"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl"
+          >
+            <DropdownMenuItem
+              onClick={() => onEdit(project)}
+              className="text-xs text-white/70"
+            >
+              <Pencil className="mr-2 h-3.5 w-3.5" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onArchive(project.id)}
+              className="text-xs text-white/70"
+            >
+              <Archive className="mr-2 h-3.5 w-3.5" />
+              Arquivar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(project.id)}
+              className="text-xs text-red-400"
+            >
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="flex items-center gap-3 text-[10px] text-white/35">
+        <span>{sessionCount} {sessionCount === 1 ? "sessao" : "sessoes"}</span>
+        <span>·</span>
+        <span>{formatRelativeTime(lastActivity)}</span>
+      </div>
+
+      {project.status === "archived" && (
+        <span className="mt-2 inline-block rounded-md border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-white/30">
+          Arquivado
+        </span>
+      )}
+    </div>
+  );
+}

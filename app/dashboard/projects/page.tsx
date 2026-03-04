@@ -8,12 +8,16 @@ import {
   ArrowRight,
   FolderKanban,
   Loader2,
+  Plus,
   Rocket,
   Sparkles,
   Target,
 } from "lucide-react";
+import { toast } from "sonner";
 import { CardSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
+import { ProjectCard } from "@/components/workspace/project-card";
+import { ProjectCreateDialog } from "@/components/workspace/project-create-dialog";
 import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
@@ -24,9 +28,12 @@ import {
 } from "@/lib/session-journey";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
+import { useProjectStore } from "@/stores/project-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
+import type { Project } from "@/types/project";
 
 function formatExecutionStrategy(strategy: string | undefined) {
   if (strategy === "consensus") {
@@ -61,10 +68,34 @@ function ProjectsPageContent() {
 
   const [isHydrating, setIsHydrating] = useState(false);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [editProjectTarget, setEditProjectTarget] = useState<Project | null>(null);
 
   const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
+
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const allSessions = useSessionStore((s) => s.sessions);
+  const wsProjects = useProjectStore((s) =>
+    activeWorkspaceId ? s.getProjectsByWorkspace(activeWorkspaceId) : []
+  );
+  const archiveProject = useProjectStore((s) => s.archiveProject);
+  const removeProject = useProjectStore((s) => s.removeProject);
+  const activeProjects = useMemo(
+    () => wsProjects.filter((p) => p.status === "active"),
+    [wsProjects]
+  );
+  const getProjectSessionCount = (projId: string) =>
+    allSessions.filter((s) => s.projectId === projId).length;
+  const getProjectLastActivity = (projId: string) => {
+    const projSessions = allSessions.filter((s) => s.projectId === projId);
+    if (projSessions.length === 0) return null;
+    return projSessions.reduce<Date>((latest, s) => {
+      const d = new Date(s.updatedAt);
+      return d > latest ? d : latest;
+    }, new Date(0));
+  };
 
   const decompositions = useDecompositionStore((state) => state.decompositions);
   const activeDecompositionId = useDecompositionStore(
@@ -230,6 +261,57 @@ function ProjectsPageContent() {
           ) : null}
         </div>
       </div>
+
+      {/* Workspace Projects Grid */}
+      {activeWorkspaceId && activeProjects.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-white/65">
+              <FolderKanban className="h-4 w-4" />
+              Projetos do Workspace
+            </h2>
+            <button
+              type="button"
+              onClick={() => {
+                setEditProjectTarget(null);
+                setProjectDialogOpen(true);
+              }}
+              className="inline-flex items-center gap-1 text-xs text-neon-cyan hover:text-neon-cyan/80"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Novo projeto
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {activeProjects.map((proj) => (
+              <ProjectCard
+                key={proj.id}
+                project={proj}
+                sessionCount={getProjectSessionCount(proj.id)}
+                lastActivity={getProjectLastActivity(proj.id)}
+                onEdit={(p) => {
+                  setEditProjectTarget(p);
+                  setProjectDialogOpen(true);
+                }}
+                onArchive={(id) => {
+                  archiveProject(id);
+                  toast.success("Projeto arquivado");
+                }}
+                onDelete={(id) => {
+                  removeProject(id);
+                  toast.success("Projeto excluido");
+                }}
+              />
+            ))}
+          </div>
+          <ProjectCreateDialog
+            open={projectDialogOpen}
+            onOpenChange={setProjectDialogOpen}
+            workspaceId={activeWorkspaceId}
+            editProject={editProjectTarget}
+          />
+        </div>
+      )}
 
       {isHydrating ? (
         <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">

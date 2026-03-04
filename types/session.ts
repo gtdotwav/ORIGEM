@@ -3,6 +3,7 @@ export interface Session {
   title: string;
   status: "active" | "completed" | "archived";
   workspaceId?: string;
+  projectId?: string;
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
