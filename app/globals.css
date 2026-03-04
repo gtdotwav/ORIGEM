@@ -346,22 +346,22 @@
 /* Hologram background overlays */
 @keyframes hologram-drift {
   0% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
   }
   50% {
-    transform: translate3d(-0.8%, -1.2%, 0) scale(1.015);
+    transform: translate3d(-1.2%, -0.8%, 0) scale(1.025) rotate(-1deg);
   }
   100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
   }
 }
 
 @keyframes hologram-scan {
   0% {
-    background-position: 0 -120%;
+    background-position: 0 -140%, 0 0;
   }
   100% {
-    background-position: 0 120%;
+    background-position: 0 140%, 0 0;
   }
 }
 
@@ -386,31 +386,55 @@
   }
 }
 
+@keyframes hologram-breathe {
+  0%,
+  100% {
+    opacity: 0.24;
+  }
+  50% {
+    opacity: 0.38;
+  }
+}
+
 .hologram-aurora {
-  opacity: 0.28;
+  opacity: 0.32;
   mix-blend-mode: screen;
   background:
-    radial-gradient(circle at 50% 26%, rgba(0, 238, 221, 0.2), transparent 46%),
-    radial-gradient(circle at 34% 35%, rgba(7, 175, 186, 0.15), transparent 42%),
-    radial-gradient(circle at 65% 62%, rgba(6, 97, 104, 0.12), transparent 50%);
-  animation: hologram-drift 20s ease-in-out infinite;
+    radial-gradient(circle at 50% 32%, rgba(40, 247, 255, 0.23), transparent 42%),
+    conic-gradient(
+      from 220deg at 50% 38%,
+      rgba(0, 246, 255, 0) 0deg,
+      rgba(0, 246, 255, 0.18) 80deg,
+      rgba(128, 255, 209, 0.2) 155deg,
+      rgba(8, 118, 133, 0.14) 235deg,
+      rgba(0, 246, 255, 0) 360deg
+    ),
+    radial-gradient(circle at 50% 74%, rgba(0, 150, 166, 0.16), transparent 50%);
+  animation: hologram-drift 18s ease-in-out infinite, hologram-breathe 7.5s ease-in-out infinite;
 }
 
 .hologram-scanlines {
-  opacity: 0.12;
+  opacity: 0.14;
   mix-blend-mode: screen;
-  background-image: repeating-linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045) 0px,
-    rgba(255, 255, 255, 0.045) 1px,
-    transparent 2px,
-    transparent 3px
-  );
-  animation: hologram-scan 10s linear infinite;
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045) 0px,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(35, 248, 255, 0) 0%,
+      rgba(35, 248, 255, 0.12) 48%,
+      rgba(35, 248, 255, 0) 100%
+    );
+  animation: hologram-scan 8s linear infinite;
 }
 
 .hologram-noise {
-  opacity: 0.19;
+  opacity: 0.24;
   mix-blend-mode: soft-light;
 }
 
@@ -419,15 +443,16 @@
   position: absolute;
   inset: -50%;
   background-image:
-    radial-gradient(rgba(255, 255, 255, 0.18) 0.5px, transparent 0.7px),
-    radial-gradient(rgba(17, 224, 216, 0.12) 0.45px, transparent 0.75px);
-  background-size: 2px 2px, 3px 3px;
+    radial-gradient(rgba(255, 255, 255, 0.22) 0.45px, transparent 0.75px),
+    radial-gradient(rgba(30, 248, 230, 0.14) 0.4px, transparent 0.72px),
+    radial-gradient(rgba(118, 255, 211, 0.09) 0.35px, transparent 0.65px);
+  background-size: 2px 2px, 3px 3px, 4px 4px;
   animation: hologram-grain 0.35s steps(2) infinite;
 }
 
 .hologram-vignette {
   background:
-    radial-gradient(circle at 50% 44%, transparent 24%, rgba(0, 0, 0, 0.64) 78%),
-    radial-gradient(circle at 50% 25%, rgba(0, 231, 223, 0.14), transparent 43%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.78));
+    radial-gradient(circle at 50% 43%, rgba(0, 0, 0, 0) 18%, rgba(0, 0, 0, 0.72) 82%),
+    radial-gradient(circle at 50% 30%, rgba(45, 249, 255, 0.18), rgba(45, 249, 255, 0) 45%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.84));
 }
