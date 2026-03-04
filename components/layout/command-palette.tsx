@@ -13,6 +13,8 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { usePersonaStore } from "@/stores/persona-store";
+import { CELEBRITY_PERSONAS } from "@/lib/personas";
 import {
   LayoutDashboard,
   Brain,
@@ -43,6 +45,8 @@ const navItems = [
   { label: "Providers", href: "/dashboard/settings/providers", icon: Key },
   { label: "Controle", href: "/dashboard/control", icon: Gauge },
   { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
+  { label: "Apps", href: "/dashboard/apps", icon: Sparkles },
+  { label: "Celebridade IA", href: "/dashboard/apps/celebrity-chat", icon: MessageSquare },
 ];
 
 const actionItems = [
@@ -63,6 +67,7 @@ export function CommandPalette() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
   const activeWorkspaces = workspaces.filter((w) => w.status === "active");
+  const setActivePersona = usePersonaStore((s) => s.setActivePersona);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -146,6 +151,22 @@ export function CommandPalette() {
             ))}
           </CommandGroup>
         )}
+
+        <CommandGroup heading="Mudar persona">
+          {CELEBRITY_PERSONAS.map((persona) => (
+            <CommandItem
+              key={persona.id}
+              onSelect={() => {
+                setActivePersona(persona.id);
+                router.push("/dashboard/apps/celebrity-chat");
+                setCommandPaletteOpen(false);
+              }}
+            >
+              <span className="text-base">{persona.emoji}</span>
+              <span>{persona.name}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
 
         <CommandGroup heading="Acoes">
           {actionItems.map((item) => (

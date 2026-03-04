@@ -15,6 +15,7 @@ import {
   Users,
   GitBranch,
   LogIn,
+  Sparkles,
 } from "lucide-react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
@@ -66,6 +67,12 @@ const NAV_ITEMS = [
     description: "Organize sessoes em espacos de trabalho",
     href: "/dashboard/workspaces",
     icon: Layers,
+  },
+  {
+    label: "Apps",
+    description: "Experiencias especializadas com IA",
+    href: "/dashboard/apps",
+    icon: Sparkles,
   },
 ];
 
@@ -202,6 +209,14 @@ export function FloatingNav() {
                     className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
                   >
                     Design
+                  </Link>
+                  <span className="text-white/10">|</span>
+                  <Link
+                    href="/dashboard/apps"
+                    onClick={() => setNavOpen(false)}
+                    className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
+                  >
+                    Apps
                   </Link>
                   <span className="text-white/10">|</span>
                   <Link
