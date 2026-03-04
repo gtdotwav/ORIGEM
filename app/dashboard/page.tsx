@@ -7,7 +7,7 @@ import { ImageIcon, Settings, Atom, Send, LayoutDashboard, Loader2, MessageCircl
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { TierSelector } from "@/components/chat/tier-selector";
+import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
 import { cn } from "@/lib/utils";
@@ -270,10 +270,8 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            {!isEcosystem && (
-              <div className="h-4 w-px bg-white/[0.08]" />
-            )}
-            {!isEcosystem && <TierSelector />}
+            <div className="h-4 w-px bg-white/[0.08]" />
+            <LLMSelector />
           </div>
 
           {/* Controls row */}
