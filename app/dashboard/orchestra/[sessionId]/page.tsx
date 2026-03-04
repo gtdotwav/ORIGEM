@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import {
   hydrateSessionSnapshot,
   persistSessionSnapshot,
@@ -31,6 +32,7 @@ import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type { PipelineStage } from "@/types/pipeline";
 import type { RuntimeLanguage } from "@/types/runtime";
 
@@ -63,7 +65,7 @@ function OrchestraPage() {
   const [isRunningOrchestra, setIsRunningOrchestra] = useState(false);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const messages = useSessionStore((state) => state.messages);
   const addMessage = useSessionStore((state) => state.addMessage);
 
@@ -248,7 +250,7 @@ function OrchestraPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
@@ -287,10 +289,16 @@ function OrchestraPage() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6">
-          <div className="inline-flex items-center gap-2 text-sm text-white/70">
-            <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-            Carregando sessao para orquestra...
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <MetricSkeleton />
+            <MetricSkeleton />
+            <MetricSkeleton />
+            <MetricSkeleton />
+          </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
         </div>
       ) : (
@@ -310,7 +318,7 @@ function OrchestraPage() {
                 style={{ width: `${overallProgress}%` }}
               />
             </div>
-            <div className="grid gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-3 py-2">
                 <p className="text-[11px] text-cyan-100/70">Contextos</p>
                 <p className="text-lg font-semibold text-cyan-100">{contexts.length}</p>

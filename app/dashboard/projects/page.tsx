@@ -12,6 +12,8 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+import { CardSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
@@ -24,6 +26,7 @@ import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 function formatExecutionStrategy(strategy: string | undefined) {
   if (strategy === "consensus") {
@@ -59,7 +62,7 @@ function ProjectsPageContent() {
   const [isHydrating, setIsHydrating] = useState(false);
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
 
@@ -179,7 +182,7 @@ function ProjectsPageContent() {
     sessionGroups[0]?.strategy ?? selectedContext?.taskRouting.executionStrategy;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
@@ -236,25 +239,28 @@ function ProjectsPageContent() {
           </div>
         </div>
       ) : !targetSessionId ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
-          Nenhuma sessao ativa encontrada. Inicie no chat para criar o projeto.
-        </div>
+        <CosmicEmptyState
+          icon={FolderKanban}
+          title="Nenhum projeto ativo"
+          description="Projetos sao criados automaticamente apos a delegacao de agentes no chat."
+          neonColor="cyan"
+        />
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-blue-300/20 bg-blue-300/10 p-4">
-            <div className="mb-2 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-blue-100/75">
+          <div className="mb-4 rounded-2xl border border-neon-cyan/20 bg-neon-cyan/5 p-4">
+            <div className="mb-2 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-neon-cyan">
               <Target className="h-3.5 w-3.5" />
               Objetivo principal
             </div>
-            <p className="text-sm text-blue-100/95">{projectObjective}</p>
+            <p className="text-sm text-white/85">{projectObjective}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="rounded-md border border-blue-100/25 bg-blue-100/10 px-2 py-0.5 text-[11px] text-blue-100/85">
+              <span className="rounded-md border border-neon-cyan/20 bg-neon-cyan/5 px-2 py-0.5 text-[11px] text-white/85">
                 estrategia: {formatExecutionStrategy(projectStrategy)}
               </span>
-              <span className="rounded-md border border-blue-100/25 bg-blue-100/10 px-2 py-0.5 text-[11px] text-blue-100/85">
+              <span className="rounded-md border border-neon-cyan/20 bg-neon-cyan/5 px-2 py-0.5 text-[11px] text-white/85">
                 agentes envolvidos: {sessionAgents.length}
               </span>
-              <span className="rounded-md border border-blue-100/25 bg-blue-100/10 px-2 py-0.5 text-[11px] text-blue-100/85">
+              <span className="rounded-md border border-neon-cyan/20 bg-neon-cyan/5 px-2 py-0.5 text-[11px] text-white/85">
                 tarefas: {runtimeTasks.length}
               </span>
             </div>
@@ -330,9 +336,9 @@ function ProjectsPageContent() {
                     {projectDirections.map((direction) => (
                       <div
                         key={direction.id}
-                        className="rounded-lg border border-blue-300/20 bg-blue-300/10 px-2.5 py-2"
+                        className="rounded-lg border border-neon-cyan/20 bg-neon-cyan/5 px-2.5 py-2"
                       >
-                        <p className="text-xs text-blue-100/90">{direction.text}</p>
+                        <p className="text-xs text-white/85">{direction.text}</p>
                       </div>
                     ))}
                   </div>
@@ -367,12 +373,12 @@ function ProjectsPageContent() {
 
 function ProjectsPageFallback() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2 text-sm text-white/70">
-          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-          Carregando projetos...
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <CardSkeleton />
+      <div className="mt-3 space-y-2">
+        <TaskRowSkeleton />
+        <TaskRowSkeleton />
+        <TaskRowSkeleton />
       </div>
     </div>
   );

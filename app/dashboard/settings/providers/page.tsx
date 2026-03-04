@@ -20,6 +20,7 @@ import {
   Key,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -184,8 +185,10 @@ export default function ProvidersPage() {
         isDirty: false,
         saveStatus: "saved",
       });
+      toast.success("Provider salvo com sucesso!");
     } catch {
       updateState(name, { saveStatus: "error" });
+      toast.error("Falha ao salvar provider.");
     }
   };
 
@@ -195,13 +198,17 @@ export default function ProvidersPage() {
     updateState(name, { status: "testing" });
     await new Promise((r) => setTimeout(r, 1500));
     const hasKey = apiKey.length > 10 || hasSavedKey;
-    updateState(name, {
-      status: hasKey ? "success" : "error",
-    });
+    const status = hasKey ? "success" : "error";
+    updateState(name, { status });
+    if (status === "success") {
+      toast.success("Conexao OK!");
+    } else {
+      toast.error("Conexao falhou.");
+    }
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start gap-3">

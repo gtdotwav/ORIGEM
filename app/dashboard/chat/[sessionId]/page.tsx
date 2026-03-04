@@ -5,12 +5,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   ArrowUpRight,
+  Copy,
   GripVertical,
   Loader2,
   MessageSquarePlus,
   Send,
+  SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { RealtimeDistributionBubble } from "@/components/chat/realtime-distribution-bubble";
 import {
@@ -121,7 +126,9 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [controlSheetOpen, setControlSheetOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
 
@@ -277,6 +284,8 @@ export default function ChatPage() {
         language: selectedLanguage,
       });
       persistSnapshotQuietly();
+    } catch {
+      toast.error("Erro ao processar mensagem.");
     } finally {
       setIsSending(false);
     }
@@ -299,6 +308,7 @@ export default function ChatPage() {
 
     setNoteInput("");
     persistSnapshotQuietly();
+    toast.success("Nota enviada.");
   };
 
   const liveProgress = runtime?.overallProgress ?? progress;
@@ -389,18 +399,30 @@ export default function ChatPage() {
                       <div
                         key={message.id}
                         className={cn(
-                          "flex w-full",
+                          "flex w-full animate-message-in",
                           isUser ? "justify-end" : "justify-start"
                         )}
                       >
                         <div
                           className={cn(
-                            "max-w-[88%] rounded-2xl border px-4 py-3",
+                            "group relative max-w-[88%] rounded-2xl border px-4 py-3",
                             isUser
                               ? "border-neon-cyan/30 bg-neon-cyan/10 text-white"
                               : "border-white/[0.09] bg-black/35 text-white/85"
                           )}
                         >
+                          {!isUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                void navigator.clipboard.writeText(message.content);
+                                toast.success("Copiado!");
+                              }}
+                              className="absolute right-2 top-2 rounded-md p-1 text-white/20 opacity-0 transition-all hover:bg-white/[0.06] hover:text-white/50 group-hover:opacity-100"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                           {imageAttachment ? (
                             <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.12] bg-black/20">
                               <img
@@ -413,9 +435,13 @@ export default function ChatPage() {
                               </div>
                             </div>
                           ) : null}
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                            {message.content}
-                          </p>
+                          {isUser ? (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          ) : (
+                            <MarkdownRenderer content={message.content} />
+                          )}
                           {!isUser && shouldRenderDistribution(message.metadata) && (
                             <RealtimeDistributionBubble sessionId={sessionId} />
                           )}
@@ -510,126 +536,162 @@ export default function ChatPage() {
           </div>
         </section>
 
-        <aside className="min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="mb-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
-                Controle da Execucao
-              </p>
-              <p className="mt-1 text-sm text-white/65">
-                Ajuste linguagem, prioridade e notas durante o processamento.
-              </p>
-            </div>
-
-            <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
-              <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
-                Linguagem da resposta
-              </label>
-              <select
-                value={selectedLanguage}
-                onChange={(e) =>
-                  {
-                    setLanguage(sessionId, e.target.value as RuntimeLanguage);
-                    persistSnapshotQuietly();
-                  }}
-                className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white outline-none"
-              >
-                {LANGUAGE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3 min-h-0 flex-1 rounded-xl border border-white/[0.08] bg-black/30 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[10px] uppercase tracking-wide text-white/35">
-                  Prioridade das funcoes (drag and drop)
+        {(() => {
+          const controlPanel = (
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="mb-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Controle da Execucao
                 </p>
-                <span className="text-[10px] text-white/30">
-                  {runtime?.tasks.length ?? 0} itens
-                </span>
+                <p className="mt-1 text-sm text-white/65">
+                  Ajuste linguagem, prioridade e notas durante o processamento.
+                </p>
               </div>
 
-              <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
-                {runtime?.tasks.length ? (
-                  runtime.tasks.map((task) => (
-                    <div
-                      key={task.id}
-                      draggable
-                      onDragStart={() => setDraggedTaskId(task.id)}
-                      onDragEnd={() => setDraggedTaskId(null)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={() => {
-                        if (!draggedTaskId) {
-                          return;
-                        }
-                        reorderTasks(sessionId, draggedTaskId, task.id);
-                        setDraggedTaskId(null);
-                        persistSnapshotQuietly();
-                      }}
-                      className="cursor-grab rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 active:cursor-grabbing"
-                    >
-                      <div className="flex items-start gap-2">
-                        <GripVertical className="mt-0.5 h-3.5 w-3.5 text-white/30" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[11px] text-white/80">
-                            {task.priority}. {task.title}
-                          </p>
-                          <p className="text-[10px] text-white/40">
-                            {task.agentName} · {getTaskStatusLabel(task.status)} · {task.progress}%
-                          </p>
+              <div className="mb-3 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+                <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+                  Linguagem da resposta
+                </label>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) =>
+                    {
+                      setLanguage(sessionId, e.target.value as RuntimeLanguage);
+                      persistSnapshotQuietly();
+                    }}
+                  className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white outline-none"
+                >
+                  {LANGUAGE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-3 min-h-0 flex-1 rounded-xl border border-white/[0.08] bg-black/30 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-wide text-white/35">
+                    Prioridade das funcoes (drag and drop)
+                  </p>
+                  <span className="text-[10px] text-white/30">
+                    {runtime?.tasks.length ?? 0} itens
+                  </span>
+                </div>
+
+                <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
+                  {runtime?.tasks.length ? (
+                    runtime.tasks.map((task) => (
+                      <div
+                        key={task.id}
+                        draggable
+                        onDragStart={() => setDraggedTaskId(task.id)}
+                        onDragEnd={() => {
+                          setDraggedTaskId(null);
+                          setDragOverTaskId(null);
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setDragOverTaskId(task.id);
+                        }}
+                        onDragLeave={() => setDragOverTaskId(null)}
+                        onDrop={() => {
+                          if (!draggedTaskId) {
+                            return;
+                          }
+                          reorderTasks(sessionId, draggedTaskId, task.id);
+                          setDraggedTaskId(null);
+                          setDragOverTaskId(null);
+                          persistSnapshotQuietly();
+                        }}
+                        className={cn(
+                          "cursor-grab rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 transition-all duration-150 active:cursor-grabbing",
+                          draggedTaskId === task.id && "scale-95 opacity-50 border-neon-cyan/30",
+                          dragOverTaskId === task.id && draggedTaskId !== task.id && "border-t-2 border-t-neon-cyan"
+                        )}
+                      >
+                        <div className="flex items-start gap-2">
+                          <GripVertical className="mt-0.5 h-3.5 w-3.5 text-white/30" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[11px] text-white/80">
+                              {task.priority}. {task.title}
+                            </p>
+                            <p className="text-[10px] text-white/40">
+                              {task.agentName} · {getTaskStatusLabel(task.status)} · {task.progress}%
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-white/40">
-                    As funcoes delegadas aparecerao aqui assim que voce enviar a mensagem.
-                  </p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-xs text-white/40">
+                      As funcoes delegadas aparecerao aqui assim que voce enviar a mensagem.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
+                <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+                  Notas para execucao
+                </label>
+                <textarea
+                  value={noteInput}
+                  onChange={(e) => setNoteInput(e.target.value)}
+                  placeholder="Ex: priorize seguranca e responda com exemplos"
+                  className="h-20 w-full resize-none rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white placeholder:text-white/25 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={sendNote}
+                  disabled={!noteInput.trim()}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/25 bg-amber-300/10 px-2.5 py-1.5 text-xs font-medium text-amber-200 transition-all hover:border-amber-300/45 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <MessageSquarePlus className="h-3.5 w-3.5" />
+                  Enviar nota
+                </button>
+
+                {runtime?.notes.length ? (
+                  <div className="mt-2 space-y-1.5 border-t border-white/[0.06] pt-2">
+                    {runtime.notes
+                      .slice(-3)
+                      .reverse()
+                      .map((note) => (
+                        <div
+                          key={note.id}
+                          className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1"
+                        >
+                          <p className="text-[11px] text-white/70">{note.text}</p>
+                        </div>
+                      ))}
+                  </div>
+                ) : null}
               </div>
             </div>
+          );
 
-            <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
-              <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
-                Notas para execucao
-              </label>
-              <textarea
-                value={noteInput}
-                onChange={(e) => setNoteInput(e.target.value)}
-                placeholder="Ex: priorize seguranca e responda com exemplos"
-                className="h-20 w-full resize-none rounded-md border border-white/[0.08] bg-neutral-900 px-2 py-1.5 text-xs text-white placeholder:text-white/25 outline-none"
-              />
-              <button
-                type="button"
-                onClick={sendNote}
-                disabled={!noteInput.trim()}
-                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/25 bg-amber-300/10 px-2.5 py-1.5 text-xs font-medium text-amber-200 transition-all hover:border-amber-300/45 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <MessageSquarePlus className="h-3.5 w-3.5" />
-                Enviar nota
-              </button>
+          return (
+            <>
+              <aside className="hidden min-h-0 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl lg:block">
+                {controlPanel}
+              </aside>
 
-              {runtime?.notes.length ? (
-                <div className="mt-2 space-y-1.5 border-t border-white/[0.06] pt-2">
-                  {runtime.notes
-                    .slice(-3)
-                    .reverse()
-                    .map((note) => (
-                      <div
-                        key={note.id}
-                        className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1"
-                      >
-                        <p className="text-[11px] text-white/70">{note.text}</p>
-                      </div>
-                    ))}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </aside>
+              <Sheet open={controlSheetOpen} onOpenChange={setControlSheetOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    type="button"
+                    className="fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-neon-cyan/30 bg-neutral-900/90 text-neon-cyan shadow-lg backdrop-blur-xl transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/10 lg:hidden"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 border-white/[0.08] bg-neutral-900/95 p-4 backdrop-blur-xl">
+                  {controlPanel}
+                </SheetContent>
+              </Sheet>
+            </>
+          );
+        })()}
       </div>
     </div>
   );

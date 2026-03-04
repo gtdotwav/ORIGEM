@@ -12,6 +12,7 @@ import {
   Bot,
 } from "lucide-react";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 
@@ -37,7 +38,7 @@ interface CanvasView {
 }
 
 export default function SpacePage() {
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const messages = useSessionStore((state) => state.messages);
   const agents = useAgentStore((state) => state.agents);
   const decompositions = useDecompositionStore((state) => state.decompositions);
@@ -79,7 +80,7 @@ export default function SpacePage() {
   }, [sessions, messages, agents, decompositions]);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">

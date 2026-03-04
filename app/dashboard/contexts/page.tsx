@@ -13,6 +13,9 @@ import {
   Tags,
   Target,
 } from "lucide-react";
+import { ContextSkeleton } from "@/components/shared/cosmic-skeleton";
+import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
+import { toast } from "sonner";
 import {
   hydrateSessionSnapshot,
   persistSessionSnapshot,
@@ -22,6 +25,7 @@ import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type {
   DecompositionResult,
   Intent,
@@ -312,7 +316,7 @@ function ContextsPageContent() {
   const [contextInstruction, setContextInstruction] = useState("");
   const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
-  const sessions = useSessionStore((state) => state.sessions);
+  const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
   const messages = useSessionStore((state) => state.messages);
   const addMessage = useSessionStore((state) => state.addMessage);
@@ -521,13 +525,14 @@ function ContextsPageContent() {
     );
 
     setContextInstruction("");
+    toast.success("Direcao contextual enviada.");
     void persistSessionSnapshot(targetSessionId).catch((error) => {
       console.error("Failed to persist context instruction", error);
     });
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
@@ -568,6 +573,11 @@ function ContextsPageContent() {
           placeholder="Buscar por texto, intencao ou dominio..."
           className="w-full bg-transparent text-sm text-white placeholder:text-white/20 outline-none"
         />
+        {search.trim() && (
+          <span className="shrink-0 text-xs text-white/35">
+            {contextResults.length} resultado{contextResults.length !== 1 ? "s" : ""}
+          </span>
+        )}
       </div>
 
       {isHydrating ? (
@@ -578,14 +588,17 @@ function ContextsPageContent() {
           </div>
         </div>
       ) : contextResults.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-          <p className="text-sm text-white/65">
-            Nenhum contexto encontrado para esta sessao ainda.
-          </p>
-          <p className="mt-2 text-xs text-white/35">
-            Envie uma mensagem no chat para iniciar decomposicao e delegacao de funcoes.
-          </p>
-        </div>
+        <CosmicEmptyState
+          icon={Brain}
+          title="Nenhum contexto encontrado"
+          description="Envie uma mensagem no chat para iniciar decomposicao e delegacao de funcoes."
+          neonColor="cyan"
+          action={
+            targetSessionId
+              ? { label: "Ir para o chat", href: `/dashboard/chat/${targetSessionId}` }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-3">
           {contextResults.map((result) => {
@@ -775,13 +788,15 @@ function ContextsPageContent() {
 
 function ContextsPageFallback() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2 text-sm text-white/65">
-          <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-          Carregando contexto da sessao...
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-8 flex items-start gap-3">
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-white/[0.04]" />
+        <div className="space-y-2">
+          <div className="h-5 w-40 animate-pulse rounded bg-white/[0.04]" />
+          <div className="h-3 w-72 animate-pulse rounded bg-white/[0.04]" />
         </div>
       </div>
+      <ContextSkeleton />
     </div>
   );
 }

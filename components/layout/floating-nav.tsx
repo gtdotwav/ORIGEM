@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Atom,
   ChevronDown,
+  Layers,
   LayoutDashboard,
   Brain,
   FolderKanban,
@@ -15,6 +16,7 @@ import {
   GitBranch,
   LogIn,
 } from "lucide-react";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 const NAV_ITEMS = [
   {
@@ -59,6 +61,12 @@ const NAV_ITEMS = [
     href: "/dashboard/flows",
     icon: GitBranch,
   },
+  {
+    label: "Workspaces",
+    description: "Organize sessoes em espacos de trabalho",
+    href: "/dashboard/workspaces",
+    icon: Layers,
+  },
 ];
 
 export function FloatingNav() {
@@ -81,6 +89,9 @@ export function FloatingNav() {
 
   // Find the active page label for display
   const activePage = NAV_ITEMS.find((item) => pathname.startsWith(item.href));
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const activeWsName = workspaces.find((w) => w.id === activeWorkspaceId)?.name;
 
   return (
     <div className="relative z-50 w-full px-4 pt-6 md:px-6">
@@ -105,6 +116,12 @@ export function FloatingNav() {
             <span className="text-sm font-medium text-white/90">
               ORIGEM
             </span>
+            {activeWsName && (
+              <>
+                <span className="text-white/20">/</span>
+                <span className="max-w-[80px] truncate text-sm text-neon-cyan/60">{activeWsName}</span>
+              </>
+            )}
             {activePage && (
               <>
                 <span className="text-white/20">/</span>
@@ -120,11 +137,11 @@ export function FloatingNav() {
 
           {/* Dropdown — 2-col grid, compact */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-3 w-[520px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
+            <div className="absolute left-1/2 top-full mt-3 w-[calc(100vw-2rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-2 shadow-2xl shadow-black/40 backdrop-blur-xl sm:w-[520px] sm:p-3">
               {/* Arrow indicator */}
-              <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/[0.08] bg-neutral-900/95" />
+              <div className="absolute -top-1.5 left-1/2 hidden h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/[0.08] bg-neutral-900/95 sm:block" />
 
-              <div className="relative grid grid-cols-2 gap-1">
+              <div className="relative grid grid-cols-1 gap-1 sm:grid-cols-2">
                 {NAV_ITEMS.map((item) => {
                   const isActive = pathname.startsWith(item.href);
                   return (
@@ -161,6 +178,14 @@ export function FloatingNav() {
                     className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
                   >
                     Home
+                  </Link>
+                  <span className="text-white/10">|</span>
+                  <Link
+                    href="/dashboard/workspaces"
+                    onClick={() => setNavOpen(false)}
+                    className="rounded-lg px-3 py-1.5 text-xs text-white/35 transition-colors hover:text-white/60"
+                  >
+                    Workspaces
                   </Link>
                   <span className="text-white/10">|</span>
                   <Link

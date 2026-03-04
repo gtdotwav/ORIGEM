@@ -196,12 +196,17 @@ export function toSessionTitle(prompt: string) {
   return `${compact.slice(0, 49)}...`;
 }
 
-export function createSession(sessionId: string, prompt: string): Session {
+export function createSession(
+  sessionId: string,
+  prompt: string,
+  workspaceId?: string
+): Session {
   const now = new Date();
   return {
     id: sessionId,
     title: toSessionTitle(prompt),
     status: "active",
+    ...(workspaceId ? { workspaceId } : {}),
     metadata: {
       source: "chat",
     },

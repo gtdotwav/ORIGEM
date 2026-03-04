@@ -69,6 +69,17 @@
   --chart-5: var(--neon-pink);
 
   --radius: 0.75rem;
+
+  /* Shadow depth hierarchy */
+  --shadow-low: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-mid: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-high: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px oklch(0.78 0.15 195 / 0.2);
+
+  /* Transition defaults */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease-out;
 }
 
 /* Dark class mirrors root (always dark) */
@@ -294,6 +305,39 @@
   50% {
     opacity: 1;
   }
+}
+
+/* Message enter animation */
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-in {
+  animation: message-in 0.25s ease-out;
+}
+
+/* Reduce motion — toggled from Settings */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Card hover lift */
+.hover-lift {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
 }
 
 /* Custom scrollbar */
