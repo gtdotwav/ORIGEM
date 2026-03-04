@@ -28,12 +28,14 @@ import {
   createMessage,
   createSession,
   runChatOrchestration,
+  runSimpleChat,
   toSessionTitle,
 } from "@/lib/chat-orchestrator";
 import { useAgentStore } from "@/stores/agent-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { usePersonaStore } from "@/stores/persona-store";
 import type { RuntimeLanguage, RuntimeTask } from "@/types/runtime";
 
 const STAGE_LABELS: Record<string, string> = {
@@ -149,6 +151,7 @@ export default function ChatPage() {
   const addRuntimeNote = useRuntimeStore((s) => s.addNote);
   const agents = useAgentStore((s) => s.agents);
   const groups = useAgentStore((s) => s.groups);
+  const chatMode = usePersonaStore((s) => s.chatMode);
 
   const selectedLanguage = runtime?.language ?? "pt-BR";
 
@@ -280,9 +283,13 @@ export default function ChatPage() {
     setIsSending(true);
 
     try {
-      await runChatOrchestration(sessionId, text, {
-        language: selectedLanguage,
-      });
+      if (chatMode === "ecosystem") {
+        await runChatOrchestration(sessionId, text, {
+          language: selectedLanguage,
+        });
+      } else {
+        await runSimpleChat(sessionId, text);
+      }
       persistSnapshotQuietly();
     } catch {
       toast.error("Erro ao processar mensagem.");
