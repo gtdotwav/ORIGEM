@@ -53,7 +53,7 @@ function parseCriticResponse(raw: string): Omit<CriticResult, "criticType"> {
 export async function runCriticPipeline(
   originalResponse: string,
   activeCritics: CriticConfig[],
-  _tier: TokenTier
+  tier: TokenTier
 ): Promise<{ finalContent: string; results: CriticResult[] }> {
   const results: CriticResult[] = [];
   let currentContent = originalResponse;
@@ -63,7 +63,7 @@ export async function runCriticPipeline(
       const criticPrompt = buildCriticSystemPrompt(critic);
       const result = await callChatCompletion({
         messages: [{ role: "user", content: currentContent }],
-        tier: "medium",
+        tier,
         systemPrompt: criticPrompt,
       });
 

@@ -29,8 +29,7 @@ function getConfiguredProviderModel(): { provider: ProviderName; model: string }
   if (ecosystemConfig.provider && ecosystemConfig.model) {
     return { provider: ecosystemConfig.provider, model: ecosystemConfig.model };
   }
-  // Fallback — last resort defaults
-  return { provider: "openai" as ProviderName, model: "gpt-4o" };
+  return { provider: "baseten" as ProviderName, model: "moonshotai/Kimi-K2.5" };
 }
 
 interface MetricSnapshot {
@@ -180,12 +179,6 @@ const FUNCTION_AGENT_PREFERENCE: Record<RuntimeFunctionKey, string[]> = {
   groups: ["Critic", "Judge", "Synthesizer"],
   aggregation: ["Synthesizer", "Editor", "Analyst", "Planner"],
 };
-
-function delay(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 export function createId(prefix: string) {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -584,6 +577,33 @@ function createRuntimeTasks(
   });
 }
 
+/** Build a focused user prompt per function so each agent gets task-specific context. */
+function buildAgentUserPrompt(
+  functionKey: RuntimeFunctionKey,
+  originalPrompt: string,
+  previousOutputs: string[]
+): string {
+  const previous =
+    previousOutputs.length > 0
+      ? `\n\nResultados dos agentes anteriores:\n${previousOutputs.join("\n\n")}`
+      : "";
+
+  switch (functionKey) {
+    case "contexts":
+      return `Decomponha o pedido do usuario em contexto semantico, identifique intencao, dominios e entidades relevantes.\n\nPedido: ${originalPrompt}${previous}`;
+    case "projects":
+      return `Defina o objetivo do projeto, etapas e entregaveis a partir do pedido.\n\nPedido: ${originalPrompt}${previous}`;
+    case "agents":
+      return `Delegue funcoes especificas para agentes especializados e justifique cada atribuicao.\n\nPedido: ${originalPrompt}${previous}`;
+    case "groups":
+      return `Organize os agentes em grupos de execucao, defina estrategia (paralelo/sequencial) e sincronize dependencias.\n\nPedido: ${originalPrompt}${previous}`;
+    case "aggregation":
+      return `Sintetize os resultados em uma resposta final coesa e acionavel.\n\nPedido: ${originalPrompt}${previous}`;
+    default:
+      return `${originalPrompt}${previous}`;
+  }
+}
+
 async function callAgentLLM(
   agent: AgentInstance,
   task: RuntimeTask,
@@ -598,29 +618,25 @@ async function callAgentLLM(
       ? "Responde en español."
       : "Responda em portugues brasileiro.";
 
-  const previousContext =
-    previousOutputs.length > 0
-      ? `\n\nResultados dos agentes anteriores:\n${previousOutputs.map((o, i) => `--- Agente ${i + 1} ---\n${o}`).join("\n\n")}`
-      : "";
-
   const systemPrompt = [
-    `Voce e ${agent.name}, um agente especializado com o papel: ${agent.role}.`,
+    `Voce e ${agent.name}, um agente especializado do ORIGEM com o papel: ${agent.role}.`,
     `Sua tarefa atual: ${task.title}.`,
     langInstruction,
     `Seja objetivo, detalhado e pratico. Foque exclusivamente na sua funcao.`,
-    previousContext,
   ].join(" ");
+
+  const userPrompt = buildAgentUserPrompt(task.functionKey, prompt, previousOutputs);
 
   try {
     const { callChatCompletion } = await import("@/lib/chat-api");
-    const { ecosystemConfig } = useChatSettingsStore.getState();
+    const { ecosystemConfig, selectedTier } = useChatSettingsStore.getState();
     const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
 
     const result = await callChatCompletion({
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: userPrompt }],
       ...(hasManual
         ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
-        : { tier: "medium" }),
+        : { tier: selectedTier }),
       systemPrompt,
       maxTokens: 2048,
     });
@@ -829,18 +845,8 @@ export async function runChatOrchestration(
   runtimeStore.setDistributionReady(sessionId, false);
   runtimeStore.setRunning(sessionId, true);
 
-  pipelineStore.setStage("intake");
-  pipelineStore.setProgress(8);
-  pipelineStore.addEvent({
-    type: "stage_change",
-    data: { stage: "intake", sessionId },
-    timestamp: Date.now(),
-  });
-
-  await delay(120);
-
   pipelineStore.setStage("decomposing");
-  pipelineStore.setProgress(20);
+  pipelineStore.setProgress(15);
 
   const decomposition = buildDecomposition(prompt);
   decompositionStore.addDecomposition(decomposition);
@@ -853,8 +859,6 @@ export async function runChatOrchestration(
     },
     timestamp: Date.now(),
   });
-
-  await delay(120);
 
   const { agents, group } = ensureAgentsForSession(
     sessionId,
@@ -1124,83 +1128,8 @@ export async function runChatOrchestration(
 /*  Simple chat mode — conversational response without full pipeline  */
 /* ------------------------------------------------------------------ */
 
-const FACTUAL_RESPONSES: Array<{ test: (q: string) => boolean; answer: string }> = [
-  {
-    test: (q) => /quantas?\s+pessoas|popula[cç][aã]o/.test(q) && /brasil/.test(q),
-    answer: "O Brasil tem aproximadamente **215,3 milhoes de habitantes** (estimativa IBGE 2024). E o sexto pais mais populoso do mundo, atras de India, China, EUA, Indonesia e Paquistao. A maior concentracao esta no Sudeste, especialmente em Sao Paulo e Rio de Janeiro.",
-  },
-  {
-    test: (q) => /capital\s+d[oe]/.test(q) && /brasil/.test(q),
-    answer: "A capital do Brasil e **Brasilia**, localizada no Distrito Federal. Foi inaugurada em 21 de abril de 1960, projetada por Lucio Costa (urbanismo) e Oscar Niemeyer (arquitetura).",
-  },
-  {
-    test: (q) => /quantos?\s+estados/.test(q) && /brasil/.test(q),
-    answer: "O Brasil possui **26 estados** e **1 Distrito Federal**, totalizando 27 unidades federativas. O maior em area e o Amazonas, e o mais populoso e Sao Paulo.",
-  },
-  {
-    test: (q) => /(?:o que|que)\s+[eé]/.test(q) && /(?:ia|inteligencia artificial)/.test(q),
-    answer: "**Inteligencia Artificial (IA)** e um campo da ciencia da computacao que desenvolve sistemas capazes de realizar tarefas que normalmente requerem inteligencia humana — como aprendizado, raciocinio, percepcao e tomada de decisao. Inclui subcampos como machine learning, processamento de linguagem natural (NLP), visao computacional e redes neurais.",
-  },
-  {
-    test: (q) => /(?:o que|que)\s+[eé]/.test(q) && /origem/.test(q),
-    answer: "**ORIGEM** e uma plataforma de inteligencia artificial psicossemantica. Ela decompoe conceitos, orquestra agentes especializados e cria mapas de contexto para resolver problemas complexos. No modo 360, ativa todo o ecossistema de decomposicao, delegacao e sintese.",
-  },
-];
-
-const TOPIC_RESPONSES: Array<{ keywords: string[]; response: string }> = [
-  {
-    keywords: ["conceito", "decompor", "decomposicao"],
-    response: "Para decompor um conceito, identificamos seus elementos fundamentais e relacoes. Qual conceito voce quer explorar? Posso mapear dimensoes semanticas, contextos de uso e conexoes.\n\n> **Dica**: No modo **360**, a decomposicao e feita automaticamente por agentes especializados.",
-  },
-  {
-    keywords: ["mapa", "contexto", "mapear"],
-    response: "Vamos criar um mapa de contexto! Descreva o tema central e eu ajudarei a identificar nos semanticos, conexoes e camadas de significado.\n\n> **Dica**: No modo **360**, o mapeamento gera automaticamente projetos e tarefas delegadas.",
-  },
-  {
-    keywords: ["agente", "orquestrar", "delegar"],
-    response: "Posso ajudar com orquestracao! Descreva a tarefa e eu sugerirei quais agentes especializados usar e qual estrategia de execucao adotar.\n\n> **Dica**: No modo **360**, os agentes sao delegados e executados automaticamente.",
-  },
-  {
-    keywords: ["projeto", "plano", "planejamento"],
-    response: "Me conte mais sobre o projeto! Posso ajudar a estruturar etapas, definir objetivos e criar um plano de execucao eficiente.\n\n> **Dica**: No modo **360**, o planejamento gera contextos, agentes e pipeline automaticamente.",
-  },
-  {
-    keywords: ["ideia", "criar", "novo", "inventar"],
-    response: "Adorei! Me de mais detalhes sobre sua ideia e vamos construir juntos, passo a passo.\n\n> **Dica**: No modo **360**, sua ideia e decomposta, delegada a agentes e sintetizada automaticamente.",
-  },
-  {
-    keywords: ["ajuda", "ajudar", "help"],
-    response: "Claro! Estou aqui para ajudar. Voce pode me perguntar qualquer coisa — desde questoes factuais ate planejamento de projetos e decomposicao de conceitos.\n\nNo modo **Chat**, respondo diretamente. No modo **360**, ativo o ecossistema completo com agentes, decomposicao e pipeline.",
-  },
-  {
-    keywords: ["ola", "oi", "bom dia", "boa tarde", "boa noite", "hey"],
-    response: "Ola! Bem-vindo ao ORIGEM. Como posso ajudar? Pode fazer perguntas, pedir analises ou explorar conceitos comigo.\n\nEstou no modo **Chat** — respostas diretas e conversacionais.",
-  },
-];
-
-function generateSimpleResponse(prompt: string): string {
-  const lower = prompt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  // 1. Check factual knowledge base
-  const factual = FACTUAL_RESPONSES.find((r) => r.test(lower));
-  if (factual) return factual.answer;
-
-  // 2. Check topic patterns
-  const topic = TOPIC_RESPONSES.find((r) =>
-    r.keywords.some((kw) => lower.includes(kw))
-  );
-  if (topic) return topic.response;
-
-  // 3. Detect question patterns and give helpful generic response
-  const isQuestion = lower.includes("?") ||
-    /^(qual|quanto|quantas|como|por que|porque|onde|quando|quem|o que|que)\b/.test(lower);
-
-  if (isQuestion) {
-    return `Essa e uma otima pergunta! No momento, estou operando no modo **Chat direto** sem conexao com LLM externo.\n\nPara perguntas factuais e analises profundas, recomendo:\n1. Conectar um provedor de IA em **Settings > Providers**\n2. Ou mudar para o modo **360** para acionar o ecossistema completo de decomposicao e analise.\n\nMesmo assim, posso ajudar com planejamento, decomposicao de conceitos e organizacao de ideias!`;
-  }
-
-  // 4. Default conversational response
-  return `Recebi sua mensagem! No modo **Chat**, respondo de forma direta e conversacional.\n\nPosso ajudar com:\n- Decomposicao de conceitos\n- Planejamento de projetos\n- Mapeamento de contextos\n- Perguntas sobre o ORIGEM\n\nPara analise profunda com agentes e pipeline, mude para o modo **360**.`;
+function generateSimpleResponse(_prompt: string): string {
+  return `Nenhum provedor de IA configurado. Conecte sua API key em **Settings > Providers** para ativar o motor do ORIGEM.\n\nModelo recomendado: **Kimi K2.5** via Baseten.`;
 }
 
 export async function runSimpleChat(
@@ -1273,8 +1202,6 @@ export async function runSimpleChat(
       }
     }
   } catch {
-    // Fallback to template response if no provider configured
-    await delay(400 + Math.random() * 600);
     response = generateSimpleResponse(prompt);
   }
 

@@ -328,7 +328,7 @@ function OrchestraPage() {
               </div>
               <div className="rounded-lg border border-blue-300/20 bg-blue-300/10 px-3 py-2">
                 <p className="text-[11px] text-blue-100/70">Projetos</p>
-                <p className="text-lg font-semibold text-blue-100">1</p>
+                <p className="text-lg font-semibold text-blue-100">{targetSession ? 1 : 0}</p>
                 <p className="text-[11px] text-blue-100/70">{distribution.projects}%</p>
               </div>
               <div className="rounded-lg border border-green-300/20 bg-green-300/10 px-3 py-2">

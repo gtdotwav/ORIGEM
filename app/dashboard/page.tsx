@@ -2,15 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Send, Loader2, MessageCircle, Workflow, History, Plug, Calendar, Sparkles as SparklesIcon } from "lucide-react";
+import { ImageIcon, Settings, Send, Loader2, ChevronDown, History, Plug, Calendar, Sparkles as SparklesIcon } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
 import { CalendarPanel } from "@/components/chat/calendar-panel";
-import { Switch } from "@/components/ui/switch";
 import { LLMSelector } from "@/components/chat/llm-selector";
+import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
 import { IdeaSwiper } from "@/components/chat/idea-swiper";
@@ -26,13 +26,6 @@ import {
   runChatOrchestration,
   runSimpleChat,
 } from "@/lib/chat-orchestrator";
-
-const SUGGESTIONS = [
-  "Decompor um conceito",
-  "Criar mapa de contexto",
-  "Orquestrar agentes",
-  "Analisar semantica",
-];
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
@@ -67,12 +60,12 @@ export default function DashboardPage() {
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.name
   );
   const chatMode = usePersonaStore((s) => s.chatMode);
-  const setChatMode = usePersonaStore((s) => s.setChatMode);
   const isEcosystem = chatMode === "ecosystem";
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [ideasOpen, setIdeasOpen] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -252,15 +245,41 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Input field */}
-          <div className="mb-3 rounded-xl bg-foreground/[0.06] px-4 py-3">
+          {/* Expanded tools row */}
+          {toolsExpanded && (
+            <div className="mb-2 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <LLMSelector />
+              <ChatModeToggle />
+            </div>
+          )}
+
+          {/* Main input row */}
+          <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.04] p-2.5">
+            {toolsExpanded && (
+              <div className="flex items-center gap-1 animate-in fade-in duration-150">
+                <AIVoiceInput
+                  onStop={(dur) => {
+                    if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={openImagePicker}
+                  disabled={sending || uploadingImage}
+                  className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50 disabled:cursor-not-allowed disabled:opacity-40"
+                  title="Enviar imagem"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+              </div>
+            )}
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Pergunte qualquer coisa..."
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -268,106 +287,55 @@ export default function DashboardPage() {
                 }
               }}
             />
+            {toolsExpanded && (
+              <div className="flex items-center gap-1 animate-in fade-in duration-150">
+                <CriticPanel />
+                <button
+                  type="button"
+                  onClick={() => setIdeasOpen((v) => !v)}
+                  className={cn(
+                    "rounded-lg p-2 transition-colors",
+                    ideasOpen
+                      ? "text-neon-purple"
+                      : "text-foreground/30 hover:bg-foreground/5 hover:text-foreground/50"
+                  )}
+                  title="Gerar ideias"
+                >
+                  <SparklesIcon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/settings/providers")}
+                  className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50"
+                  title="Configuracoes"
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setToolsExpanded(!toolsExpanded)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
+            >
+              <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", toolsExpanded && "rotate-180")} />
+            </button>
+            <button
+              type="button"
+              onClick={() => void startSessionFromHome()}
+              disabled={!input.trim() || sending || uploadingImage}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send className="h-3.5 w-3.5" />
+              {sending || uploadingImage ? "..." : "Enviar"}
+            </button>
           </div>
 
-          {/* Mode toggle + Tier selector */}
-          <div className="mb-3 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <MessageCircle
-                  className={cn(
-                    "h-3.5 w-3.5 transition-colors",
-                    !isEcosystem ? "text-neon-cyan" : "text-foreground/25"
-                  )}
-                />
-                <span
-                  className={cn(
-                    "text-[11px] transition-colors",
-                    !isEcosystem ? "text-foreground/60" : "text-foreground/25"
-                  )}
-                >
-                  Chat
-                </span>
-              </div>
-              <Switch
-                checked={isEcosystem}
-                onCheckedChange={(checked) =>
-                  setChatMode(checked ? "ecosystem" : "direct")
-                }
-              />
-              <div className="flex items-center gap-1.5">
-                <Workflow
-                  className={cn(
-                    "h-3.5 w-3.5 transition-colors",
-                    isEcosystem ? "text-neon-purple" : "text-foreground/25"
-                  )}
-                />
-                <span
-                  className={cn(
-                    "text-[11px] transition-colors",
-                    isEcosystem ? "text-foreground/60" : "text-foreground/25"
-                  )}
-                >
-                  360
-                </span>
-              </div>
-            </div>
-            <div className="h-4 w-px bg-foreground/[0.08]" />
-            <LLMSelector />
-          </div>
-
-          {/* Controls row */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <AIVoiceInput
-                onStop={(dur) => {
-                  if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
-                }}
-              />
-              <button
-                type="button"
-                onClick={openImagePicker}
-                disabled={sending || uploadingImage}
-                className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50 disabled:cursor-not-allowed disabled:opacity-40"
-                title="Enviar imagem"
-              >
-                <ImageIcon className="h-4 w-4" />
-              </button>
-              <CriticPanel />
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/settings/providers")}
-                className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50"
-                title="Configuracoes"
-              >
-                <Settings className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setIdeasOpen((v) => !v)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
-                  ideasOpen
-                    ? "border-neon-purple/40 bg-neon-purple/15 text-neon-purple"
-                    : "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 hover:border-neon-purple/30 hover:bg-neon-purple/5 hover:text-neon-purple/70"
-                )}
-                title="Gerar ideias"
-              >
-                <SparklesIcon className="h-3.5 w-3.5" />
-                Ideias
-              </button>
-              <button
-                type="button"
-                onClick={() => void startSessionFromHome()}
-                disabled={!input.trim() || sending || uploadingImage}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Send className="h-3.5 w-3.5" />
-                {sending || uploadingImage ? "Enviando..." : "Enviar"}
-              </button>
-            </div>
+          {/* Mode indicator */}
+          <div className="mt-1.5 px-1">
+            <span className="text-[10px] text-foreground/25">
+              {isEcosystem ? "agent \u221E" : "chat direto"}
+            </span>
           </div>
 
           <input
@@ -406,22 +374,6 @@ export default function DashboardPage() {
             )}
           </AnimatePresence>
 
-          {/* Suggestion badges */}
-          <div className="flex flex-wrap gap-2 overflow-x-auto">
-            {SUGGESTIONS.map((suggestion, index) => (
-              <motion.button
-                key={suggestion}
-                type="button"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
-                onClick={() => setInput(suggestion)}
-                className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/15 hover:bg-foreground/[0.08] hover:text-foreground/70"
-              >
-                {suggestion}
-              </motion.button>
-            ))}
-          </div>
         </div>
       </motion.div>
 

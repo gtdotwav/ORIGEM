@@ -378,7 +378,7 @@ export const useRuntimeStore = create<RuntimeState>()(
           const tasks: RuntimeTask[] = current.tasks.map(
             (task): RuntimeTask => ({
               ...task,
-              progress: 100,
+              progress: task.status === "blocked" ? task.progress : 100,
               status: task.status === "blocked" ? "blocked" : "done",
             })
           );
@@ -389,8 +389,10 @@ export const useRuntimeStore = create<RuntimeState>()(
               [sessionId]: {
                 ...current,
                 tasks,
+                runId: null,
                 overallProgress: 100,
                 isRunning: false,
+                distributionReady: true,
                 updatedAt: Date.now(),
               },
             },
