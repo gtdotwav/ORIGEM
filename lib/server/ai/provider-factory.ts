@@ -68,7 +68,10 @@ export async function getLanguageModel(
       throw new Error("google_provider_requires_sdk_install");
 
     case "baseten":
-      throw new Error("baseten_requires_custom_endpoint");
+      return createOpenAI({
+        apiKey,
+        baseURL: "https://inference.baseten.co/v1",
+      })(modelId);
 
     default:
       throw new Error(`unsupported_provider_${provider as string}`);
