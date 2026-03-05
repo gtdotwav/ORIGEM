@@ -222,11 +222,53 @@ export default function DashboardPage() {
       {/* Spacer to push chat card to center */}
       <div className="flex-1" />
 
+      {/* Logo orb */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative z-10 mb-8 flex flex-col items-center gap-4"
+      >
+        <div className="relative h-20 w-20">
+          {/* Outer ambient glow */}
+          <div className="absolute -inset-4 rounded-full bg-white/[0.03] blur-2xl" />
+          {/* Glass sphere */}
+          <div
+            className="relative h-full w-full rounded-full border border-white/[0.12] shadow-[0_0_40px_rgba(255,255,255,0.06),inset_0_-8px_20px_rgba(255,255,255,0.04),inset_0_4px_12px_rgba(255,255,255,0.08)]"
+            style={{
+              background:
+                "radial-gradient(ellipse 60% 50% at 40% 35%, rgba(255,255,255,0.18), transparent 70%), radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255,255,255,0.06), transparent), radial-gradient(circle at 50% 100%, rgba(255,255,255,0.03), transparent 60%)",
+              backdropFilter: "blur(20px)",
+            }}
+          >
+            {/* Top highlight */}
+            <div
+              className="absolute left-1/2 top-[18%] h-[28%] w-[44%] -translate-x-1/2 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.22), transparent 70%)",
+              }}
+            />
+            {/* Bottom subtle reflection */}
+            <div
+              className="absolute bottom-[12%] left-1/2 h-[16%] w-[36%] -translate-x-1/2 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.06), transparent 70%)",
+              }}
+            />
+          </div>
+        </div>
+        <span className="text-xs font-semibold tracking-[0.3em] text-white/40">
+          ORIGEM
+        </span>
+      </motion.div>
+
       {/* Central chat card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
         className="relative z-10 flex w-full max-w-[640px] flex-col items-center"
       >
         <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-neon-cyan/8 bg-neon-cyan/4 blur-2xl" />
