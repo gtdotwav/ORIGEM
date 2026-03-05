@@ -5,6 +5,7 @@ import { Link2, Copy, Trash2, Plus, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -46,14 +47,17 @@ export function InviteLinkDialog({ open, onOpenChange }: InviteLinkDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white/90">
+          <DialogTitle className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-neon-purple" />
             Links de convite
           </DialogTitle>
+          <DialogDescription>
+            Gere links para convidar pessoas a sua rede
+          </DialogDescription>
         </DialogHeader>
 
         {/* Create new */}
-        <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="dialog-section space-y-2">
           <p className="mb-1.5 text-xs font-medium text-white/50">Criar novo link</p>
           <div className="flex gap-2">
             <Input

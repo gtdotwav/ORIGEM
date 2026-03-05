@@ -5,6 +5,7 @@ import { UserPlus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -101,10 +102,15 @@ export function ConnectionCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white/90">
+          <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-4 w-4 text-neon-cyan" />
-            {editConnection ? "Editar conexão" : "Adicionar conexão"}
+            {editConnection ? "Editar conexao" : "Adicionar conexao"}
           </DialogTitle>
+          <DialogDescription>
+            {editConnection
+              ? "Atualize os dados da conexao"
+              : "Registre um contato na sua rede profissional"}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-3">

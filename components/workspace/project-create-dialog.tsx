@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -105,9 +106,14 @@ export function ProjectCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white/90">
+          <DialogTitle>
             {editProject ? "Editar projeto" : "Novo projeto"}
           </DialogTitle>
+          <DialogDescription>
+            {editProject
+              ? "Atualize as informacoes do projeto"
+              : "Crie um projeto dentro do workspace"}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -141,7 +147,7 @@ export function ProjectCreateDialog({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Cor
             </label>
             <div className="flex gap-2">
@@ -166,7 +172,7 @@ export function ProjectCreateDialog({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Icone
             </label>
             <div className="grid grid-cols-4 gap-2">
