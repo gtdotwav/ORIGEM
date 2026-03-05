@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Zap,
   MessageSquare,
   Sparkles,
   Flame,
   ChevronDown,
-  Cpu,
   Check,
 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useChatSettingsStore } from "@/stores/chat-settings-store";
 import { useConfiguredProviders } from "@/hooks/use-configured-providers";
@@ -30,15 +24,9 @@ const TIER_ICONS: Record<TokenTier, React.ComponentType<{ className?: string }>>
   ultra: Flame,
 };
 
-const TIER_COLORS: Record<string, { text: string; bg: string; border: string }> = {
-  "neon-green":  { text: "text-neon-green",  bg: "bg-neon-green/10",  border: "border-neon-green/30" },
-  "neon-cyan":   { text: "text-neon-cyan",   bg: "bg-neon-cyan/10",   border: "border-neon-cyan/30" },
-  "neon-purple": { text: "text-neon-purple", bg: "bg-neon-purple/10", border: "border-neon-purple/30" },
-  "neon-orange": { text: "text-neon-orange", bg: "bg-neon-orange/10", border: "border-neon-orange/30" },
-};
-
 export function LLMSelector({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const { providers: configuredProviders, loading } = useConfiguredProviders();
 
   const selectedTier = useChatSettingsStore((s) => s.selectedTier);
@@ -47,21 +35,35 @@ export function LLMSelector({ className }: { className?: string }) {
   const setEcosystemProvider = useChatSettingsStore((s) => s.setEcosystemProvider);
   const setEcosystemModel = useChatSettingsStore((s) => s.setEcosystemModel);
 
-  const hasManualSelection = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+  const hasManualSelection =
+    ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
 
-  // Find display info for current selection
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   const currentTierConfig = TOKEN_TIERS[selectedTier];
-  const tierColors = TIER_COLORS[currentTierConfig.color] ?? TIER_COLORS["neon-cyan"];
 
-  let displayLabel = `Auto · ${currentTierConfig.label}`;
-  let displayProvider: string | null = null;
+  let displayLabel = currentTierConfig.label;
+  let displaySub = "Auto";
 
   if (hasManualSelection) {
-    const provMeta = PROVIDER_CATALOG.find((p) => p.name === ecosystemConfig.provider);
-    const modelMeta = provMeta?.models.find((m) => m.id === ecosystemConfig.model);
+    const provMeta = PROVIDER_CATALOG.find(
+      (p) => p.name === ecosystemConfig.provider
+    );
+    const modelMeta = provMeta?.models.find(
+      (m) => m.id === ecosystemConfig.model
+    );
     displayLabel = modelMeta?.name ?? ecosystemConfig.model;
-    displayProvider = provMeta?.displayName ?? null;
+    displaySub = provMeta?.displayName ?? "";
   }
+
+  const configuredNames = configuredProviders.map((p) => p.provider);
 
   function selectAuto() {
     setEcosystemProvider(null);
@@ -75,140 +77,151 @@ export function LLMSelector({ className }: { className?: string }) {
     setOpen(false);
   }
 
-  const configuredNames = configuredProviders.map((p) => p.provider);
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-all",
-            hasManualSelection
-              ? "border-neon-purple/30 bg-neon-purple/10 text-neon-purple"
-              : `${tierColors.border} ${tierColors.bg} ${tierColors.text}`,
-            className
-          )}
-        >
-          <Cpu className="h-3.5 w-3.5" />
-          <span className="max-w-[120px] truncate">
-            {displayProvider ? `${displayProvider} · ${displayLabel}` : displayLabel}
-          </span>
-          <ChevronDown className="h-3 w-3 opacity-50" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-72 border-foreground/[0.08] bg-card/95 p-3 shadow-2xl backdrop-blur-xl"
-        align="start"
-        sideOffset={8}
-      >
-        {/* Tier pills */}
-        <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/30">
-          Nivel de resposta
-        </p>
-        <div className="mb-3 flex gap-1">
-          {TIER_ORDER.map((tier) => {
-            const config = TOKEN_TIERS[tier];
-            const TierIcon = TIER_ICONS[tier];
-            const colors = TIER_COLORS[config.color] ?? TIER_COLORS["neon-cyan"];
-            const isActive = selectedTier === tier;
-
-            return (
-              <button
-                key={tier}
-                type="button"
-                onClick={() => {
-                  setSelectedTier(tier);
-                  setEcosystemProvider(null);
-                  setEcosystemModel("");
-                }}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-1 rounded-md border px-1.5 py-1 text-[10px] font-medium transition-all",
-                  isActive && !hasManualSelection
-                    ? `${colors.border} ${colors.bg} ${colors.text}`
-                    : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/35 hover:bg-foreground/[0.05] hover:text-foreground/50"
-                )}
-              >
-                <TierIcon className="h-3 w-3" />
-                {config.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Auto option */}
-        <div className="border-t border-foreground/[0.06] pt-2">
-          <button
-            type="button"
-            onClick={selectAuto}
-            className={cn(
-              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
-              !hasManualSelection
-                ? "bg-neon-cyan/8 text-neon-cyan"
-                : "text-foreground/50 hover:bg-foreground/[0.04] hover:text-foreground/70"
-            )}
-          >
-            <Zap className="h-3 w-3" />
-            <div className="flex-1">
-              <p className="text-[11px] font-medium">Auto</p>
-              <p className="text-[9px] opacity-50">
-                Seleciona o melhor modelo pelo tier
-              </p>
-            </div>
-            {!hasManualSelection && <Check className="h-3 w-3" />}
-          </button>
-        </div>
-
-        {/* Provider + model list */}
-        {loading ? (
-          <p className="mt-2 text-center text-[10px] text-foreground/25">
-            Carregando provedores...
-          </p>
-        ) : configuredNames.length === 0 ? (
-          <p className="mt-2 text-center text-[10px] text-foreground/25">
-            Nenhum provedor configurado
-          </p>
-        ) : (
-          <div className="mt-2 max-h-52 space-y-1 overflow-y-auto border-t border-foreground/[0.06] pt-2">
-            {PROVIDER_CATALOG.filter((p) =>
-              configuredNames.includes(p.name)
-            ).map((provMeta) => (
-              <div key={provMeta.name}>
-                <p className="mb-0.5 px-2 text-[9px] uppercase tracking-wider text-foreground/25">
-                  {provMeta.displayName}
-                </p>
-                {provMeta.models.map((model) => {
-                  const isSelected =
-                    ecosystemConfig.provider === provMeta.name &&
-                    ecosystemConfig.model === model.id;
-
-                  return (
-                    <button
-                      key={model.id}
-                      type="button"
-                      onClick={() => selectModel(provMeta.name, model.id)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
-                        isSelected
-                          ? "bg-neon-purple/8 text-neon-purple"
-                          : "text-foreground/50 hover:bg-foreground/[0.04] hover:text-foreground/70"
-                      )}
-                    >
-                      <div className="flex-1">
-                        <p className="text-[11px] font-medium">{model.name}</p>
-                        <p className="text-[9px] opacity-50">
-                          {model.costTier} · {model.bestFor.slice(0, 2).join(", ")}
-                        </p>
-                      </div>
-                      {isSelected && <Check className="h-3 w-3" />}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+    <div ref={ref} className={cn("relative", className)}>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-all",
+          open
+            ? "border-foreground/[0.12] bg-foreground/[0.06]"
+            : "border-foreground/[0.06] bg-foreground/[0.03] hover:border-foreground/[0.10]"
         )}
-      </PopoverContent>
-    </Popover>
+      >
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-medium text-foreground/65">
+            {displayLabel}
+          </p>
+          <p className="truncate text-[8px] text-foreground/25">
+            {displaySub}
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-3 w-3 shrink-0 text-foreground/20 transition-transform",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-[280px] rounded-xl border border-foreground/[0.08] bg-card/95 shadow-2xl backdrop-blur-xl">
+          {/* Tiers */}
+          <div className="border-b border-foreground/[0.05] p-2.5">
+            <p className="mb-1.5 px-1 text-[8px] font-medium uppercase tracking-widest text-foreground/25">
+              Nivel
+            </p>
+            <div className="flex gap-1">
+              {TIER_ORDER.map((tier) => {
+                const config = TOKEN_TIERS[tier];
+                const TierIcon = TIER_ICONS[tier];
+                const isActive =
+                  selectedTier === tier && !hasManualSelection;
+                return (
+                  <button
+                    key={tier}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTier(tier);
+                      setEcosystemProvider(null);
+                      setEcosystemModel("");
+                    }}
+                    className={cn(
+                      "flex flex-1 flex-col items-center gap-0.5 rounded-lg border py-1.5 transition-all",
+                      isActive
+                        ? "border-neon-cyan/25 bg-neon-cyan/8 text-neon-cyan"
+                        : "border-foreground/[0.04] text-foreground/30 hover:border-foreground/[0.08] hover:text-foreground/50"
+                    )}
+                  >
+                    <TierIcon className="h-3 w-3" />
+                    <span className="text-[9px] font-medium">
+                      {config.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Auto */}
+          <div className="border-b border-foreground/[0.05] px-2 py-1.5">
+            <button
+              type="button"
+              onClick={selectAuto}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 transition-colors",
+                !hasManualSelection
+                  ? "bg-foreground/[0.04] text-foreground/70"
+                  : "text-foreground/35 hover:bg-foreground/[0.03] hover:text-foreground/55"
+              )}
+            >
+              <Zap className="h-3 w-3 shrink-0" />
+              <span className="flex-1 text-[11px]">Auto</span>
+              {!hasManualSelection && (
+                <Check className="h-3 w-3 shrink-0 text-neon-cyan" />
+              )}
+            </button>
+          </div>
+
+          {/* Models */}
+          <div className="max-h-[240px] overflow-y-auto p-1.5">
+            {loading ? (
+              <p className="py-3 text-center text-[10px] text-foreground/20">
+                Carregando...
+              </p>
+            ) : configuredNames.length === 0 ? (
+              <p className="py-3 text-center text-[10px] text-foreground/20">
+                Nenhum provedor configurado
+              </p>
+            ) : (
+              PROVIDER_CATALOG.filter((p) =>
+                configuredNames.includes(p.name)
+              ).map((provMeta) => (
+                <div key={provMeta.name} className="mb-1">
+                  <p className="px-2 py-1 text-[8px] font-medium uppercase tracking-widest text-foreground/20">
+                    {provMeta.displayName}
+                  </p>
+                  {provMeta.models.map((model) => {
+                    const isSelected =
+                      ecosystemConfig.provider === provMeta.name &&
+                      ecosystemConfig.model === model.id;
+                    return (
+                      <button
+                        key={model.id}
+                        type="button"
+                        onClick={() =>
+                          selectModel(provMeta.name, model.id)
+                        }
+                        className={cn(
+                          "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors",
+                          isSelected
+                            ? "bg-foreground/[0.05]"
+                            : "hover:bg-foreground/[0.03]"
+                        )}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[11px] text-foreground/60">
+                            {model.name}
+                          </p>
+                          <p className="truncate text-[8px] text-foreground/20">
+                            {model.bestFor.slice(0, 2).join(" · ")}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <Check className="h-3 w-3 shrink-0 text-neon-cyan" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

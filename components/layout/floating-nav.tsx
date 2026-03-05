@@ -14,7 +14,7 @@ import {
   Brain,
   FolderKanban,
   Bot,
-  Orbit,
+
   Users,
   GitBranch,
   Workflow,
@@ -115,13 +115,6 @@ const NAV_ENTRIES: NavEntry[] = [
         color: "orange",
       },
     ],
-  },
-  {
-    label: "Space",
-    description: "Canvas infinito para orquestração",
-    href: "/dashboard/space",
-    icon: Orbit,
-    color: "pink",
   },
   {
     label: "Workspaces",
@@ -252,6 +245,7 @@ export function FloatingNav() {
           {/* Theme toggle — soft slide */}
           {mounted && (
             <button
+              data-tour="theme-toggle"
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="relative inline-flex h-7 w-12 items-center rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-md transition-all"
@@ -286,6 +280,7 @@ export function FloatingNav() {
         <div ref={navRef} className="relative flex flex-col items-center gap-2">
           {/* Trigger — logo image */}
           <button
+            data-tour="nav-logo"
             type="button"
             onClick={() => {
               setNavOpen((v) => !v);

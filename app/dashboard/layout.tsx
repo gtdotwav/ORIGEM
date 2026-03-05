@@ -8,6 +8,7 @@ import { FloatingNav } from "@/components/layout/floating-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { BackendSessionBootstrap } from "@/components/layout/backend-session-bootstrap";
 import { LiquidGradientBackground } from "@/components/shared/liquid-gradient-bg";
+import { GuidedTour } from "@/components/tour/guided-tour";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { WORKSPACE_COLORS } from "@/components/workspace/workspace-card";
 
@@ -31,6 +32,7 @@ export default function DashboardLayout({
       {/* Floating nav — always visible */}
       <FloatingNav />
       <CommandPalette />
+      <GuidedTour />
 
       {/* Workspace active context bar */}
       {activeWorkspace && (

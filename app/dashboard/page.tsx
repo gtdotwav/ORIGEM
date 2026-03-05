@@ -172,7 +172,7 @@ export default function DashboardPage() {
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
 
       {/* Left toolbar — vertical button strip */}
-      <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-foreground/[0.06] bg-card/80 p-1 shadow-lg backdrop-blur-xl">
+      <div data-tour="left-toolbar" className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-foreground/[0.06] bg-card/80 p-1 shadow-lg backdrop-blur-xl">
         <button
           type="button"
           onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); setCalendarOpen(false); }}
@@ -254,34 +254,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Expanded tools row */}
-          {toolsExpanded && (
-            <div className="mb-2 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <LLMSelector />
-              <ChatModeToggle />
-            </div>
-          )}
-
           {/* Main input row */}
-          <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.04] p-2.5">
-            {toolsExpanded && (
-              <div className="flex items-center gap-1 animate-in fade-in duration-150">
-                <AIVoiceInput
-                  onStop={(dur) => {
-                    if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={openImagePicker}
-                  disabled={sending || uploadingImage}
-                  className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50 disabled:cursor-not-allowed disabled:opacity-40"
-                  title="Enviar imagem"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+          <div data-tour="chat-input" className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.04] p-2.5">
             <input
               ref={inputRef}
               type="text"
@@ -296,33 +270,8 @@ export default function DashboardPage() {
                 }
               }}
             />
-            {toolsExpanded && (
-              <div className="flex items-center gap-1 animate-in fade-in duration-150">
-                <CriticPanel />
-                <button
-                  type="button"
-                  onClick={() => setIdeasOpen((v) => !v)}
-                  className={cn(
-                    "rounded-lg p-2 transition-colors",
-                    ideasOpen
-                      ? "text-neon-purple"
-                      : "text-foreground/30 hover:bg-foreground/5 hover:text-foreground/50"
-                  )}
-                  title="Gerar ideias"
-                >
-                  <SparklesIcon className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard/settings/providers")}
-                  className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50"
-                  title="Configuracoes"
-                >
-                  <Settings className="h-4 w-4" />
-                </button>
-              </div>
-            )}
             <button
+              data-tour="tools-chevron"
               type="button"
               onClick={() => setToolsExpanded(!toolsExpanded)}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
@@ -340,9 +289,71 @@ export default function DashboardPage() {
             </button>
           </div>
 
+          {/* Expanded tools panel */}
+          <AnimatePresence>
+            {toolsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                  {/* Row 1 — Model + Mode */}
+                  <div className="flex items-center gap-2">
+                    <LLMSelector className="flex-1" />
+                    <ChatModeToggle />
+                  </div>
+
+                  {/* Row 2 — Tools */}
+                  <div className="mt-2 flex items-center gap-1 border-t border-foreground/[0.04] pt-2">
+                    <AIVoiceInput
+                      onStop={(dur) => {
+                        if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={openImagePicker}
+                      disabled={sending || uploadingImage}
+                      className="rounded-lg p-2 text-foreground/25 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/50 disabled:opacity-40"
+                      title="Enviar imagem"
+                    >
+                      <ImageIcon className="h-3.5 w-3.5" />
+                    </button>
+                    <CriticPanel />
+                    <button
+                      type="button"
+                      onClick={() => setIdeasOpen((v) => !v)}
+                      className={cn(
+                        "rounded-lg p-2 transition-colors",
+                        ideasOpen
+                          ? "text-neon-purple"
+                          : "text-foreground/25 hover:bg-foreground/[0.04] hover:text-foreground/50"
+                      )}
+                      title="Gerar ideias"
+                    >
+                      <SparklesIcon className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="flex-1" />
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard/settings/providers")}
+                      className="rounded-lg p-2 text-foreground/20 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/40"
+                      title="Configuracoes"
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Mode indicator */}
-          <div className="mt-1.5 px-1">
-            <span className="text-[10px] text-foreground/25">
+          <div className="mt-1.5 flex items-center justify-between px-1">
+            <span className="text-[10px] text-foreground/20">
               {isEcosystem ? "agent \u221E" : "chat direto"}
             </span>
           </div>

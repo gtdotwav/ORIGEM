@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
 import {
   Orbit,
   Plus,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSpacesStore } from "@/stores/spaces-store";
-import { cn } from "@/lib/utils";
 
 function formatTime(ts: number) {
   const diff = Date.now() - ts;
@@ -43,7 +43,6 @@ export default function SpacesHubPage() {
   const handleRename = (spaceId: string) => {
     if (editName.trim()) {
       renameSpace(spaceId, editName.trim());
-      toast.success("Renomeado!");
     }
     setEditingId(null);
   };
@@ -54,89 +53,89 @@ export default function SpacesHubPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
       {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <Orbit className="h-5 w-5 text-foreground/50" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">ORIGEM Spaces</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Workspace infinito para criacao de imagens com IA — organize, gere e
-              itere visualmente
-            </p>
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-2.5 mb-1">
+          <Orbit className="h-5 w-5 text-foreground/40" />
+          <h1 className="text-xl font-semibold text-foreground">Spaces</h1>
         </div>
+        <p className="text-xs text-foreground/35 pl-[30px]">
+          Canvas infinito para criacao de imagens e videos com IA
+        </p>
+      </motion.div>
 
-        <button
-          type="button"
-          onClick={handleCreate}
-          className="inline-flex items-center gap-2 rounded-xl border border-foreground/[0.10] bg-foreground/[0.05] px-4 py-2.5 text-sm text-foreground/60 transition-all hover:border-foreground/[0.15] hover:bg-foreground/[0.08] hover:text-foreground/80"
-        >
-          <Plus className="h-4 w-4" />
-          Novo Space
-        </button>
-      </div>
-
-      {/* New space hero */}
-      <button
+      {/* Create hero */}
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
         type="button"
         onClick={handleCreate}
-        className="group mb-6 flex w-full items-center justify-center rounded-2xl border border-dashed border-foreground/[0.08] bg-card/40 py-14 backdrop-blur-sm transition-all hover:border-neon-cyan/25 hover:bg-neon-cyan/[0.03]"
+        className="group mb-8 flex w-full items-center justify-center rounded-xl border border-dashed border-foreground/[0.06] py-12 transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.02]"
       >
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04] transition-all group-hover:border-foreground/[0.15] group-hover:bg-foreground/[0.06]">
-            <Orbit className="h-7 w-7 text-foreground/20 transition-colors group-hover:text-foreground/50" />
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] transition-all group-hover:bg-foreground/[0.06]">
+            <Plus className="h-4 w-4 text-foreground/25 transition-colors group-hover:text-foreground/50" />
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-foreground/50 transition-colors group-hover:text-foreground/80">
-              Criar novo Space
-            </p>
-            <p className="mt-1 text-xs text-foreground/25">
-              Canvas infinito com geracao de imagens, variacoes e workflow visual
-            </p>
-          </div>
+          <p className="text-xs text-foreground/35 group-hover:text-foreground/55">
+            Criar novo Space
+          </p>
         </div>
-      </button>
+      </motion.button>
 
-      {/* Spaces grid */}
+      {/* Grid */}
       {spaces.length > 0 && (
-        <>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-foreground/50">Seus Spaces</h2>
-            <span className="text-[10px] text-foreground/20">
-              {spaces.length} {spaces.length === 1 ? "space" : "spaces"}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-foreground/25">
+              Seus Spaces
+            </span>
+            <span className="text-[10px] text-foreground/15">
+              {spaces.length}
             </span>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[...spaces]
               .sort((a, b) => b.updatedAt - a.updatedAt)
-              .map((space) => {
-                const spaceCards = cards.filter((c) => c.spaceId === space.id);
-                const doneCards = spaceCards.filter((c) => c.status === "done");
-                const previewImages = doneCards
+              .map((space, i) => {
+                const spaceCards = cards.filter(
+                  (c) => c.spaceId === space.id
+                );
+                const previewImages = spaceCards
+                  .filter((c) => c.status === "done")
                   .flatMap((c) => c.imageUrls)
                   .slice(0, 4);
 
                 return (
-                  <div
+                  <motion.div
                     key={space.id}
-                    className="group rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-md transition-all hover:border-foreground/[0.14] hover:bg-card/80"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 * i }}
+                    className="group overflow-hidden rounded-xl border border-foreground/[0.06] bg-card/50 transition-all hover:border-foreground/[0.10]"
                   >
-                    {/* Preview area */}
                     <button
                       type="button"
-                      onClick={() => router.push(`/dashboard/spaces/${space.id}`)}
-                      className="flex h-32 w-full items-center justify-center overflow-hidden rounded-t-2xl border-b border-foreground/[0.04] bg-foreground/[0.02] transition-colors hover:bg-foreground/[0.04]"
+                      onClick={() =>
+                        router.push(`/dashboard/spaces/${space.id}`)
+                      }
+                      className="flex h-28 w-full items-center justify-center bg-foreground/[0.02] transition-colors hover:bg-foreground/[0.04]"
                     >
                       {previewImages.length > 0 ? (
-                        <div className="grid h-full w-full grid-cols-2 gap-0.5">
-                          {previewImages.map((url, i) => (
+                        <div className="grid h-full w-full grid-cols-2 gap-px">
+                          {previewImages.map((url, j) => (
                             <img
-                              key={i}
+                              key={j}
                               src={url}
                               alt=""
                               className="h-full w-full object-cover"
@@ -144,18 +143,12 @@ export default function SpacesHubPage() {
                           ))}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <ImageIcon className="h-6 w-6 text-foreground/10" />
-                          <span className="text-[10px] text-foreground/20">
-                            Space vazio
-                          </span>
-                        </div>
+                        <ImageIcon className="h-5 w-5 text-foreground/8" />
                       )}
                     </button>
 
-                    {/* Info */}
-                    <div className="p-4">
-                      <div className="mb-2 flex items-start justify-between">
+                    <div className="px-3 py-2.5">
+                      <div className="flex items-center justify-between">
                         {editingId === space.id ? (
                           <input
                             type="text"
@@ -167,64 +160,57 @@ export default function SpacesHubPage() {
                               if (e.key === "Escape") setEditingId(null);
                             }}
                             autoFocus
-                            className="flex-1 rounded border border-neon-cyan/30 bg-transparent px-1 text-sm font-semibold text-foreground outline-none"
+                            className="flex-1 rounded bg-transparent text-xs font-medium text-foreground outline-none ring-1 ring-neon-cyan/30 px-1"
                           />
                         ) : (
-                          <h3 className="text-sm font-semibold text-foreground/90">
+                          <h3 className="truncate text-xs font-medium text-foreground/75">
                             {space.name}
                           </h3>
                         )}
 
-                        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 ml-2">
                           <button
                             type="button"
                             onClick={() => {
                               setEditingId(space.id);
                               setEditName(space.name);
                             }}
-                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/25 hover:text-foreground/50"
+                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/20 hover:text-foreground/50"
                           >
-                            <Pencil className="h-3 w-3" />
+                            <Pencil className="h-2.5 w-2.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(space.id)}
-                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/25 hover:text-red-400"
+                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/20 hover:text-red-400"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-2.5 w-2.5" />
                           </button>
                         </div>
                       </div>
 
-                      {space.description && (
-                        <p className="mb-2 text-xs text-foreground/40">
-                          {space.description}
-                        </p>
-                      )}
-
-                      <div className="flex items-center gap-3 border-t border-foreground/[0.05] pt-3">
-                        <span className="flex items-center gap-1 text-[10px] text-foreground/25">
-                          <ImageIcon className="h-3 w-3" />
-                          {spaceCards.length} {spaceCards.length === 1 ? "card" : "cards"}
+                      <div className="mt-1.5 flex items-center gap-2 text-[9px] text-foreground/20">
+                        <span className="flex items-center gap-1">
+                          <ImageIcon className="h-2.5 w-2.5" />
+                          {spaceCards.length}
                         </span>
-                        <span className="ml-auto flex items-center gap-1 text-[10px] text-foreground/20">
-                          <Clock className="h-3 w-3" />
+                        <span className="ml-auto flex items-center gap-1">
+                          <Clock className="h-2.5 w-2.5" />
                           {formatTime(space.updatedAt)}
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
           </div>
-        </>
+        </motion.div>
       )}
 
       {spaces.length === 0 && (
-        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 text-center backdrop-blur-md">
-          <Orbit className="mx-auto mb-3 h-8 w-8 text-foreground/15" />
-          <p className="text-sm text-foreground/50">
-            Nenhum space criado. Crie seu primeiro workspace de geracao de imagens.
+        <div className="text-center py-8">
+          <p className="text-xs text-foreground/25">
+            Nenhum space criado ainda
           </p>
         </div>
       )}

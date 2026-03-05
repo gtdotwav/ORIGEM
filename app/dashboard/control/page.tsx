@@ -451,7 +451,7 @@ export default function DashboardControlPage() {
                   Fluxos
                 </div>
               </Link>
-              <Link href={latestSessionId ? `/dashboard/orchestra/${latestSessionId}` : "/dashboard/space"} className="rounded-lg border border-fuchsia-300/20 bg-fuchsia-300/10 px-2.5 py-2 text-[11px] text-fuchsia-200 transition-all hover:border-fuchsia-300/40 hover:bg-fuchsia-300/15">
+              <Link href={latestSessionId ? `/dashboard/orchestra/${latestSessionId}` : "/dashboard/spaces"} className="rounded-lg border border-fuchsia-300/20 bg-fuchsia-300/10 px-2.5 py-2 text-[11px] text-fuchsia-200 transition-all hover:border-fuchsia-300/40 hover:bg-fuchsia-300/15">
                 <div className="mb-1 inline-flex items-center gap-1">
                   <Orbit className="h-3.5 w-3.5" />
                   Orquestra

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ReactFlow,
@@ -12,7 +12,8 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowLeft, Plus, Maximize2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { ArrowLeft, Plus, PanelRightOpen, PanelRightClose } from "lucide-react";
 import { SpacesSidebar } from "@/components/spaces/spaces-sidebar";
 import GenerationCardNode from "@/components/spaces/generation-card-node";
 import { ControlPanel } from "@/components/spaces/control-panel";
@@ -26,6 +27,7 @@ const NODE_TYPES = {
 export default function SpaceCanvasPage() {
   const { spaceId } = useParams<{ spaceId: string }>();
   const router = useRouter();
+  const [panelOpen, setPanelOpen] = useState(true);
 
   const spaces = useSpacesStore((s) => s.spaces);
   const setActiveSpace = useSpacesStore((s) => s.setActiveSpace);
@@ -45,7 +47,6 @@ export default function SpaceCanvasPage() {
     [spaces, spaceId]
   );
 
-  // Ensure space exists and is active
   useEffect(() => {
     if (!spaceId) return;
     const existing = spaces.find((s) => s.id === spaceId);
@@ -54,6 +55,11 @@ export default function SpaceCanvasPage() {
     }
     setActiveSpace(spaceId);
   }, [spaceId, spaces, setActiveSpace, createSpace]);
+
+  // Auto-open panel when a card is selected
+  useEffect(() => {
+    if (selectedCardId && !panelOpen) setPanelOpen(true);
+  }, [selectedCardId, panelOpen]);
 
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
@@ -79,55 +85,69 @@ export default function SpaceCanvasPage() {
   };
 
   const spaceNodes = useMemo(
-    () => nodes.filter((n) => {
-      const card = useSpacesStore.getState().cards.find((c) => c.id === n.id);
-      return card?.spaceId === spaceId;
-    }),
+    () =>
+      nodes.filter((n) => {
+        const card = useSpacesStore
+          .getState()
+          .cards.find((c) => c.id === n.id);
+        return card?.spaceId === spaceId;
+      }),
     [nodes, spaceId]
   );
 
   const spaceEdges = useMemo(() => {
     const nodeIds = new Set(spaceNodes.map((n) => n.id));
-    return edges.filter((e) => nodeIds.has(e.source) || nodeIds.has(e.target));
+    return edges.filter(
+      (e) => nodeIds.has(e.source) || nodeIds.has(e.target)
+    );
   }, [edges, spaceNodes]);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden">
-      {/* Left sidebar */}
+    <div className="fixed inset-0 z-50 flex bg-[oklch(0.09_0_0)]">
+      {/* Left sidebar — compact tools */}
       <SpacesSidebar />
 
       {/* Center — Infinite Canvas */}
       <div className="relative flex-1">
-        {/* Top bar overlay */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-          <div className="pointer-events-auto flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.push("/dashboard/spaces")}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-foreground/[0.06] bg-[oklch(0.15_0_0)] text-foreground/40 transition-all hover:bg-[oklch(0.18_0_0)] hover:text-foreground/60"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <div className="rounded-xl border border-foreground/[0.06] bg-[oklch(0.15_0_0)] px-3 py-1.5">
-              <h2 className="text-xs font-semibold text-foreground/60">
-                {space?.name ?? "Space"}
-              </h2>
-            </div>
-          </div>
-
+        {/* Top bar — floating overlay */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2.5">
           <div className="pointer-events-auto flex items-center gap-2">
             <button
               type="button"
-              onClick={handleAddCard}
-              className="flex items-center gap-1.5 rounded-xl border border-foreground/[0.08] bg-[oklch(0.15_0_0)] px-3 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/[0.12] hover:bg-[oklch(0.18_0_0)] hover:text-foreground/70"
+              onClick={() => router.push("/dashboard/spaces")}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 transition-all hover:bg-white/[0.06] hover:text-white/70"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[11px] font-medium text-white/50">
+              {space?.name ?? "Space"}
+            </span>
+          </div>
+
+          <div className="pointer-events-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleAddCard}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-white/50 transition-all hover:bg-white/[0.06] hover:text-white/70"
+            >
+              <Plus className="h-3 w-3" />
               Novo Card
+            </button>
+            <button
+              type="button"
+              onClick={() => setPanelOpen(!panelOpen)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/35 transition-all hover:bg-white/[0.06] hover:text-white/60"
+            >
+              {panelOpen ? (
+                <PanelRightClose className="h-3.5 w-3.5" />
+              ) : (
+                <PanelRightOpen className="h-3.5 w-3.5" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* React Flow Canvas — plain static background */}
+        {/* React Flow Canvas */}
         <ReactFlow
           nodes={spaceNodes}
           edges={spaceEdges}
@@ -140,46 +160,60 @@ export default function SpaceCanvasPage() {
           fitView
           minZoom={0.1}
           maxZoom={3}
-          className="!bg-[oklch(0.11_0_0)]"
+          className="!bg-[oklch(0.09_0_0)]"
           proOptions={{ hideAttribution: true }}
         >
           <Background
             variant={BackgroundVariant.Dots}
-            gap={28}
-            size={0.8}
-            className="!opacity-20"
+            gap={32}
+            size={0.6}
+            className="!opacity-[0.12]"
           />
           <Controls
             showInteractive={false}
-            className="!rounded-xl !border !border-foreground/[0.06] !bg-[oklch(0.15_0_0)] !shadow-md [&>button]:!border-foreground/[0.05] [&>button]:!bg-transparent [&>button]:!text-foreground/35 [&>button:hover]:!bg-foreground/[0.06] [&>button:hover]:!text-foreground/55"
+            className="!rounded-lg !border !border-white/[0.06] !bg-white/[0.03] !shadow-none [&>button]:!border-white/[0.04] [&>button]:!bg-transparent [&>button]:!text-white/25 [&>button:hover]:!bg-white/[0.06] [&>button:hover]:!text-white/50"
           />
           <MiniMap
-            nodeStrokeWidth={3}
-            className="!rounded-xl !border !border-foreground/[0.06] !bg-[oklch(0.13_0_0)] !shadow-md"
-            maskColor="rgba(0,0,0,0.4)"
+            nodeStrokeWidth={2}
+            className="!rounded-lg !border !border-white/[0.06] !bg-white/[0.03] !shadow-none"
+            maskColor="rgba(0,0,0,0.5)"
           />
         </ReactFlow>
 
-        {/* Empty state — plain, no glow */}
+        {/* Empty state */}
         {spaceNodes.length === 0 && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04]">
-                <Maximize2 className="h-6 w-6 text-foreground/15" />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col items-center gap-3"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+                <Plus className="h-5 w-5 text-white/15" />
               </div>
-              <div className="text-center">
-                <p className="text-sm text-foreground/35">Canvas vazio</p>
-                <p className="mt-1 text-xs text-foreground/18">
-                  Clique em &quot;Novo Card&quot; ou use o botao + na sidebar
-                </p>
-              </div>
-            </div>
+              <p className="text-xs text-white/25">
+                Crie um card para comecar
+              </p>
+            </motion.div>
           </div>
         )}
       </div>
 
-      {/* Right control panel */}
-      <ControlPanel />
+      {/* Right control panel — collapsible */}
+      <AnimatePresence>
+        {panelOpen && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 300, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <ControlPanel />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

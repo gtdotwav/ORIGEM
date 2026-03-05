@@ -40,7 +40,7 @@ import {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Space", href: "/dashboard/space", icon: Orbit },
+  { label: "Spaces", href: "/dashboard/spaces", icon: Orbit },
   { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
   { label: "Feed", href: "/dashboard/feed", icon: Rss },
   { label: "Conexões", href: "/dashboard/connections", icon: Users2 },
