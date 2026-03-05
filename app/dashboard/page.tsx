@@ -174,8 +174,6 @@ export default function DashboardPage() {
 
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
-      {/* Subtle radial focus — complements layout HologramBackground */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_20%,rgba(0,0,0,0.35)_75%)]" />
 
       {/* Left toolbar — vertical button strip */}
       <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-white/[0.06] bg-neutral-950/80 p-1 shadow-lg backdrop-blur-xl">
@@ -235,7 +233,7 @@ export default function DashboardPage() {
         <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
-            <Atom className="h-4 w-4 text-blue-400" />
+            <Atom className="h-4 w-4 text-white/40" />
             <span className="text-sm text-white/70">Bem-vindo ao ORIGEM</span>
           </div>
 
