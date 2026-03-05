@@ -123,7 +123,7 @@ export function generateSeedFeedItems(): FeedItem[] {
       type: "tweet",
       title: "@raaborges",
       content:
-        "O pipeline ORIGEM está absurdo. Decomposição semântica → agentes → grupos → orquestração. É como ter uma equipe inteira de especialistas rodando em paralelo. 🚀",
+        "O pipeline ORIGEM está absurdo. Decomposição semântica → agentes → grupos → orquestração. É como ter uma equipe inteira de especialistas rodando em paralelo.",
       source: "X",
       author: "Rafael Borges",
       tags: ["origem", "orquestracao", "agentes"],

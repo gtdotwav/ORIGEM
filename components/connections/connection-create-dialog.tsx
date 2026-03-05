@@ -7,7 +7,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useConnectionStore } from "@/stores/connection-store";
 import type { Connection } from "@/types/connection";
 import { toast } from "sonner";
@@ -95,7 +99,7 @@ export function ConnectionCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white/90">
             <UserPlus className="h-4 w-4 text-neon-cyan" />
@@ -106,62 +110,62 @@ export function ConnectionCreateDialog({
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-xs text-white/40">Nome *</label>
-            <input
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Nome *</label>
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nome completo"
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="mb-1 block text-xs text-white/40">Email</label>
-            <input
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Email</label>
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
           {/* Role + Title */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs text-white/40">Função</label>
-              <input
+              <label className="mb-1.5 block text-xs font-medium text-white/50">Função</label>
+              <Input
                 type="text"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 placeholder="Ex: Desenvolvedor"
-                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+                className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-white/40">Título</label>
-              <input
+              <label className="mb-1.5 block text-xs font-medium text-white/50">Título</label>
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Senior @ XPTO"
-                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+                className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
               />
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="mb-1 block text-xs text-white/40">Tags (Enter para adicionar)</label>
-            <input
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Tags (Enter para adicionar)</label>
+            <Input
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
               placeholder="Ex: tech, ia, design"
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
             {tags.length > 0 && (
               <div className="mt-1.5 flex flex-wrap gap-1">
@@ -182,23 +186,30 @@ export function ConnectionCreateDialog({
 
           {/* Notes */}
           <div>
-            <label className="mb-1 block text-xs text-white/40">Notas</label>
-            <textarea
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Notas</label>
+            <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Observações sobre essa conexão..."
               rows={2}
-              className="w-full resize-none rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/15 focus:outline-none"
+              className="min-h-[60px] resize-none border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
           {/* Submit */}
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-neon-cyan/15 py-2.5 text-sm font-medium text-neon-cyan transition-colors hover:bg-neon-cyan/20"
-          >
-            {editConnection ? "Salvar alterações" : "Adicionar conexão"}
-          </button>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="text-xs text-white/50 hover:text-white/70"
+            >
+              Cancelar
+            </Button>
+            <Button variant="neon" size="sm" type="submit">
+              {editConnection ? "Salvar alterações" : "Adicionar conexão"}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

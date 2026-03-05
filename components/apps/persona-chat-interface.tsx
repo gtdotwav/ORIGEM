@@ -5,7 +5,7 @@ import { Send, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePersonaChat } from "@/hooks/use-persona-chat";
 import { usePersonaStore } from "@/stores/persona-store";
-import { PERSONA_COLORS } from "@/lib/personas";
+import { PERSONA_COLORS, PERSONA_ICONS } from "@/lib/personas";
 import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +52,10 @@ export function PersonaChatInterface() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{activePersona.emoji}</span>
+          {(() => {
+            const Icon = PERSONA_ICONS[activePersona.id];
+            return Icon ? <Icon className={cn("h-6 w-6", colors.text)} /> : null;
+          })()}
           <div>
             <h2 className="text-sm font-semibold text-white/90">
               {activePersona.name}
@@ -83,7 +86,10 @@ export function PersonaChatInterface() {
       <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <span className="mb-3 text-5xl">{activePersona.emoji}</span>
+            {(() => {
+              const Icon = PERSONA_ICONS[activePersona.id];
+              return Icon ? <Icon className={cn("mb-3 h-12 w-12", colors.text, "opacity-60")} /> : null;
+            })()}
             <div className="max-w-md rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
               <p className="text-sm leading-relaxed text-white/60">
                 {activePersona.greeting}
@@ -117,7 +123,7 @@ export function PersonaChatInterface() {
             >
               {msg.role === "persona" && (
                 <span className="mb-1 block text-xs font-medium text-white/40">
-                  {activePersona.emoji} {activePersona.name}
+                  {activePersona.name}
                 </span>
               )}
               {msg.content}

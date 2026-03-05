@@ -1,3 +1,4 @@
+import { Brain, Crown, Zap, Palette, BookOpen, Monitor, type LucideIcon } from "lucide-react";
 import type { Persona, PersonaColor } from "@/types/persona";
 
 export const PERSONA_COLORS: Record<
@@ -46,6 +47,15 @@ export const PERSONA_COLORS: Record<
     borderHover: "hover:border-neon-blue/50",
     bgHover: "hover:bg-neon-blue/[0.06]",
   },
+};
+
+export const PERSONA_ICONS: Record<string, LucideIcon> = {
+  "persona-einstein": Brain,
+  "persona-cleopatra": Crown,
+  "persona-tesla": Zap,
+  "persona-frida": Palette,
+  "persona-machado": BookOpen,
+  "persona-ada": Monitor,
 };
 
 export const CELEBRITY_PERSONAS: Persona[] = [

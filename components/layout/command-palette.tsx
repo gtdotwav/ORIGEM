@@ -15,7 +15,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { usePersonaStore } from "@/stores/persona-store";
 import { useConnectionStore } from "@/stores/connection-store";
-import { CELEBRITY_PERSONAS } from "@/lib/personas";
+import { CELEBRITY_PERSONAS, PERSONA_ICONS } from "@/lib/personas";
 import {
   LayoutDashboard,
   Brain,
@@ -203,7 +203,10 @@ export function CommandPalette() {
                 setCommandPaletteOpen(false);
               }}
             >
-              <span className="text-base">{persona.emoji}</span>
+              {(() => {
+                const Icon = PERSONA_ICONS[persona.id];
+                return Icon ? <Icon className="h-4 w-4" /> : null;
+              })()}
               <span>{persona.name}</span>
             </CommandItem>
           ))}

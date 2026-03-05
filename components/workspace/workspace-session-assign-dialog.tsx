@@ -61,7 +61,7 @@ export function WorkspaceSessionAssignDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white/90">
             Adicionar sessoes a {workspaceName}
@@ -119,9 +119,10 @@ export function WorkspaceSessionAssignDialog({
             Cancelar
           </Button>
           <Button
+            variant="neon"
+            size="sm"
             onClick={handleAssign}
             disabled={selected.size === 0}
-            className="border border-neon-cyan/30 bg-neon-cyan/10 text-xs font-medium text-neon-cyan hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:opacity-40"
           >
             Adicionar ({selected.size})
           </Button>
