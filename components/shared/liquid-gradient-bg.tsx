@@ -8,9 +8,9 @@ class TouchTexture {
   size = 64;
   width = 64;
   height = 64;
-  maxAge = 80;
-  radius = 0.15;
-  speed = 1 / 80;
+  maxAge = 96;
+  radius = 0.12;
+  speed = 1 / 96;
   trail: { x: number; y: number; age: number; force: number; vx: number; vy: number }[] = [];
   last: { x: number; y: number } | null = null;
   canvas: HTMLCanvasElement;
@@ -53,7 +53,7 @@ class TouchTexture {
       const d = Math.sqrt(dx * dx + dy * dy);
       vx = dx / d;
       vy = dy / d;
-      force = Math.min((dx * dx + dy * dy) * 25000, 2.5);
+      force = Math.min((dx * dx + dy * dy) * 18000, 1.8);
     }
     this.last = { x: point.x, y: point.y };
     this.trail.push({ x: point.x, y: point.y, age: 0, force, vx, vy });
@@ -73,8 +73,8 @@ class TouchTexture {
     const radius = this.radius * this.width;
     this.ctx.shadowOffsetX = this.size * 5;
     this.ctx.shadowOffsetY = this.size * 5;
-    this.ctx.shadowBlur = radius * 1.5;
-    this.ctx.shadowColor = `rgba(${color},${0.3 * intensity})`;
+    this.ctx.shadowBlur = radius * 1.2;
+    this.ctx.shadowColor = `rgba(${color},${0.25 * intensity})`;
     this.ctx.beginPath();
     this.ctx.fillStyle = "rgba(255,0,0,1)";
     this.ctx.arc(pos.x - this.size * 5, pos.y - this.size * 5, radius, 0, Math.PI * 2);
@@ -82,7 +82,7 @@ class TouchTexture {
   }
 }
 
-/* ─── ORIGEM Neon Gradient Shader v2 ─── */
+/* ─── ORIGEM Nebula Shader — domain warping ─── */
 const VERTEX_SHADER = `
   varying vec2 vUv;
   void main() {
@@ -91,14 +91,20 @@ const VERTEX_SHADER = `
   }
 `;
 
+/*
+ * Domain warping technique: fbm(p + fbm(p + fbm(p)))
+ * Creates organic, smoke/nebula patterns that flow continuously.
+ * Colors mapped through noise regions, not discrete blobs.
+ */
 const FRAGMENT_SHADER = `
-  uniform float uTime, uSpeed, uIntensity, uGrainIntensity;
+  precision highp float;
+
+  uniform float uTime;
   uniform vec2 uResolution;
-  uniform vec3 uColor1, uColor2, uColor3, uColor4, uColor5, uColor6, uDarkBase;
   uniform sampler2D uTouchTexture;
   varying vec2 vUv;
 
-  /* ── simplex-style noise ── */
+  /* ── simplex noise ── */
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec3 permute(vec3 x) { return mod289(((x * 34.0) + 1.0) * x); }
@@ -127,128 +133,110 @@ const FRAGMENT_SHADER = `
     return 130.0 * dot(m, g);
   }
 
-  float fbm(vec2 uv, float t) {
+  /* fractal brownian motion — 5 octaves for rich detail */
+  float fbm(vec2 p) {
     float val = 0.0;
     float amp = 0.5;
-    vec2 shift = vec2(100.0);
-    for (int i = 0; i < 4; i++) {
-      val += amp * snoise(uv + t * 0.15);
-      uv = uv * 2.0 + shift;
+    float freq = 1.0;
+    for (int i = 0; i < 5; i++) {
+      val += amp * snoise(p * freq);
+      freq *= 2.0;
       amp *= 0.5;
     }
     return val;
   }
 
+  /* film grain */
   float grain(vec2 uv, float t) {
-    return fract(sin(dot(uv * uResolution * 0.5 + t, vec2(12.9898, 78.233))) * 43758.5453) * 2.0 - 1.0;
-  }
-
-  vec3 getGradientColor(vec2 uv, float time) {
-    float t = time * uSpeed;
-
-    /* organic noise displacement */
-    float n1 = fbm(uv * 2.0, t * 0.6);
-    float n2 = fbm(uv * 2.5 + 5.0, t * 0.4);
-    vec2 distorted = uv + vec2(n1, n2) * 0.12;
-
-    /* blob centers with noise-perturbed orbits */
-    vec2 c1 = vec2(0.3 + sin(t * 0.3) * 0.25 + n1 * 0.08,
-                   0.4 + cos(t * 0.4) * 0.3);
-    vec2 c2 = vec2(0.7 + cos(t * 0.35) * 0.25,
-                   0.6 + sin(t * 0.28) * 0.3 + n2 * 0.06);
-    vec2 c3 = vec2(0.5 + sin(t * 0.22) * 0.35,
-                   0.3 + cos(t * 0.38) * 0.25);
-    vec2 c4 = vec2(0.6 + cos(t * 0.32) * 0.3 + n1 * 0.05,
-                   0.7 + sin(t * 0.25) * 0.2);
-    vec2 c5 = vec2(0.35 + sin(t * 0.42) * 0.2,
-                   0.65 + cos(t * 0.35) * 0.25 + n2 * 0.07);
-    vec2 c6 = vec2(0.65 + cos(t * 0.28) * 0.3,
-                   0.35 + sin(t * 0.45) * 0.25);
-
-    /* primary blobs — large, soft */
-    float r1 = 0.45 + sin(t * 0.5) * 0.08;
-    float r2 = 0.50 + cos(t * 0.4) * 0.06;
-    float r3 = 0.42 + sin(t * 0.6) * 0.07;
-    float r4 = 0.38 + cos(t * 0.55) * 0.05;
-    float r5 = 0.40 + sin(t * 0.35) * 0.06;
-    float r6 = 0.44 + cos(t * 0.48) * 0.07;
-
-    float i1 = 1.0 - smoothstep(0.0, r1, length(distorted - c1));
-    float i2 = 1.0 - smoothstep(0.0, r2, length(distorted - c2));
-    float i3 = 1.0 - smoothstep(0.0, r3, length(distorted - c3));
-    float i4 = 1.0 - smoothstep(0.0, r4, length(distorted - c4));
-    float i5 = 1.0 - smoothstep(0.0, r5, length(distorted - c5));
-    float i6 = 1.0 - smoothstep(0.0, r6, length(distorted - c6));
-
-    /* secondary accent layer — smaller, faster, adds depth */
-    vec2 a1 = vec2(0.4 + sin(t * 0.8) * 0.3, 0.5 + cos(t * 0.7) * 0.3);
-    vec2 a2 = vec2(0.6 + cos(t * 0.9) * 0.25, 0.4 + sin(t * 0.6) * 0.3);
-    vec2 a3 = vec2(0.5 + sin(t * 0.65) * 0.35, 0.6 + cos(t * 0.85) * 0.25);
-    float ai1 = 1.0 - smoothstep(0.0, 0.25, length(distorted - a1));
-    float ai2 = 1.0 - smoothstep(0.0, 0.22, length(distorted - a2));
-    float ai3 = 1.0 - smoothstep(0.0, 0.20, length(distorted - a3));
-
-    /* color mixing — primary */
-    float pulse1 = 0.6 + 0.4 * sin(t * 0.7);
-    float pulse2 = 0.6 + 0.4 * cos(t * 0.8);
-    float pulse3 = 0.6 + 0.4 * sin(t * 0.55);
-
-    vec3 color = vec3(0.0);
-    color += uColor1 * i1 * pulse1 * 1.0;
-    color += uColor2 * i2 * pulse2 * 1.2;
-    color += uColor3 * i3 * pulse3 * 0.9;
-    color += uColor4 * i4 * pulse1 * 0.8;
-    color += uColor5 * i5 * pulse2 * 0.7;
-    color += uColor6 * i6 * pulse3 * 0.6;
-
-    /* accent layer — cross-color glow */
-    color += uColor2 * ai1 * 0.35;
-    color += uColor1 * ai2 * 0.3;
-    color += uColor4 * ai3 * 0.25;
-
-    /* intensity + tone mapping */
-    color = clamp(color, vec3(0.0), vec3(1.5)) * uIntensity;
-
-    /* boost saturation */
-    float lum = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(lum), color, 1.5);
-
-    /* soft tone curve */
-    color = pow(color, vec3(0.88));
-
-    /* bloom glow — bleed bright areas outward */
-    float brightness = dot(color, vec3(0.299, 0.587, 0.114));
-    vec3 bloom = color * smoothstep(0.3, 0.8, brightness) * 0.3;
-    color += bloom;
-
-    /* dark base blending — deep space with glow emergence */
-    float totalBrightness = length(color);
-    color = mix(uDarkBase, color, max(totalBrightness * 1.4, 0.08));
-
-    return color;
+    return fract(sin(dot(uv * uResolution * 0.4 + t, vec2(12.9898, 78.233))) * 43758.5453) * 2.0 - 1.0;
   }
 
   void main() {
     vec2 uv = vUv;
+    float aspect = uResolution.x / uResolution.y;
+    vec2 p = vec2(uv.x * aspect, uv.y);
 
-    /* touch distortion */
+    /* touch distortion — subtle warp */
     vec4 touchTex = texture2D(uTouchTexture, uv);
-    uv.x -= (touchTex.r * 2.0 - 1.0) * 1.0 * touchTex.b;
-    uv.y -= (touchTex.g * 2.0 - 1.0) * 1.0 * touchTex.b;
+    p.x += (touchTex.r * 2.0 - 1.0) * 0.15 * touchTex.b;
+    p.y += (touchTex.g * 2.0 - 1.0) * 0.15 * touchTex.b;
+
+    float t = uTime * 0.08;
+
+    /* ── triple domain warping ── */
+    /* layer 1: base flow */
+    vec2 q = vec2(
+      fbm(p + vec2(0.0, 0.0) + t * 0.4),
+      fbm(p + vec2(5.2, 1.3) + t * 0.3)
+    );
+
+    /* layer 2: warp the warp */
+    vec2 r = vec2(
+      fbm(p + 4.0 * q + vec2(1.7, 9.2) + t * 0.35),
+      fbm(p + 4.0 * q + vec2(8.3, 2.8) + t * 0.28)
+    );
+
+    /* layer 3: final pattern value */
+    float f = fbm(p + 3.5 * r + t * 0.2);
+
+    /* ── color palette ──
+     * Not discrete blobs — colors emerge from noise topology.
+     * Deep space base → cyan/blue core → purple veins → pink highlights
+     */
+    vec3 deepSpace  = vec3(0.008, 0.012, 0.035);
+    vec3 midnight   = vec3(0.02, 0.04, 0.12);
+    vec3 cyan       = vec3(0.0, 0.65, 0.78);
+    vec3 blue       = vec3(0.10, 0.28, 0.85);
+    vec3 purple     = vec3(0.40, 0.10, 0.80);
+    vec3 pink       = vec3(0.75, 0.15, 0.45);
+
+    /* map noise values to color — smooth transitions */
+    float ff = f * f * 4.0;
+    float ql = length(q);
+    float rl = length(r);
+
+    vec3 color = deepSpace;
+
+    /* base: midnight blue tinted by pattern density */
+    color = mix(color, midnight, clamp(ff * 0.6, 0.0, 1.0));
+
+    /* primary: cyan/blue emerging from noise ridges */
+    color = mix(color, mix(blue, cyan, clamp(f * 0.5 + 0.5, 0.0, 1.0)),
+                clamp(ff * 0.8, 0.0, 0.65));
+
+    /* secondary: purple in warp-dense regions */
+    color = mix(color, purple,
+                clamp(ql * ql * 0.9, 0.0, 0.45));
+
+    /* accent: pink on high-energy peaks */
+    color = mix(color, pink,
+                clamp(rl * 0.6 * smoothstep(0.3, 0.8, f), 0.0, 0.3));
+
+    /* subtle warm glow in sparse areas */
+    float warmth = smoothstep(-0.3, 0.1, -f) * 0.15;
+    color += vec3(0.08, 0.02, 0.0) * warmth;
+
+    /* ── luminance + glow ── */
+    /* soft HDR bloom on bright regions */
+    float lum = dot(color, vec3(0.299, 0.587, 0.114));
+    vec3 bloom = color * smoothstep(0.08, 0.25, lum) * 0.6;
+    color += bloom;
+
+    /* saturation boost — controlled */
+    color = mix(vec3(lum), color, 1.35);
+
+    /* gentle tone curve — keeps darks rich */
+    color = pow(color, vec3(0.95));
+
+    /* ── vignette — radial fade to deep space ── */
     float dist = length(uv - vec2(0.5));
-    float ripple = sin(dist * 25.0 - uTime * 4.0) * 0.05 * touchTex.b;
-    uv += vec2(ripple);
+    float vig = 1.0 - smoothstep(0.3, 0.95, dist);
+    color *= mix(0.35, 1.0, vig);
 
-    vec3 color = getGradientColor(uv, uTime);
+    /* film grain — very subtle */
+    color += grain(uv, uTime) * 0.03;
 
-    /* vignette — darkens edges for depth */
-    float vignette = 1.0 - smoothstep(0.4, 1.1, dist * 1.3);
-    color *= mix(0.5, 1.0, vignette);
-
-    /* film grain */
-    color += grain(uv, uTime) * uGrainIntensity;
     color = clamp(color, vec3(0.0), vec3(1.0));
-
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -268,7 +256,7 @@ class GradientScene {
 
   constructor(container: HTMLElement) {
     this.container = container;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
@@ -285,28 +273,10 @@ class GradientScene {
     this.clock = new THREE.Clock();
     this.touchTexture = new TouchTexture();
 
-    /* ORIGEM neon palette — boosted vibrancy
-     * Cyan:   oklch(0.80 0.18 195)
-     * Purple: oklch(0.55 0.30 290)
-     * Blue:   oklch(0.60 0.25 255)
-     * Pink:   oklch(0.68 0.25 340)
-     * Green:  oklch(0.75 0.22 150)
-     * Orange: oklch(0.72 0.20 55)
-     */
     this.uniforms = {
       uTime: { value: 0 },
       uResolution: { value: new THREE.Vector2(container.clientWidth, container.clientHeight) },
-      uColor1: { value: new THREE.Vector3(0.0, 0.82, 0.88) },    // cyan — vivid
-      uColor2: { value: new THREE.Vector3(0.50, 0.15, 1.0) },    // purple — deep neon
-      uColor3: { value: new THREE.Vector3(0.15, 0.40, 1.0) },    // blue — electric
-      uColor4: { value: new THREE.Vector3(0.95, 0.25, 0.50) },   // pink — hot
-      uColor5: { value: new THREE.Vector3(0.15, 0.85, 0.35) },   // green — neon
-      uColor6: { value: new THREE.Vector3(0.95, 0.50, 0.10) },   // orange — amber
-      uDarkBase: { value: new THREE.Vector3(0.008, 0.016, 0.045) }, // deeper space
-      uSpeed: { value: 0.55 },
-      uIntensity: { value: 1.1 },
       uTouchTexture: { value: this.touchTexture.texture },
-      uGrainIntensity: { value: 0.04 },
     };
 
     this.init();
@@ -410,10 +380,10 @@ export function LiquidGradientBackground() {
           className="absolute inset-0"
           style={{
             background: [
-              "radial-gradient(ellipse 60% 50% at 30% 30%, rgba(0,200,220,0.18), transparent)",
-              "radial-gradient(ellipse 55% 45% at 70% 60%, rgba(80,30,220,0.14), transparent)",
-              "radial-gradient(ellipse 40% 35% at 50% 80%, rgba(200,50,100,0.08), transparent)",
-              "linear-gradient(180deg, #020610 0%, #060a1e 100%)",
+              "radial-gradient(ellipse 70% 55% at 35% 40%, rgba(0,160,200,0.12), transparent)",
+              "radial-gradient(ellipse 60% 50% at 65% 55%, rgba(90,20,180,0.10), transparent)",
+              "radial-gradient(ellipse 45% 40% at 50% 75%, rgba(180,30,90,0.06), transparent)",
+              "linear-gradient(180deg, #020610 0%, #040818 100%)",
             ].join(", "),
           }}
         />
