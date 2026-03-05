@@ -65,7 +65,7 @@ const PLANS = [
 
 export default function PricingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
+    <main className="isolate relative min-h-screen overflow-hidden bg-[#04070d] text-white">
       <LiquidGradientBackground />
 
       {/* Top bar */}
@@ -157,6 +157,6 @@ export default function PricingPage() {
           ))}
         </div>
       </section>
-    </div>
+    </main>
   );
 }
