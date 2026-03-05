@@ -584,26 +584,66 @@ function createRuntimeTasks(
   });
 }
 
+async function callAgentLLM(
+  agent: AgentInstance,
+  task: RuntimeTask,
+  prompt: string,
+  language: RuntimeLanguage,
+  previousOutputs: string[]
+): Promise<string> {
+  const langInstruction =
+    language === "en-US"
+      ? "Respond in English."
+      : language === "es-ES"
+      ? "Responde en español."
+      : "Responda em portugues brasileiro.";
+
+  const previousContext =
+    previousOutputs.length > 0
+      ? `\n\nResultados dos agentes anteriores:\n${previousOutputs.map((o, i) => `--- Agente ${i + 1} ---\n${o}`).join("\n\n")}`
+      : "";
+
+  const systemPrompt = [
+    `Voce e ${agent.name}, um agente especializado com o papel: ${agent.role}.`,
+    `Sua tarefa atual: ${task.title}.`,
+    langInstruction,
+    `Seja objetivo, detalhado e pratico. Foque exclusivamente na sua funcao.`,
+    previousContext,
+  ].join(" ");
+
+  try {
+    const { callChatCompletion } = await import("@/lib/chat-api");
+    const { ecosystemConfig } = useChatSettingsStore.getState();
+    const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+
+    const result = await callChatCompletion({
+      messages: [{ role: "user", content: prompt }],
+      ...(hasManual
+        ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+        : { tier: "medium" }),
+      systemPrompt,
+      maxTokens: 2048,
+    });
+
+    return result.content;
+  } catch {
+    return `[${agent.name}] Nao foi possivel obter resposta da LLM para a tarefa: ${task.title}.`;
+  }
+}
+
 function createAgentOutput(
   sessionId: string,
   agent: AgentInstance,
   task: RuntimeTask,
-  prompt: string,
+  content: string,
   language: RuntimeLanguage
 ): AgentOutput {
-  const languageName =
-    language === "en-US"
-      ? "English"
-      : language === "es-ES"
-      ? "Espanol"
-      : "Portugues";
-
   return {
     id: createId("output"),
     agentId: agent.id,
     sessionId,
     type: "thought",
-    content: `${task.title} executada por ${agent.name} em ${languageName}: ${prompt.slice(0, 120)}${prompt.length > 120 ? "..." : ""}`,
+    content,
     metadata: {
       functionKey: task.functionKey,
       language,
@@ -855,6 +895,8 @@ export async function runChatOrchestration(
     timestamp: Date.now(),
   });
 
+  const agentOutputTexts: string[] = [];
+
   for (;;) {
     let runtime = runtimeStore.getSession(sessionId);
     if (!runtime || runtime.tasks.length === 0) {
@@ -883,16 +925,26 @@ export async function runChatOrchestration(
       });
     }
 
-    for (const step of [22, 46, 68, 86, 100]) {
-      await delay(90);
-      runtimeStore.updateTask(sessionId, nextTask.id, {
-        progress: step,
-      });
+    // Show initial progress
+    runtimeStore.updateTask(sessionId, nextTask.id, { progress: 20 });
+    pipelineStore.setProgress(
+      Math.max(10, getPipelineProgressFromRuntime(sessionId))
+    );
 
-      pipelineStore.setProgress(
-        Math.max(10, getPipelineProgressFromRuntime(sessionId))
-      );
-    }
+    // Call the LLM for this agent's task
+    const llmResponse = currentAgent
+      ? await callAgentLLM(
+          currentAgent,
+          nextTask,
+          prompt,
+          selectedLanguage,
+          agentOutputTexts
+        )
+      : "";
+
+    agentOutputTexts.push(
+      `[${currentAgent?.name ?? "Agent"}] ${llmResponse}`
+    );
 
     runtimeStore.updateTask(sessionId, nextTask.id, {
       status: "done",
@@ -931,7 +983,7 @@ export async function runChatOrchestration(
         sessionId,
         currentAgent,
         nextTask,
-        prompt,
+        llmResponse,
         selectedLanguage
       );
 
@@ -963,6 +1015,53 @@ export async function runChatOrchestration(
   pipelineStore.setStage("aggregating");
   pipelineStore.setProgress(96);
 
+  // Final LLM aggregation — synthesize all agent outputs
+  let finalResponse: string;
+  try {
+    const { callChatCompletion } = await import("@/lib/chat-api");
+    const { ecosystemConfig, selectedTier } = useChatSettingsStore.getState();
+    const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+
+    const langInstruction =
+      selectedLanguage === "en-US"
+        ? "Respond in English."
+        : selectedLanguage === "es-ES"
+        ? "Responde en español."
+        : "Responda em portugues brasileiro.";
+
+    const aggregationResult = await callChatCompletion({
+      messages: [
+        {
+          role: "user",
+          content: `Pedido original do usuario: ${prompt}\n\nResultados dos agentes:\n${agentOutputTexts.join("\n\n")}`,
+        },
+      ],
+      ...(hasManual
+        ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+        : { tier: selectedTier }),
+      systemPrompt: `Voce e o ORIGEM, orquestrador de IA psicossemantica. Sintetize os resultados dos agentes em uma resposta final coesa, clara e acionavel. ${langInstruction}`,
+      maxTokens: 4096,
+    });
+
+    finalResponse = aggregationResult.content;
+  } catch {
+    // Fallback to template if aggregation LLM call fails
+    const metrics = getSessionMetricSnapshot(sessionId, decomposition.id, tasks);
+    const finalRuntime2 = runtimeStore.getSession(sessionId);
+    const finalTasks2 =
+      finalRuntime2?.tasks && finalRuntime2.tasks.length > 0
+        ? finalRuntime2.tasks
+        : tasks;
+    finalResponse = buildAssistantResponse(
+      selectedLanguage,
+      decomposition.intent.primary,
+      metrics,
+      finalTasks2,
+      finalRuntime2?.notes.length ?? 0,
+      null
+    );
+  }
+
   const metrics = getSessionMetricSnapshot(sessionId, decomposition.id, tasks);
   const finalRuntime = runtimeStore.getSession(sessionId);
   const finalTasks =
@@ -978,14 +1077,7 @@ export async function runChatOrchestration(
   const assistantMessage = createMessage(
     sessionId,
     "assistant",
-    buildAssistantResponse(
-      selectedLanguage,
-      decomposition.intent.primary,
-      metrics,
-      finalTasks,
-      noteCount,
-      nextJourneyStep?.label ?? null
-    ),
+    finalResponse,
     {
       includeDistribution: true,
       includeJourney: true,
