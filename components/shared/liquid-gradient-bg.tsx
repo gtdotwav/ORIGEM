@@ -363,7 +363,7 @@ export function LiquidGradientBackground() {
 
   if (reducedMotion) {
     return (
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -382,7 +382,7 @@ export function LiquidGradientBackground() {
   return (
     <div
       ref={containerRef}
-      className="pointer-events-auto absolute inset-0 -z-10 overflow-hidden"
+      className="pointer-events-auto fixed inset-0 -z-10 overflow-hidden"
       style={{ cursor: "default" }}
     />
   );
