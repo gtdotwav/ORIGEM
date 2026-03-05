@@ -188,7 +188,7 @@ function detectPreferredStrategy(text: string): "consensus" | "parallel" | "sequ
 
 function detectFunctionPriorityOrder(text: string): RuntimeFunctionKey[] {
   const normalized = text.toLowerCase();
-  const matches: Array<{ key: RuntimeFunctionKey; index: number }> = [
+  const all: Array<{ key: RuntimeFunctionKey; index: number }> = [
     {
       key: "contexts",
       index: normalized.search(/contexto|context|semantico|semântico/),
@@ -209,7 +209,8 @@ function detectFunctionPriorityOrder(text: string): RuntimeFunctionKey[] {
       key: "aggregation",
       index: normalized.search(/agrega|sintese|síntese|orquestra|final/),
     },
-  ]
+  ];
+  const matches = all
     .filter((item) => item.index >= 0)
     .sort((a, b) => a.index - b.index);
 

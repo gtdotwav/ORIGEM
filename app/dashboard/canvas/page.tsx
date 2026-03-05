@@ -8,8 +8,8 @@ import {
   Controls,
   MiniMap,
   type Connection,
-  type Edge,
 } from "@xyflow/react";
+import type { OrigemEdge } from "@/types/canvas";
 import "@xyflow/react/dist/style.css";
 import {
   ArrowLeft,
@@ -63,7 +63,7 @@ export default function CanvasPage() {
   const handleConnect = useCallback(
     (connection: Connection) => {
       if (!activeFlowId || !connection.source || !connection.target) return;
-      const edge: Edge = {
+      const edge: OrigemEdge = {
         id: `e-${connection.source}-${connection.target}`,
         source: connection.source,
         target: connection.target,

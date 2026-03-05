@@ -11,16 +11,18 @@ const SUGGESTIONS = [
   { emoji: "\u{1F3AF}", label: "Desafio" },
 ];
 
-const INITIAL_MESSAGES = [
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+const INITIAL_MESSAGES: ChatMessage[] = [
   {
-    role: "assistant" as const,
+    role: "assistant",
     content:
       "Ola! Eu sou o Ori, seu amigo virtual! \u{1F916}\u2728 Posso contar historias, ensinar coisas legais, responder suas perguntas e propor desafios divertidos. O que voce quer fazer?",
   },
 ];
 
 export default function KidsCompanionPage() {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
 
   const handleSend = (text: string) => {

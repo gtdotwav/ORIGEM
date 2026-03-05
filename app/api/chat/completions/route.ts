@@ -3,12 +3,36 @@ import { generateText } from "ai";
 import { getLanguageModel } from "@/lib/server/ai/provider-factory";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 import { selectModelForTier } from "@/config/token-tiers";
+import { checkRateLimit, getClientIp } from "@/lib/server/rate-limit";
 import type { ProviderName } from "@/types/provider";
 import type { TokenTier } from "@/types/chat";
 
 const TIERS: TokenTier[] = ["short", "medium", "max", "ultra"];
+const MAX_BODY_SIZE = 100_000; // 100KB
 
 export async function POST(request: Request) {
+  // Rate limiting
+  const ip = getClientIp(request);
+  const rateCheck = checkRateLimit(ip);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: "rate_limited", retryAfter: rateCheck.retryAfter },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateCheck.retryAfter ?? 60) },
+      }
+    );
+  }
+
+  // Body size check
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+    return NextResponse.json(
+      { error: "body_too_large", maxBytes: MAX_BODY_SIZE },
+      { status: 413 }
+    );
+  }
+
   const body = (await request.json().catch(() => null)) as Record<
     string,
     unknown
@@ -36,11 +60,9 @@ export async function POST(request: Request) {
 
   try {
     if (provider && model) {
-      // Explicit provider + model
       resolvedProvider = provider as ProviderName;
       resolvedModel = model;
     } else if (tier && TIERS.includes(tier as TokenTier)) {
-      // Auto-select based on tier
       const store = getSnapshotStore();
       const records = await store.listProviderRecords();
       const configured = records
@@ -65,7 +87,6 @@ export async function POST(request: Request) {
       resolvedProvider = selection.provider;
       resolvedModel = selection.model.id;
 
-      // Use tier max tokens if no explicit override
       if (typeof maxTokens !== "number") {
         const { TOKEN_TIERS } = await import("@/config/token-tiers");
         resolvedMaxTokens = TOKEN_TIERS[tier as TokenTier].maxTokens;
@@ -92,7 +113,7 @@ export async function POST(request: Request) {
     const result = await generateText({
       model: languageModel,
       messages: allMessages,
-      maxTokens: resolvedMaxTokens,
+      maxOutputTokens: resolvedMaxTokens,
     });
 
     return NextResponse.json({
@@ -101,8 +122,8 @@ export async function POST(request: Request) {
       model: resolvedModel,
       usage: result.usage
         ? {
-            promptTokens: result.usage.promptTokens,
-            completionTokens: result.usage.completionTokens,
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
             totalTokens: result.usage.totalTokens,
           }
         : undefined,
