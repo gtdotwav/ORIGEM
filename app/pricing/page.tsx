@@ -79,7 +79,7 @@ export default function PricingPage() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="ORIGEM" width={36} height={36} />
+          <Image src="/logo.png" alt="ORIGEM" width={72} height={72} />
           <span className="text-xs font-semibold tracking-[0.25em] text-white/40">
             ORIGEM
           </span>
