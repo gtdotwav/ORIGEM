@@ -28,8 +28,8 @@ export default function DashboardLayout({
       <BackendSessionBootstrap />
       <LiquidGradientBackground />
 
-      {/* Gradient overlay — subtle, lets the liquid gradient breathe */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/25 to-transparent" />
+      {/* Soft bottom fade — content readability near bottom edge */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
       {/* Floating nav — always visible */}
       <FloatingNav />
