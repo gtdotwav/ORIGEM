@@ -9,53 +9,53 @@ export const ORIGEM_TOOLS = {
   semantic_decompose: tool({
     description:
       "Break a concept into atomic semantic units and meaning layers",
-    parameters: z.object({
+    inputSchema: z.object({
       concept: z.string().describe("Concept or idea to decompose"),
     }),
   }),
   semantic_analysis: tool({
     description:
       "Analyze the deeper meaning, intent, assumptions and implications of text",
-    parameters: z.object({
+    inputSchema: z.object({
       text: z.string(),
     }),
   }),
   semantic_graph: tool({
     description: "Create a semantic relationship graph between concepts",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   context_map: tool({
     description:
       "Create a contextual map connecting entities, ideas, systems and outcomes",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   expand_context: tool({
     description:
       "Expand a concept with additional relevant context and knowledge",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   generate_ideas: tool({
     description: "Generate innovative ideas based on a topic",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
       quantity: z.number().optional(),
     }),
   }),
   deep_research: tool({
     description: "Perform deep research on a topic",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   spawn_agents: tool({
     description: "Spawn specialized reasoning agents to solve a task",
-    parameters: z.object({
+    inputSchema: z.object({
       task: z.string(),
       agents: z.array(z.string()).optional(),
     }),
@@ -63,81 +63,81 @@ export const ORIGEM_TOOLS = {
   orchestrate_agents: tool({
     description:
       "Coordinate multiple agents working on the same problem",
-    parameters: z.object({
+    inputSchema: z.object({
       task: z.string(),
     }),
   }),
   agent_perspectives: tool({
     description: "Generate multiple expert perspectives about a topic",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   workflow_create: tool({
     description: "Create an AI workflow composed of multiple steps",
-    parameters: z.object({
+    inputSchema: z.object({
       goal: z.string(),
     }),
   }),
   knowledge_expand: tool({
     description:
       "Expand a topic using knowledge graphs and contextual relations",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
   knowledge_store: tool({
     description: "Store information into the knowledge system",
-    parameters: z.object({
+    inputSchema: z.object({
       content: z.string(),
     }),
   }),
   knowledge_retrieve: tool({
     description: "Retrieve stored knowledge related to a query",
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string(),
     }),
   }),
   multimodal_analysis: tool({
     description: "Analyze images, audio or multimodal content",
-    parameters: z.object({
+    inputSchema: z.object({
       input: z.string(),
     }),
   }),
   generate_image: tool({
     description: "Generate an image from a prompt",
-    parameters: z.object({
+    inputSchema: z.object({
       prompt: z.string(),
     }),
   }),
   code_generate: tool({
     description: "Generate code for software development tasks",
-    parameters: z.object({
+    inputSchema: z.object({
       task: z.string(),
       language: z.string().optional(),
     }),
   }),
   code_analyze: tool({
     description: "Analyze and explain source code",
-    parameters: z.object({
+    inputSchema: z.object({
       code: z.string(),
     }),
   }),
   system_reasoning: tool({
     description: "Perform deep reasoning about complex systems",
-    parameters: z.object({
+    inputSchema: z.object({
       system: z.string(),
     }),
   }),
   decision_analysis: tool({
     description: "Analyze decisions and possible outcomes",
-    parameters: z.object({
+    inputSchema: z.object({
       decision: z.string(),
     }),
   }),
   future_scenarios: tool({
     description: "Generate possible future scenarios based on trends",
-    parameters: z.object({
+    inputSchema: z.object({
       topic: z.string(),
     }),
   }),
