@@ -971,12 +971,6 @@
   animation: hologram-grain 0.35s steps(2) infinite;
 }
 
-.hologram-vignette {
-  background:
-    radial-gradient(circle at 50% 43%, rgba(0, 0, 0, 0) 18%, rgba(0, 0, 0, 0.72) 82%),
-    radial-gradient(circle at 50% 30%, rgba(45, 249, 255, 0.18), rgba(45, 249, 255, 0) 45%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.84));
-}
 
 /* ======================================================
    React Flow — ORIGEM Theme Overrides
