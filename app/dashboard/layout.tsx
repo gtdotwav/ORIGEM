@@ -18,6 +18,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isSpaceCanvas = pathname.startsWith("/dashboard/spaces/");
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const activeWorkspace = useWorkspaceStore((s) =>
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)
@@ -27,15 +28,15 @@ export default function DashboardLayout({
   return (
     <main className="isolate relative flex min-h-screen flex-col bg-background">
       <BackendSessionBootstrap />
-      <LiquidGradientBackground />
+      {!isSpaceCanvas && <LiquidGradientBackground />}
 
-      {/* Floating nav — always visible */}
-      <FloatingNav />
+      {/* Floating nav — hidden inside Spaces canvas */}
+      {!isSpaceCanvas && <FloatingNav />}
       <CommandPalette />
-      <GuidedTour />
+      {!isSpaceCanvas && <GuidedTour />}
 
       {/* Workspace active context bar */}
-      {activeWorkspace && (
+      {activeWorkspace && !isSpaceCanvas && (
         <div className="relative z-20 flex items-center justify-center gap-3 border-b border-border/30 bg-card/50 px-4 py-1.5 backdrop-blur-sm">
           <span
             className={`h-1.5 w-1.5 rounded-full ${WORKSPACE_COLORS[activeWorkspace.color].bg} ${WORKSPACE_COLORS[activeWorkspace.color].border} border`}
