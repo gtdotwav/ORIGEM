@@ -2,11 +2,20 @@ import { z } from "zod";
 
 const DateValueSchema = z.union([z.string(), z.number(), z.date()]);
 
+/** Accept null | undefined → normalize to undefined before validation */
+const optStr = z.preprocess((v) => v ?? undefined, z.string().optional());
+const optRecord = z.preprocess(
+  (v) => v ?? undefined,
+  z.record(z.string(), z.unknown()).optional()
+);
+
 const SessionSchema = z.object({
   id: z.string().min(1),
   title: z.string(),
   status: z.enum(["active", "completed", "archived"]),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  workspaceId: optStr,
+  projectId: optStr,
+  metadata: optRecord,
   createdAt: DateValueSchema,
   updatedAt: DateValueSchema,
 });
@@ -16,9 +25,9 @@ const MessageSchema = z.object({
   sessionId: z.string().min(1),
   role: z.enum(["user", "system", "assistant", "agent"]),
   content: z.string(),
-  agentId: z.string().optional(),
-  decompositionId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  agentId: optStr,
+  decompositionId: optStr,
+  metadata: optRecord,
   createdAt: DateValueSchema,
 });
 
@@ -44,7 +53,7 @@ const RuntimeNoteSchema = z.object({
   id: z.string().min(1),
   text: z.string(),
   createdAt: z.number().int(),
-  taskId: z.string().optional(),
+  taskId: optStr,
 });
 
 const RuntimeSchema = z.object({
@@ -69,9 +78,9 @@ const AgentOutputSchema = z.object({
   sessionId: z.string(),
   type: z.enum(["text", "code", "html", "image", "thought", "spawn"]),
   content: z.string(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-  canvasNodeId: z.string().optional(),
-  parentOutputId: z.string().optional(),
+  metadata: optRecord,
+  canvasNodeId: optStr,
+  parentOutputId: optStr,
   createdAt: DateValueSchema,
 });
 
@@ -96,9 +105,9 @@ const AgentSchema = z.object({
   ]),
   model: z.string(),
   systemPrompt: z.string(),
-  groupId: z.string().optional(),
-  canvasNodeId: z.string().optional(),
-  config: z.record(z.string(), z.unknown()).optional(),
+  groupId: optStr,
+  canvasNodeId: optStr,
+  config: optRecord,
   outputs: z.array(AgentOutputSchema),
   createdAt: DateValueSchema,
   updatedAt: DateValueSchema,
@@ -110,7 +119,7 @@ const AgentGroupSchema = z.object({
   name: z.string(),
   strategy: z.enum(["parallel", "sequential", "consensus"]),
   agentIds: z.array(z.string()),
-  canvasNodeId: z.string().optional(),
+  canvasNodeId: optStr,
   createdAt: DateValueSchema,
 });
 
