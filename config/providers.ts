@@ -200,7 +200,7 @@ export const PROVIDER_CATALOG: ProviderMeta[] = [
   },
   {
     name: "baseten",
-    displayName: "Baseten",
+    displayName: "Kimi K2.5 (Baseten)",
     icon: "Box",
     color: "#2563EB",
     website: "https://baseten.co",
