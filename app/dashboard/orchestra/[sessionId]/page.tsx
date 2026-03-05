@@ -243,7 +243,9 @@ function OrchestraPage() {
       await runChatOrchestration(sessionId, orchestrationPrompt, {
         language,
       });
-      await persistSessionSnapshot(sessionId);
+      persistSessionSnapshot(sessionId).catch((err) =>
+        console.warn("[snapshot] persist failed (non-blocking):", err)
+      );
     } finally {
       setIsRunningOrchestra(false);
     }

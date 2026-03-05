@@ -184,7 +184,9 @@ export default function DashboardControlPage() {
 
     try {
       await runChatOrchestration(sessionId, text);
-      await persistSessionSnapshot(sessionId);
+      persistSessionSnapshot(sessionId).catch((err) =>
+        console.warn("[snapshot] persist failed (non-blocking):", err)
+      );
     } finally {
       setSending(false);
     }

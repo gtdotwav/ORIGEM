@@ -103,7 +103,9 @@ export default function DashboardPage() {
       } else {
         await runSimpleChat(sessionId, text);
       }
-      await persistSessionSnapshot(sessionId);
+      persistSessionSnapshot(sessionId).catch((err) =>
+        console.warn("[snapshot] persist failed (non-blocking):", err)
+      );
     } catch {
       toast.error("Erro ao processar mensagem. Verifique suas configuracoes.");
     } finally {
