@@ -117,9 +117,9 @@ const NAV_ENTRIES: NavEntry[] = [
     ],
   },
   {
-    label: "Spaces",
-    description: "AI Image Lab — geração visual com IA",
-    href: "/dashboard/spaces",
+    label: "Space",
+    description: "Canvas infinito para orquestração",
+    href: "/dashboard/space",
     icon: Orbit,
     color: "pink",
   },

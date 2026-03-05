@@ -10,6 +10,7 @@ import {
   Copy,
   History,
   Loader2,
+  Orbit,
   Plug,
   Send,
   Sparkles,
@@ -314,6 +315,15 @@ export default function ChatPage() {
           title="Calendario"
         >
           <Calendar className="h-3.5 w-3.5" />
+        </button>
+        <div className="my-0.5 h-px w-5 self-center bg-foreground/[0.06]" />
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/spaces")}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-neon-pink"
+          title="Spaces"
+        >
+          <Orbit className="h-3.5 w-3.5" />
         </button>
       </div>
 
