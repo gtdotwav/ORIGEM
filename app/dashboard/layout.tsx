@@ -24,7 +24,7 @@ export default function DashboardLayout({
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   return (
-    <main className="relative flex min-h-screen flex-col bg-[#04070d]">
+    <main className="isolate relative flex min-h-screen flex-col bg-[#04070d]">
       <BackendSessionBootstrap />
       <LiquidGradientBackground />
 
