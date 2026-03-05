@@ -248,56 +248,28 @@ export function FloatingNav() {
       )}
 
       <div className="flex w-full justify-center">
-        <div ref={navRef} className="relative">
-          {/* Trigger pill */}
+        <div ref={navRef} className="relative flex flex-col items-center gap-2">
+          {/* Trigger — logo image */}
           <button
             type="button"
             onClick={() => {
               setNavOpen((v) => !v);
               if (navOpen) setExpanded360(false);
             }}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-md transition-all",
-              navOpen
-                ? "border-white/20 bg-white/10 shadow-lg shadow-black/20"
-                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-            )}
+            className="relative transition-transform duration-200 hover:scale-105 active:scale-95"
           >
             <Image
               src="/logo.png"
               alt="ORIGEM"
-              width={28}
-              height={28}
-              className="pointer-events-none -ml-1 -my-1"
-            />
-            <span className="text-sm font-medium text-white/90">ORIGEM</span>
-            {activeWsName && (
-              <>
-                <span className="text-white/15">·</span>
-                <span className="max-w-[80px] truncate text-xs text-neon-cyan/50">{activeWsName}</span>
-              </>
-            )}
-            {active && (
-              <>
-                <span className="text-white/15">·</span>
-                {active.parentLabel && (
-                  <>
-                    <span className="text-xs text-neon-purple/50">{active.parentLabel}</span>
-                    <span className="text-white/15">›</span>
-                  </>
-                )}
-                <span className={cn("text-xs", activeColor?.icon ?? "text-white/40")}>
-                  {active.item.label}
-                </span>
-              </>
-            )}
-            <ChevronDown
-              className={cn(
-                "h-3 w-3 text-white/30 transition-transform duration-200",
-                navOpen && "rotate-180"
-              )}
+              width={48}
+              height={48}
+              className="pointer-events-none drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]"
             />
           </button>
+          {/* Label beneath logo */}
+          <span className="text-[10px] font-semibold tracking-[0.3em] text-white/30">
+            ORIGEM
+          </span>
 
           {/* Dropdown */}
           {navOpen && (
