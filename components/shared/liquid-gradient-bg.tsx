@@ -225,10 +225,12 @@ const FRAGMENT_SHADER = `
     /* tone curve — lift shadows slightly for richness */
     color = pow(color, vec3(0.96));
 
-    /* ── vignette ── */
-    float dist = length(uv - vec2(0.5));
-    float vig = 1.0 - smoothstep(0.35, 1.0, dist);
-    color *= mix(0.4, 1.0, vig);
+    /* ── vignette — bottom + sides only, top stays clean ── */
+    float dx = abs(uv.x - 0.5) * 2.0;
+    float dy = max(1.0 - uv.y, 0.0);
+    float side = smoothstep(0.6, 1.0, dx) * 0.3;
+    float bottom = smoothstep(0.3, 0.0, uv.y) * 0.5;
+    color *= 1.0 - side - bottom;
 
     /* grain — barely perceptible */
     color += grain(uv, uTime) * 0.025;
