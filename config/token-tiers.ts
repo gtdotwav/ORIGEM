@@ -32,7 +32,7 @@ export const TOKEN_TIERS: Record<TokenTier, TokenTierConfig> = {
   },
   ultra: {
     tier: "ultra",
-    label: "ULTRA",
+    label: "Agent \u221E",
     description: "Sem limite pratico (~16K tokens)",
     maxTokens: 16384,
     preferredCostTiers: ["high", "medium"],
