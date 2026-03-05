@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -63,9 +64,12 @@ export function WorkspaceSessionAssignDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white/90">
+          <DialogTitle>
             Adicionar sessoes a {workspaceName}
           </DialogTitle>
+          <DialogDescription>
+            Selecione sessoes existentes para vincular ao workspace
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">

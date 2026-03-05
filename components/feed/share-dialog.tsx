@@ -5,6 +5,7 @@ import { Search, Share2, Users2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -46,14 +47,17 @@ export function ShareDialog({ open, onOpenChange, item }: ShareDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white/90">
+          <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-4 w-4 text-neon-cyan" />
             Compartilhar
           </DialogTitle>
+          <DialogDescription>
+            Envie para uma conexao da sua rede
+          </DialogDescription>
         </DialogHeader>
 
         {item && (
-          <div className="mb-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5">
+          <div className="dialog-section mb-3">
             <p className="truncate text-sm font-medium text-white/70">{item.title}</p>
             <p className="text-xs text-white/30">{item.source} · {item.author}</p>
           </div>

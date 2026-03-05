@@ -5,6 +5,7 @@ import { Search, Users2, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -63,10 +64,13 @@ export function ConnectionPicker({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white/90">
+          <DialogTitle className="flex items-center gap-2">
             <Users2 className="h-4 w-4 text-neon-cyan" />
             {title}
           </DialogTitle>
+          <DialogDescription>
+            Escolha uma ou mais conexoes da sua rede
+          </DialogDescription>
         </DialogHeader>
 
         <div className="relative mb-2">
@@ -98,7 +102,7 @@ export function ConnectionPicker({
                     isSelected ? "bg-neon-cyan/5" : "hover:bg-white/[0.05]"
                   )}
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon-cyan/10 text-[10px] font-bold text-neon-cyan/70">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neon-cyan/10 text-xs font-bold text-neon-cyan/70">
                     {conn.name
                       .split(" ")
                       .map((n) => n[0])

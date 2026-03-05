@@ -5,6 +5,7 @@ import { Plus, Rocket, Globe, Image, BookOpen } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -92,10 +93,13 @@ export function AppBuilderDialog() {
       </DialogTrigger>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
+          <DialogTitle className="flex items-center gap-2">
             <Rocket className="h-4 w-4 text-neon-cyan" />
             Desenvolver Novo App
           </DialogTitle>
+          <DialogDescription>
+            Configure um agente de IA com proposito especializado
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -151,7 +155,7 @@ export function AppBuilderDialog() {
             />
             <label
               htmlFor="advanced-ctx"
-              className="cursor-pointer text-[11px] text-white/50"
+              className="cursor-pointer text-xs text-white/50"
             >
               Habilitar contexto avancado (sites, midias, fontes)
             </label>
@@ -159,7 +163,7 @@ export function AppBuilderDialog() {
 
           {/* Advanced context fields */}
           {showAdvanced && (
-            <div className="space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+            <div className="dialog-section space-y-3">
               <div>
                 <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
                   <Globe className="h-3 w-3" />

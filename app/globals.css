@@ -740,18 +740,62 @@
 /* ======================================================
    Dialog Premium Glass Treatment
    ====================================================== */
-[data-slot="dialog-overlay"] {
-  backdrop-filter: blur(4px) saturate(0.8);
-  -webkit-backdrop-filter: blur(4px) saturate(0.8);
+[data-slot="dialog-overlay"],
+[data-slot="alert-dialog-overlay"] {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    oklch(0.08 0.03 270 / 0.6) 0%,
+    oklch(0.04 0.02 270 / 0.75) 100%
+  );
+  backdrop-filter: blur(6px) saturate(0.7);
+  -webkit-backdrop-filter: blur(6px) saturate(0.7);
 }
 
-[data-slot="dialog-content"] {
-  background: oklch(0.11 0.02 270 / 0.92);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"] {
+  background: oklch(0.11 0.02 270 / 0.94);
+  backdrop-filter: blur(32px) saturate(1.3);
+  -webkit-backdrop-filter: blur(32px) saturate(1.3);
   box-shadow:
     var(--shadow-high),
-    var(--glass-inner-highlight);
+    var(--glass-inner-highlight),
+    0 0 80px oklch(0.78 0.15 195 / 0.03);
+  border-color: oklch(1 0 0 / 0.08);
+}
+
+[data-slot="dialog-title"],
+[data-slot="alert-dialog-title"] {
+  letter-spacing: -0.01em;
+}
+
+[data-slot="dialog-description"],
+[data-slot="alert-dialog-description"] {
+  color: oklch(0.55 0.02 270);
+}
+
+[data-slot="dialog-close"] {
+  color: oklch(1 0 0 / 0.25);
+  border-radius: 8px;
+  transition: all 150ms var(--ease-smooth);
+}
+[data-slot="dialog-close"]:hover {
+  color: oklch(1 0 0 / 0.6);
+  background: oklch(1 0 0 / 0.06);
+}
+
+[data-slot="dialog-footer"],
+[data-slot="alert-dialog-footer"] {
+  border-top: 1px solid oklch(1 0 0 / 0.06);
+  padding-top: 1rem;
+  margin-top: 0.25rem;
+}
+
+/* Dialog nested section panel */
+.dialog-section {
+  background: oklch(1 0 0 / 0.02);
+  border: 1px solid oklch(1 0 0 / 0.06);
+  border-radius: 12px;
+  padding: 0.75rem;
 }
 
 /* ======================================================

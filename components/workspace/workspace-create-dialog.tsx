@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -101,9 +102,14 @@ export function WorkspaceCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white/90">
+          <DialogTitle>
             {editWorkspace ? "Editar workspace" : "Novo workspace"}
           </DialogTitle>
+          <DialogDescription>
+            {editWorkspace
+              ? "Atualize as informacoes do workspace"
+              : "Organize suas sessoes em um espaco dedicado"}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -137,7 +143,7 @@ export function WorkspaceCreateDialog({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Cor
             </label>
             <div className="flex gap-2">
@@ -162,7 +168,7 @@ export function WorkspaceCreateDialog({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Icone
             </label>
             <div className="grid grid-cols-4 gap-2">
