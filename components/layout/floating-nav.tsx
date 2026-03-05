@@ -235,7 +235,14 @@ export function FloatingNav() {
   return (
     <div className="relative z-50 w-full px-4 pt-6 md:px-6">
       {isAuthenticated && (
-        <div className="absolute right-4 top-6 md:right-6">
+        <div className="absolute right-4 top-6 flex items-center gap-2 md:right-6">
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Assinar
+          </Link>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
