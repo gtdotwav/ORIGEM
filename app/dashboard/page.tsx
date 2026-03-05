@@ -233,7 +233,7 @@ export default function DashboardPage() {
         <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
-            <Atom className="h-4 w-4 text-blue-400" />
+            <Atom className="h-4 w-4 text-white/40" />
             <span className="text-sm text-white/70">Bem-vindo ao ORIGEM</span>
           </div>
 

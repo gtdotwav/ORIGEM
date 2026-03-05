@@ -179,51 +179,47 @@ const FRAGMENT_SHADER = `
 
     float f = fbm(p + 1.4 * r + t * 0.12);
 
-    /* ── color palette ──
-     * Mostly dark void. Color emerges softly from noise topology.
+    /* ── monochrome palette — liquid smoke / mercury ──
+     * Pure black void. White luminance emerges from warped noise.
+     * No color — only light and shadow.
      */
-    vec3 void_     = vec3(0.006, 0.010, 0.028);
-    vec3 deep      = vec3(0.015, 0.025, 0.08);
-    vec3 cyan      = vec3(0.0, 0.55, 0.70);
-    vec3 blue      = vec3(0.08, 0.22, 0.72);
-    vec3 purple    = vec3(0.35, 0.08, 0.65);
-    vec3 rose      = vec3(0.60, 0.12, 0.38);
+    vec3 void_     = vec3(0.0, 0.0, 0.0);
+    vec3 deep      = vec3(0.015, 0.015, 0.015);
+    vec3 smoke     = vec3(0.08, 0.08, 0.08);
+    vec3 silver    = vec3(0.18, 0.18, 0.18);
+    vec3 light     = vec3(0.30, 0.30, 0.30);
 
     /* derived values */
     float ql = length(q);
     float rl = length(r);
 
-    /* soft threshold — controls how much of the screen has color */
+    /* soft threshold — controls luminance spread */
     float mask = smoothstep(-0.1, 0.55, f);
 
     vec3 color = void_;
 
-    /* deep blue undertone where noise has any presence */
-    color = mix(color, deep, smoothstep(-0.3, 0.3, f) * 0.8);
+    /* deep shadow lift where noise has presence */
+    color = mix(color, deep, smoothstep(-0.3, 0.3, f) * 0.9);
 
-    /* primary: blue/cyan in noise ridges — soft emergence */
-    vec3 primary = mix(blue, cyan, smoothstep(-0.2, 0.4, f));
-    color = mix(color, primary, mask * 0.45);
+    /* primary: smoke/silver in noise ridges */
+    vec3 primary = mix(smoke, silver, smoothstep(-0.2, 0.4, f));
+    color = mix(color, primary, mask * 0.5);
 
-    /* purple glow in warped regions */
-    float purpleMask = smoothstep(0.15, 0.55, ql) * smoothstep(-0.1, 0.3, f);
-    color = mix(color, purple, purpleMask * 0.35);
+    /* brighter regions in warped zones */
+    float lightMask = smoothstep(0.15, 0.55, ql) * smoothstep(-0.1, 0.3, f);
+    color = mix(color, silver, lightMask * 0.35);
 
-    /* rose accent — very rare, only at peaks */
-    float roseMask = smoothstep(0.3, 0.6, rl) * smoothstep(0.2, 0.5, f);
-    color = mix(color, rose, roseMask * 0.2);
+    /* peak luminance — rare bright spots */
+    float peakMask = smoothstep(0.3, 0.6, rl) * smoothstep(0.2, 0.5, f);
+    color = mix(color, light, peakMask * 0.25);
 
     /* ── soft glow ── */
-    float lum = dot(color, vec3(0.299, 0.587, 0.114));
+    float lum = color.r; /* monochrome: all channels equal */
     /* bloom: gentle halo on bright areas */
-    color += color * smoothstep(0.04, 0.15, lum) * 0.4;
+    color += color * smoothstep(0.03, 0.12, lum) * 0.35;
 
-    /* saturation — subtle, not screaming */
-    float lum2 = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(lum2), color, 1.25);
-
-    /* tone curve — lift shadows slightly for richness */
-    color = pow(color, vec3(0.96));
+    /* tone curve — slight contrast lift */
+    color = pow(color, vec3(0.94));
 
     /* grain — barely perceptible */
     color += grain(uv, uTime) * 0.025;
@@ -261,7 +257,7 @@ class GradientScene {
     );
     this.camera.position.z = 50;
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x020610);
+    this.scene.background = new THREE.Color(0x000000);
     this.clock = new THREE.Clock();
     this.touchTexture = new TouchTexture();
 
@@ -372,10 +368,10 @@ export function LiquidGradientBackground() {
           className="absolute inset-0"
           style={{
             background: [
-              "radial-gradient(ellipse 70% 55% at 35% 40%, rgba(0,160,200,0.12), transparent)",
-              "radial-gradient(ellipse 60% 50% at 65% 55%, rgba(90,20,180,0.10), transparent)",
-              "radial-gradient(ellipse 45% 40% at 50% 75%, rgba(180,30,90,0.06), transparent)",
-              "linear-gradient(180deg, #020610 0%, #040818 100%)",
+              "radial-gradient(ellipse 70% 55% at 35% 40%, rgba(255,255,255,0.04), transparent)",
+              "radial-gradient(ellipse 60% 50% at 65% 55%, rgba(255,255,255,0.03), transparent)",
+              "radial-gradient(ellipse 45% 40% at 50% 75%, rgba(255,255,255,0.02), transparent)",
+              "linear-gradient(180deg, #000000 0%, #0a0a0a 100%)",
             ].join(", "),
           }}
         />
