@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, GithubIcon, BrainCircuit } from "lucide-react";
 import { Particles } from "@/components/ui/particles";
-import { signIn } from "@/lib/auth";
+import { signIn, authEnabled } from "@/lib/auth";
 
 export default function LoginPage() {
+  // When auth is not configured, go straight to dashboard
+  if (!authEnabled) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="relative w-full bg-background md:h-screen md:overflow-hidden">
       <Particles

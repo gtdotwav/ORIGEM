@@ -34,7 +34,7 @@ export default function RootLayout({
       <body
         className={`font-sans antialiased ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
       >
-        <AuthSessionProvider>
+        <AuthSessionProvider enabled={!!process.env.AUTH_SECRET}>
           {children}
         </AuthSessionProvider>
         <Toaster position="bottom-right" richColors />

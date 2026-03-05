@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Atom,
   ChevronDown,
@@ -158,23 +158,27 @@ export function FloatingNav() {
 
   const activePage = NAV_ITEMS.find((item) => pathname.startsWith(item.href));
   const activeColor = activePage ? COLOR_CLASSES[activePage.color] : null;
+  const session = useSession();
+  const isAuthenticated = session.status === "authenticated";
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const activeWsName = workspaces.find((w) => w.id === activeWorkspaceId)?.name;
 
   return (
     <div className="relative z-50 w-full px-4 pt-6 md:px-6">
-      {/* Sign out button */}
-      <div className="absolute right-4 top-6 md:right-6">
-        <button
-          type="button"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-xs font-medium text-white/50 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/70"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          Sair
-        </button>
-      </div>
+      {/* Sign out button — only when authenticated */}
+      {isAuthenticated && (
+        <div className="absolute right-4 top-6 md:right-6">
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-xs font-medium text-white/50 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/70"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sair
+          </button>
+        </div>
+      )}
 
       <div className="flex w-full justify-center">
         <div ref={navRef} className="relative">

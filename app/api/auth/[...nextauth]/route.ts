@@ -1,3 +1,10 @@
-import { handlers } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { handlers, authEnabled } from "@/lib/auth";
 
-export const { GET, POST } = handlers;
+// When auth is not configured, return empty session so SessionProvider doesn't crash
+function emptySessionHandler() {
+  return NextResponse.json({});
+}
+
+export const GET = authEnabled ? handlers.GET : emptySessionHandler;
+export const POST = authEnabled ? handlers.POST : emptySessionHandler;
