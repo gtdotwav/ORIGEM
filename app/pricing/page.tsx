@@ -38,7 +38,7 @@ const PLANS = [
       "Modo 360 basico",
     ],
     cta: "Assinar Starter",
-    href: "#",
+    href: "/checkout?plan=starter",
     highlight: false,
   },
   {
@@ -57,7 +57,7 @@ const PLANS = [
       "Suporte prioritario",
     ],
     cta: "Assinar Pro",
-    href: "#",
+    href: "/checkout?plan=pro",
     highlight: true,
   },
   {
@@ -75,7 +75,7 @@ const PLANS = [
       "Suporte dedicado",
     ],
     cta: "Assinar Creator",
-    href: "#",
+    href: "/checkout?plan=creator",
     highlight: false,
   },
   {
@@ -93,7 +93,7 @@ const PLANS = [
       "Suporte 24/7",
     ],
     cta: "Falar com vendas",
-    href: "#",
+    href: "/checkout?plan=enterprise",
     highlight: false,
   },
 ];
