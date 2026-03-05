@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthSessionProvider } from "@/components/providers/session-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -30,14 +31,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`font-sans antialiased ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
       >
-        <AuthSessionProvider enabled={!!process.env.AUTH_SECRET}>
-          {children}
-        </AuthSessionProvider>
-        <Toaster position="bottom-right" richColors />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <AuthSessionProvider enabled={!!process.env.AUTH_SECRET}>
+            {children}
+          </AuthSessionProvider>
+          <Toaster position="bottom-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   )

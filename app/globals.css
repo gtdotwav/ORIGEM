@@ -9,59 +9,59 @@
    ====================================================== */
 
 :root {
-  /* Force dark — ORIGEM is always dark */
-  --background: oklch(0.06 0 0);
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.10 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.08 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.85 0 0);
-  --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.85 0 0);
-  --muted: oklch(0.15 0 0);
-  --muted-foreground: oklch(0.55 0 0);
-  --accent: oklch(0.70 0 0);
-  --accent-foreground: oklch(0.95 0 0);
+  /* Light mode — refined, clean */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.12 0 0);
+  --card: oklch(0.96 0 0);
+  --card-foreground: oklch(0.12 0 0);
+  --popover: oklch(0.98 0 0);
+  --popover-foreground: oklch(0.12 0 0);
+  --primary: oklch(0.15 0 0);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0 0);
+  --secondary-foreground: oklch(0.20 0 0);
+  --muted: oklch(0.94 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.35 0 0);
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.95 0 0);
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.18 0 0);
-  --ring: oklch(0.85 0 0);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.88 0 0);
+  --input: oklch(0.92 0 0);
+  --ring: oklch(0.15 0 0);
 
-  /* Monochrome accent palette — white/gray hierarchy */
-  --neon-cyan: oklch(0.85 0 0);
-  --neon-purple: oklch(0.70 0 0);
-  --neon-green: oklch(0.80 0 0);
-  --neon-orange: oklch(0.75 0 0);
-  --neon-pink: oklch(0.65 0 0);
-  --neon-blue: oklch(0.60 0 0);
-  --neon-white: oklch(0.95 0 0);
+  /* Monochrome accent palette */
+  --neon-cyan: oklch(0.25 0 0);
+  --neon-purple: oklch(0.35 0 0);
+  --neon-green: oklch(0.30 0 0);
+  --neon-orange: oklch(0.35 0 0);
+  --neon-pink: oklch(0.40 0 0);
+  --neon-blue: oklch(0.45 0 0);
+  --neon-white: oklch(0.10 0 0);
 
   /* Glass surfaces */
-  --glass-bg: oklch(0.10 0 0 / 0.6);
-  --glass-border: oklch(1 0 0 / 0.08);
-  --glass-highlight: oklch(1 0 0 / 0.04);
+  --glass-bg: oklch(1 0 0 / 0.6);
+  --glass-border: oklch(0 0 0 / 0.08);
+  --glass-highlight: oklch(0 0 0 / 0.03);
   --glass-blur: 20px;
 
   /* Canvas */
-  --canvas-bg: oklch(0.04 0 0);
-  --canvas-grid: oklch(1 0 0 / 0.03);
-  --canvas-grid-accent: oklch(1 0 0 / 0.06);
-  --canvas-dot: oklch(1 0 0 / 0.08);
+  --canvas-bg: oklch(0.97 0 0);
+  --canvas-grid: oklch(0 0 0 / 0.04);
+  --canvas-grid-accent: oklch(0 0 0 / 0.07);
+  --canvas-dot: oklch(0 0 0 / 0.08);
 
   /* Sidebar */
-  --sidebar: oklch(0.08 0 0);
-  --sidebar-foreground: oklch(0.85 0 0);
-  --sidebar-primary: oklch(0.85 0 0);
-  --sidebar-primary-foreground: oklch(0.08 0 0);
-  --sidebar-accent: oklch(0.14 0 0);
-  --sidebar-accent-foreground: oklch(0.90 0 0);
-  --sidebar-border: oklch(0.18 0 0);
-  --sidebar-ring: oklch(0.85 0 0);
+  --sidebar: oklch(0.96 0 0);
+  --sidebar-foreground: oklch(0.20 0 0);
+  --sidebar-primary: oklch(0.15 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.92 0 0);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.88 0 0);
+  --sidebar-ring: oklch(0.15 0 0);
 
-  /* Chart colors mapped to neons */
+  /* Chart colors */
   --chart-1: var(--neon-cyan);
   --chart-2: var(--neon-purple);
   --chart-3: var(--neon-green);
@@ -71,10 +71,10 @@
   --radius: 0.75rem;
 
   /* Shadow depth hierarchy */
-  --shadow-low: 0 1px 2px oklch(0 0 0 / 0.25), 0 1px 3px oklch(0 0 0 / 0.2);
-  --shadow-mid: 0 2px 4px oklch(0 0 0 / 0.2), 0 4px 12px oklch(0 0 0 / 0.25), inset 0 1px 0 oklch(1 0 0 / 0.03);
-  --shadow-high: 0 4px 8px oklch(0 0 0 / 0.2), 0 8px 24px oklch(0 0 0 / 0.3), 0 16px 48px oklch(0 0 0 / 0.15), inset 0 1px 0 oklch(1 0 0 / 0.04);
-  --shadow-glow: 0 0 15px oklch(1 0 0 / 0.15), 0 0 45px oklch(1 0 0 / 0.05), 0 0 0 1px oklch(1 0 0 / 0.10);
+  --shadow-low: 0 1px 2px oklch(0 0 0 / 0.06), 0 1px 3px oklch(0 0 0 / 0.04);
+  --shadow-mid: 0 2px 4px oklch(0 0 0 / 0.04), 0 4px 12px oklch(0 0 0 / 0.06);
+  --shadow-high: 0 4px 8px oklch(0 0 0 / 0.04), 0 8px 24px oklch(0 0 0 / 0.06), 0 16px 48px oklch(0 0 0 / 0.04);
+  --shadow-glow: 0 0 15px oklch(0 0 0 / 0.05), 0 0 45px oklch(0 0 0 / 0.02);
 
   /* Transition defaults */
   --transition-fast: 150ms ease;
@@ -94,17 +94,17 @@
   --duration-slow: 500ms;
 
   /* Surface tokens */
-  --surface-panel: oklch(0.09 0 0 / 0.7);
-  --surface-inset: oklch(0.06 0 0 / 0.5);
-  --surface-raised: oklch(0.12 0 0 / 0.8);
+  --surface-panel: oklch(0.97 0 0 / 0.8);
+  --surface-inset: oklch(0.95 0 0 / 0.6);
+  --surface-raised: oklch(1 0 0 / 0.9);
 
   /* Border tokens */
-  --border-subtle: oklch(1 0 0 / 0.06);
-  --border-medium: oklch(1 0 0 / 0.10);
-  --border-strong: oklch(1 0 0 / 0.18);
+  --border-subtle: oklch(0 0 0 / 0.05);
+  --border-medium: oklch(0 0 0 / 0.08);
+  --border-strong: oklch(0 0 0 / 0.14);
 
   /* Glass inner highlight */
-  --glass-inner-highlight: inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+  --glass-inner-highlight: inset 0 1px 0 0 oklch(1 0 0 / 0.5);
 
   /* Semantic radius */
   --radius-card: 16px;
@@ -114,7 +114,7 @@
   --radius-pill: 9999px;
 }
 
-/* Dark class mirrors root (always dark) */
+/* Dark mode */
 .dark {
   --background: oklch(0.06 0 0);
   --foreground: oklch(0.95 0 0);
@@ -135,6 +135,24 @@
   --border: oklch(0.22 0 0);
   --input: oklch(0.18 0 0);
   --ring: oklch(0.85 0 0);
+
+  --neon-cyan: oklch(0.85 0 0);
+  --neon-purple: oklch(0.70 0 0);
+  --neon-green: oklch(0.80 0 0);
+  --neon-orange: oklch(0.75 0 0);
+  --neon-pink: oklch(0.65 0 0);
+  --neon-blue: oklch(0.60 0 0);
+  --neon-white: oklch(0.95 0 0);
+
+  --glass-bg: oklch(0.10 0 0 / 0.6);
+  --glass-border: oklch(1 0 0 / 0.08);
+  --glass-highlight: oklch(1 0 0 / 0.04);
+
+  --canvas-bg: oklch(0.04 0 0);
+  --canvas-grid: oklch(1 0 0 / 0.03);
+  --canvas-grid-accent: oklch(1 0 0 / 0.06);
+  --canvas-dot: oklch(1 0 0 / 0.08);
+
   --sidebar: oklch(0.08 0 0);
   --sidebar-foreground: oklch(0.85 0 0);
   --sidebar-primary: oklch(0.85 0 0);
@@ -143,6 +161,21 @@
   --sidebar-accent-foreground: oklch(0.90 0 0);
   --sidebar-border: oklch(0.18 0 0);
   --sidebar-ring: oklch(0.85 0 0);
+
+  --shadow-low: 0 1px 2px oklch(0 0 0 / 0.25), 0 1px 3px oklch(0 0 0 / 0.2);
+  --shadow-mid: 0 2px 4px oklch(0 0 0 / 0.2), 0 4px 12px oklch(0 0 0 / 0.25), inset 0 1px 0 oklch(1 0 0 / 0.03);
+  --shadow-high: 0 4px 8px oklch(0 0 0 / 0.2), 0 8px 24px oklch(0 0 0 / 0.3), 0 16px 48px oklch(0 0 0 / 0.15), inset 0 1px 0 oklch(1 0 0 / 0.04);
+  --shadow-glow: 0 0 15px oklch(1 0 0 / 0.15), 0 0 45px oklch(1 0 0 / 0.05), 0 0 0 1px oklch(1 0 0 / 0.10);
+
+  --surface-panel: oklch(0.09 0 0 / 0.7);
+  --surface-inset: oklch(0.06 0 0 / 0.5);
+  --surface-raised: oklch(0.12 0 0 / 0.8);
+
+  --border-subtle: oklch(1 0 0 / 0.06);
+  --border-medium: oklch(1 0 0 / 0.10);
+  --border-strong: oklch(1 0 0 / 0.18);
+
+  --glass-inner-highlight: inset 0 1px 0 0 oklch(1 0 0 / 0.06);
 }
 
 @theme inline {

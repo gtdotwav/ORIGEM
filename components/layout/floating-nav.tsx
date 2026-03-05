@@ -27,7 +27,10 @@ import {
   Compass,
   Rss,
   Users2,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
@@ -217,6 +220,10 @@ export function FloatingNav() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [navOpen, handleClickOutside]);
 
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const active = findActivePage(pathname);
   const activeColor = active ? COLOR_CLASSES[active.item.color] : null;
   const session = useSession();
@@ -238,14 +245,36 @@ export function FloatingNav() {
         <div className="absolute right-4 top-6 flex items-center gap-2 md:right-6">
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white dark:border-white/20 dark:bg-white/10 dark:text-white/80"
           >
             Assinar
           </Link>
+          {/* Theme toggle — soft slide */}
+          {mounted && (
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="relative inline-flex h-7 w-12 items-center rounded-full border border-black/10 bg-black/5 backdrop-blur-md transition-all dark:border-white/10 dark:bg-white/10"
+              aria-label="Alternar tema"
+            >
+              <span
+                className={cn(
+                  "absolute flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] dark:bg-white/90",
+                  theme === "dark" ? "left-[22px]" : "left-[3px]"
+                )}
+              >
+                {theme === "dark" ? (
+                  <Moon className="h-3 w-3 text-neutral-800" />
+                ) : (
+                  <Sun className="h-3 w-3 text-amber-500" />
+                )}
+              </span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-xs font-medium text-white/50 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/70"
+            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/5 px-3 py-1.5 text-xs font-medium text-black/50 backdrop-blur-md transition-all hover:border-black/20 hover:text-black/70 dark:border-white/10 dark:bg-black/45 dark:text-white/50 dark:hover:border-white/20 dark:hover:text-white/70"
           >
             <LogOut className="h-3.5 w-3.5" />
             Sair
