@@ -737,6 +737,22 @@
   cursor: not-allowed;
 }
 
+/* Neon button hover glow + elevation */
+.neon-btn-cyan:hover:not(:disabled) {
+  box-shadow:
+    0 0 20px oklch(0.78 0.15 195 / 0.2),
+    0 0 60px oklch(0.78 0.15 195 / 0.06),
+    inset 0 1px 0 oklch(0.78 0.15 195 / 0.1);
+  transform: translateY(-1px);
+}
+.neon-btn-purple:hover:not(:disabled) {
+  box-shadow:
+    0 0 20px oklch(0.65 0.25 290 / 0.2),
+    0 0 60px oklch(0.65 0.25 290 / 0.06),
+    inset 0 1px 0 oklch(0.65 0.25 290 / 0.1);
+  transform: translateY(-1px);
+}
+
 /* ======================================================
    Dialog Premium Glass Treatment
    ====================================================== */
@@ -756,11 +772,18 @@
   background: oklch(0.11 0.02 270 / 0.94);
   backdrop-filter: blur(32px) saturate(1.3);
   -webkit-backdrop-filter: blur(32px) saturate(1.3);
+  border-color: oklch(1 0 0 / 0.10);
   box-shadow:
-    var(--shadow-high),
-    var(--glass-inner-highlight),
-    0 0 80px oklch(0.78 0.15 195 / 0.03);
-  border-color: oklch(1 0 0 / 0.08);
+    0 20px 80px oklch(0 0 0 / 0.45),
+    0 8px 32px oklch(0 0 0 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 0 120px oklch(0.78 0.15 195 / 0.025);
+}
+
+[data-slot="dialog-header"],
+[data-slot="alert-dialog-header"] {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid oklch(1 0 0 / 0.05);
 }
 
 [data-slot="dialog-title"],
@@ -775,12 +798,13 @@
 
 [data-slot="dialog-close"] {
   color: oklch(1 0 0 / 0.25);
-  border-radius: 8px;
-  transition: all 150ms var(--ease-smooth);
+  border-radius: 10px;
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 [data-slot="dialog-close"]:hover {
-  color: oklch(1 0 0 / 0.6);
-  background: oklch(1 0 0 / 0.06);
+  color: oklch(1 0 0 / 0.7);
+  background: oklch(1 0 0 / 0.08);
+  box-shadow: 0 0 12px oklch(1 0 0 / 0.04);
 }
 
 [data-slot="dialog-footer"],
@@ -794,26 +818,51 @@
 .dialog-section {
   background: oklch(1 0 0 / 0.02);
   border: 1px solid oklch(1 0 0 / 0.06);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0.75rem;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+  transition: border-color var(--duration-fast) var(--ease-smooth);
+}
+.dialog-section:hover {
+  border-color: oklch(1 0 0 / 0.10);
 }
 
 /* ======================================================
-   Input Focus Glow
+   Input Premium Interactions
    ====================================================== */
+[data-slot="input"],
+[data-slot="textarea"] {
+  transition:
+    border-color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    background var(--duration-fast) var(--ease-smooth);
+}
+
+[data-slot="input"]:hover:not(:focus):not(:disabled),
+[data-slot="textarea"]:hover:not(:focus):not(:disabled) {
+  border-color: oklch(1 0 0 / 0.14);
+  background: oklch(1 0 0 / 0.04);
+}
+
 [data-slot="input"]:focus,
 [data-slot="textarea"]:focus {
+  border-color: oklch(0.78 0.15 195 / 0.5);
   box-shadow:
     0 0 0 2px oklch(0.08 0.02 270),
-    0 0 0 4px oklch(0.78 0.15 195 / 0.4),
-    inset 0 0 8px oklch(0.78 0.15 195 / 0.06);
+    0 0 0 4px oklch(0.78 0.15 195 / 0.35),
+    0 0 20px oklch(0.78 0.15 195 / 0.08),
+    inset 0 0 12px oklch(0.78 0.15 195 / 0.04);
 }
 
 /* ======================================================
-   Switch Checked Glow
+   Switch & Checkbox Checked Glow
    ====================================================== */
 [data-slot="switch"][data-state="checked"] {
   box-shadow: 0 0 8px oklch(0.78 0.15 195 / 0.3), 0 0 0 1px oklch(0.78 0.15 195 / 0.2);
+}
+
+[data-slot="checkbox"][data-state="checked"] {
+  box-shadow: 0 0 6px oklch(0.78 0.15 195 / 0.25);
 }
 
 /* ======================================================
