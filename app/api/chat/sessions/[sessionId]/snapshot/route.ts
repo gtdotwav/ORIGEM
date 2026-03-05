@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import {
   deleteSessionRecord,
   getSessionRecord,
@@ -52,6 +53,18 @@ export async function PUT(request: Request, { params }: Params) {
     const record = await upsertSessionSnapshot({ snapshot });
     return NextResponse.json(record);
   } catch (error) {
+    if (error instanceof ZodError) {
+      const issues = error.issues.map((i) => ({
+        path: i.path.join("."),
+        code: i.code,
+        message: i.message,
+      }));
+      console.error("[snapshot] Zod validation failed:", JSON.stringify(issues, null, 2));
+      return NextResponse.json(
+        { error: "invalid_snapshot", issues },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       {
         error: "invalid_snapshot",

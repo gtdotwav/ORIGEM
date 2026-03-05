@@ -233,6 +233,10 @@ export async function persistSessionSnapshot(sessionId: string): Promise<void> {
   });
 
   if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    if (errorBody?.issues) {
+      console.error("[snapshot] Validation issues:", errorBody.issues);
+    }
     throw new Error(`Failed to persist snapshot (${response.status})`);
   }
 }
