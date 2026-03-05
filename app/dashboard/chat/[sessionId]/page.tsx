@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
+  Calendar,
   Copy,
   History,
   Loader2,
@@ -22,6 +23,7 @@ import { CriticPanel } from "@/components/chat/critic-panel";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
+import { CalendarPanel } from "@/components/chat/calendar-panel";
 import {
   ensureSessionRecord,
   hydrateSessionSnapshot,
@@ -113,6 +115,7 @@ export default function ChatPage() {
   const [isSending, setIsSending] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
@@ -287,7 +290,7 @@ export default function ChatPage() {
       <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-white/[0.06] bg-neutral-950/80 p-1 shadow-lg backdrop-blur-xl">
         <button
           type="button"
-          onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); }}
+          onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); setCalendarOpen(false); }}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
           title="Historico"
         >
@@ -295,11 +298,19 @@ export default function ChatPage() {
         </button>
         <button
           type="button"
-          onClick={() => { setConnectorsOpen(!connectorsOpen); setHistoryOpen(false); }}
+          onClick={() => { setConnectorsOpen(!connectorsOpen); setHistoryOpen(false); setCalendarOpen(false); }}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
           title="Conectores"
         >
           <Plug className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => { setCalendarOpen(!calendarOpen); setHistoryOpen(false); setConnectorsOpen(false); }}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          title="Calendario"
+        >
+          <Calendar className="h-3.5 w-3.5" />
         </button>
       </div>
 
@@ -316,6 +327,11 @@ export default function ChatPage() {
       <ConnectorsPanel
         open={connectorsOpen}
         onClose={() => setConnectorsOpen(false)}
+      />
+
+      <CalendarPanel
+        open={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
       />
 
       {/* Header with glow */}
