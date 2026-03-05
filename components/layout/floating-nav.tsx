@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import {
-  Atom,
   ChevronDown,
   ChevronRight,
   Layers,
@@ -173,7 +173,7 @@ interface QuickLink {
 }
 
 const QUICK_LINKS: QuickLink[] = [
-  { label: "Início", href: "/dashboard", icon: Atom },
+  { label: "Início", href: "/dashboard", icon: LayoutDashboard },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
   { label: "Design", href: "/dashboard/design", icon: Palette },
   { label: "Provedores", href: "/dashboard/settings/providers", icon: Key },
@@ -263,7 +263,13 @@ export function FloatingNav() {
                 : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
             )}
           >
-            <Atom className={cn("h-4 w-4", activeColor ? activeColor.icon : "text-blue-400")} />
+            <Image
+              src="/logo.png"
+              alt="ORIGEM"
+              width={28}
+              height={28}
+              className="pointer-events-none -ml-1 -my-1"
+            />
             <span className="text-sm font-medium text-white/90">ORIGEM</span>
             {activeWsName && (
               <>
