@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import type { PersonaColor } from "@/types/persona";
 import { PERSONA_COLORS } from "@/lib/personas";
 import { cn } from "@/lib/utils";
@@ -8,13 +9,14 @@ import { cn } from "@/lib/utils";
 interface AppCardProps {
   title: string;
   description: string;
-  emoji: string;
+  emoji?: string;
+  icon?: LucideIcon;
   color: PersonaColor;
   href: string;
   badge?: string;
 }
 
-export function AppCard({ title, description, emoji, color, href, badge }: AppCardProps) {
+export function AppCard({ title, description, emoji, icon: Icon, color, href, badge }: AppCardProps) {
   const colors = PERSONA_COLORS[color];
 
   return (
@@ -34,7 +36,11 @@ export function AppCard({ title, description, emoji, color, href, badge }: AppCa
             colors.bg
           )}
         >
-          <span className="text-2xl">{emoji}</span>
+          {Icon ? (
+            <Icon className={cn("h-6 w-6", colors.text)} />
+          ) : (
+            <span className="text-2xl">{emoji}</span>
+          )}
         </div>
         {badge && (
           <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">

@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useConnectionStore } from "@/stores/connection-store";
 
@@ -59,7 +61,7 @@ export function ConnectionPicker({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl sm:max-w-sm">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white/90">
             <Users2 className="h-4 w-4 text-neon-cyan" />
@@ -69,12 +71,12 @@ export function ConnectionPicker({
 
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar..."
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] py-2 pl-9 pr-3 text-sm text-white/80 placeholder:text-white/25 focus:border-white/15 focus:outline-none"
+            className="border-white/[0.08] bg-white/[0.04] pl-9 text-sm text-white/90 placeholder:text-white/25"
           />
         </div>
 
@@ -116,14 +118,15 @@ export function ConnectionPicker({
         </div>
 
         {multiSelect && (
-          <button
-            type="button"
+          <Button
+            variant="neon"
+            size="sm"
             onClick={handleConfirm}
             disabled={selectedIds.length === 0}
-            className="mt-2 w-full rounded-xl bg-neon-cyan/15 py-2 text-sm font-medium text-neon-cyan transition-colors hover:bg-neon-cyan/20 disabled:opacity-40"
+            className="mt-2 w-full"
           >
             Confirmar ({selectedIds.length})
-          </button>
+          </Button>
         )}
       </DialogContent>
     </Dialog>

@@ -1,10 +1,11 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
+import { Drama, MessageSquare } from "lucide-react";
 import { usePersonaStore } from "@/stores/persona-store";
 import { PersonaSwitcher } from "@/components/apps/persona-switcher";
 import { PersonaChatInterface } from "@/components/apps/persona-chat-interface";
-import { CELEBRITY_PERSONAS } from "@/lib/personas";
+import { CELEBRITY_PERSONAS, PERSONA_ICONS, PERSONA_COLORS } from "@/lib/personas";
+import { cn } from "@/lib/utils";
 
 export default function CelebrityChatPage() {
   const activePersonaId = usePersonaStore((s) => s.activePersonaId);
@@ -37,7 +38,7 @@ export default function CelebrityChatPage() {
         <PersonaChatInterface />
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center px-4">
-          <span className="mb-4 text-6xl">🎭</span>
+          <Drama className="mb-4 h-16 w-16 text-neon-purple/60" />
           <h2 className="mb-2 text-lg font-semibold text-white/80">
             Escolha uma persona
           </h2>
@@ -48,21 +49,25 @@ export default function CelebrityChatPage() {
 
           {/* Quick pick grid */}
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {CELEBRITY_PERSONAS.map((persona) => (
-              <button
-                key={persona.id}
-                type="button"
-                onClick={() =>
-                  usePersonaStore.getState().setActivePersona(persona.id)
-                }
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 transition-all hover:border-white/[0.15] hover:bg-white/[0.05]"
-              >
-                <span className="text-2xl">{persona.emoji}</span>
-                <span className="text-[10px] text-white/50">
-                  {persona.name.split(" ")[0]}
-                </span>
-              </button>
-            ))}
+            {CELEBRITY_PERSONAS.map((persona) => {
+              const Icon = PERSONA_ICONS[persona.id];
+              const colors = PERSONA_COLORS[persona.color];
+              return (
+                <button
+                  key={persona.id}
+                  type="button"
+                  onClick={() =>
+                    usePersonaStore.getState().setActivePersona(persona.id)
+                  }
+                  className="flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 transition-all hover:border-white/[0.15] hover:bg-white/[0.05]"
+                >
+                  {Icon && <Icon className={cn("h-6 w-6", colors.text)} />}
+                  <span className="text-[10px] text-white/50">
+                    {persona.name.split(" ")[0]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

@@ -7,8 +7,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCustomAppStore } from "@/stores/custom-app-store";
 
@@ -86,7 +90,7 @@ export function AppBuilderDialog() {
           </p>
         </button>
       </DialogTrigger>
-      <DialogContent className="border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <Rocket className="h-4 w-4 text-neon-cyan" />
@@ -97,43 +101,43 @@ export function AppBuilderDialog() {
         <div className="space-y-3">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Nome
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Assistente de Vendas"
-              className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none focus:border-neon-cyan/30"
+              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
           {/* Intention */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Intencao
             </label>
-            <input
+            <Input
               type="text"
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
               placeholder="Ex: Ajudar na qualificacao de leads"
-              className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none focus:border-neon-cyan/30"
+              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wide text-white/35">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">
               Descricao
             </label>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descreva o que o app deve fazer, como e para quem..."
               rows={3}
-              className="w-full rounded-md border border-white/[0.08] bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none focus:border-neon-cyan/30 resize-none"
+              className="min-h-[60px] resize-none border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
             />
           </div>
 
@@ -147,7 +151,7 @@ export function AppBuilderDialog() {
             />
             <label
               htmlFor="advanced-ctx"
-              className="text-[11px] text-white/50 cursor-pointer"
+              className="cursor-pointer text-[11px] text-white/50"
             >
               Habilitar contexto avancado (sites, midias, fontes)
             </label>
@@ -157,44 +161,44 @@ export function AppBuilderDialog() {
           {showAdvanced && (
             <div className="space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
                   <Globe className="h-3 w-3" />
                   Sites / URLs
                 </label>
-                <textarea
+                <Textarea
                   value={urls}
                   onChange={(e) => setUrls(e.target.value)}
                   placeholder="Cole links de sites relevantes (um por linha)..."
                   rows={2}
-                  className="w-full rounded-md border border-white/[0.06] bg-neutral-900/50 px-3 py-2 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-neon-cyan/20 resize-none"
+                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
                   <Image className="h-3 w-3" />
                   Midias
                 </label>
-                <textarea
+                <Textarea
                   value={media}
                   onChange={(e) => setMedia(e.target.value)}
                   placeholder="Referencias de midia, imagens, videos (um por linha)..."
                   rows={2}
-                  className="w-full rounded-md border border-white/[0.06] bg-neutral-900/50 px-3 py-2 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-neon-cyan/20 resize-none"
+                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
                   <BookOpen className="h-3 w-3" />
                   Fontes
                 </label>
-                <textarea
+                <Textarea
                   value={sources}
                   onChange={(e) => setSources(e.target.value)}
                   placeholder="Fontes que fortalecem o contexto do app (um por linha)..."
                   rows={2}
-                  className="w-full rounded-md border border-white/[0.06] bg-neutral-900/50 px-3 py-2 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-neon-cyan/20 resize-none"
+                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
                 />
               </div>
             </div>
@@ -202,17 +206,24 @@ export function AppBuilderDialog() {
         </div>
 
         {/* Submit */}
-        <div className="mt-1 flex justify-end">
-          <button
-            type="button"
+        <DialogFooter>
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(false)}
+            className="text-xs text-white/50 hover:text-white/70"
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="neon"
+            size="sm"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Rocket className="h-3.5 w-3.5" />
             Criar App
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

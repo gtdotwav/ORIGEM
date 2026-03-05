@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 import { useConnectionStore } from "@/stores/connection-store";
 import { useFeedStore } from "@/stores/feed-store";
 import type { FeedItem } from "@/types/feed";
@@ -44,7 +44,7 @@ export function ShareDialog({ open, onOpenChange, item }: ShareDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white/90">
             <Share2 className="h-4 w-4 text-neon-cyan" />
@@ -62,12 +62,12 @@ export function ShareDialog({ open, onOpenChange, item }: ShareDialogProps) {
         {/* Search */}
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar conexão..."
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] py-2 pl-9 pr-3 text-sm text-white/80 placeholder:text-white/25 focus:border-white/15 focus:outline-none"
+            className="border-white/[0.08] bg-white/[0.04] pl-9 text-sm text-white/90 placeholder:text-white/25"
           />
         </div>
 

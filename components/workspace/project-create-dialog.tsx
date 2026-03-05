@@ -103,7 +103,7 @@ export function ProjectCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white/90">
             {editProject ? "Editar projeto" : "Novo projeto"}
@@ -202,9 +202,10 @@ export function ProjectCreateDialog({
             Cancelar
           </Button>
           <Button
+            variant="neon"
+            size="sm"
             onClick={handleSubmit}
             disabled={!name.trim()}
-            className="border border-neon-cyan/30 bg-neon-cyan/10 text-xs font-medium text-neon-cyan hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:opacity-40"
           >
             {editProject ? "Salvar" : "Criar projeto"}
           </Button>

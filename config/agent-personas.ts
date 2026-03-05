@@ -1,5 +1,17 @@
+import { Briefcase, GraduationCap, MessageSquare, Code, Brain, Paintbrush, Film, HeartHandshake, type LucideIcon } from "lucide-react";
 import type { AgentPersona } from "@/types/agent-task";
 import type { Intent } from "@/types/decomposition";
+
+export const AGENT_PERSONA_ICONS: Record<string, LucideIcon> = {
+  "mentor-negocios": Briefcase,
+  "professor-ia": GraduationCap,
+  "criador-conteudo": MessageSquare,
+  "programador-ia": Code,
+  "psicologo-ia": Brain,
+  "criador-imagens": Paintbrush,
+  "criador-videos": Film,
+  "companheiro-ia": HeartHandshake,
+};
 
 export const AGENT_PERSONAS: AgentPersona[] = [
   {

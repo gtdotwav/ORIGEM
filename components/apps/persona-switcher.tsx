@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { usePersonaStore } from "@/stores/persona-store";
-import { CELEBRITY_PERSONAS, PERSONA_COLORS } from "@/lib/personas";
+import { CELEBRITY_PERSONAS, PERSONA_COLORS, PERSONA_ICONS } from "@/lib/personas";
 import { cn } from "@/lib/utils";
 
 export function PersonaSwitcher() {
@@ -27,7 +27,11 @@ export function PersonaSwitcher() {
         >
           {activePersona ? (
             <>
-              <span className="text-lg">{activePersona.emoji}</span>
+              {(() => {
+                const Icon = PERSONA_ICONS[activePersona.id];
+                const colors = PERSONA_COLORS[activePersona.color];
+                return Icon ? <Icon className={cn("h-4.5 w-4.5", colors.text)} /> : null;
+              })()}
               <span className="max-w-[120px] truncate text-white/80">
                 {activePersona.name}
               </span>
@@ -66,7 +70,10 @@ export function PersonaSwitcher() {
                 isActive ? "bg-white/[0.04]" : ""
               )}
             >
-              <span className="text-xl">{persona.emoji}</span>
+              {(() => {
+                const Icon = PERSONA_ICONS[persona.id];
+                return Icon ? <Icon className={cn("h-5 w-5", colors.text)} /> : null;
+              })()}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span

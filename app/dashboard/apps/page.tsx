@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Trash2 } from "lucide-react";
+import { Sparkles, Trash2, Drama, Rocket } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
 import { useCustomAppStore } from "@/stores/custom-app-store";
@@ -36,7 +36,7 @@ export default function AppsPage() {
         <AppCard
           title="Converse com uma Celebridade IA"
           description="Escolha uma persona historica e converse com ela. A IA responde em personagem, usando analise psicossemantica para criar uma experiencia didatica e imersiva."
-          emoji="🎭"
+          icon={Drama}
           color="purple"
           href="/dashboard/apps/celebrity-chat"
           badge="Novo"
@@ -57,7 +57,7 @@ export default function AppsPage() {
               <Trash2 className="h-3.5 w-3.5" />
             </button>
             <div className="mb-3 flex items-center gap-2">
-              <span className="text-xl">🚀</span>
+              <Rocket className="h-5 w-5 text-neon-cyan" />
               <span className="rounded-md border border-neon-cyan/25 bg-neon-cyan/10 px-1.5 py-0.5 text-[9px] font-medium uppercase text-neon-cyan">
                 {STATUS_BADGE[app.status] ?? app.status}
               </span>

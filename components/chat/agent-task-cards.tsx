@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useRuntimeStore } from "@/stores/runtime-store";
-import { AGENT_PERSONAS, selectPersonasForIntent } from "@/config/agent-personas";
+import { AGENT_PERSONAS, AGENT_PERSONA_ICONS, selectPersonasForIntent } from "@/config/agent-personas";
 import type { AgentPersona } from "@/types/agent-task";
 import type { RuntimeTask } from "@/types/runtime";
 import type { Intent } from "@/types/decomposition";
@@ -159,8 +159,11 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                     type="button"
                     className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left"
                   >
-                    {/* Emoji */}
-                    <span className="text-sm">{persona.emoji}</span>
+                    {/* Icon */}
+                    {(() => {
+                      const Icon = AGENT_PERSONA_ICONS[persona.id];
+                      return Icon ? <Icon className="h-4 w-4 shrink-0" /> : null;
+                    })()}
 
                     {/* Name + role */}
                     <div className="min-w-0 flex-1">

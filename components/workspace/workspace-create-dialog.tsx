@@ -99,7 +99,7 @@ export function WorkspaceCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white/90">
             {editWorkspace ? "Editar workspace" : "Novo workspace"}
@@ -198,9 +198,10 @@ export function WorkspaceCreateDialog({
             Cancelar
           </Button>
           <Button
+            variant="neon"
+            size="sm"
             onClick={handleSubmit}
             disabled={!name.trim()}
-            className="border border-neon-cyan/30 bg-neon-cyan/10 text-xs font-medium text-neon-cyan hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:opacity-40"
           >
             {editWorkspace ? "Salvar" : "Criar workspace"}
           </Button>
