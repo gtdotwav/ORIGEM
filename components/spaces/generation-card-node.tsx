@@ -32,10 +32,10 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "group w-[260px] rounded-2xl border bg-card/80 shadow-xl backdrop-blur-xl transition-all",
+        "group w-[260px] rounded-2xl border bg-card/70 shadow-lg backdrop-blur-md transition-all",
         selected
-          ? "border-neon-cyan/40 shadow-[0_0_20px_rgba(0,255,255,0.1)]"
-          : "border-foreground/[0.08] hover:border-foreground/[0.15]"
+          ? "border-foreground/[0.18]"
+          : "border-foreground/[0.08] hover:border-foreground/[0.12]"
       )}
       onClick={() => selectCard(id)}
     >
@@ -71,11 +71,8 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           </div>
         ) : isGenerating ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="absolute -inset-4 animate-pulse rounded-full bg-neon-cyan/10 blur-xl" />
-              <Loader2 className="relative h-8 w-8 animate-spin text-neon-cyan/60" />
-            </div>
-            <span className="text-[10px] text-foreground/30">Gerando...</span>
+            <Loader2 className="h-7 w-7 animate-spin text-foreground/30" />
+            <span className="text-[10px] text-foreground/25">Gerando...</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">

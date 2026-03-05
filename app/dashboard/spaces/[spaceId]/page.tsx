@@ -104,12 +104,12 @@ export default function SpaceCanvasPage() {
             <button
               type="button"
               onClick={() => router.push("/dashboard/spaces")}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-foreground/[0.08] bg-card/80 text-foreground/40 backdrop-blur-xl transition-all hover:bg-card hover:text-foreground/70"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-foreground/[0.06] bg-[oklch(0.15_0_0)] text-foreground/40 transition-all hover:bg-[oklch(0.18_0_0)] hover:text-foreground/60"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <div className="rounded-xl border border-foreground/[0.08] bg-card/80 px-3 py-1.5 backdrop-blur-xl">
-              <h2 className="text-xs font-semibold text-foreground/70">
+            <div className="rounded-xl border border-foreground/[0.06] bg-[oklch(0.15_0_0)] px-3 py-1.5">
+              <h2 className="text-xs font-semibold text-foreground/60">
                 {space?.name ?? "Space"}
               </h2>
             </div>
@@ -119,7 +119,7 @@ export default function SpaceCanvasPage() {
             <button
               type="button"
               onClick={handleAddCard}
-              className="flex items-center gap-1.5 rounded-xl border border-neon-cyan/25 bg-card/80 px-3 py-1.5 text-xs text-neon-cyan backdrop-blur-xl transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/10"
+              className="flex items-center gap-1.5 rounded-xl border border-foreground/[0.08] bg-[oklch(0.15_0_0)] px-3 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/[0.12] hover:bg-[oklch(0.18_0_0)] hover:text-foreground/70"
             >
               <Plus className="h-3.5 w-3.5" />
               Novo Card
@@ -127,7 +127,7 @@ export default function SpaceCanvasPage() {
           </div>
         </div>
 
-        {/* React Flow Canvas */}
+        {/* React Flow Canvas — plain static background */}
         <ReactFlow
           nodes={spaceNodes}
           edges={spaceEdges}
@@ -140,39 +140,36 @@ export default function SpaceCanvasPage() {
           fitView
           minZoom={0.1}
           maxZoom={3}
-          className="bg-background"
+          className="!bg-[oklch(0.11_0_0)]"
           proOptions={{ hideAttribution: true }}
         >
           <Background
             variant={BackgroundVariant.Dots}
-            gap={24}
-            size={1}
-            className="opacity-30"
+            gap={28}
+            size={0.8}
+            className="!opacity-20"
           />
           <Controls
             showInteractive={false}
-            className="!rounded-xl !border !border-foreground/[0.08] !bg-card/80 !shadow-lg !backdrop-blur-xl [&>button]:!border-foreground/[0.06] [&>button]:!bg-transparent [&>button]:!text-foreground/40 [&>button:hover]:!bg-foreground/[0.06] [&>button:hover]:!text-foreground/60"
+            className="!rounded-xl !border !border-foreground/[0.06] !bg-[oklch(0.15_0_0)] !shadow-md [&>button]:!border-foreground/[0.05] [&>button]:!bg-transparent [&>button]:!text-foreground/35 [&>button:hover]:!bg-foreground/[0.06] [&>button:hover]:!text-foreground/55"
           />
           <MiniMap
             nodeStrokeWidth={3}
-            className="!rounded-xl !border !border-foreground/[0.08] !bg-card/80 !shadow-lg !backdrop-blur-xl"
-            maskColor="rgba(0,0,0,0.3)"
+            className="!rounded-xl !border !border-foreground/[0.06] !bg-[oklch(0.13_0_0)] !shadow-md"
+            maskColor="rgba(0,0,0,0.4)"
           />
         </ReactFlow>
 
-        {/* Empty state */}
+        {/* Empty state — plain, no glow */}
         {spaceNodes.length === 0 && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="absolute -inset-8 rounded-full bg-neon-cyan/5 blur-3xl" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl">
-                  <Maximize2 className="h-7 w-7 text-foreground/15" />
-                </div>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04]">
+                <Maximize2 className="h-6 w-6 text-foreground/15" />
               </div>
               <div className="text-center">
-                <p className="text-sm text-foreground/40">Canvas vazio</p>
-                <p className="mt-1 text-xs text-foreground/20">
+                <p className="text-sm text-foreground/35">Canvas vazio</p>
+                <p className="mt-1 text-xs text-foreground/18">
                   Clique em &quot;Novo Card&quot; ou use o botao + na sidebar
                 </p>
               </div>

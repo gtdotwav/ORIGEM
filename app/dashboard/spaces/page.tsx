@@ -58,8 +58,8 @@ export default function SpacesHubPage() {
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-cyan/15 bg-neon-cyan/[0.06]">
-            <Orbit className="h-5 w-5 text-neon-cyan" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
+            <Orbit className="h-5 w-5 text-foreground/50" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-foreground">ORIGEM Spaces</h1>
@@ -73,7 +73,7 @@ export default function SpacesHubPage() {
         <button
           type="button"
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 px-4 py-2.5 text-sm text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 hover:shadow-[0_0_16px_rgba(0,255,255,0.1)]"
+          className="inline-flex items-center gap-2 rounded-xl border border-foreground/[0.10] bg-foreground/[0.05] px-4 py-2.5 text-sm text-foreground/60 transition-all hover:border-foreground/[0.15] hover:bg-foreground/[0.08] hover:text-foreground/80"
         >
           <Plus className="h-4 w-4" />
           Novo Space
@@ -87,11 +87,8 @@ export default function SpacesHubPage() {
         className="group mb-6 flex w-full items-center justify-center rounded-2xl border border-dashed border-foreground/[0.08] bg-card/40 py-14 backdrop-blur-sm transition-all hover:border-neon-cyan/25 hover:bg-neon-cyan/[0.03]"
       >
         <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-full bg-neon-cyan/5 blur-2xl transition-all group-hover:bg-neon-cyan/10" />
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04] transition-all group-hover:border-neon-cyan/25 group-hover:bg-neon-cyan/10">
-              <Orbit className="h-7 w-7 text-foreground/20 transition-colors group-hover:text-neon-cyan" />
-            </div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04] transition-all group-hover:border-foreground/[0.15] group-hover:bg-foreground/[0.06]">
+            <Orbit className="h-7 w-7 text-foreground/20 transition-colors group-hover:text-foreground/50" />
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-foreground/50 transition-colors group-hover:text-foreground/80">
@@ -127,7 +124,7 @@ export default function SpacesHubPage() {
                 return (
                   <div
                     key={space.id}
-                    className="group rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all hover:border-neon-cyan/20 hover:bg-card/80"
+                    className="group rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-md transition-all hover:border-foreground/[0.14] hover:bg-card/80"
                   >
                     {/* Preview area */}
                     <button
@@ -224,7 +221,7 @@ export default function SpacesHubPage() {
       )}
 
       {spaces.length === 0 && (
-        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 text-center backdrop-blur-xl">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 text-center backdrop-blur-md">
           <Orbit className="mx-auto mb-3 h-8 w-8 text-foreground/15" />
           <p className="text-sm text-foreground/50">
             Nenhum space criado. Crie seu primeiro workspace de geracao de imagens.

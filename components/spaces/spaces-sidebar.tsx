@@ -79,12 +79,12 @@ export function SpacesSidebar() {
   ];
 
   return (
-    <div className="flex h-full w-14 flex-col items-center gap-1 border-r border-foreground/[0.06] bg-card/50 py-3 backdrop-blur-xl">
+    <div className="flex h-full w-14 flex-col items-center gap-1 border-r border-foreground/[0.05] bg-[oklch(0.13_0_0)] py-3">
       {/* New generation button */}
       <button
         type="button"
         onClick={handleNewGeneration}
-        className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 hover:shadow-[0_0_12px_rgba(0,255,255,0.15)]"
+        className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl border border-foreground/[0.10] bg-foreground/[0.06] text-foreground/50 transition-all hover:bg-foreground/[0.10] hover:text-foreground/70"
         title="Nova geracao"
       >
         <Plus className="h-4 w-4" />

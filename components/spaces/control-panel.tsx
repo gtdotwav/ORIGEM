@@ -102,7 +102,7 @@ export function ControlPanel() {
   };
 
   return (
-    <div className="flex h-full w-[300px] flex-col border-l border-foreground/[0.06] bg-card/50 backdrop-blur-xl">
+    <div className="flex h-full w-[300px] flex-col border-l border-foreground/[0.05] bg-[oklch(0.13_0_0)]">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-foreground/[0.06] px-4 py-3">
         <h3 className="text-xs font-semibold text-foreground/70">
