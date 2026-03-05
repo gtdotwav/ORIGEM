@@ -261,8 +261,8 @@ export function FloatingNav() {
             <Image
               src="/logo.png"
               alt="ORIGEM"
-              width={96}
-              height={96}
+              width={128}
+              height={128}
               className="pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
             />
           </button>
