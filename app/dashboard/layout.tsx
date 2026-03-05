@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import { FloatingNav } from "@/components/layout/floating-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { BackendSessionBootstrap } from "@/components/layout/backend-session-bootstrap";
-import { HologramBackground } from "@/components/shared/hologram-background";
+import { LiquidGradientBackground } from "@/components/shared/liquid-gradient-bg";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { WORKSPACE_COLORS } from "@/components/workspace/workspace-card";
 
@@ -26,7 +26,7 @@ export default function DashboardLayout({
   return (
     <main className="relative flex min-h-screen flex-col bg-[#04070d]">
       <BackendSessionBootstrap />
-      <HologramBackground />
+      <LiquidGradientBackground />
 
       {/* Gradient overlay */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/10" />
