@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   Globe,
   Key,
   Monitor,
@@ -11,6 +10,9 @@ import {
   Settings,
   SlidersHorizontal,
   Sparkles,
+  Plug,
+  Check,
+  Circle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -22,17 +24,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EcosystemConfig } from "@/components/chat/ecosystem-config";
+import { useConfiguredProviders } from "@/hooks/use-configured-providers";
+import { PROVIDER_CATALOG } from "@/config/providers";
 
 const SECTIONS = [
   {
     title: "Provedores de IA",
     description:
       "Configure API keys para Claude, GPT, Gemini, Groq, Fireworks e outros. Necessario para ativar decomposicao e agentes.",
-    href: "/dashboard/settings/providers",
     icon: Key,
     iconClass: "text-neon-cyan",
     borderClass: "border-neon-cyan/20 hover:border-neon-cyan/40",
-    cta: "Gerenciar Provedores",
   },
   {
     title: "Aparencia",
@@ -72,6 +74,7 @@ const SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const { providers: configuredProviders, loading: providersLoading } = useConfiguredProviders();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [language, setLanguage] = useState("pt-BR");
   const [runtimeLanguage, setRuntimeLanguage] = useState("pt-BR");
@@ -200,14 +203,74 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                {section.href && (
-                  <Link
-                    href={section.href}
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
-                  >
-                    {section.cta}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+                {section.title === "Provedores de IA" && (
+                  <div className="mt-3 space-y-3">
+                    {/* Provider list dropdown */}
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                        Provedores configurados
+                      </p>
+                      {providersLoading ? (
+                        <p className="text-xs text-white/25">Carregando...</p>
+                      ) : configuredProviders.length === 0 ? (
+                        <p className="text-xs text-white/30">Nenhum provedor conectado</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {configuredProviders.map((cp) => {
+                            const meta = PROVIDER_CATALOG.find((p) => p.name === cp.provider);
+                            const model = meta?.models.find((m) => m.id === cp.selectedModel);
+                            return (
+                              <div
+                                key={cp.provider}
+                                className="flex items-center justify-between rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Circle className="h-2 w-2 fill-neon-green text-neon-green" />
+                                  <span className="text-xs font-medium text-white/80">
+                                    {meta?.displayName ?? cp.provider}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] text-white/30">
+                                    {model?.name ?? cp.selectedModel}
+                                  </span>
+                                  <Check className="h-3 w-3 text-neon-green/60" />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {/* Show unconfigured providers */}
+                      {!providersLoading && (() => {
+                        const configuredNames = configuredProviders.map((p) => p.provider);
+                        const unconfigured = PROVIDER_CATALOG.filter((p) => !configuredNames.includes(p.name));
+                        if (unconfigured.length === 0) return null;
+                        return (
+                          <div className="mt-2 space-y-1">
+                            {unconfigured.map((p) => (
+                              <div
+                                key={p.name}
+                                className="flex items-center gap-2 rounded-md px-3 py-1.5 opacity-40"
+                              >
+                                <Circle className="h-2 w-2 text-white/20" />
+                                <span className="text-[11px] text-white/40">{p.displayName}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Connect button */}
+                    <Link
+                      href="/dashboard/settings/providers"
+                      className="inline-flex items-center gap-2 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+                    >
+                      <Plug className="h-3.5 w-3.5" />
+                      Connect
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>
