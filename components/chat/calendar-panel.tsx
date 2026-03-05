@@ -13,11 +13,15 @@ import {
   Layers,
   Trash2,
   Check,
+  Clock,
+  Sparkles,
+  Send,
 } from "lucide-react";
 import {
   useCalendarStore,
   toDateKey,
-  type CalendarEventType,
+  parseSchedulePrompt,
+  type CalendarEvent,
 } from "@/stores/calendar-store";
 
 interface CalendarPanelProps {
@@ -49,12 +53,6 @@ const CONTEXTS = [
   { id: "monitor", label: "Monitoramento", desc: "Check de infraestrutura" },
 ];
 
-const EVENT_COLORS: Record<CalendarEventType, "cyan" | "purple" | "orange"> = {
-  note: "cyan",
-  agent: "purple",
-  context: "orange",
-};
-
 const COLOR_CLASSES = {
   cyan: { bg: "bg-neon-cyan/10", border: "border-neon-cyan/20", text: "text-neon-cyan", dot: "bg-neon-cyan" },
   purple: { bg: "bg-neon-purple/10", border: "border-neon-purple/20", text: "text-neon-purple", dot: "bg-neon-purple" },
@@ -63,7 +61,7 @@ const COLOR_CLASSES = {
   pink: { bg: "bg-neon-pink/10", border: "border-neon-pink/20", text: "text-neon-pink", dot: "bg-neon-pink" },
 };
 
-type AddMode = null | "note" | "agent" | "context";
+type AddMode = null | "note" | "agent" | "context" | "prompt";
 
 export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const today = new Date();
@@ -73,13 +71,28 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteDesc, setNoteDesc] = useState("");
+  const [noteTime, setNoteTime] = useState("");
+  const [agentTime, setAgentTime] = useState("");
+  const [ctxTime, setCtxTime] = useState("");
+  const [promptText, setPromptText] = useState("");
+  const [parsedPreview, setParsedPreview] = useState<ReturnType<typeof parseSchedulePrompt>>([]);
 
   const { events, addEvent, removeEvent } = useCalendarStore();
 
   const selectedDateKey = selectedDate ? toDateKey(selectedDate) : "";
   const dateEvents = selectedDateKey ? (events[selectedDateKey] ?? []) : [];
 
-  // Check which dates have events for dot indicators
+  // Sort events by time for timeline
+  const sortedEvents = useMemo(
+    () => [...dateEvents].sort((a, b) => {
+      if (!a.time && !b.time) return 0;
+      if (!a.time) return 1;
+      if (!b.time) return -1;
+      return a.time.localeCompare(b.time);
+    }),
+    [dateEvents]
+  );
+
   const eventDateKeys = useMemo(() => new Set(Object.keys(events).filter((k) => (events[k]?.length ?? 0) > 0)), [events]);
 
   const days = useMemo(() => {
@@ -87,7 +100,6 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
     const cells: Array<{ day: number; inMonth: boolean; date: Date }> = [];
-
     for (let i = firstDay - 1; i >= 0; i--) {
       const d = daysInPrevMonth - i;
       cells.push({ day: d, inMonth: false, date: new Date(currentYear, currentMonth - 1, d) });
@@ -102,55 +114,71 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
     return cells;
   }, [currentMonth, currentYear]);
 
-  const prevMonth = () => {
-    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
-    else setCurrentMonth(currentMonth - 1);
-  };
-  const nextMonth = () => {
-    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
-    else setCurrentMonth(currentMonth + 1);
-  };
-  const goToday = () => {
-    setCurrentMonth(today.getMonth());
-    setCurrentYear(today.getFullYear());
-    setSelectedDate(today);
-  };
+  const prevMonth = () => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } else setCurrentMonth(currentMonth - 1); };
+  const nextMonth = () => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } else setCurrentMonth(currentMonth + 1); };
+  const goToday = () => { setCurrentMonth(today.getMonth()); setCurrentYear(today.getFullYear()); setSelectedDate(today); };
 
-  const isToday = (date: Date) =>
-    date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
-  const isSelected = (date: Date) =>
-    selectedDate && date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth() && date.getFullYear() === selectedDate.getFullYear();
+  const isToday = (date: Date) => date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+  const isSelected = (date: Date) => selectedDate && date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth() && date.getFullYear() === selectedDate.getFullYear();
 
   const handleAddNote = () => {
     if (!noteTitle.trim() || !selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "note", title: noteTitle.trim(), description: noteDesc.trim(), color: "cyan" });
-    setNoteTitle(""); setNoteDesc(""); setAddMode(null);
+    addEvent({ dateKey: selectedDateKey, type: "note", title: noteTitle.trim(), description: noteDesc.trim(), time: noteTime, duration: 60, color: "cyan" });
+    setNoteTitle(""); setNoteDesc(""); setNoteTime(""); setAddMode(null);
   };
 
   const handleAddAgent = (agent: typeof AGENTS[0]) => {
     if (!selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "agent", title: agent.name, description: agent.role, agent: agent.id, color: "purple" });
-    setAddMode(null);
+    addEvent({ dateKey: selectedDateKey, type: "agent", title: agent.name, description: agent.role, agent: agent.id, time: agentTime, duration: 60, color: "purple" });
+    setAgentTime(""); setAddMode(null);
   };
 
   const handleAddContext = (ctx: typeof CONTEXTS[0]) => {
     if (!selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "context", title: ctx.label, description: ctx.desc, context: ctx.id, color: "orange" });
-    setAddMode(null);
+    addEvent({ dateKey: selectedDateKey, type: "context", title: ctx.label, description: ctx.desc, context: ctx.id, time: ctxTime, duration: 60, color: "orange" });
+    setCtxTime(""); setAddMode(null);
+  };
+
+  // Prompt interpretation
+  const handlePromptChange = (text: string) => {
+    setPromptText(text);
+    if (text.trim().length > 3) {
+      setParsedPreview(parseSchedulePrompt(text));
+    } else {
+      setParsedPreview([]);
+    }
+  };
+
+  const handlePromptSubmit = () => {
+    if (!selectedDateKey || parsedPreview.length === 0) return;
+    for (const item of parsedPreview) {
+      addEvent({
+        dateKey: selectedDateKey,
+        type: item.type,
+        title: item.title,
+        description: "",
+        time: item.time,
+        duration: item.duration,
+        agent: item.agent,
+        context: item.context,
+        color: item.color,
+      });
+    }
+    setPromptText(""); setParsedPreview([]); setAddMode(null);
+  };
+
+  const formatDuration = (min: number) => {
+    if (min < 60) return `${min}min`;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return m > 0 ? `${h}h${m}` : `${h}h`;
   };
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-40"
-            onClick={onClose}
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-40" onClick={onClose} />
 
           <motion.div
             initial={{ opacity: 0, x: -16, scale: 0.98 }}
@@ -163,7 +191,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative max-h-[85vh] w-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/[0.12] shadow-2xl shadow-black/40 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+              className="relative max-h-[88vh] w-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/[0.12] shadow-2xl shadow-black/40"
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
                 backdropFilter: "blur(40px) saturate(1.8)",
@@ -185,15 +213,9 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
               {/* Month nav */}
               <div className="flex items-center justify-between px-4 pb-3 pt-1">
-                <button type="button" onClick={prevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60">
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-                <button type="button" onClick={goToday} className="text-sm font-medium text-white/80 transition-colors hover:text-white">
-                  {MONTHS[currentMonth]} {currentYear}
-                </button>
-                <button type="button" onClick={nextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60">
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+                <button type="button" onClick={prevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60"><ChevronLeft className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={goToday} className="text-sm font-medium text-white/80 transition-colors hover:text-white">{MONTHS[currentMonth]} {currentYear}</button>
+                <button type="button" onClick={nextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60"><ChevronRight className="h-3.5 w-3.5" /></button>
               </div>
 
               <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
@@ -211,42 +233,14 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   const _isToday = isToday(cell.date);
                   const _isSelected = isSelected(cell.date);
                   const hasEvents = eventDateKeys.has(toDateKey(cell.date));
-
                   return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => { setSelectedDate(cell.date); setAddMode(null); }}
-                      className="group relative flex h-8 w-full items-center justify-center rounded-lg transition-all"
-                    >
-                      {_isSelected && (
-                        <motion.div
-                          layoutId="calendar-selected"
-                          className="absolute inset-0.5 rounded-lg"
-                          style={{
-                            background: "linear-gradient(135deg, rgba(0,210,210,0.25) 0%, rgba(0,210,210,0.10) 100%)",
-                            boxShadow: "0 0 12px rgba(0,210,210,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
-                          }}
-                          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        />
-                      )}
-                      {_isToday && !_isSelected && (
-                        <div className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)" }} />
-                      )}
-                      {!_isSelected && (
-                        <div className="absolute inset-0.5 rounded-lg opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)" }} />
-                      )}
-                      <span className={`relative z-10 text-xs tabular-nums ${_isSelected ? "font-semibold text-neon-cyan" : _isToday ? "font-semibold text-white/90" : cell.inMonth ? "text-white/60 group-hover:text-white/80" : "text-white/15"}`}>
-                        {cell.day}
-                      </span>
-                      {/* Today dot */}
-                      {_isToday && (
-                        <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-cyan shadow-[0_0_4px_rgba(0,210,210,0.5)]" />
-                      )}
-                      {/* Event indicator */}
-                      {hasEvents && !_isToday && (
-                        <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-orange shadow-[0_0_4px_rgba(255,160,0,0.4)]" />
-                      )}
+                    <button key={i} type="button" onClick={() => { setSelectedDate(cell.date); setAddMode(null); }} className="group relative flex h-8 w-full items-center justify-center rounded-lg transition-all">
+                      {_isSelected && <motion.div layoutId="calendar-selected" className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(0,210,210,0.25) 0%, rgba(0,210,210,0.10) 100%)", boxShadow: "0 0 12px rgba(0,210,210,0.15), inset 0 1px 0 rgba(255,255,255,0.1)" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} />}
+                      {_isToday && !_isSelected && <div className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)" }} />}
+                      {!_isSelected && <div className="absolute inset-0.5 rounded-lg opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)" }} />}
+                      <span className={`relative z-10 text-xs tabular-nums ${_isSelected ? "font-semibold text-neon-cyan" : _isToday ? "font-semibold text-white/90" : cell.inMonth ? "text-white/60 group-hover:text-white/80" : "text-white/15"}`}>{cell.day}</span>
+                      {_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-cyan shadow-[0_0_4px_rgba(0,210,210,0.5)]" />}
+                      {hasEvents && !_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-orange shadow-[0_0_4px_rgba(255,160,0,0.4)]" />}
                     </button>
                   );
                 })}
@@ -258,116 +252,167 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
                   <div className="px-4 py-3">
-                    {/* Date header */}
                     <p className="text-xs font-medium text-white/50">
                       {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
                     </p>
 
-                    {/* Events list */}
-                    {dateEvents.length > 0 && (
-                      <div className="mt-2.5 space-y-1.5">
-                        {dateEvents.map((ev) => {
+                    {/* ── Timeline View ── */}
+                    {sortedEvents.length > 0 && (
+                      <div className="mt-3 space-y-0">
+                        {sortedEvents.map((ev, idx) => {
                           const c = COLOR_CLASSES[ev.color];
+                          const isLast = idx === sortedEvents.length - 1;
                           return (
-                            <div key={ev.id} className={`group flex items-start gap-2 rounded-lg border ${c.border} ${c.bg} px-2.5 py-2`}>
-                              <div className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${c.dot}`} />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-[11px] font-medium text-white/80">{ev.title}</p>
-                                {ev.description && <p className="mt-0.5 text-[10px] text-white/35">{ev.description}</p>}
-                                <span className={`mt-0.5 inline-block text-[9px] uppercase tracking-wider ${c.text}`}>
-                                  {ev.type === "note" ? "Nota" : ev.type === "agent" ? "Agente" : "Servico"}
-                                </span>
+                            <div key={ev.id} className="group flex gap-2.5">
+                              {/* Timeline rail */}
+                              <div className="flex w-4 flex-col items-center">
+                                <div className={`h-2.5 w-2.5 shrink-0 rounded-full border-2 ${c.border} ${c.bg}`} />
+                                {!isLast && <div className="w-px flex-1 bg-white/[0.06]" />}
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => removeEvent(selectedDateKey, ev.id)}
-                                className="shrink-0 text-white/0 transition-colors group-hover:text-white/30 hover:!text-red-400"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
+
+                              {/* Event card */}
+                              <div className={`mb-2 flex-1 rounded-lg border ${c.border} ${c.bg} px-2.5 py-2`}>
+                                <div className="flex items-start justify-between gap-1">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                      {ev.time && (
+                                        <span className="shrink-0 font-mono text-[10px] font-semibold tabular-nums text-white/60">{ev.time}</span>
+                                      )}
+                                      {!ev.time && (
+                                        <span className="shrink-0 text-[9px] text-white/25">dia todo</span>
+                                      )}
+                                      <span className="text-[11px] font-medium text-white/80">{ev.title}</span>
+                                    </div>
+                                    {ev.description && <p className="mt-0.5 text-[10px] text-white/30">{ev.description}</p>}
+                                    <div className="mt-0.5 flex items-center gap-2">
+                                      <span className={`text-[9px] uppercase tracking-wider ${c.text}`}>
+                                        {ev.type === "note" ? "Nota" : ev.type === "agent" ? "Agente" : "Servico"}
+                                      </span>
+                                      {ev.time && ev.duration > 0 && (
+                                        <span className="text-[9px] text-white/20">{formatDuration(ev.duration)}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeEvent(selectedDateKey, ev.id)}
+                                    className="shrink-0 text-white/0 transition-colors group-hover:text-white/30 hover:!text-red-400"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           );
                         })}
                       </div>
                     )}
 
-                    {dateEvents.length === 0 && addMode === null && (
+                    {sortedEvents.length === 0 && addMode === null && (
                       <p className="mt-1 text-[10px] text-white/20">Nenhum evento agendado</p>
                     )}
 
-                    {/* Add buttons */}
+                    {/* ── Action Buttons ── */}
                     {addMode === null && (
-                      <div className="mt-3 flex gap-1.5">
+                      <div className="mt-3 space-y-2">
+                        {/* Prompt input — always visible */}
                         <button
                           type="button"
-                          onClick={() => setAddMode("note")}
-                          className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-cyan/20 hover:bg-neon-cyan/5 hover:text-neon-cyan"
+                          onClick={() => setAddMode("prompt")}
+                          className="flex w-full items-center gap-1.5 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] px-2.5 py-2 text-left text-[10px] text-white/35 transition-all hover:border-neon-green/30 hover:text-neon-green/70"
                         >
-                          <StickyNote className="h-3 w-3" />
-                          Nota
+                          <Sparkles className="h-3 w-3 shrink-0 text-neon-green/50" />
+                          <span>Descreva sua agenda com horarios...</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setAddMode("agent")}
-                          className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5 hover:text-neon-purple"
-                        >
-                          <Bot className="h-3 w-3" />
-                          Agente
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAddMode("context")}
-                          className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5 hover:text-neon-orange"
-                        >
-                          <Layers className="h-3 w-3" />
-                          Contexto
-                        </button>
+
+                        <div className="flex gap-1.5">
+                          <button type="button" onClick={() => setAddMode("note")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-cyan/20 hover:bg-neon-cyan/5 hover:text-neon-cyan">
+                            <StickyNote className="h-3 w-3" /> Nota
+                          </button>
+                          <button type="button" onClick={() => setAddMode("agent")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5 hover:text-neon-purple">
+                            <Bot className="h-3 w-3" /> Agente
+                          </button>
+                          <button type="button" onClick={() => setAddMode("context")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5 hover:text-neon-orange">
+                            <Layers className="h-3 w-3" /> Contexto
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    {/* ── Add Note Form ── */}
                     <AnimatePresence mode="wait">
+                      {/* ── Prompt Interpreter ── */}
+                      {addMode === "prompt" && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                          <div className="mt-3 space-y-2 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] p-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <Sparkles className="h-3 w-3 text-neon-green/60" />
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-green/60">Prompt de Horarios</span>
+                            </div>
+                            <textarea
+                              value={promptText}
+                              onChange={(e) => handlePromptChange(e.target.value)}
+                              placeholder={"Ex: standup 9h, code review 10:30,\nplanning 14h, deploy 18h"}
+                              rows={3}
+                              className="w-full resize-none rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-green/30"
+                              autoFocus
+                              onKeyDown={(e) => { if (e.key === "Escape") { setAddMode(null); setPromptText(""); setParsedPreview([]); } }}
+                            />
+
+                            {/* Live preview */}
+                            {parsedPreview.length > 0 && (
+                              <div className="space-y-1 rounded-md border border-white/[0.04] bg-black/15 p-2">
+                                <p className="text-[9px] font-semibold uppercase tracking-wider text-white/25">Interpretado ({parsedPreview.length})</p>
+                                {parsedPreview.map((item, idx) => {
+                                  const c = COLOR_CLASSES[item.color];
+                                  return (
+                                    <div key={idx} className="flex items-center gap-2">
+                                      <span className="w-10 shrink-0 font-mono text-[10px] font-semibold tabular-nums text-white/50">{item.time}</span>
+                                      <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${c.dot}`} />
+                                      <span className="text-[10px] text-white/60">{item.title}</span>
+                                      <span className={`ml-auto text-[8px] uppercase ${c.text}`}>
+                                        {item.type === "note" ? "nota" : item.type === "agent" ? "agente" : "servico"}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            <div className="flex justify-end gap-1.5">
+                              <button type="button" onClick={() => { setAddMode(null); setPromptText(""); setParsedPreview([]); }} className="rounded-md px-2 py-1 text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button
+                                type="button"
+                                onClick={handlePromptSubmit}
+                                disabled={parsedPreview.length === 0}
+                                className="flex items-center gap-1 rounded-md border border-neon-green/30 bg-neon-green/10 px-2 py-1 text-[10px] font-medium text-neon-green transition-all hover:bg-neon-green/20 disabled:opacity-30"
+                              >
+                                <Send className="h-2.5 w-2.5" />
+                                Agendar {parsedPreview.length > 0 ? `(${parsedPreview.length})` : ""}
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* ── Add Note Form ── */}
                       {addMode === "note" && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                           <div className="mt-3 space-y-2 rounded-lg border border-neon-cyan/15 bg-neon-cyan/[0.03] p-2.5">
                             <div className="flex items-center gap-1.5">
                               <StickyNote className="h-3 w-3 text-neon-cyan/60" />
                               <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-cyan/60">Nova Nota</span>
                             </div>
-                            <input
-                              type="text"
-                              value={noteTitle}
-                              onChange={(e) => setNoteTitle(e.target.value)}
-                              placeholder="Titulo..."
-                              className="w-full rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30"
-                              autoFocus
-                              onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(); if (e.key === "Escape") setAddMode(null); }}
-                            />
-                            <textarea
-                              value={noteDesc}
-                              onChange={(e) => setNoteDesc(e.target.value)}
-                              placeholder="Descricao (opcional)..."
-                              rows={2}
-                              className="w-full resize-none rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30"
-                            />
+                            <div className="flex gap-1.5">
+                              <input type="text" value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="Titulo..." className="flex-1 rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30" autoFocus onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(); if (e.key === "Escape") setAddMode(null); }} />
+                              <div className="relative">
+                                <Clock className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
+                                <input type="time" value={noteTime} onChange={(e) => setNoteTime(e.target.value)} className="w-20 rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-6 pr-1 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-cyan/30 [&::-webkit-calendar-picker-indicator]:invert" />
+                              </div>
+                            </div>
+                            <textarea value={noteDesc} onChange={(e) => setNoteDesc(e.target.value)} placeholder="Descricao (opcional)..." rows={2} className="w-full resize-none rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30" />
                             <div className="flex justify-end gap-1.5">
-                              <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); }} className="rounded-md px-2 py-1 text-[10px] text-white/30 hover:text-white/50">
-                                Cancelar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleAddNote}
-                                disabled={!noteTitle.trim()}
-                                className="flex items-center gap-1 rounded-md border border-neon-cyan/30 bg-neon-cyan/10 px-2 py-1 text-[10px] font-medium text-neon-cyan transition-all hover:bg-neon-cyan/20 disabled:opacity-30"
-                              >
-                                <Check className="h-2.5 w-2.5" />
-                                Salvar
-                              </button>
+                              <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); setNoteTime(""); }} className="rounded-md px-2 py-1 text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button type="button" onClick={handleAddNote} disabled={!noteTitle.trim()} className="flex items-center gap-1 rounded-md border border-neon-cyan/30 bg-neon-cyan/10 px-2 py-1 text-[10px] font-medium text-neon-cyan transition-all hover:bg-neon-cyan/20 disabled:opacity-30"><Check className="h-2.5 w-2.5" /> Salvar</button>
                             </div>
                           </div>
                         </motion.div>
@@ -375,35 +420,22 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
                       {/* ── Add Agent Picker ── */}
                       {addMode === "agent" && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                           <div className="mt-3 space-y-1.5 rounded-lg border border-neon-purple/15 bg-neon-purple/[0.03] p-2.5">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5">
-                                <Bot className="h-3 w-3 text-neon-purple/60" />
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-purple/60">Agendar Agente</span>
-                              </div>
+                              <div className="flex items-center gap-1.5"><Bot className="h-3 w-3 text-neon-purple/60" /><span className="text-[10px] font-semibold uppercase tracking-wider text-neon-purple/60">Agendar Agente</span></div>
                               <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                            </div>
+                            {/* Time picker for agent */}
+                            <div className="relative">
+                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
+                              <input type="time" value={agentTime} onChange={(e) => setAgentTime(e.target.value)} placeholder="Horario" className="w-full rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-purple/30 [&::-webkit-calendar-picker-indicator]:invert" />
                             </div>
                             <div className="space-y-1">
                               {AGENTS.map((agent) => (
-                                <button
-                                  key={agent.id}
-                                  type="button"
-                                  onClick={() => handleAddAgent(agent)}
-                                  className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5"
-                                >
-                                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-purple/10">
-                                    <Bot className="h-2.5 w-2.5 text-neon-purple" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-[11px] font-medium text-white/70">{agent.name}</p>
-                                    <p className="text-[9px] text-white/25">{agent.role}</p>
-                                  </div>
+                                <button key={agent.id} type="button" onClick={() => handleAddAgent(agent)} className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5">
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-purple/10"><Bot className="h-2.5 w-2.5 text-neon-purple" /></div>
+                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-white/70">{agent.name}</p><p className="text-[9px] text-white/25">{agent.role}</p></div>
                                   <Plus className="h-3 w-3 text-white/15" />
                                 </button>
                               ))}
@@ -414,35 +446,22 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
                       {/* ── Add Context/Service Picker ── */}
                       {addMode === "context" && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                           <div className="mt-3 space-y-1.5 rounded-lg border border-neon-orange/15 bg-neon-orange/[0.03] p-2.5">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5">
-                                <Layers className="h-3 w-3 text-neon-orange/60" />
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-orange/60">Agendar Servico</span>
-                              </div>
+                              <div className="flex items-center gap-1.5"><Layers className="h-3 w-3 text-neon-orange/60" /><span className="text-[10px] font-semibold uppercase tracking-wider text-neon-orange/60">Agendar Servico</span></div>
                               <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                            </div>
+                            {/* Time picker for context */}
+                            <div className="relative">
+                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
+                              <input type="time" value={ctxTime} onChange={(e) => setCtxTime(e.target.value)} className="w-full rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-orange/30 [&::-webkit-calendar-picker-indicator]:invert" />
                             </div>
                             <div className="space-y-1">
                               {CONTEXTS.map((ctx) => (
-                                <button
-                                  key={ctx.id}
-                                  type="button"
-                                  onClick={() => handleAddContext(ctx)}
-                                  className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5"
-                                >
-                                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-orange/10">
-                                    <Layers className="h-2.5 w-2.5 text-neon-orange" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-[11px] font-medium text-white/70">{ctx.label}</p>
-                                    <p className="text-[9px] text-white/25">{ctx.desc}</p>
-                                  </div>
+                                <button key={ctx.id} type="button" onClick={() => handleAddContext(ctx)} className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5">
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-orange/10"><Layers className="h-2.5 w-2.5 text-neon-orange" /></div>
+                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-white/70">{ctx.label}</p><p className="text-[9px] text-white/25">{ctx.desc}</p></div>
                                   <Plus className="h-3 w-3 text-white/15" />
                                 </button>
                               ))}
