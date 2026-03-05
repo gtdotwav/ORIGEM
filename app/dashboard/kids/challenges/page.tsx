@@ -41,7 +41,7 @@ export default function KidsChallengesPage() {
       <div className="mb-6 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -49,8 +49,8 @@ export default function KidsChallengesPage() {
           <span className="text-xl">{"\u2B50"}</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-white">Desafios do Dia</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Desafios do Dia</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Complete desafios educativos e ganhe estrelas
           </p>
         </div>
@@ -72,14 +72,14 @@ export default function KidsChallengesPage() {
         <div className="flex items-center gap-4">
           <span className="text-5xl">{TODAY_CHALLENGE.emoji}</span>
           <div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-foreground">
               {TODAY_CHALLENGE.title}
             </h2>
-            <p className="mt-1 text-sm text-white/55">
+            <p className="mt-1 text-sm text-foreground/55">
               {TODAY_CHALLENGE.description}
             </p>
             <div className="mt-3 flex items-center gap-3">
-              <span className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/40">
+              <span className="rounded-md border border-foreground/[0.08] bg-foreground/[0.04] px-2 py-0.5 text-[10px] text-foreground/40">
                 {TODAY_CHALLENGE.category}
               </span>
               <span className="flex items-center gap-1 text-xs text-amber-400">
@@ -92,7 +92,7 @@ export default function KidsChallengesPage() {
       </div>
 
       {/* Categories */}
-      <h2 className="mb-3 text-sm font-semibold text-white/60">Categorias</h2>
+      <h2 className="mb-3 text-sm font-semibold text-foreground/60">Categorias</h2>
       <div className="mb-8 flex flex-wrap gap-2">
         {CATEGORIES.map((cat) => (
           <div
@@ -106,31 +106,31 @@ export default function KidsChallengesPage() {
       </div>
 
       {/* Past challenges */}
-      <h2 className="mb-3 text-sm font-semibold text-white/60">
+      <h2 className="mb-3 text-sm font-semibold text-foreground/60">
         Desafios Anteriores
       </h2>
       <div className="space-y-2">
         {PAST_CHALLENGES.map((challenge) => (
           <div
             key={challenge.id}
-            className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/70 px-4 py-3 backdrop-blur-xl"
+            className="flex items-center gap-3 rounded-xl border border-foreground/[0.06] bg-card/70 px-4 py-3 backdrop-blur-xl"
           >
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                 challenge.completed
                   ? "border border-neon-green/25 bg-neon-green/10"
-                  : "border border-white/[0.08] bg-white/[0.04]"
+                  : "border border-foreground/[0.08] bg-foreground/[0.04]"
               }`}
             >
               {challenge.completed ? (
                 <span className="text-xs text-neon-green">{"\u2713"}</span>
               ) : (
-                <span className="text-xs text-white/25">?</span>
+                <span className="text-xs text-foreground/25">?</span>
               )}
             </div>
             <div className="flex-1">
-              <p className="text-sm text-white/75">{challenge.title}</p>
-              <span className="text-[10px] text-white/30">
+              <p className="text-sm text-foreground/75">{challenge.title}</p>
+              <span className="text-[10px] text-foreground/30">
                 {challenge.category}
               </span>
             </div>
@@ -141,7 +141,7 @@ export default function KidsChallengesPage() {
                   className={`h-3 w-3 ${
                     challenge.completed
                       ? "fill-amber-400 text-amber-400"
-                      : "text-white/15"
+                      : "text-foreground/15"
                   }`}
                 />
               ))}
@@ -150,7 +150,7 @@ export default function KidsChallengesPage() {
               className={`rounded-md border px-2 py-0.5 text-[10px] font-medium ${
                 challenge.completed
                   ? "border-neon-green/25 bg-neon-green/10 text-neon-green"
-                  : "border-white/[0.08] bg-white/[0.04] text-white/35"
+                  : "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/35"
               }`}
             >
               {challenge.completed ? "Completo" : "Novo"}

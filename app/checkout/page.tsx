@@ -116,45 +116,45 @@ function CheckoutContent() {
   /* ── Success State ── */
   if (success) {
     return (
-      <main className="isolate relative flex min-h-screen items-center justify-center bg-[#04070d] text-white">
+      <main className="isolate relative flex min-h-screen items-center justify-center bg-background text-foreground">
         <LiquidGradientBackground />
 
         <div className="relative z-10 mx-auto max-w-md px-6 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/20 bg-white/[0.08] backdrop-blur-xl">
-            <ShieldCheck className="h-10 w-10 text-white/80" />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-foreground/20 bg-foreground/[0.08] backdrop-blur-xl">
+            <ShieldCheck className="h-10 w-10 text-foreground/80" />
           </div>
 
           <h1 className="mt-8 text-3xl font-semibold tracking-tight">
             Assinatura confirmada
           </h1>
 
-          <p className="mt-4 text-base text-white/50">
-            Seu plano <span className="font-medium text-white/80">{plan.name}</span> esta
+          <p className="mt-4 text-base text-foreground/50">
+            Seu plano <span className="font-medium text-foreground/80">{plan.name}</span> esta
             ativo. Voce ja pode acessar todos os recursos.
           </p>
 
-          <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-4 backdrop-blur-xl">
+          <div className="mt-6 rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] px-6 py-4 backdrop-blur-xl">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/40">Plano</span>
+              <span className="text-sm text-foreground/40">Plano</span>
               <span className="text-sm font-medium">{plan.name}</span>
             </div>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm text-white/40">Valor</span>
+              <span className="text-sm text-foreground/40">Valor</span>
               <span className="text-sm font-medium">
                 {plan.price}
-                <span className="text-white/30">{plan.period}</span>
+                <span className="text-foreground/30">{plan.period}</span>
               </span>
             </div>
           </div>
 
           <Link
             href="/dashboard"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-medium text-black transition-all hover:bg-white/90"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-foreground px-8 py-3.5 text-sm font-medium text-background transition-all hover:bg-foreground/90"
           >
             Ir para o dashboard
           </Link>
 
-          <p className="mt-4 text-xs text-white/25">
+          <p className="mt-4 text-xs text-foreground/25">
             Um email de confirmacao foi enviado para sua conta.
           </p>
         </div>
@@ -164,14 +164,14 @@ function CheckoutContent() {
 
   /* ── Checkout Form ── */
   return (
-    <main className="isolate relative min-h-screen bg-[#04070d] text-white">
+    <main className="isolate relative min-h-screen bg-background text-foreground">
       <LiquidGradientBackground />
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6 md:px-10">
         <Link
           href="/pricing"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/60 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/80 sm:gap-2 sm:px-3 sm:py-1.5 sm:text-xs"
+          className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-foreground/5 px-2.5 py-1 text-[11px] text-foreground/60 backdrop-blur-md transition-all hover:border-foreground/20 hover:text-foreground/80 sm:gap-2 sm:px-3 sm:py-1.5 sm:text-xs"
         >
           <ArrowLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           Voltar
@@ -185,7 +185,7 @@ function CheckoutContent() {
             height={48}
             className="sm:h-[72px] sm:w-[72px]"
           />
-          <span className="text-[10px] font-semibold tracking-[0.25em] text-white/40 sm:text-xs">
+          <span className="text-[10px] font-semibold tracking-[0.25em] text-foreground/40 sm:text-xs">
             ORIGEM
           </span>
         </div>
@@ -200,8 +200,8 @@ function CheckoutContent() {
         <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
           {/* Order Summary */}
           <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-xl sm:p-8">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/30">
+            <div className="rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03] p-6 backdrop-blur-xl sm:p-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-foreground/30">
                 Resumo do pedido
               </p>
 
@@ -213,29 +213,29 @@ function CheckoutContent() {
                   <span className="text-3xl font-semibold tracking-tight">
                     {plan.price}
                   </span>
-                  <span className="ml-1 text-sm text-white/30">
+                  <span className="ml-1 text-sm text-foreground/30">
                     {plan.period}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-white/[0.06] pt-6">
+              <div className="mt-6 border-t border-foreground/[0.06] pt-6">
                 <ul className="space-y-2.5">
                   {plan.features.map((f) => (
                     <li
                       key={f}
-                      className="flex items-center gap-2.5 text-xs text-white/50"
+                      className="flex items-center gap-2.5 text-xs text-foreground/50"
                     >
-                      <Check className="h-3.5 w-3.5 flex-shrink-0 text-white/30" />
+                      <Check className="h-3.5 w-3.5 flex-shrink-0 text-foreground/30" />
                       {f}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-6 border-t border-white/[0.06] pt-6">
+              <div className="mt-6 border-t border-foreground/[0.06] pt-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/40">Total mensal</span>
+                  <span className="text-sm text-foreground/40">Total mensal</span>
                   <span className="text-lg font-semibold">{plan.price}</span>
                 </div>
               </div>
@@ -246,11 +246,11 @@ function CheckoutContent() {
           <div className="lg:col-span-3">
             <form
               onSubmit={handleSubmit}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-xl sm:p-8"
+              className="rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03] p-6 backdrop-blur-xl sm:p-8"
             >
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-white/40" />
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/30">
+                <CreditCard className="h-4 w-4 text-foreground/40" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-foreground/30">
                   Dados de pagamento
                 </p>
               </div>
@@ -260,7 +260,7 @@ function CheckoutContent() {
                 <div>
                   <label
                     htmlFor="name"
-                    className="mb-1.5 block text-xs text-white/40"
+                    className="mb-1.5 block text-xs text-foreground/40"
                   >
                     Nome no cartao
                   </label>
@@ -272,7 +272,7 @@ function CheckoutContent() {
                     onChange={(e) =>
                       setForm((p) => ({ ...p, name: e.target.value }))
                     }
-                    className="h-11 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 text-sm text-white placeholder:text-white/20 focus:border-white/25 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    className="h-11 w-full rounded-xl border border-foreground/[0.1] bg-foreground/[0.05] px-4 text-sm text-foreground placeholder:text-foreground/20 focus:border-foreground/25 focus:outline-none focus:ring-1 focus:ring-white/10"
                   />
                 </div>
 
@@ -280,7 +280,7 @@ function CheckoutContent() {
                 <div>
                   <label
                     htmlFor="card"
-                    className="mb-1.5 block text-xs text-white/40"
+                    className="mb-1.5 block text-xs text-foreground/40"
                   >
                     Numero do cartao
                   </label>
@@ -296,7 +296,7 @@ function CheckoutContent() {
                         card: formatCard(e.target.value),
                       }))
                     }
-                    className="h-11 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 font-mono text-sm tracking-wider text-white placeholder:text-white/20 focus:border-white/25 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    className="h-11 w-full rounded-xl border border-foreground/[0.1] bg-foreground/[0.05] px-4 font-mono text-sm tracking-wider text-foreground placeholder:text-foreground/20 focus:border-foreground/25 focus:outline-none focus:ring-1 focus:ring-white/10"
                   />
                 </div>
 
@@ -305,7 +305,7 @@ function CheckoutContent() {
                   <div>
                     <label
                       htmlFor="expiry"
-                      className="mb-1.5 block text-xs text-white/40"
+                      className="mb-1.5 block text-xs text-foreground/40"
                     >
                       Validade
                     </label>
@@ -321,13 +321,13 @@ function CheckoutContent() {
                           expiry: formatExpiry(e.target.value),
                         }))
                       }
-                      className="h-11 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 font-mono text-sm tracking-wider text-white placeholder:text-white/20 focus:border-white/25 focus:outline-none focus:ring-1 focus:ring-white/10"
+                      className="h-11 w-full rounded-xl border border-foreground/[0.1] bg-foreground/[0.05] px-4 font-mono text-sm tracking-wider text-foreground placeholder:text-foreground/20 focus:border-foreground/25 focus:outline-none focus:ring-1 focus:ring-white/10"
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="cvc"
-                      className="mb-1.5 block text-xs text-white/40"
+                      className="mb-1.5 block text-xs text-foreground/40"
                     >
                       CVC
                     </label>
@@ -344,7 +344,7 @@ function CheckoutContent() {
                           cvc: e.target.value.replace(/\D/g, "").slice(0, 4),
                         }))
                       }
-                      className="h-11 w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 font-mono text-sm tracking-wider text-white placeholder:text-white/20 focus:border-white/25 focus:outline-none focus:ring-1 focus:ring-white/10"
+                      className="h-11 w-full rounded-xl border border-foreground/[0.1] bg-foreground/[0.05] px-4 font-mono text-sm tracking-wider text-foreground placeholder:text-foreground/20 focus:border-foreground/25 focus:outline-none focus:ring-1 focus:ring-white/10"
                     />
                   </div>
                 </div>
@@ -354,7 +354,7 @@ function CheckoutContent() {
               <button
                 type="submit"
                 disabled={!isValid || processing}
-                className="mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-medium text-black transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {processing ? (
                   <span className="flex items-center gap-2">
@@ -388,7 +388,7 @@ function CheckoutContent() {
               </button>
 
               {/* Security note */}
-              <p className="mt-4 text-center text-[11px] text-white/25">
+              <p className="mt-4 text-center text-[11px] text-foreground/25">
                 <Lock className="mr-1 inline-block h-3 w-3" />
                 Pagamento seguro com criptografia de ponta a ponta
               </p>
@@ -404,8 +404,8 @@ export default function CheckoutPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#04070d]">
-          <div className="text-sm text-white/30">Carregando...</div>
+        <main className="flex min-h-screen items-center justify-center bg-background">
+          <div className="text-sm text-foreground/30">Carregando...</div>
         </main>
       }
     >

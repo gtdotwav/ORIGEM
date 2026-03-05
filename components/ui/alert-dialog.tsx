@@ -99,7 +99,7 @@ function AlertDialogTitle({
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn('text-base font-semibold text-white/90', className)}
+      className={cn('text-base font-semibold text-foreground/90', className)}
       {...props}
     />
   )
@@ -112,7 +112,7 @@ function AlertDialogDescription({
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn('text-sm text-white/40', className)}
+      className={cn('text-sm text-foreground/40', className)}
       {...props}
     />
   )

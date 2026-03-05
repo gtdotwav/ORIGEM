@@ -30,7 +30,7 @@ const CONNECTORS: Connector[] = [
         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.12.83-.26.83-.57v-2.2c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.08-.73.08-.73 1.2.08 1.84 1.23 1.84 1.23 1.07 1.84 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .31.22.69.83.57C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z" />
       </svg>
     ),
-    color: "text-white",
+    color: "text-foreground",
     statusKey: "origem-connector-github",
   },
   {
@@ -42,7 +42,7 @@ const CONNECTORS: Connector[] = [
         <path d="M12 1L24 22H0L12 1z" />
       </svg>
     ),
-    color: "text-white",
+    color: "text-foreground",
     statusKey: "origem-connector-vercel",
   },
   {
@@ -78,7 +78,7 @@ const CONNECTORS: Connector[] = [
         <path d="M22.28 9.37a5.98 5.98 0 0 0-.51-4.93 6.05 6.05 0 0 0-6.5-2.91A5.99 5.99 0 0 0 10.8.15a6.05 6.05 0 0 0-5.78 4.19 5.98 5.98 0 0 0-4 2.89 6.05 6.05 0 0 0 .74 7.09 5.98 5.98 0 0 0 .51 4.93 6.05 6.05 0 0 0 6.5 2.91A5.99 5.99 0 0 0 13.2 23.85a6.05 6.05 0 0 0 5.78-4.19 5.98 5.98 0 0 0 4-2.89 6.05 6.05 0 0 0-.74-7.09zM13.2 22.18a4.49 4.49 0 0 1-2.88-1.05l.14-.08 4.78-2.76a.78.78 0 0 0 .39-.67v-6.73l2.02 1.17a.07.07 0 0 1 .04.06v5.57a4.51 4.51 0 0 1-4.49 4.49zM3.6 18.11a4.49 4.49 0 0 1-.54-3.02l.14.09 4.78 2.76a.78.78 0 0 0 .78 0l5.83-3.37v2.33a.07.07 0 0 1-.03.06l-4.83 2.79a4.51 4.51 0 0 1-6.13-1.64zM2.34 7.89A4.49 4.49 0 0 1 4.7 5.91v5.69a.78.78 0 0 0 .39.67l5.83 3.37-2.02 1.17a.07.07 0 0 1-.07 0L4 14.02a4.51 4.51 0 0 1-1.66-6.13zM19.23 11.96l-5.83-3.37 2.02-1.17a.07.07 0 0 1 .07 0l4.83 2.79a4.51 4.51 0 0 1-.7 8.14v-5.72a.78.78 0 0 0-.39-.67zM21.2 8.91l-.14-.09-4.78-2.76a.78.78 0 0 0-.78 0l-5.83 3.37V7.1a.07.07 0 0 1 .03-.06l4.83-2.79a4.51 4.51 0 0 1 6.67 4.66zM7.85 13.36L5.83 12.2a.07.07 0 0 1-.04-.06V6.56a4.51 4.51 0 0 1 7.37-3.47l-.14.08-4.78 2.76a.78.78 0 0 0-.39.67v6.76zM8.88 11l2.6-1.5 2.6 1.5v3l-2.6 1.5-2.6-1.5v-3z" />
       </svg>
     ),
-    color: "text-white",
+    color: "text-foreground",
     statusKey: "origem-connector-openai",
   },
   {
@@ -161,13 +161,13 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-white/[0.06] bg-neutral-950/98 backdrop-blur-2xl"
+        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-foreground/[0.06] bg-card/98 backdrop-blur-2xl"
       >
         {/* Header */}
-        <div className="flex h-10 items-center justify-between border-b border-white/[0.05] px-3">
+        <div className="flex h-10 items-center justify-between border-b border-foreground/[0.05] px-3">
           <div className="flex items-center gap-1.5">
-            <Plug className="h-3.5 w-3.5 text-white/30" />
-            <span className="text-[11px] font-medium tracking-wide text-white/50">
+            <Plug className="h-3.5 w-3.5 text-foreground/30" />
+            <span className="text-[11px] font-medium tracking-wide text-foreground/50">
               CONECTORES
             </span>
             {connectedCount > 0 && (
@@ -179,7 +179,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-0.5 text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+            className="rounded p-0.5 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
@@ -198,19 +198,19 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                   className={cn(
                     "group flex w-full items-center gap-2 rounded-md px-2 py-2 text-left transition-colors",
                     isConnected
-                      ? "bg-white/[0.04] text-white/70"
-                      : "text-white/40 hover:bg-white/[0.03] hover:text-white/55"
+                      ? "bg-foreground/[0.04] text-foreground/70"
+                      : "text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/55"
                   )}
                 >
                   <div
                     className={cn(
                       "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
                       isConnected
-                        ? "bg-white/[0.08]"
-                        : "bg-white/[0.03] group-hover:bg-white/[0.05]"
+                        ? "bg-foreground/[0.08]"
+                        : "bg-foreground/[0.03] group-hover:bg-foreground/[0.05]"
                     )}
                   >
-                    <span className={cn(isConnected ? connector.color : "text-white/20")}>
+                    <span className={cn(isConnected ? connector.color : "text-foreground/20")}>
                       {connector.icon}
                     </span>
                   </div>
@@ -218,7 +218,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                     <p className="truncate text-[11px] leading-tight">
                       {connector.name}
                     </p>
-                    <p className="truncate text-[9px] text-white/20">
+                    <p className="truncate text-[9px] text-foreground/20">
                       {connector.description}
                     </p>
                   </div>
@@ -230,8 +230,8 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                       className={cn(
                         "h-3 w-3 transition-opacity",
                         isConnected
-                          ? "text-white/15 opacity-0 group-hover:opacity-100"
-                          : "text-white/10 opacity-0 group-hover:opacity-60"
+                          ? "text-foreground/15 opacity-0 group-hover:opacity-100"
+                          : "text-foreground/10 opacity-0 group-hover:opacity-60"
                       )}
                     />
                   </div>
@@ -242,8 +242,8 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-white/[0.05] px-3 py-2">
-          <p className="text-[9px] text-white/15">
+        <div className="border-t border-foreground/[0.05] px-3 py-2">
+          <p className="text-[9px] text-foreground/15">
             Conectores simulados — integracao real em breve
           </p>
         </div>

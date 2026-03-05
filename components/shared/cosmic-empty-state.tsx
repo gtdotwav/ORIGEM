@@ -67,7 +67,7 @@ export function CosmicEmptyState({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-8 backdrop-blur-xl",
+        "rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 backdrop-blur-xl",
         className
       )}
     >
@@ -81,8 +81,8 @@ export function CosmicEmptyState({
         >
           <Icon className={cn("h-6 w-6", colors.icon)} />
         </div>
-        <h3 className="mb-1 text-sm font-semibold text-white/85">{title}</h3>
-        <p className="mb-4 max-w-sm text-xs text-white/50">{description}</p>
+        <h3 className="mb-1 text-sm font-semibold text-foreground/85">{title}</h3>
+        <p className="mb-4 max-w-sm text-xs text-foreground/50">{description}</p>
         {action &&
           ("href" in action ? (
             <Link

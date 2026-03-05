@@ -53,7 +53,7 @@ const PIPELINE_ORDER: PipelineStage[] = [
 ];
 
 const STATUS_STYLE = {
-  pending: "text-white/50 border-white/[0.12] bg-white/[0.05]",
+  pending: "text-foreground/50 border-foreground/[0.12] bg-foreground/[0.05]",
   running: "text-amber-200 border-amber-300/30 bg-amber-300/10",
   done: "text-green-200 border-green-300/30 bg-green-300/10",
   blocked: "text-red-200 border-red-300/30 bg-red-300/10",
@@ -234,12 +234,12 @@ function FlowsPageContent() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <GitBranch className="h-5 w-5 text-orange-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">Fluxos em Tempo Real</h1>
-            <p className="mt-1 text-sm text-white/50">
+            <h1 className="text-2xl font-semibold text-foreground">Fluxos em Tempo Real</h1>
+            <p className="mt-1 text-sm text-foreground/50">
               Pipeline conectado a contexto, grupos e tarefas do runtime.
             </p>
           </div>
@@ -253,7 +253,7 @@ function FlowsPageContent() {
                 targetSessionId,
                 selectedContext?.id
               )}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Grupos
@@ -276,8 +276,8 @@ function FlowsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-          <div className="inline-flex items-center gap-2 text-sm text-white/70">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 text-sm text-foreground/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando fluxo da sessao...
           </div>
@@ -291,16 +291,16 @@ function FlowsPageContent() {
         />
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
+          <div className="mb-4 rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
                 Estado do pipeline
               </p>
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-foreground/60">
                 {STAGE_LABELS[pipelineStage]} · {progress}%
               </span>
             </div>
-            <div className="mb-3 h-2 overflow-hidden rounded-full bg-white/[0.07]">
+            <div className="mb-3 h-2 overflow-hidden rounded-full bg-foreground/[0.07]">
               <div
                 className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -313,13 +313,13 @@ function FlowsPageContent() {
                 return (
                   <Fragment key={stage}>
                     {i > 0 && (
-                      <div className={`h-0.5 w-6 shrink-0 transition-colors ${reached ? "bg-neon-cyan/50" : "bg-white/[0.08]"}`} />
+                      <div className={`h-0.5 w-6 shrink-0 transition-colors ${reached ? "bg-neon-cyan/50" : "bg-foreground/[0.08]"}`} />
                     )}
                     <div className={`flex flex-col items-center gap-1 shrink-0 transition-transform ${isCurrent ? "scale-110" : ""}`}>
                       <div className={`h-3 w-3 rounded-full border-2 transition-colors ${
-                        reached ? "border-neon-cyan bg-neon-cyan/30" : "border-white/20 bg-transparent"
+                        reached ? "border-neon-cyan bg-neon-cyan/30" : "border-foreground/20 bg-transparent"
                       } ${isCurrent ? "ring-2 ring-neon-cyan/20" : ""}`} />
-                      <span className={`text-[9px] whitespace-nowrap ${reached ? "text-neon-cyan" : "text-white/35"}`}>
+                      <span className={`text-[9px] whitespace-nowrap ${reached ? "text-neon-cyan" : "text-foreground/35"}`}>
                         {STAGE_LABELS[stage]}
                       </span>
                     </div>
@@ -330,21 +330,21 @@ function FlowsPageContent() {
           </div>
 
           <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
-            <section className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-              <p className="mb-2 text-xs uppercase tracking-[0.14em] text-white/40">
+            <section className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+              <p className="mb-2 text-xs uppercase tracking-[0.14em] text-foreground/40">
                 Funcoes em execucao
               </p>
               {runtimeTasks.length === 0 ? (
-                <p className="text-sm text-white/50">Nenhuma tarefa ativa para esta sessao.</p>
+                <p className="text-sm text-foreground/50">Nenhuma tarefa ativa para esta sessao.</p>
               ) : (
                 <div className="space-y-2">
                   {runtimeTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="rounded-lg border border-white/[0.08] bg-black/25 px-3 py-2"
+                      className="rounded-lg border border-foreground/[0.08] bg-black/25 px-3 py-2"
                     >
                       <div className="mb-1 flex items-start justify-between gap-2">
-                        <p className="text-sm text-white/85">
+                        <p className="text-sm text-foreground/85">
                           {task.priority}. {task.title}
                         </p>
                         <span
@@ -353,8 +353,8 @@ function FlowsPageContent() {
                           {task.status}
                         </span>
                       </div>
-                      <p className="text-xs text-white/45">Agente: {task.agentName}</p>
-                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                      <p className="text-xs text-foreground/45">Agente: {task.agentName}</p>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-foreground/[0.06]">
                         <div
                           className="h-full rounded-full bg-neon-cyan/70"
                           style={{ width: `${task.progress}%` }}
@@ -367,12 +367,12 @@ function FlowsPageContent() {
             </section>
 
             <aside className="space-y-3">
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-                <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+                <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
                   Direcoes para fluxo
                 </p>
                 {flowDirections.length === 0 ? (
-                  <p className="mt-2 text-xs text-white/50">
+                  <p className="mt-2 text-xs text-foreground/50">
                     Nenhuma direcao de fluxo recebida no contexto atual.
                   </p>
                 ) : (
@@ -389,21 +389,21 @@ function FlowsPageContent() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-                <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+                <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
                   Eventos recentes
                 </p>
                 {relevantEvents.length === 0 ? (
-                  <p className="mt-2 text-xs text-white/50">Sem eventos no pipeline ainda.</p>
+                  <p className="mt-2 text-xs text-foreground/50">Sem eventos no pipeline ainda.</p>
                 ) : (
                   <div className="mt-2 space-y-1.5">
                     {relevantEvents.map((event, index) => (
                       <div
                         key={`${event.type}-${event.timestamp}-${index}`}
-                        className="rounded-lg border border-white/[0.08] bg-black/25 px-2.5 py-2"
+                        className="rounded-lg border border-foreground/[0.08] bg-black/25 px-2.5 py-2"
                       >
-                        <p className="text-xs text-white/75">{eventLabel(event)}</p>
-                        <p className="mt-0.5 text-[10px] text-white/40">
+                        <p className="text-xs text-foreground/75">{eventLabel(event)}</p>
+                        <p className="mt-0.5 text-[10px] text-foreground/40">
                           {new Date(event.timestamp).toLocaleTimeString("pt-BR", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -423,7 +423,7 @@ function FlowsPageContent() {
               <CheckCircle2 className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
-            <p className="mt-1 text-xs text-white/70">
+            <p className="mt-1 text-xs text-foreground/70">
               Entrar na Orquestra para visualizar contexto, agentes, projeto e plano operando juntos.
             </p>
             <div className="mt-2">

@@ -187,7 +187,7 @@ export function CommandPalette() {
               >
                 <Users2 />
                 <span>{conn.name}</span>
-                <span className="ml-auto text-[10px] text-white/30">{conn.role}</span>
+                <span className="ml-auto text-[10px] text-foreground/30">{conn.role}</span>
               </CommandItem>
             ))}
           </CommandGroup>

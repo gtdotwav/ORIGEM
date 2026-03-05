@@ -48,7 +48,7 @@ export function JourneyConnectorCard({
         Jornada conectada da engrenagem
       </div>
 
-      <p className="mb-2 text-xs text-white/65">
+      <p className="mb-2 text-xs text-foreground/65">
         Siga a trilha didatica para conectar tudo: Contexto → Agentes → Projeto → Grupos → Fluxos → Orquestra.
       </p>
 
@@ -65,7 +65,7 @@ export function JourneyConnectorCard({
                   ? "border-neon-cyan/35 bg-neon-cyan/10 text-neon-cyan"
                   : isVisited
                     ? "border-green-400/25 bg-green-400/10 text-green-200"
-                    : "border-white/[0.08] bg-white/[0.03] text-white/50"
+                    : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/50"
               }`}
             >
               <span>

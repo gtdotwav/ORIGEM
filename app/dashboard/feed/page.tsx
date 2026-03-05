@@ -85,8 +85,8 @@ function FeedPageContent() {
           <Rss className="h-6 w-6 text-neon-blue" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white/95">Feed</h1>
-          <p className="text-sm text-white/40">
+          <h1 className="text-2xl font-bold text-foreground/95">Feed</h1>
+          <p className="text-sm text-foreground/40">
             Notícias, tweets e conteúdo em tempo real
           </p>
         </div>
@@ -94,26 +94,26 @@ function FeedPageContent() {
 
       {/* Metrics */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Newspaper className="h-3.5 w-3.5 text-neon-cyan/60" />
-            <span className="text-xs text-white/30">Total</span>
+            <span className="text-xs text-foreground/30">Total</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{items.length}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{items.length}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Heart className="h-3.5 w-3.5 text-pink-400/60" />
-            <span className="text-xs text-white/30">Curtidas</span>
+            <span className="text-xs text-foreground/30">Curtidas</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{totalLikes}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{totalLikes}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Share2 className="h-3.5 w-3.5 text-neon-cyan/60" />
-            <span className="text-xs text-white/30">Compartilhamentos</span>
+            <span className="text-xs text-foreground/30">Compartilhamentos</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{totalShares}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{totalShares}</p>
         </div>
       </div>
 

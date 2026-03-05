@@ -16,7 +16,7 @@ import { useFeedStore, getSuggestions } from "@/stores/feed-store";
 import type { FeedItemType } from "@/types/feed";
 
 const FILTERS: { value: FeedItemType | "all"; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
-  { value: "all", label: "Todos", icon: Globe, color: "text-white/50 border-white/10 hover:border-white/20" },
+  { value: "all", label: "Todos", icon: Globe, color: "text-foreground/50 border-foreground/10 hover:border-foreground/20" },
   { value: "news", label: "Notícias", icon: Newspaper, color: "text-neon-cyan border-neon-cyan/20 hover:border-neon-cyan/40" },
   { value: "tweet", label: "Tweets", icon: MessageCircle, color: "text-neon-blue border-neon-blue/20 hover:border-neon-blue/40" },
   { value: "blog", label: "Blog", icon: FileText, color: "text-neon-purple border-neon-purple/20 hover:border-neon-purple/40" },
@@ -24,7 +24,7 @@ const FILTERS: { value: FeedItemType | "all"; label: string; icon: React.Compone
 ];
 
 const ACTIVE_COLORS: Record<string, string> = {
-  all: "bg-white/10 border-white/20 text-white",
+  all: "bg-foreground/10 border-foreground/20 text-foreground",
   news: "bg-neon-cyan/10 border-neon-cyan/30 text-neon-cyan",
   tweet: "bg-neon-blue/10 border-neon-blue/30 text-neon-blue",
   blog: "bg-neon-purple/10 border-neon-purple/30 text-neon-purple",
@@ -90,7 +90,7 @@ export function FeedSearchBar() {
       {/* Search input */}
       <div ref={containerRef} className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/30" />
           <input
             ref={inputRef}
             type="text"
@@ -105,13 +105,13 @@ export function FeedSearchBar() {
               if (e.key === "Escape") setShowSuggestions(false);
             }}
             placeholder="Buscar por título, autor, tag, fonte..."
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white/90 placeholder:text-white/25 backdrop-blur-sm transition-colors focus:border-white/20 focus:outline-none focus:ring-0"
+            className="w-full rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] py-2.5 pl-10 pr-10 text-sm text-foreground/90 placeholder:text-foreground/25 backdrop-blur-sm transition-colors focus:border-foreground/20 focus:outline-none focus:ring-0"
           />
           {localQuery && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60"
             >
               <X className="h-4 w-4" />
             </button>
@@ -120,21 +120,21 @@ export function FeedSearchBar() {
 
         {/* Suggestions dropdown */}
         {showSuggestions && (
-          <div className="absolute left-0 right-0 top-full z-10 mt-1 rounded-xl border border-white/[0.08] bg-neutral-950/95 p-1.5 shadow-xl backdrop-blur-xl">
+          <div className="absolute left-0 right-0 top-full z-10 mt-1 rounded-xl border border-foreground/[0.08] bg-card/95 p-1.5 shadow-xl backdrop-blur-xl">
             {suggestions.map((s) => (
               <button
                 key={`${s.type}-${s.label}`}
                 type="button"
                 onClick={() => handleSelectSuggestion(s.label)}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-white/[0.05]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-foreground/[0.05]"
               >
                 {s.type === "tag" ? (
                   <Tag className="h-3 w-3 text-neon-purple/60" />
                 ) : (
                   <Globe className="h-3 w-3 text-neon-cyan/60" />
                 )}
-                <span className="text-white/70">{s.label}</span>
-                <span className="ml-auto text-[10px] text-white/25">
+                <span className="text-foreground/70">{s.label}</span>
+                <span className="ml-auto text-[10px] text-foreground/25">
                   {s.type === "tag" ? "tag" : "fonte"}
                 </span>
               </button>

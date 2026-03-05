@@ -30,7 +30,7 @@ function Stars({ count }: { count: number }) {
           className={`h-3.5 w-3.5 ${
             i < count
               ? "fill-amber-400 text-amber-400"
-              : "text-white/15"
+              : "text-foreground/15"
           }`}
         />
       ))}
@@ -47,7 +47,7 @@ export default function KidsGamesPage() {
       <div className="mb-6 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -55,8 +55,8 @@ export default function KidsGamesPage() {
           <span className="text-xl">{"\u{1F3AE}"}</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-white">Minigames Educativos</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Minigames Educativos</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Aprenda brincando com jogos didaticos
           </p>
         </div>
@@ -72,16 +72,16 @@ export default function KidsGamesPage() {
         {GAMES.map((game) => (
           <div
             key={game.id}
-            className={`group cursor-pointer rounded-2xl border bg-neutral-900/70 p-5 backdrop-blur-xl transition-all ${game.color}`}
+            className={`group cursor-pointer rounded-2xl border bg-card/70 p-5 backdrop-blur-xl transition-all ${game.color}`}
           >
             <div className="mb-3 flex items-center justify-between">
               <span className="text-3xl">{game.emoji}</span>
               <Stars count={game.stars} />
             </div>
-            <h3 className="mb-1 text-sm font-semibold text-white/85">
+            <h3 className="mb-1 text-sm font-semibold text-foreground/85">
               {game.name}
             </h3>
-            <p className="mb-3 text-xs text-white/40">{game.description}</p>
+            <p className="mb-3 text-xs text-foreground/40">{game.description}</p>
             <span
               className={`inline-block rounded-md border px-2 py-0.5 text-[10px] font-medium ${
                 DIFFICULTY_COLORS[game.difficulty]

@@ -87,7 +87,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="group rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:bg-neutral-900/80">
+    <div className="group rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl transition-all hover:border-foreground/[0.12] hover:bg-card/80">
       {/* Header: type badge + time */}
       <div className="mb-3 flex items-center justify-between">
         <div
@@ -101,18 +101,18 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
           <TypeIcon className="h-3 w-3" />
           {style.label}
         </div>
-        <span className="text-[11px] text-white/25">{timeAgo}</span>
+        <span className="text-[11px] text-foreground/25">{timeAgo}</span>
       </div>
 
       {/* Title */}
-      <h3 className="mb-1.5 text-[15px] font-semibold leading-snug text-white/90">
+      <h3 className="mb-1.5 text-[15px] font-semibold leading-snug text-foreground/90">
         {item.title}
       </h3>
 
       {/* Content */}
       <p
         className={cn(
-          "mb-3 text-sm leading-relaxed text-white/50",
+          "mb-3 text-sm leading-relaxed text-foreground/50",
           !expanded && "line-clamp-3"
         )}
       >
@@ -130,7 +130,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
 
       {/* Author + source */}
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-white/50">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground/[0.06] text-[10px] font-bold text-foreground/50">
           {item.author
             .split(" ")
             .map((n) => n[0])
@@ -138,11 +138,11 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
             .slice(0, 2)
             .toUpperCase()}
         </div>
-        <span className="text-xs text-white/50">{item.author}</span>
-        <span className="text-white/15">·</span>
-        <span className="text-xs text-white/30">{item.source}</span>
+        <span className="text-xs text-foreground/50">{item.author}</span>
+        <span className="text-foreground/15">·</span>
+        <span className="text-xs text-foreground/30">{item.source}</span>
         {item.sourceUrl && (
-          <ExternalLink className="h-3 w-3 text-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
+          <ExternalLink className="h-3 w-3 text-foreground/20 opacity-0 transition-opacity group-hover:opacity-100" />
         )}
       </div>
 
@@ -152,7 +152,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
           {item.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/35"
+              className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-[10px] text-foreground/35"
             >
               #{tag}
             </span>
@@ -161,7 +161,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
       )}
 
       {/* Action bar */}
-      <div className="flex items-center gap-1 border-t border-white/[0.05] pt-3">
+      <div className="flex items-center gap-1 border-t border-foreground/[0.05] pt-3">
         {/* Like */}
         <button
           type="button"
@@ -170,7 +170,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
             "inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs transition-all",
             isLiked
               ? "bg-pink-500/10 text-pink-400"
-              : "text-white/30 hover:bg-white/[0.05] hover:text-white/50"
+              : "text-foreground/30 hover:bg-foreground/[0.05] hover:text-foreground/50"
           )}
         >
           <Heart className={cn("h-3.5 w-3.5", isLiked && "fill-current")} />
@@ -184,7 +184,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
             addRepost(item.id);
             toast.success("Repostado!");
           }}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-white/30 transition-all hover:bg-neon-green/5 hover:text-neon-green/60"
+          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-foreground/30 transition-all hover:bg-neon-green/5 hover:text-neon-green/60"
         >
           <Repeat2 className="h-3.5 w-3.5" />
           {repostCount > 0 && <span>{repostCount}</span>}
@@ -197,7 +197,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
             addToContext(item.id, item.title);
             toast.success("Adicionado ao contexto!");
           }}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-white/30 transition-all hover:bg-neon-purple/5 hover:text-neon-purple/60"
+          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-foreground/30 transition-all hover:bg-neon-purple/5 hover:text-neon-purple/60"
         >
           <Brain className="h-3.5 w-3.5" />
         </button>
@@ -206,7 +206,7 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
         <button
           type="button"
           onClick={() => onShare(item)}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-white/30 transition-all hover:bg-neon-cyan/5 hover:text-neon-cyan/60"
+          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-foreground/30 transition-all hover:bg-neon-cyan/5 hover:text-neon-cyan/60"
         >
           <Share2 className="h-3.5 w-3.5" />
           {shareCount > 0 && <span>{shareCount}</span>}

@@ -194,16 +194,16 @@ export default function DashboardControlPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-8 pt-4 md:px-6">
-      <div className="mb-5 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl">
+      <div className="mb-5 rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.14em] text-white/35">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-foreground/35">
               Dashboard Control Center
             </p>
-            <h1 className="text-2xl font-semibold text-white/90">
+            <h1 className="text-2xl font-semibold text-foreground/90">
               Controle operacional completo da engrenagem
             </h1>
-            <p className="mt-1 text-sm text-white/55">
+            <p className="mt-1 text-sm text-foreground/55">
               Dispare sessoes, monitore delegacao em tempo real e avance
               {" "}Contexto {"->"} Agentes {"->"} Projetos {"->"} Grupos {"->"} Fluxos {"->"} Orquestra.
             </p>
@@ -212,26 +212,26 @@ export default function DashboardControlPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.10] bg-black/35 px-2.5 py-2 text-xs text-white/70 transition-all hover:border-white/[0.2] hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.10] bg-black/35 px-2.5 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.2] hover:bg-foreground/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Principal
             </Link>
-            <div className="rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2 text-xs text-white/65">
+            <div className="rounded-xl border border-foreground/[0.08] bg-black/30 px-3 py-2 text-xs text-foreground/65">
               Pipeline global: {STAGE_LABELS[pipelineStage] ?? pipelineStage}
             </div>
           </div>
         </div>
 
-        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
           <div
             className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
             style={{ width: `${pipelineProgress}%` }}
           />
         </div>
 
-        <div className="rounded-xl border border-white/[0.08] bg-black/30 p-3">
-          <div className="mb-2 inline-flex items-center gap-2 text-sm text-white/70">
+        <div className="rounded-xl border border-foreground/[0.08] bg-black/30 p-3">
+          <div className="mb-2 inline-flex items-center gap-2 text-sm text-foreground/70">
             <Sparkles className="h-4 w-4 text-neon-cyan" />
             Iniciar nova sessão controlada
           </div>
@@ -242,7 +242,7 @@ export default function DashboardControlPage() {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder="Digite a instrução mestre para acionar todas as funcionalidades..."
-              className="min-w-[260px] flex-1 rounded-lg border border-white/[0.08] bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none"
+              className="min-w-[260px] flex-1 rounded-lg border border-foreground/[0.08] bg-card px-3 py-2 text-sm text-foreground placeholder:text-foreground/30 outline-none"
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
@@ -266,7 +266,7 @@ export default function DashboardControlPage() {
                 key={suggestion}
                 type="button"
                 onClick={() => setInput(suggestion)}
-                className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-[11px] text-white/55 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white/75"
+                className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3 py-1 text-[11px] text-foreground/55 transition-all hover:border-foreground/20 hover:bg-foreground/[0.08] hover:text-foreground/75"
               >
                 {suggestion}
               </button>
@@ -276,38 +276,38 @@ export default function DashboardControlPage() {
       </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-white/35">Sessoes</p>
-          <p className="mt-1 text-xl font-semibold text-white">{sessions.length}</p>
-          <p className="text-xs text-white/45">{activeSessionCount} ativas</p>
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Sessoes</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{sessions.length}</p>
+          <p className="text-xs text-foreground/45">{activeSessionCount} ativas</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-white/35">Contextos</p>
-          <p className="mt-1 text-xl font-semibold text-white">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Contextos</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">
             {Object.keys(decompositions).length}
           </p>
-          <p className="text-xs text-white/45">decomposicoes registradas</p>
+          <p className="text-xs text-foreground/45">decomposicoes registradas</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-white/35">Agentes e Grupos</p>
-          <p className="mt-1 text-xl font-semibold text-white">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Agentes e Grupos</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">
             {agents.length} / {groups.length}
           </p>
-          <p className="text-xs text-white/45">instancias da sessao global</p>
+          <p className="text-xs text-foreground/45">instancias da sessao global</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-white/35">Runtime</p>
-          <p className="mt-1 text-xl font-semibold text-white">{runningRuntimes.length}</p>
-          <p className="text-xs text-white/45">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Runtime</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{runningRuntimes.length}</p>
+          <p className="text-xs text-foreground/45">
             execucoes ao vivo · {totalRuntimeTasks} tarefas · {totalNotes} notas
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
-        <section className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
+        <section className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-white/65">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/65">
               Sessoes e Comandos
             </h2>
             {latestSessionId ? (
@@ -343,12 +343,12 @@ export default function DashboardControlPage() {
                 return (
                   <div
                     key={session.id}
-                    className="rounded-xl border border-white/[0.08] bg-black/25 p-3"
+                    className="rounded-xl border border-foreground/[0.08] bg-black/25 p-3"
                   >
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-sm font-medium text-white/85">{session.title}</p>
-                        <p className="text-[11px] text-white/40">
+                        <p className="text-sm font-medium text-foreground/85">{session.title}</p>
+                        <p className="text-[11px] text-foreground/40">
                           Atualizada em {formatSessionTime(session.updatedAt)}
                         </p>
                       </div>
@@ -356,21 +356,21 @@ export default function DashboardControlPage() {
                         className={`rounded-full px-2 py-0.5 text-[10px] ${
                           running
                             ? "border border-amber-300/30 bg-amber-300/10 text-amber-200"
-                            : "border border-white/[0.10] bg-white/[0.05] text-white/55"
+                            : "border border-foreground/[0.10] bg-foreground/[0.05] text-foreground/55"
                         }`}
                       >
                         {running ? "Em execucao" : "Aguardando"}
                       </span>
                     </div>
 
-                    <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                    <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
                       <div
                         className="h-full rounded-full bg-neon-cyan/70 transition-all"
                         style={{ width: `${sessionProgress}%` }}
                       />
                     </div>
 
-                    <div className="mb-3 flex flex-wrap items-center gap-2 text-[10px] text-white/45">
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-[10px] text-foreground/45">
                       <span>{sessionMessages.length} mensagens</span>
                       <span>•</span>
                       <span>{runtime?.tasks.length ?? 0} tarefas</span>
@@ -403,12 +403,12 @@ export default function DashboardControlPage() {
               })}
             </div>
             {totalPages > 1 && (
-              <div className="mt-3 flex items-center justify-between text-xs text-white/35">
+              <div className="mt-3 flex items-center justify-between text-xs text-foreground/35">
                 <button type="button" disabled={sessionPage === 0} onClick={() => setSessionPage(p => p - 1)}
-                  className="transition-colors hover:text-white/60 disabled:opacity-30">Anterior</button>
+                  className="transition-colors hover:text-foreground/60 disabled:opacity-30">Anterior</button>
                 <span>{sessionPage + 1} / {totalPages}</span>
                 <button type="button" disabled={sessionPage >= totalPages - 1} onClick={() => setSessionPage(p => p + 1)}
-                  className="transition-colors hover:text-white/60 disabled:opacity-30">Proxima</button>
+                  className="transition-colors hover:text-foreground/60 disabled:opacity-30">Proxima</button>
               </div>
             )}
             </>
@@ -416,8 +416,8 @@ export default function DashboardControlPage() {
         </section>
 
         <aside className="space-y-4">
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/65">
+          <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/65">
               Modulos de Controle
             </h2>
             <div className="grid grid-cols-2 gap-2">
@@ -460,19 +460,19 @@ export default function DashboardControlPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/65">
+          <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/65">
               Infra e Estado
             </h2>
-            <div className="space-y-2 text-xs text-white/60">
-              <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-black/25 px-2.5 py-2">
+            <div className="space-y-2 text-xs text-foreground/60">
+              <div className="flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-black/25 px-2.5 py-2">
                 <span className="inline-flex items-center gap-1.5">
                   <Atom className="h-3.5 w-3.5 text-neon-cyan" />
                   Pipeline
                 </span>
                 <span>{STAGE_LABELS[pipelineStage] ?? pipelineStage}</span>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-black/25 px-2.5 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-black/25 px-2.5 py-2">
                 <span className="inline-flex items-center gap-1.5">
                   <Activity className="h-3.5 w-3.5 text-green-300" />
                   Providers conectados
@@ -485,7 +485,7 @@ export default function DashboardControlPage() {
             <button
               type="button"
               onClick={resetPipeline}
-              className="mt-3 w-full rounded-lg border border-white/[0.10] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.2] hover:bg-white/[0.08]"
+              className="mt-3 w-full rounded-lg border border-foreground/[0.10] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.2] hover:bg-foreground/[0.08]"
             >
               Resetar Pipeline Global
             </button>

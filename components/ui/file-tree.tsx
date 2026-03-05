@@ -58,8 +58,8 @@ function FileItem({ node, depth, isLast, parentPath, onFileSelect, selectedFile 
         className={cn(
           "group relative flex items-center gap-2 py-1 px-2 rounded-md cursor-pointer",
           "transition-all duration-200 ease-out",
-          isHovered && "bg-white/[0.04]",
-          isSelected && "bg-white/[0.08]",
+          isHovered && "bg-foreground/[0.04]",
+          isSelected && "bg-foreground/[0.08]",
         )}
         onClick={() => {
           if (isFolder) setIsOpen(!isOpen)

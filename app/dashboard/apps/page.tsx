@@ -19,12 +19,12 @@ export default function AppsPage() {
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="mb-8 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
           <Sparkles className="h-5 w-5 text-neon-cyan" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Apps</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Apps</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Experiencias especializadas com IA — agentes unicos para criar
             diferencial e engajamento
           </p>
@@ -55,12 +55,12 @@ export default function AppsPage() {
         {customApps.map((app) => (
           <div
             key={app.id}
-            className="group relative rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl transition-all hover:border-white/[0.15]"
+            className="group relative rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 backdrop-blur-xl transition-all hover:border-foreground/[0.15]"
           >
             <button
               type="button"
               onClick={() => removeApp(app.id)}
-              className="absolute right-3 top-3 rounded-md p-1 text-white/15 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+              className="absolute right-3 top-3 rounded-md p-1 text-foreground/15 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
               title="Remover app"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -71,29 +71,29 @@ export default function AppsPage() {
                 {STATUS_BADGE[app.status] ?? app.status}
               </span>
             </div>
-            <h3 className="mb-1 text-sm font-semibold text-white/90">
+            <h3 className="mb-1 text-sm font-semibold text-foreground/90">
               {app.name}
             </h3>
             <p className="mb-2 text-[11px] text-neon-cyan/70">
               {app.intention}
             </p>
-            <p className="text-xs text-white/40 line-clamp-2">
+            <p className="text-xs text-foreground/40 line-clamp-2">
               {app.description}
             </p>
             {app.advancedContext && (
               <div className="mt-2 flex gap-2">
                 {app.advancedContext.urls.length > 0 && (
-                  <span className="text-[9px] text-white/25">
+                  <span className="text-[9px] text-foreground/25">
                     {app.advancedContext.urls.length} sites
                   </span>
                 )}
                 {app.advancedContext.media.length > 0 && (
-                  <span className="text-[9px] text-white/25">
+                  <span className="text-[9px] text-foreground/25">
                     {app.advancedContext.media.length} midias
                   </span>
                 )}
                 {app.advancedContext.sources.length > 0 && (
-                  <span className="text-[9px] text-white/25">
+                  <span className="text-[9px] text-foreground/25">
                     {app.advancedContext.sources.length} fontes
                   </span>
                 )}

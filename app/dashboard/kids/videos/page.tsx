@@ -44,7 +44,7 @@ export default function KidsVideosPage() {
       <div className="mb-6 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -52,8 +52,8 @@ export default function KidsVideosPage() {
           <span className="text-xl">{"\u{1F3AC}"}</span>
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Videos Educativos</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Videos Educativos</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Videos curtos e divertidos para aprender brincando
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function KidsVideosPage() {
               "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
               activeCategory === cat.id
                 ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-                : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:bg-white/[0.06] hover:text-white/60"
+                : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/40 hover:bg-foreground/[0.06] hover:text-foreground/60"
             )}
           >
             {cat.label}
@@ -83,27 +83,27 @@ export default function KidsVideosPage() {
         {filtered.map((video) => (
           <div
             key={video.id}
-            className="group cursor-pointer rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl transition-all hover:border-neon-cyan/30"
+            className="group cursor-pointer rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all hover:border-neon-cyan/30"
           >
             {/* Thumbnail */}
             <div
               className={`relative flex h-36 items-center justify-center rounded-t-2xl bg-gradient-to-br ${video.color}`}
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/40 backdrop-blur-md transition-transform group-hover:scale-110">
-                <Play className="h-5 w-5 text-white" />
+                <Play className="h-5 w-5 text-foreground" />
               </div>
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] text-white/80 backdrop-blur-sm">
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] text-foreground/80 backdrop-blur-sm">
                 <Clock className="h-2.5 w-2.5" />
                 {video.duration}
               </div>
             </div>
             {/* Info */}
             <div className="p-4">
-              <h3 className="mb-1 text-sm font-medium text-white/85">
+              <h3 className="mb-1 text-sm font-medium text-foreground/85">
                 {video.title}
               </h3>
               <div className="flex items-center justify-between">
-                <span className="rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase text-white/35">
+                <span className="rounded-md border border-foreground/[0.08] bg-foreground/[0.04] px-1.5 py-0.5 text-[9px] uppercase text-foreground/35">
                   {video.category}
                 </span>
                 <div className="flex items-center gap-1 text-[10px] text-neon-green/60">

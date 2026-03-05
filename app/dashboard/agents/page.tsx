@@ -29,7 +29,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 const STATUS_META = {
-  idle: "text-white/55 border-white/[0.15] bg-white/[0.06]",
+  idle: "text-foreground/55 border-foreground/[0.15] bg-foreground/[0.06]",
   thinking: "text-cyan-200 border-cyan-300/30 bg-cyan-300/10",
   working: "text-amber-200 border-amber-300/30 bg-amber-300/10",
   done: "text-green-200 border-green-300/30 bg-green-300/10",
@@ -174,16 +174,16 @@ function AgentsPageContent() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Bot className="h-5 w-5 text-cyan-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">Agentes Conectados</h1>
-            <p className="mt-1 text-sm text-white/50">
+            <h1 className="text-2xl font-semibold text-foreground">Agentes Conectados</h1>
+            <p className="mt-1 text-sm text-foreground/50">
               Direcao herdada do contexto e delegacao real por funcao.
             </p>
             {targetSession ? (
-              <p className="mt-1 text-xs text-white/35">
+              <p className="mt-1 text-xs text-foreground/35">
                 Sessao: {targetSession.title} · atualizada em{" "}
                 {formatDateTime(targetSession.updatedAt)}
               </p>
@@ -199,7 +199,7 @@ function AgentsPageContent() {
                 targetSessionId,
                 selectedContext?.id
               )}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Contexto
@@ -222,47 +222,47 @@ function AgentsPageContent() {
       </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-white/35">Agentes</p>
-          <p className="mt-1 text-xl font-semibold text-white">{sessionAgents.length}</p>
-          <p className="text-xs text-white/45">{activeAgentCount} em execucao</p>
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Agentes</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{sessionAgents.length}</p>
+          <p className="text-xs text-foreground/45">{activeAgentCount} em execucao</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-white/35">Funcoes delegadas</p>
-          <p className="mt-1 text-xl font-semibold text-white">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Funcoes delegadas</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">
             {new Set(runtimeTasks.map((task) => task.functionKey)).size}
           </p>
-          <p className="text-xs text-white/45">{runtimeTasks.length} tarefas mapeadas</p>
+          <p className="text-xs text-foreground/45">{runtimeTasks.length} tarefas mapeadas</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-white/35">Direcoes de contexto</p>
-          <p className="mt-1 text-xl font-semibold text-white">{contextDirections.length}</p>
-          <p className="text-xs text-white/45">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Direcoes de contexto</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{contextDirections.length}</p>
+          <p className="text-xs text-foreground/45">
             {selectedContext ? `contexto ${selectedContext.id.slice(0, 8)}` : "geral"}
           </p>
         </div>
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-          <div className="inline-flex items-center gap-2 text-sm text-white/70">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 text-sm text-foreground/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando estado de agentes da sessao...
           </div>
         </div>
       ) : !targetSessionId ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 text-sm text-foreground/65">
           Nenhuma sessao ativa encontrada. Inicie pelo chat para delegar os agentes.
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-            <div className="mb-2 inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/40">
+          <div className="mb-4 rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+            <div className="mb-2 inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-foreground/40">
               <Brain className="h-3.5 w-3.5" />
               Direcoes vindas do contexto
             </div>
             {contextDirections.length === 0 ? (
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-foreground/50">
                 Sem direcao manual para agentes neste contexto ainda.
               </p>
             ) : (
@@ -316,12 +316,12 @@ function AgentsPageContent() {
                 return (
                   <div
                     key={agent.id}
-                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl"
+                    className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl"
                   >
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-base font-semibold text-white/90">{agent.name}</p>
-                        <p className="text-xs text-white/45">{agent.role}</p>
+                        <p className="text-base font-semibold text-foreground/90">{agent.name}</p>
+                        <p className="text-xs text-foreground/45">{agent.role}</p>
                       </div>
                       <span
                         className={`rounded-md border px-2 py-0.5 text-xs ${STATUS_META[agent.status]}`}
@@ -330,7 +330,7 @@ function AgentsPageContent() {
                       </span>
                     </div>
 
-                    <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                    <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
                       <div
                         className="h-full rounded-full bg-neon-cyan/70 transition-all"
                         style={{ width: `${avgProgress}%` }}
@@ -339,14 +339,14 @@ function AgentsPageContent() {
 
                     <div className="mb-3 flex flex-wrap gap-1.5">
                       {assignedTasks.length === 0 ? (
-                        <span className="rounded-md border border-white/[0.10] bg-white/[0.04] px-2 py-1 text-[11px] text-white/45">
+                        <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.04] px-2 py-1 text-[11px] text-foreground/45">
                           sem funcao atribuida
                         </span>
                       ) : (
                         assignedTasks.map((task) => (
                           <span
                             key={task.id}
-                            className="rounded-md border border-white/[0.10] bg-white/[0.04] px-2 py-1 text-[11px] text-white/65"
+                            className="rounded-md border border-foreground/[0.10] bg-foreground/[0.04] px-2 py-1 text-[11px] text-foreground/65"
                           >
                             {FUNCTION_LABEL[task.functionKey] ?? task.functionKey} · {task.progress}%
                           </span>
@@ -354,13 +354,13 @@ function AgentsPageContent() {
                       )}
                     </div>
 
-                    <div className="grid gap-1 text-xs text-white/55">
+                    <div className="grid gap-1 text-xs text-foreground/55">
                       <p>
                         Modelo: {agent.model} · Provider: {agent.provider}
                       </p>
                       <p>Outputs: {agent.outputs.length}</p>
                       {latestOutput ? (
-                        <div className="text-white/45">
+                        <div className="text-foreground/45">
                           <p>
                             Ultimo output:{" "}
                             {expandedOutputId === agent.id
@@ -399,7 +399,7 @@ function AgentsPageContent() {
               <Sparkles className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
-            <p className="mt-1 text-xs text-white/70">
+            <p className="mt-1 text-xs text-foreground/70">
               Consolidar o plano em projeto executavel com base na delegacao atual.
             </p>
             <div className="mt-2">
@@ -433,10 +433,10 @@ function AgentsPageFallback() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex items-start gap-3">
-        <div className="h-11 w-11 animate-pulse rounded-xl bg-white/[0.04]" />
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-foreground/[0.04]" />
         <div className="space-y-2">
-          <div className="h-5 w-48 animate-pulse rounded bg-white/[0.04]" />
-          <div className="h-3 w-64 animate-pulse rounded bg-white/[0.04]" />
+          <div className="h-5 w-48 animate-pulse rounded bg-foreground/[0.04]" />
+          <div className="h-3 w-64 animate-pulse rounded bg-foreground/[0.04]" />
         </div>
       </div>
       <div className="mb-4 grid gap-3 sm:grid-cols-3">

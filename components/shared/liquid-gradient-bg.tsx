@@ -336,6 +336,7 @@ export function LiquidGradientBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<GradientScene | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -346,9 +347,20 @@ export function LiquidGradientBackground() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  // Watch for theme changes via the `dark` class on <html>
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const html = document.documentElement;
+    const check = () => setIsDark(html.classList.contains("dark"));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || reducedMotion) return;
+    if (!container || reducedMotion || !isDark) return;
 
     if (sceneRef.current) sceneRef.current.cleanup();
     sceneRef.current = new GradientScene(container);
@@ -359,7 +371,26 @@ export function LiquidGradientBackground() {
         sceneRef.current = null;
       }
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isDark]);
+
+  // Light mode — soft ambient gradient (no shader)
+  if (!isDark) {
+    return (
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: [
+              "radial-gradient(ellipse 80% 60% at 30% 20%, rgba(0,0,0,0.03), transparent)",
+              "radial-gradient(ellipse 70% 50% at 70% 60%, rgba(0,0,0,0.02), transparent)",
+              "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(0,0,0,0.015), transparent)",
+              "linear-gradient(180deg, #f8f8fa 0%, #eeeef2 100%)",
+            ].join(", "),
+          }}
+        />
+      </div>
+    );
+  }
 
   if (reducedMotion) {
     return (

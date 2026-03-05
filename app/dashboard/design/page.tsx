@@ -105,7 +105,7 @@ function PreviewGlassCards() {
               opacity: 0.6,
             }}
           />
-          <p className="text-[9px] text-white/50">{color}</p>
+          <p className="text-[9px] text-foreground/50">{color}</p>
         </GlassCard>
       ))}
     </div>
@@ -122,10 +122,10 @@ function PreviewMetricCards() {
       ].map((m) => (
         <div
           key={m.label}
-          className="rounded-lg border border-white/[0.08] bg-neutral-900/70 p-2"
+          className="rounded-lg border border-foreground/[0.08] bg-card/70 p-2"
         >
-          <p className="text-[8px] uppercase text-white/30">{m.label}</p>
-          <p className="text-lg font-semibold text-white">{m.value}</p>
+          <p className="text-[8px] uppercase text-foreground/30">{m.label}</p>
+          <p className="text-lg font-semibold text-foreground">{m.value}</p>
         </div>
       ))}
     </div>
@@ -134,20 +134,20 @@ function PreviewMetricCards() {
 
 function PreviewAgentCard() {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+    <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-neon-cyan" />
-          <span className="text-xs font-medium text-white/90">Researcher</span>
+          <span className="text-xs font-medium text-foreground/90">Researcher</span>
         </div>
         <span className="rounded-md border border-cyan-300/30 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] text-cyan-200">
           thinking
         </span>
       </div>
-      <div className="mb-2 h-1 overflow-hidden rounded-full bg-white/[0.07]">
+      <div className="mb-2 h-1 overflow-hidden rounded-full bg-foreground/[0.07]">
         <div className="h-full w-[42%] rounded-full bg-neon-cyan/70" />
       </div>
-      <p className="text-[9px] text-white/40">claude-opus-4 · anthropic</p>
+      <p className="text-[9px] text-foreground/40">claude-opus-4 · anthropic</p>
     </div>
   );
 }
@@ -181,7 +181,7 @@ function PreviewRecommendation() {
         <Sparkles className="h-3 w-3" />
         Proxima etapa recomendada
       </div>
-      <p className="mb-2 text-[9px] text-white/60">
+      <p className="mb-2 text-[9px] text-foreground/60">
         Consolidar o plano em projeto executavel.
       </p>
       <div className="inline-flex items-center gap-1 rounded-md border border-neon-cyan/35 bg-neon-cyan/15 px-2 py-1 text-[9px] font-medium text-neon-cyan">
@@ -220,13 +220,13 @@ function PreviewPrimaryButtons() {
         <Send className="h-3 w-3" />
         Primary
       </div>
-      <div className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-2.5 py-1.5 text-[10px] text-white/70">
+      <div className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-2.5 py-1.5 text-[10px] text-foreground/70">
         Secondary
       </div>
-      <div className="rounded-lg p-1.5 text-white/30">
+      <div className="rounded-lg p-1.5 text-foreground/30">
         <Settings className="h-3.5 w-3.5" />
       </div>
-      <div className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[9px] text-white/50">
+      <div className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 py-1 text-[9px] text-foreground/50">
         Suggestion Pill
       </div>
     </div>
@@ -270,7 +270,7 @@ function PreviewIntentBadges() {
 
 function PreviewStatusBadges() {
   const statuses = [
-    { s: "idle", cls: "text-white/55 border-white/[0.15] bg-white/[0.06]" },
+    { s: "idle", cls: "text-foreground/55 border-foreground/[0.15] bg-foreground/[0.06]" },
     { s: "thinking", cls: "text-cyan-200 border-cyan-300/30 bg-cyan-300/10" },
     { s: "working", cls: "text-amber-200 border-amber-300/30 bg-amber-300/10" },
     { s: "done", cls: "text-green-200 border-green-300/30 bg-green-300/10" },
@@ -296,7 +296,7 @@ function PreviewStatusPulse() {
       {(["idle", "active", "success", "error", "warning"] as const).map((s) => (
         <div key={s} className="flex flex-col items-center gap-1">
           <StatusPulse status={s} size="md" />
-          <span className="text-[8px] text-white/35">{s}</span>
+          <span className="text-[8px] text-foreground/35">{s}</span>
         </div>
       ))}
     </div>
@@ -317,14 +317,14 @@ function PreviewShadcnBadges() {
 function PreviewFloatingNav() {
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1.5 backdrop-blur-md">
         <Atom className="h-3 w-3 text-blue-400" />
-        <span className="text-[10px] font-medium text-white/90">ORIGEM</span>
-        <span className="text-white/20">/</span>
-        <span className="text-[10px] text-white/50">Design</span>
-        <ChevronDown className="h-2.5 w-2.5 text-white/40" />
+        <span className="text-[10px] font-medium text-foreground/90">ORIGEM</span>
+        <span className="text-foreground/20">/</span>
+        <span className="text-[10px] text-foreground/50">Design</span>
+        <ChevronDown className="h-2.5 w-2.5 text-foreground/40" />
       </div>
-      <div className="w-full max-w-[280px] rounded-xl border border-white/[0.08] bg-neutral-900/95 p-2">
+      <div className="w-full max-w-[280px] rounded-xl border border-foreground/[0.08] bg-card/95 p-2">
         <div className="grid grid-cols-2 gap-1">
           {[
             { label: "Dashboard", icon: LayoutDashboard },
@@ -334,10 +334,10 @@ function PreviewFloatingNav() {
           ].map((item) => (
             <div
               key={item.label}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 hover:bg-white/[0.06]"
+              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 hover:bg-foreground/[0.06]"
             >
-              <item.icon className="h-3 w-3 text-white/40" />
-              <span className="text-[9px] text-white/80">{item.label}</span>
+              <item.icon className="h-3 w-3 text-foreground/40" />
+              <span className="text-[9px] text-foreground/80">{item.label}</span>
             </div>
           ))}
         </div>
@@ -348,13 +348,13 @@ function PreviewFloatingNav() {
 
 function PreviewBreadcrumb() {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1.5">
       <Atom className="h-3 w-3 text-blue-400" />
-      <span className="text-[10px] text-white/70">ORIGEM</span>
-      <span className="text-white/15">/</span>
-      <span className="text-[10px] text-white/50">Dashboard</span>
-      <span className="text-white/15">/</span>
-      <span className="text-[10px] text-white/90">Design</span>
+      <span className="text-[10px] text-foreground/70">ORIGEM</span>
+      <span className="text-foreground/15">/</span>
+      <span className="text-[10px] text-foreground/50">Dashboard</span>
+      <span className="text-foreground/15">/</span>
+      <span className="text-[10px] text-foreground/90">Design</span>
     </div>
   );
 }
@@ -387,8 +387,8 @@ function PreviewProgressBar() {
     <div className="space-y-2">
       {[25, 65, 100].map((pct) => (
         <div key={pct} className="flex items-center gap-2">
-          <span className="w-6 text-right text-[8px] text-white/35">{pct}%</span>
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
+          <span className="w-6 text-right text-[8px] text-foreground/35">{pct}%</span>
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.07]">
             <div
               className="h-full rounded-full bg-neon-cyan/70"
               style={{ width: `${pct}%` }}
@@ -410,7 +410,7 @@ function PreviewPipelineStepper() {
           className={`rounded-md border px-1.5 py-0.5 text-[8px] ${
             i <= 3
               ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-              : "border-white/[0.10] bg-white/[0.04] text-white/45"
+              : "border-foreground/[0.10] bg-foreground/[0.04] text-foreground/45"
           }`}
         >
           {stage}
@@ -430,14 +430,14 @@ function PreviewPolarityBars() {
     <div className="space-y-1.5">
       {bars.map(([label, value]) => (
         <div key={label} className="flex items-center gap-1.5">
-          <span className="w-16 text-[8px] text-white/30">{label}</span>
-          <div className="h-1 flex-1 rounded-full bg-white/[0.06]">
+          <span className="w-16 text-[8px] text-foreground/30">{label}</span>
+          <div className="h-1 flex-1 rounded-full bg-foreground/[0.06]">
             <div
               className="h-full rounded-full bg-blue-400/60"
               style={{ width: `${value}%` }}
             />
           </div>
-          <span className="w-6 text-right text-[8px] text-white/35">{value}%</span>
+          <span className="w-6 text-right text-[8px] text-foreground/35">{value}%</span>
         </div>
       ))}
     </div>
@@ -447,12 +447,12 @@ function PreviewPolarityBars() {
 function PreviewGlassInput() {
   return (
     <div className="space-y-2">
-      <div className="rounded-lg bg-white/[0.06] px-3 py-2">
-        <p className="text-[10px] text-white/25">Ask me anything...</p>
+      <div className="rounded-lg bg-foreground/[0.06] px-3 py-2">
+        <p className="text-[10px] text-foreground/25">Ask me anything...</p>
       </div>
-      <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-neutral-900/70 px-3 py-2">
-        <Search className="h-3 w-3 text-white/20" />
-        <p className="text-[10px] text-white/20">Buscar por texto...</p>
+      <div className="flex items-center gap-2 rounded-lg border border-foreground/[0.08] bg-card/70 px-3 py-2">
+        <Search className="h-3 w-3 text-foreground/20" />
+        <p className="text-[10px] text-foreground/20">Buscar por texto...</p>
       </div>
     </div>
   );
@@ -464,11 +464,11 @@ function PreviewFormControls() {
       <Input
         placeholder="Standard input"
         readOnly
-        className="h-8 text-[10px] bg-black/20 border-white/[0.06] text-white"
+        className="h-8 text-[10px] bg-black/20 border-foreground/[0.06] text-foreground"
       />
       <div className="flex items-center gap-2">
         <Switch checked className="scale-75" />
-        <span className="text-[10px] text-white/60">Streaming</span>
+        <span className="text-[10px] text-foreground/60">Streaming</span>
       </div>
       <Progress value={68} className="h-1.5" />
     </div>
@@ -482,9 +482,9 @@ function PreviewPasswordInput() {
         type="password"
         defaultValue="sk-proj-abc123"
         readOnly
-        className="h-8 pr-8 font-mono text-[10px] bg-black/20 border-white/[0.06] text-white"
+        className="h-8 pr-8 font-mono text-[10px] bg-black/20 border-foreground/[0.06] text-foreground"
       />
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-white/25">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground/25">
         <Eye className="h-3 w-3" />
       </div>
     </div>
@@ -497,9 +497,9 @@ function PreviewGlowBoxes() {
       {(["cyan", "purple", "green", "orange", "pink", "blue"] as const).map((color) => (
         <div
           key={color}
-          className={`glow-${color} flex h-10 items-center justify-center rounded-lg border border-white/[0.08] bg-neutral-900/70`}
+          className={`glow-${color} flex h-10 items-center justify-center rounded-lg border border-foreground/[0.08] bg-card/70`}
         >
-          <p className="text-[8px] text-white/40">{color}</p>
+          <p className="text-[8px] text-foreground/40">{color}</p>
         </div>
       ))}
     </div>
@@ -511,8 +511,8 @@ function PreviewNeonGlow() {
     <div className="grid grid-cols-3 gap-2">
       {(["subtle", "medium", "strong"] as const).map((intensity) => (
         <NeonGlow key={intensity} color="cyan" intensity={intensity}>
-          <div className="flex h-10 items-center justify-center rounded-lg border border-white/[0.08] bg-neutral-900/70">
-            <p className="text-[8px] text-white/40">{intensity}</p>
+          <div className="flex h-10 items-center justify-center rounded-lg border border-foreground/[0.08] bg-card/70">
+            <p className="text-[8px] text-foreground/40">{intensity}</p>
           </div>
         </NeonGlow>
       ))}
@@ -525,15 +525,15 @@ function PreviewLoadingOrb() {
     <div className="flex items-end justify-center gap-6">
       <div className="flex flex-col items-center gap-1">
         <LoadingOrb size="sm" color="cyan" />
-        <span className="text-[8px] text-white/25">sm</span>
+        <span className="text-[8px] text-foreground/25">sm</span>
       </div>
       <div className="flex flex-col items-center gap-1">
         <LoadingOrb size="md" color="purple" />
-        <span className="text-[8px] text-white/25">md</span>
+        <span className="text-[8px] text-foreground/25">md</span>
       </div>
       <div className="flex flex-col items-center gap-1">
         <LoadingOrb size="lg" color="green" />
-        <span className="text-[8px] text-white/25">lg</span>
+        <span className="text-[8px] text-foreground/25">lg</span>
       </div>
     </div>
   );
@@ -544,19 +544,19 @@ function PreviewAnimations() {
     <div className="flex items-center justify-center gap-5">
       <div className="flex flex-col items-center gap-1">
         <div className="h-5 w-5 animate-pulse-glow rounded-full bg-neon-cyan" />
-        <span className="text-[8px] text-white/25">pulse</span>
+        <span className="text-[8px] text-foreground/25">pulse</span>
       </div>
       <div className="flex flex-col items-center gap-1">
         <div className="h-5 w-5 animate-float rounded-lg bg-neon-purple" />
-        <span className="text-[8px] text-white/25">float</span>
+        <span className="text-[8px] text-foreground/25">float</span>
       </div>
       <div className="flex flex-col items-center gap-1">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-neon-green border-t-transparent" />
-        <span className="text-[8px] text-white/25">spin</span>
+        <span className="text-[8px] text-foreground/25">spin</span>
       </div>
       <div className="flex flex-col items-center gap-1">
         <div className="h-5 w-5 animate-bounce rounded-lg bg-neon-pink" />
-        <span className="text-[8px] text-white/25">bounce</span>
+        <span className="text-[8px] text-foreground/25">bounce</span>
       </div>
     </div>
   );
@@ -565,7 +565,7 @@ function PreviewAnimations() {
 function PreviewGradientBorder() {
   return (
     <div className="gradient-border rounded-xl p-3">
-      <p className="text-[9px] text-white/50">
+      <p className="text-[9px] text-foreground/50">
         .gradient-border — animated conic gradient
       </p>
     </div>
@@ -586,7 +586,7 @@ function PreviewColorPalette() {
       {swatches.map((s) => (
         <div key={s.name} className="text-center">
           <div className="mb-1 h-10 rounded-lg" style={{ backgroundColor: s.oklch }} />
-          <p className="text-[8px] text-white/50">{s.name}</p>
+          <p className="text-[8px] text-foreground/50">{s.name}</p>
         </div>
       ))}
     </div>
@@ -596,10 +596,10 @@ function PreviewColorPalette() {
 function PreviewTypography() {
   return (
     <div className="space-y-1">
-      <p className="text-base font-semibold text-white">Heading Base</p>
-      <p className="text-sm text-white/80">Body text sm</p>
-      <p className="text-xs text-white/55">Caption xs</p>
-      <p className="font-mono text-[10px] text-white/40">monospace code</p>
+      <p className="text-base font-semibold text-foreground">Heading Base</p>
+      <p className="text-sm text-foreground/80">Body text sm</p>
+      <p className="text-xs text-foreground/55">Caption xs</p>
+      <p className="font-mono text-[10px] text-foreground/40">monospace code</p>
       <div className="mt-2 flex gap-3">
         <GradientText variant="primary" className="text-sm font-semibold">Primary</GradientText>
         <GradientText variant="neon" className="text-sm font-semibold">Neon</GradientText>
@@ -613,13 +613,13 @@ function PreviewGlassSurfaces() {
   return (
     <div className="grid grid-cols-3 gap-2">
       <div className="glass rounded-lg p-2">
-        <p className="text-[8px] text-white/50">.glass</p>
+        <p className="text-[8px] text-foreground/50">.glass</p>
       </div>
       <div className="glass-subtle rounded-lg p-2">
-        <p className="text-[8px] text-white/50">.glass-subtle</p>
+        <p className="text-[8px] text-foreground/50">.glass-subtle</p>
       </div>
-      <div className="rounded-lg border border-white/[0.08] bg-neutral-900/70 p-2">
-        <p className="text-[8px] text-white/50">card</p>
+      <div className="rounded-lg border border-foreground/[0.08] bg-card/70 p-2">
+        <p className="text-[8px] text-foreground/50">card</p>
       </div>
     </div>
   );
@@ -627,8 +627,8 @@ function PreviewGlassSurfaces() {
 
 function PreviewLoadingState() {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-      <div className="inline-flex items-center gap-2 text-[10px] text-white/60">
+    <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+      <div className="inline-flex items-center gap-2 text-[10px] text-foreground/60">
         <Loader2 className="h-3.5 w-3.5 animate-spin text-neon-cyan" />
         Carregando agentes da sessao...
       </div>
@@ -638,14 +638,14 @@ function PreviewLoadingState() {
 
 function PreviewSettingsCard() {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+    <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3">
       <div className="mb-2 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-foreground/[0.06] bg-foreground/[0.03]">
           <Brain className="h-3.5 w-3.5 text-neon-cyan" />
         </div>
         <div>
-          <p className="text-[10px] font-medium text-white/85">AI Providers</p>
-          <p className="text-[8px] text-white/35">Configuracao de modelos</p>
+          <p className="text-[10px] font-medium text-foreground/85">AI Providers</p>
+          <p className="text-[8px] text-foreground/35">Configuracao de modelos</p>
         </div>
       </div>
       <div className="inline-flex items-center gap-1 rounded-md border border-neon-cyan/35 bg-neon-cyan/15 px-2 py-1 text-[9px] font-medium text-neon-cyan">
@@ -664,9 +664,9 @@ function PreviewGroupStrategy() {
   ];
   return (
     <div className="space-y-2">
-      <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3">
+      <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] font-medium text-white/80">Core Workflow</span>
+          <span className="text-[10px] font-medium text-foreground/80">Core Workflow</span>
           <span className="rounded-md border border-cyan-300/30 bg-cyan-300/10 px-1.5 py-0.5 text-[8px] text-cyan-200">
             Paralelo
           </span>
@@ -675,7 +675,7 @@ function PreviewGroupStrategy() {
           {["Researcher", "Planner"].map((a) => (
             <span
               key={a}
-              className="rounded-md border border-white/[0.12] bg-white/[0.05] px-1.5 py-0.5 text-[8px] text-white/60"
+              className="rounded-md border border-foreground/[0.12] bg-foreground/[0.05] px-1.5 py-0.5 text-[8px] text-foreground/60"
             >
               {a}
             </span>
@@ -695,15 +695,15 @@ function PreviewGroupStrategy() {
 
 function PreviewTaskCard() {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-black/25 p-2.5">
+    <div className="rounded-xl border border-foreground/[0.08] bg-black/25 p-2.5">
       <div className="mb-1 flex items-center justify-between">
-        <p className="text-[10px] text-white/80">1. Analise de contexto</p>
+        <p className="text-[10px] text-foreground/80">1. Analise de contexto</p>
         <span className="rounded-md border border-amber-300/30 bg-amber-300/10 px-1.5 py-0.5 text-[8px] text-amber-200">
           running
         </span>
       </div>
-      <p className="mb-1.5 text-[8px] text-white/40">Agente: Researcher</p>
-      <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <p className="mb-1.5 text-[8px] text-foreground/40">Agente: Researcher</p>
+      <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
         <div className="h-full w-[65%] rounded-full bg-neon-cyan/70" />
       </div>
     </div>
@@ -721,10 +721,10 @@ function PreviewEventLog() {
       {events.map((e) => (
         <div
           key={e.time}
-          className="rounded-md border border-white/[0.08] bg-black/25 px-2 py-1.5"
+          className="rounded-md border border-foreground/[0.08] bg-black/25 px-2 py-1.5"
         >
-          <p className="text-[9px] text-white/65">{e.label}</p>
-          <p className="text-[8px] text-white/30">{e.time}</p>
+          <p className="text-[9px] text-foreground/65">{e.label}</p>
+          <p className="text-[8px] text-foreground/30">{e.time}</p>
         </div>
       ))}
     </div>
@@ -1096,16 +1096,16 @@ function ComponentCard({
   return (
     <div
       onClick={() => onSelect(entry)}
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl transition-all duration-200 hover:border-white/[0.16] hover:bg-neutral-900/80 hover:shadow-lg hover:shadow-black/20"
+      className="group cursor-pointer overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all duration-200 hover:border-foreground/[0.16] hover:bg-card/80 hover:shadow-lg hover:shadow-black/20"
     >
       {/* Preview area */}
-      <div className="relative border-b border-white/[0.06] bg-black/30 p-5">
+      <div className="relative border-b border-foreground/[0.06] bg-black/30 p-5">
         <div className="pointer-events-none">
           <entry.preview />
         </div>
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/40 group-hover:opacity-100">
-          <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+          <span className="rounded-lg border border-foreground/20 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur-sm">
             Ver componente
           </span>
         </div>
@@ -1114,11 +1114,11 @@ function ComponentCard({
       {/* Info area */}
       <div className="p-3.5">
         <div className="mb-1.5 flex items-start justify-between gap-2">
-          <h3 className="text-sm font-medium text-white/90">{entry.name}</h3>
+          <h3 className="text-sm font-medium text-foreground/90">{entry.name}</h3>
           <button
             type="button"
             onClick={handleCopy}
-            className="shrink-0 rounded-md p-1 text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+            className="shrink-0 rounded-md p-1 text-foreground/20 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
             title="Copiar ID"
           >
             {copied ? (
@@ -1128,11 +1128,11 @@ function ComponentCard({
             )}
           </button>
         </div>
-        <p className="mb-2.5 text-[11px] leading-relaxed text-white/40">
+        <p className="mb-2.5 text-[11px] leading-relaxed text-foreground/40">
           {entry.description}
         </p>
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 text-[10px] text-white/35">
+          <span className="inline-flex items-center gap-1 rounded-md border border-foreground/[0.08] bg-foreground/[0.03] px-1.5 py-0.5 text-[10px] text-foreground/35">
             {categoryMeta && <categoryMeta.icon className="h-2.5 w-2.5" />}
             {categoryMeta?.label}
           </span>
@@ -1140,7 +1140,7 @@ function ComponentCard({
             {entry.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-white/25"
+                className="rounded-md bg-foreground/[0.04] px-1.5 py-0.5 text-[9px] text-foreground/25"
               >
                 {tag}
               </span>
@@ -1172,50 +1172,50 @@ function DetailModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden rounded-2xl border border-white/[0.12] bg-neutral-900/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <div className="relative w-full max-w-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden rounded-2xl border border-foreground/[0.12] bg-card/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-foreground/[0.08] px-5 py-3.5">
           <div className="flex items-center gap-3">
             {categoryMeta && (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.06] bg-foreground/[0.03]">
                 <categoryMeta.icon className="h-4 w-4 text-neon-cyan" />
               </div>
             )}
             <div>
-              <h2 className="text-base font-semibold text-white">{entry.name}</h2>
-              <p className="text-xs text-white/40">{entry.description}</p>
+              <h2 className="text-base font-semibold text-foreground">{entry.name}</h2>
+              <p className="text-xs text-foreground/40">{entry.description}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+            className="rounded-lg p-1.5 text-foreground/30 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/60"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Preview */}
-        <div className="border-b border-white/[0.08] bg-black/30 p-8">
+        <div className="border-b border-foreground/[0.08] bg-black/30 p-8">
           <entry.preview />
         </div>
 
         {/* Meta */}
         <div className="px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-md border border-white/[0.10] bg-white/[0.04] px-2 py-1 text-[11px] text-white/50">
+            <span className="inline-flex items-center gap-1 rounded-md border border-foreground/[0.10] bg-foreground/[0.04] px-2 py-1 text-[11px] text-foreground/50">
               {categoryMeta && <categoryMeta.icon className="h-3 w-3" />}
               {categoryMeta?.label}
             </span>
             {entry.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-md bg-white/[0.04] px-2 py-1 text-[11px] text-white/30"
+                className="rounded-md bg-foreground/[0.04] px-2 py-1 text-[11px] text-foreground/30"
               >
                 {tag}
               </span>
             ))}
-            <span className="ml-auto rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-white/25">
+            <span className="ml-auto rounded-md border border-foreground/[0.08] bg-foreground/[0.03] px-2 py-1 font-mono text-[10px] text-foreground/25">
               {entry.id}
             </span>
           </div>
@@ -1266,12 +1266,12 @@ export default function DesignBankingPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="mb-5 flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Palette className="h-5 w-5 text-neon-purple" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">UX/UI Banking</h1>
-            <p className="mt-1 text-sm text-white/40">
+            <h1 className="text-2xl font-semibold text-foreground">UX/UI Banking</h1>
+            <p className="mt-1 text-sm text-foreground/40">
               {COMPONENTS.length} componentes React — templates e patterns ORIGEM
             </p>
           </div>
@@ -1279,13 +1279,13 @@ export default function DesignBankingPage() {
 
         {/* Search */}
         <div className="relative mb-4 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/20" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar componentes..."
-            className="w-full rounded-xl border border-white/[0.08] bg-neutral-900/70 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/25 outline-none backdrop-blur-xl transition-colors focus:border-white/[0.16]"
+            className="w-full rounded-xl border border-foreground/[0.08] bg-card/70 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-foreground/25 outline-none backdrop-blur-xl transition-colors focus:border-foreground/[0.16]"
           />
         </div>
 
@@ -1301,7 +1301,7 @@ export default function DesignBankingPage() {
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
                   isActive
                     ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-                    : "border-white/[0.08] bg-white/[0.03] text-white/45 hover:border-white/[0.16] hover:text-white/65"
+                    : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/45 hover:border-foreground/[0.16] hover:text-foreground/65"
                 }`}
               >
                 <cat.icon className="h-3.5 w-3.5" />
@@ -1310,7 +1310,7 @@ export default function DesignBankingPage() {
                   className={`rounded-full px-1.5 py-0.5 text-[10px] ${
                     isActive
                       ? "bg-neon-cyan/20 text-neon-cyan"
-                      : "bg-white/[0.06] text-white/30"
+                      : "bg-foreground/[0.06] text-foreground/30"
                   }`}
                 >
                   {counts[cat.value] ?? 0}
@@ -1323,7 +1323,7 @@ export default function DesignBankingPage() {
 
       {/* Results count */}
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-foreground/30">
           {filtered.length} componente{filtered.length !== 1 ? "s" : ""}
           {activeCategory !== "all" &&
             ` em ${CATEGORIES.find((c) => c.value === activeCategory)?.label}`}
@@ -1333,10 +1333,10 @@ export default function DesignBankingPage() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-8 text-center backdrop-blur-xl">
-          <Search className="mx-auto mb-3 h-8 w-8 text-white/15" />
-          <p className="text-sm text-white/50">Nenhum componente encontrado</p>
-          <p className="mt-1 text-xs text-white/25">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 text-center backdrop-blur-xl">
+          <Search className="mx-auto mb-3 h-8 w-8 text-foreground/15" />
+          <p className="text-sm text-foreground/50">Nenhum componente encontrado</p>
+          <p className="mt-1 text-xs text-foreground/25">
             Tente outra busca ou categoria
           </p>
         </div>
@@ -1354,7 +1354,7 @@ export default function DesignBankingPage() {
 
       {/* Footer */}
       <div className="mt-10 text-center">
-        <p className="text-[10px] text-white/15">
+        <p className="text-[10px] text-foreground/15">
           ORIGEM Design Banking v0.2.0 — Psychosemantic AI Engine
         </p>
       </div>

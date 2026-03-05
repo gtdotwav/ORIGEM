@@ -52,13 +52,13 @@ export function EcosystemConfig({ className }: { className?: string }) {
 
   return (
     <div className={cn("space-y-3", className)}>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground/30">
         Config 360
       </p>
 
       {/* Provider */}
       <div>
-        <label className="mb-1 block text-[10px] text-white/40">
+        <label className="mb-1 block text-[10px] text-foreground/40">
           Provedor
         </label>
         <select
@@ -68,9 +68,9 @@ export function EcosystemConfig({ className }: { className?: string }) {
               e.target.value ? (e.target.value as ProviderName) : null
             )
           }
-          className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/70 outline-none transition-colors focus:border-white/20"
+          className="w-full rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 py-1.5 text-xs text-foreground/70 outline-none transition-colors focus:border-foreground/20"
         >
-          <option value="" className="bg-neutral-900">
+          <option value="" className="bg-card">
             Auto (melhor disponivel)
           </option>
           {configured.map((p) => {
@@ -79,7 +79,7 @@ export function EcosystemConfig({ className }: { className?: string }) {
               <option
                 key={p.provider}
                 value={p.provider}
-                className="bg-neutral-900"
+                className="bg-card"
               >
                 {meta?.displayName ?? p.provider}
               </option>
@@ -91,19 +91,19 @@ export function EcosystemConfig({ className }: { className?: string }) {
       {/* Model */}
       {selectedProviderMeta && (
         <div>
-          <label className="mb-1 block text-[10px] text-white/40">
+          <label className="mb-1 block text-[10px] text-foreground/40">
             Modelo
           </label>
           <select
             value={ecosystemConfig.model}
             onChange={(e) => setEcosystemModel(e.target.value)}
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/70 outline-none transition-colors focus:border-white/20"
+            className="w-full rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 py-1.5 text-xs text-foreground/70 outline-none transition-colors focus:border-foreground/20"
           >
-            <option value="" className="bg-neutral-900">
+            <option value="" className="bg-card">
               Padrao
             </option>
             {selectedProviderMeta.models.map((m) => (
-              <option key={m.id} value={m.id} className="bg-neutral-900">
+              <option key={m.id} value={m.id} className="bg-card">
                 {m.name}
               </option>
             ))}
@@ -113,7 +113,7 @@ export function EcosystemConfig({ className }: { className?: string }) {
 
       {/* Language */}
       <div>
-        <label className="mb-1 block text-[10px] text-white/40">
+        <label className="mb-1 block text-[10px] text-foreground/40">
           Linguagem
         </label>
         <select
@@ -123,13 +123,13 @@ export function EcosystemConfig({ className }: { className?: string }) {
               e.target.value as RuntimeLanguage | "origem"
             )
           }
-          className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/70 outline-none transition-colors focus:border-white/20"
+          className="w-full rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 py-1.5 text-xs text-foreground/70 outline-none transition-colors focus:border-foreground/20"
         >
           {LANGUAGE_OPTIONS.map((opt) => (
             <option
               key={opt.value}
               value={opt.value}
-              className="bg-neutral-900"
+              className="bg-card"
             >
               {opt.label}
             </option>

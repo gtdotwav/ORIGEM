@@ -50,17 +50,17 @@ export function PersonaChatInterface() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-foreground/[0.06] px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           {(() => {
             const Icon = PERSONA_ICONS[activePersona.id];
             return Icon ? <Icon className={cn("h-6 w-6", colors.text)} /> : null;
           })()}
           <div>
-            <h2 className="text-sm font-semibold text-white/90">
+            <h2 className="text-sm font-semibold text-foreground/90">
               {activePersona.name}
             </h2>
-            <p className="text-[10px] text-white/35">
+            <p className="text-[10px] text-foreground/35">
               {chatMode === "direct"
                 ? "Chat direto"
                 : "Ecossistema completo"}
@@ -73,7 +73,7 @@ export function PersonaChatInterface() {
             <button
               type="button"
               onClick={handleClear}
-              className="rounded-lg p-1.5 text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+              className="rounded-lg p-1.5 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
               title="Limpar conversa"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -90,12 +90,12 @@ export function PersonaChatInterface() {
               const Icon = PERSONA_ICONS[activePersona.id];
               return Icon ? <Icon className={cn("mb-3 h-12 w-12", colors.text, "opacity-60")} /> : null;
             })()}
-            <div className="max-w-md rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <p className="text-sm leading-relaxed text-white/60">
+            <div className="max-w-md rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-5">
+              <p className="text-sm leading-relaxed text-foreground/60">
                 {activePersona.greeting}
               </p>
             </div>
-            <p className="mt-3 text-[10px] text-white/20">
+            <p className="mt-3 text-[10px] text-foreground/20">
               Envie uma mensagem para comecar
             </p>
           </div>
@@ -113,16 +113,16 @@ export function PersonaChatInterface() {
               className={cn(
                 "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
                 msg.role === "user"
-                  ? "bg-neon-cyan/10 border border-neon-cyan/20 text-white/90"
+                  ? "bg-neon-cyan/10 border border-neon-cyan/20 text-foreground/90"
                   : cn(
-                      "border bg-white/[0.03]",
+                      "border bg-foreground/[0.03]",
                       colors.border,
-                      "text-white/75"
+                      "text-foreground/75"
                     )
               )}
             >
               {msg.role === "persona" && (
-                <span className="mb-1 block text-xs font-medium text-white/40">
+                <span className="mb-1 block text-xs font-medium text-foreground/40">
                   {activePersona.name}
                 </span>
               )}
@@ -135,12 +135,12 @@ export function PersonaChatInterface() {
           <div className="mb-4 flex justify-start animate-message-in">
             <div
               className={cn(
-                "flex items-center gap-2 rounded-2xl border bg-white/[0.03] px-4 py-3",
+                "flex items-center gap-2 rounded-2xl border bg-foreground/[0.03] px-4 py-3",
                 colors.border
               )}
             >
               <Loader2 className={cn("h-3.5 w-3.5 animate-spin", colors.text)} />
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-foreground/40">
                 {activePersona.name} esta pensando...
               </span>
             </div>
@@ -151,15 +151,15 @@ export function PersonaChatInterface() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-white/[0.06] px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-4 py-2.5">
+      <div className="border-t border-foreground/[0.06] px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-2 rounded-xl bg-foreground/[0.04] px-4 py-2.5">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Pergunte algo para ${activePersona.name}...`}
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/25 outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/25 outline-none"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();

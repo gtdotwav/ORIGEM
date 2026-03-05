@@ -24,7 +24,7 @@ export default function DashboardLayout({
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   return (
-    <main className="isolate relative flex min-h-screen flex-col bg-[#04070d]">
+    <main className="isolate relative flex min-h-screen flex-col bg-background">
       <BackendSessionBootstrap />
       <LiquidGradientBackground />
 
@@ -34,15 +34,15 @@ export default function DashboardLayout({
 
       {/* Workspace active context bar */}
       {activeWorkspace && (
-        <div className="relative z-20 flex items-center justify-center gap-3 border-b border-white/[0.04] bg-black/30 px-4 py-1.5 backdrop-blur-sm">
+        <div className="relative z-20 flex items-center justify-center gap-3 border-b border-border/30 bg-card/50 px-4 py-1.5 backdrop-blur-sm">
           <span
             className={`h-1.5 w-1.5 rounded-full ${WORKSPACE_COLORS[activeWorkspace.color].bg} ${WORKSPACE_COLORS[activeWorkspace.color].border} border`}
           />
-          <span className="text-xs text-white/45">
+          <span className="text-xs text-muted-foreground">
             Workspace:{" "}
             <Link
               href={`/dashboard/workspaces/${activeWorkspace.id}`}
-              className="text-white/65 hover:text-white/80"
+              className="text-foreground/65 hover:text-foreground/80"
             >
               {activeWorkspace.name}
             </Link>
@@ -50,7 +50,7 @@ export default function DashboardLayout({
           <button
             type="button"
             onClick={() => setActiveWorkspace(null)}
-            className="rounded p-0.5 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+            className="rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-muted/50 hover:text-foreground/60"
             title="Limpar filtro de workspace"
           >
             <X className="h-3 w-3" />

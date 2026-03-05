@@ -179,11 +179,11 @@ export default function DashboardPage() {
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
 
       {/* Left toolbar — vertical button strip */}
-      <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-white/[0.06] bg-neutral-950/80 p-1 shadow-lg backdrop-blur-xl">
+      <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-foreground/[0.06] bg-card/80 p-1 shadow-lg backdrop-blur-xl">
         <button
           type="button"
           onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); setCalendarOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
           title="Historico"
         >
           <History className="h-3.5 w-3.5" />
@@ -191,7 +191,7 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => { setConnectorsOpen(!connectorsOpen); setHistoryOpen(false); setCalendarOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
           title="Conectores"
         >
           <Plug className="h-3.5 w-3.5" />
@@ -199,7 +199,7 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => { setCalendarOpen(!calendarOpen); setHistoryOpen(false); setConnectorsOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/50"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
           title="Calendario"
         >
           <Calendar className="h-3.5 w-3.5" />
@@ -233,14 +233,14 @@ export default function DashboardPage() {
         className="relative z-10 flex w-full max-w-[640px] flex-col items-center"
       >
         <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-neon-cyan/8 bg-neon-cyan/4 blur-2xl" />
-        <div className="w-full rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 shadow-2xl backdrop-blur-xl">
+        <div className="w-full rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 shadow-2xl backdrop-blur-xl">
           {/* Greeting */}
           <div className="mb-1 flex items-center gap-2">
             <Image src="/logo.png" alt="ORIGEM" width={20} height={20} className="pointer-events-none" />
-            <span className="text-sm text-white/70">Bem-vindo ao ORIGEM</span>
+            <span className="text-sm text-foreground/70">Bem-vindo ao ORIGEM</span>
           </div>
 
-          <h1 className="mb-5 text-2xl font-semibold text-white">
+          <h1 className="mb-5 text-2xl font-semibold text-foreground">
             Como posso ajudar hoje?
           </h1>
 
@@ -253,14 +253,14 @@ export default function DashboardPage() {
           )}
 
           {/* Input field */}
-          <div className="mb-3 rounded-xl bg-white/[0.06] px-4 py-3">
+          <div className="mb-3 rounded-xl bg-foreground/[0.06] px-4 py-3">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Pergunte qualquer coisa..."
-              className="w-full bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -277,13 +277,13 @@ export default function DashboardPage() {
                 <MessageCircle
                   className={cn(
                     "h-3.5 w-3.5 transition-colors",
-                    !isEcosystem ? "text-neon-cyan" : "text-white/25"
+                    !isEcosystem ? "text-neon-cyan" : "text-foreground/25"
                   )}
                 />
                 <span
                   className={cn(
                     "text-[11px] transition-colors",
-                    !isEcosystem ? "text-white/60" : "text-white/25"
+                    !isEcosystem ? "text-foreground/60" : "text-foreground/25"
                   )}
                 >
                   Chat
@@ -299,20 +299,20 @@ export default function DashboardPage() {
                 <Workflow
                   className={cn(
                     "h-3.5 w-3.5 transition-colors",
-                    isEcosystem ? "text-neon-purple" : "text-white/25"
+                    isEcosystem ? "text-neon-purple" : "text-foreground/25"
                   )}
                 />
                 <span
                   className={cn(
                     "text-[11px] transition-colors",
-                    isEcosystem ? "text-white/60" : "text-white/25"
+                    isEcosystem ? "text-foreground/60" : "text-foreground/25"
                   )}
                 >
                   360
                 </span>
               </div>
             </div>
-            <div className="h-4 w-px bg-white/[0.08]" />
+            <div className="h-4 w-px bg-foreground/[0.08]" />
             <LLMSelector />
           </div>
 
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={openImagePicker}
                 disabled={sending || uploadingImage}
-                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50 disabled:cursor-not-allowed disabled:opacity-40"
                 title="Enviar imagem"
               >
                 <ImageIcon className="h-4 w-4" />
@@ -337,7 +337,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/settings/providers")}
-                className="rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50"
+                className="rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50"
                 title="Configuracoes"
               >
                 <Settings className="h-4 w-4" />
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
                   ideasOpen
                     ? "border-neon-purple/40 bg-neon-purple/15 text-neon-purple"
-                    : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:border-neon-purple/30 hover:bg-neon-purple/5 hover:text-neon-purple/70"
+                    : "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 hover:border-neon-purple/30 hover:bg-neon-purple/5 hover:text-neon-purple/70"
                 )}
                 title="Gerar ideias"
               >
@@ -416,7 +416,7 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
                 onClick={() => setInput(suggestion)}
-                className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/50 transition-all hover:border-white/15 hover:bg-white/[0.08] hover:text-white/70"
+                className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/15 hover:bg-foreground/[0.08] hover:text-foreground/70"
               >
                 {suggestion}
               </motion.button>
@@ -428,7 +428,7 @@ export default function DashboardPage() {
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">
         <div className="text-center">
-          <p className="text-[10px] text-white/15">ORIGEM — Psychosemantic AI Engine</p>
+          <p className="text-[10px] text-foreground/15">ORIGEM — Psychosemantic AI Engine</p>
         </div>
       </div>
     </div>

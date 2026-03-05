@@ -46,7 +46,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
     .toUpperCase();
 
   return (
-    <div className="group rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl transition-all hover:border-white/[0.12]">
+    <div className="group rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl transition-all hover:border-foreground/[0.12]">
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neon-cyan/10 text-sm font-bold text-neon-cyan/70">
@@ -56,7 +56,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
         {/* Info */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-white/90">
+            <h3 className="truncate text-sm font-semibold text-foreground/90">
               {connection.name}
             </h3>
             <span
@@ -69,9 +69,9 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               {status.label}
             </span>
           </div>
-          <p className="truncate text-xs text-white/40">{connection.role}</p>
+          <p className="truncate text-xs text-foreground/40">{connection.role}</p>
           {connection.title && (
-            <p className="truncate text-xs text-white/25">{connection.title}</p>
+            <p className="truncate text-xs text-foreground/25">{connection.title}</p>
           )}
         </div>
 
@@ -80,14 +80,14 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="rounded-lg p-1.5 text-white/20 opacity-0 transition-all hover:bg-white/[0.05] hover:text-white/50 group-hover:opacity-100"
+              className="rounded-lg p-1.5 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.05] hover:text-foreground/50 group-hover:opacity-100"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="border-white/[0.08] bg-neutral-950/95 backdrop-blur-xl"
+            className="border-foreground/[0.08] bg-card/95 backdrop-blur-xl"
           >
             <DropdownMenuItem onClick={() => onEdit(connection)}>
               <Pencil className="mr-2 h-3.5 w-3.5" />
@@ -112,7 +112,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               <Compass className="mr-2 h-3.5 w-3.5" />
               Adicionar ao 360º
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/[0.06]" />
+            <DropdownMenuSeparator className="bg-foreground/[0.06]" />
             {connection.status !== "blocked" ? (
               <DropdownMenuItem
                 onClick={() => {
@@ -154,7 +154,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
           {connection.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/35"
+              className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-[10px] text-foreground/35"
             >
               {tag}
             </span>
@@ -163,7 +163,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
       )}
 
       {/* Direction badge */}
-      <div className="mt-2 text-[10px] text-white/20">
+      <div className="mt-2 text-[10px] text-foreground/20">
         {connection.direction === "sent" ? "Convite enviado" : "Convite recebido"}
       </div>
     </div>

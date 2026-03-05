@@ -99,23 +99,23 @@ export default function CanvasPage() {
         <div className="mb-6 flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-semibold text-white">Canvas de Fluxos</h1>
-            <p className="mt-0.5 text-xs text-white/40">
+            <h1 className="text-xl font-semibold text-foreground">Canvas de Fluxos</h1>
+            <p className="mt-0.5 text-xs text-foreground/40">
               Conecte sessoes de chat em fluxos visuais
             </p>
           </div>
         </div>
 
         {flows.length === 0 ? (
-          <div className="flex flex-col items-center rounded-2xl border border-dashed border-white/[0.10] bg-neutral-900/50 py-16 text-center backdrop-blur-xl">
+          <div className="flex flex-col items-center rounded-2xl border border-dashed border-foreground/[0.10] bg-card/50 py-16 text-center backdrop-blur-xl">
             <Workflow className="mb-3 h-10 w-10 text-neon-purple/40" />
-            <p className="text-sm text-white/50">Nenhum canvas criado</p>
-            <p className="mt-1 text-xs text-white/25">
+            <p className="text-sm text-foreground/50">Nenhum canvas criado</p>
+            <p className="mt-1 text-xs text-foreground/25">
               Crie um canvas para conectar seus chats em fluxos
             </p>
             <button
@@ -134,15 +134,15 @@ export default function CanvasPage() {
                 key={flow.id}
                 type="button"
                 onClick={() => setActiveFlow(flow.id)}
-                className="group flex w-full items-center justify-between rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 text-left backdrop-blur-xl transition-all hover:border-neon-purple/20 hover:bg-neutral-900/80"
+                className="group flex w-full items-center justify-between rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 text-left backdrop-blur-xl transition-all hover:border-neon-purple/20 hover:bg-card/80"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neon-purple/10">
                     <Workflow className="h-4 w-4 text-neon-purple" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white/80">{flow.name}</p>
-                    <p className="text-[10px] text-white/30">
+                    <p className="text-sm font-medium text-foreground/80">{flow.name}</p>
+                    <p className="text-[10px] text-foreground/30">
                       {flow.nodes.length} sessoes · {flow.edges.length} conexoes
                     </p>
                   </div>
@@ -154,7 +154,7 @@ export default function CanvasPage() {
                     removeFlow(flow.id);
                     toast.success("Canvas removido");
                   }}
-                  className="rounded-md p-1.5 text-white/20 opacity-0 transition-all hover:bg-white/[0.06] hover:text-red-400 group-hover:opacity-100"
+                  className="rounded-md p-1.5 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-red-400 group-hover:opacity-100"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -179,21 +179,21 @@ export default function CanvasPage() {
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] bg-neutral-950/80 px-4 py-2.5 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-foreground/[0.06] bg-card/80 px-4 py-2.5 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setActiveFlow(null)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
           </button>
           <div className="flex items-center gap-2">
             <Workflow className="h-4 w-4 text-neon-purple" />
-            <span className="text-sm font-medium text-white/80">
+            <span className="text-sm font-medium text-foreground/80">
               {activeFlow.name}
             </span>
-            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/30">
+            <span className="rounded-md bg-foreground/[0.06] px-1.5 py-0.5 text-[10px] text-foreground/30">
               {activeFlow.nodes.length} sessoes
             </span>
           </div>
@@ -210,12 +210,12 @@ export default function CanvasPage() {
           </button>
 
           {pickerOpen && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-white/[0.08] bg-neutral-950/95 p-2 shadow-2xl backdrop-blur-xl">
-              <p className="mb-1.5 px-2 text-[10px] uppercase tracking-wide text-white/30">
+            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-foreground/[0.08] bg-card/95 p-2 shadow-2xl backdrop-blur-xl">
+              <p className="mb-1.5 px-2 text-[10px] uppercase tracking-wide text-foreground/30">
                 Sessoes disponiveis
               </p>
               {availableSessions.length === 0 ? (
-                <p className="px-2 py-3 text-center text-xs text-white/30">
+                <p className="px-2 py-3 text-center text-xs text-foreground/30">
                   Todas as sessoes ja foram adicionadas
                 </p>
               ) : (
@@ -225,9 +225,9 @@ export default function CanvasPage() {
                       key={session.id}
                       type="button"
                       onClick={() => handleAddSession(session.id)}
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/[0.05]"
+                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-foreground/[0.05]"
                     >
-                      <span className="truncate text-xs text-white/70">
+                      <span className="truncate text-xs text-foreground/70">
                         {session.title}
                       </span>
                     </button>
@@ -261,10 +261,10 @@ export default function CanvasPage() {
           <Background gap={20} size={1} color="oklch(1 0 0 / 0.04)" />
           <Controls
             showInteractive={false}
-            className="!rounded-xl !border-white/[0.08] !bg-neutral-900/80 !shadow-xl backdrop-blur-xl [&>button]:!border-white/[0.06] [&>button]:!bg-transparent [&>button]:!text-white/40 [&>button:hover]:!bg-white/[0.06] [&>button:hover]:!text-white/70"
+            className="!rounded-xl !border-foreground/[0.08] !bg-card/80 !shadow-xl backdrop-blur-xl [&>button]:!border-foreground/[0.06] [&>button]:!bg-transparent [&>button]:!text-foreground/40 [&>button:hover]:!bg-foreground/[0.06] [&>button:hover]:!text-foreground/70"
           />
           <MiniMap
-            className="!rounded-xl !border-white/[0.08] !bg-neutral-900/80 backdrop-blur-xl"
+            className="!rounded-xl !border-foreground/[0.08] !bg-card/80 backdrop-blur-xl"
             nodeColor="oklch(0.78 0.15 195 / 0.3)"
             maskColor="oklch(0 0 0 / 0.7)"
           />

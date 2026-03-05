@@ -51,7 +51,7 @@ export function CriticPanel({ className }: { className?: string }) {
             "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-all",
             activeCount > 0
               ? "border-neon-pink/30 bg-neon-pink/10 text-neon-pink"
-              : "border-white/[0.08] bg-white/[0.03] text-white/30 hover:bg-white/[0.06] hover:text-white/50",
+              : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/30 hover:bg-foreground/[0.06] hover:text-foreground/50",
             className
           )}
         >
@@ -65,11 +65,11 @@ export function CriticPanel({ className }: { className?: string }) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 border-white/[0.08] bg-neutral-950/95 p-3 shadow-2xl backdrop-blur-xl"
+        className="w-80 border-foreground/[0.08] bg-card/95 p-3 shadow-2xl backdrop-blur-xl"
         align="end"
         sideOffset={8}
       >
-        <p className="mb-3 text-xs font-semibold text-white/50">
+        <p className="mb-3 text-xs font-semibold text-foreground/50">
           Selecione os criticos ativos
         </p>
         <div className="space-y-1.5">
@@ -79,7 +79,7 @@ export function CriticPanel({ className }: { className?: string }) {
             const isExpanded = expandedCritic === critic.type;
 
             return (
-              <div key={critic.type} className="rounded-lg border border-white/[0.06] bg-white/[0.02]">
+              <div key={critic.type} className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02]">
                 <button
                   type="button"
                   onClick={() => toggleCritic(critic.type)}
@@ -88,13 +88,13 @@ export function CriticPanel({ className }: { className?: string }) {
                   <div
                     className={cn(
                       "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
-                      critic.enabled ? colors.bg : "bg-white/[0.04]"
+                      critic.enabled ? colors.bg : "bg-foreground/[0.04]"
                     )}
                   >
                     <Icon
                       className={cn(
                         "h-3 w-3 transition-colors",
-                        critic.enabled ? colors.text : "text-white/30"
+                        critic.enabled ? colors.text : "text-foreground/30"
                       )}
                     />
                   </div>
@@ -102,12 +102,12 @@ export function CriticPanel({ className }: { className?: string }) {
                     <p
                       className={cn(
                         "text-xs font-medium",
-                        critic.enabled ? "text-white/90" : "text-white/50"
+                        critic.enabled ? "text-foreground/90" : "text-foreground/50"
                       )}
                     >
                       {critic.label}
                     </p>
-                    <p className="text-[10px] text-white/25">
+                    <p className="text-[10px] text-foreground/25">
                       {critic.description}
                     </p>
                   </div>
@@ -116,19 +116,19 @@ export function CriticPanel({ className }: { className?: string }) {
                       "h-3.5 w-3.5 rounded-sm border-2 transition-colors",
                       critic.enabled
                         ? `${colors.border} ${colors.bg}`
-                        : "border-white/15"
+                        : "border-foreground/15"
                     )}
                   />
                 </button>
 
                 {critic.enabled && (
-                  <div className="border-t border-white/[0.04] px-2.5 pb-2 pt-1.5">
+                  <div className="border-t border-foreground/[0.04] px-2.5 pb-2 pt-1.5">
                     <button
                       type="button"
                       onClick={() =>
                         setExpandedCritic(isExpanded ? null : critic.type)
                       }
-                      className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/50"
+                      className="flex items-center gap-1 text-[10px] text-foreground/30 hover:text-foreground/50"
                     >
                       <ChevronDown
                         className={cn(
@@ -146,7 +146,7 @@ export function CriticPanel({ className }: { className?: string }) {
                           setCriticGuidance(critic.type, e.target.value)
                         }
                         placeholder="Ex: foque em dados numericos..."
-                        className="mt-1 w-full rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-white/15"
+                        className="mt-1 w-full rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-2 py-1.5 text-[11px] text-foreground/70 placeholder:text-foreground/20 outline-none focus:border-foreground/15"
                       />
                     )}
                   </div>

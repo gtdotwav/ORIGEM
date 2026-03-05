@@ -126,7 +126,7 @@ export function AIVoiceInput({
       onClick={handleClick}
       title="Clique para falar"
       className={cn(
-        "rounded-lg p-2 text-white/30 transition-colors hover:bg-white/5 hover:text-white/50",
+        "rounded-lg p-2 text-foreground/30 transition-colors hover:bg-foreground/5 hover:text-foreground/50",
         className
       )}
     >

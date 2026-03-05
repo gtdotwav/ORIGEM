@@ -47,7 +47,7 @@ export default function KidsStoriesPage() {
       <div className="mb-6 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -55,8 +55,8 @@ export default function KidsStoriesPage() {
           <span className="text-xl">{"\u{1F4D6}"}</span>
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Historias Interativas</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Historias Interativas</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Aventuras magicas para ler, ouvir e explorar
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function KidsStoriesPage() {
               "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
               activeFilter === f.id
                 ? "border-neon-purple/30 bg-neon-purple/10 text-neon-purple"
-                : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:bg-white/[0.06] hover:text-white/60"
+                : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/40 hover:bg-foreground/[0.06] hover:text-foreground/60"
             )}
           >
             {f.label}
@@ -89,15 +89,15 @@ export default function KidsStoriesPage() {
           return (
             <div
               key={story.id}
-              className="group cursor-pointer rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl transition-all hover:border-neon-purple/30"
+              className="group cursor-pointer rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all hover:border-neon-purple/30"
             >
               <div
                 className={`flex h-32 items-center justify-center rounded-t-2xl bg-gradient-to-br ${story.gradient}`}
               >
-                <BookOpen className="h-10 w-10 text-white/40 transition-transform group-hover:scale-110" />
+                <BookOpen className="h-10 w-10 text-foreground/40 transition-transform group-hover:scale-110" />
               </div>
               <div className="p-4">
-                <h3 className="mb-2 text-sm font-semibold text-white/85">
+                <h3 className="mb-2 text-sm font-semibold text-foreground/85">
                   {story.title}
                 </h3>
                 <div className="flex items-center gap-2">
@@ -107,11 +107,11 @@ export default function KidsStoriesPage() {
                     <FmtIcon className="h-2.5 w-2.5" />
                     {fmt.label}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-white/30">
+                  <span className="flex items-center gap-1 text-[10px] text-foreground/30">
                     <Clock className="h-2.5 w-2.5" />
                     {story.duration}
                   </span>
-                  <span className="text-[10px] text-white/20">
+                  <span className="text-[10px] text-foreground/20">
                     ORIGEM Kids
                   </span>
                 </div>

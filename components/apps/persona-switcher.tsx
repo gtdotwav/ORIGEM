@@ -23,7 +23,7 @@ export function PersonaSwitcher() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-neutral-900/80 px-3 py-2 text-sm backdrop-blur-xl transition-all hover:border-white/[0.15] hover:bg-neutral-900/90"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/[0.08] bg-card/80 px-3 py-2 text-sm backdrop-blur-xl transition-all hover:border-foreground/[0.15] hover:bg-card/90"
         >
           {activePersona ? (
             <>
@@ -32,24 +32,24 @@ export function PersonaSwitcher() {
                 const colors = PERSONA_COLORS[activePersona.color];
                 return Icon ? <Icon className={cn("h-4.5 w-4.5", colors.text)} /> : null;
               })()}
-              <span className="max-w-[120px] truncate text-white/80">
+              <span className="max-w-[120px] truncate text-foreground/80">
                 {activePersona.name}
               </span>
             </>
           ) : (
             <>
-              <Users className="h-4 w-4 text-white/40" />
-              <span className="text-white/50">Escolher persona</span>
+              <Users className="h-4 w-4 text-foreground/40" />
+              <span className="text-foreground/50">Escolher persona</span>
             </>
           )}
-          <ChevronDown className="h-3.5 w-3.5 text-white/30" />
+          <ChevronDown className="h-3.5 w-3.5 text-foreground/30" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-72 border-white/[0.08] bg-neutral-900/95 p-2 backdrop-blur-xl"
+        className="w-72 border-foreground/[0.08] bg-card/95 p-2 backdrop-blur-xl"
       >
-        <p className="mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+        <p className="mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-foreground/30">
           Escolha uma persona
         </p>
 
@@ -66,8 +66,8 @@ export function PersonaSwitcher() {
                 setOpen(false);
               }}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hover:bg-white/[0.06]",
-                isActive ? "bg-white/[0.04]" : ""
+                "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hover:bg-foreground/[0.06]",
+                isActive ? "bg-foreground/[0.04]" : ""
               )}
             >
               {(() => {
@@ -79,7 +79,7 @@ export function PersonaSwitcher() {
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      isActive ? "text-white/90" : "text-white/70"
+                      isActive ? "text-foreground/90" : "text-foreground/70"
                     )}
                   >
                     {persona.name}
@@ -91,7 +91,7 @@ export function PersonaSwitcher() {
                     )}
                   />
                 </div>
-                <p className="truncate text-[10px] text-white/35">
+                <p className="truncate text-[10px] text-foreground/35">
                   {persona.description}
                 </p>
               </div>

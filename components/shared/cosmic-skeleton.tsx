@@ -6,7 +6,7 @@ function Shimmer({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg bg-white/[0.04]",
+        "animate-pulse rounded-lg bg-foreground/[0.04]",
         className
       )}
     />
@@ -17,7 +17,7 @@ export function CardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl",
+        "rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl",
         className
       )}
     >
@@ -45,7 +45,7 @@ export function MetricSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl",
+        "rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl",
         className
       )}
     >
@@ -71,7 +71,7 @@ export function MessageSkeleton({
         className
       )}
     >
-      <div className="max-w-[88%] space-y-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+      <div className="max-w-[88%] space-y-2 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] px-4 py-3">
         <Shimmer className="h-3 w-48" />
         <Shimmer className="h-3 w-36" />
         <Shimmer className="h-2.5 w-16" />
@@ -84,7 +84,7 @@ export function TaskRowSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5",
+        "rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-2.5",
         className
       )}
     >
@@ -106,7 +106,7 @@ export function SessionListSkeleton({ count = 4 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl"
+          className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl"
         >
           <div className="mb-2 flex items-center justify-between">
             <Shimmer className="h-4 w-2/5" />
@@ -126,7 +126,7 @@ export function SessionListSkeleton({ count = 4 }: { count?: number }) {
 
 export function PipelineSkeleton() {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl">
+    <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
         <Shimmer className="h-5 w-5 rounded" />
         <Shimmer className="h-5 w-40" />
@@ -144,7 +144,7 @@ export function PipelineSkeleton() {
 export function ContextSkeleton() {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-neutral-900/70 px-4 py-3 backdrop-blur-xl">
+      <div className="flex items-center gap-3 rounded-xl border border-foreground/[0.08] bg-card/70 px-4 py-3 backdrop-blur-xl">
         <Shimmer className="h-4 w-4 rounded" />
         <Shimmer className="h-4 w-full" />
       </div>

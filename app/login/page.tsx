@@ -64,7 +64,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               size="lg"
-              className="h-12 w-full border border-white/[0.10] bg-white/[0.06] text-foreground backdrop-blur-sm hover:border-white/[0.15] hover:bg-white/[0.10]"
+              className="h-12 w-full border border-foreground/[0.10] bg-foreground/[0.06] text-foreground backdrop-blur-sm hover:border-foreground/[0.15] hover:bg-foreground/[0.10]"
             >
               <GithubIcon strokeWidth={2.5} className="me-2 size-4" />
               Continuar com GitHub

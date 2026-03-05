@@ -20,14 +20,14 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
   };
 
   return (
-    <div className="group/code relative my-2 rounded-xl border border-white/[0.08] bg-black/40">
+    <div className="group/code relative my-2 rounded-xl border border-foreground/[0.08] bg-black/40">
       {lang && (
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-3 py-1.5">
-          <span className="text-[10px] text-white/30">{lang}</span>
+        <div className="flex items-center justify-between border-b border-foreground/[0.06] px-3 py-1.5">
+          <span className="text-[10px] text-foreground/30">{lang}</span>
           <button
             type="button"
             onClick={handleCopy}
-            className="text-white/25 transition-colors hover:text-white/50"
+            className="text-foreground/25 transition-colors hover:text-foreground/50"
           >
             {copied ? (
               <Check className="h-3 w-3 text-neon-green" />
@@ -38,13 +38,13 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
         </div>
       )}
       <pre className="overflow-x-auto px-3 py-2.5">
-        <code className="font-mono text-xs text-white/80">{code}</code>
+        <code className="font-mono text-xs text-foreground/80">{code}</code>
       </pre>
       {!lang && (
         <button
           type="button"
           onClick={handleCopy}
-          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/code:opacity-100 text-white/25 hover:text-white/50"
+          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/code:opacity-100 text-foreground/25 hover:text-foreground/50"
         >
           {copied ? (
             <Check className="h-3 w-3 text-neon-green" />
@@ -66,7 +66,7 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
     // Bold
     const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
     if (boldMatch) {
-      nodes.push(<strong key={key++} className="font-semibold text-white/95">{boldMatch[1]}</strong>);
+      nodes.push(<strong key={key++} className="font-semibold text-foreground/95">{boldMatch[1]}</strong>);
       remaining = remaining.slice(boldMatch[0].length);
       continue;
     }
@@ -158,7 +158,7 @@ export function MarkdownRenderer({
         elements.push(
           <ul key={key++} className="my-1 ml-4 list-disc space-y-0.5">
             {items.map((item, j) => (
-              <li key={j} className="text-sm leading-relaxed text-white/85">
+              <li key={j} className="text-sm leading-relaxed text-foreground/85">
                 {renderInlineMarkdown(item)}
               </li>
             ))}
@@ -177,7 +177,7 @@ export function MarkdownRenderer({
         elements.push(
           <ol key={key++} className="my-1 ml-4 list-decimal space-y-0.5">
             {items.map((item, j) => (
-              <li key={j} className="text-sm leading-relaxed text-white/85">
+              <li key={j} className="text-sm leading-relaxed text-foreground/85">
                 {renderInlineMarkdown(item)}
               </li>
             ))}

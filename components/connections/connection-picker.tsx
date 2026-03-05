@@ -62,7 +62,7 @@ export function ConnectionPicker({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-sm">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users2 className="h-4 w-4 text-neon-cyan" />
@@ -74,19 +74,19 @@ export function ConnectionPicker({
         </DialogHeader>
 
         <div className="relative mb-2">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/25" />
           <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar..."
-            className="border-white/[0.08] bg-white/[0.04] pl-9 text-sm text-white/90 placeholder:text-white/25"
+            className="border-foreground/[0.08] bg-foreground/[0.04] pl-9 text-sm text-foreground/90 placeholder:text-foreground/25"
           />
         </div>
 
         <div className="max-h-60 space-y-0.5 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm text-white/25">
+            <p className="py-6 text-center text-sm text-foreground/25">
               Nenhuma conexão encontrada.
             </p>
           ) : (
@@ -99,7 +99,7 @@ export function ConnectionPicker({
                   onClick={() => handleToggle(conn.id)}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors",
-                    isSelected ? "bg-neon-cyan/5" : "hover:bg-white/[0.05]"
+                    isSelected ? "bg-neon-cyan/5" : "hover:bg-foreground/[0.05]"
                   )}
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neon-cyan/10 text-xs font-bold text-neon-cyan/70">
@@ -111,8 +111,8 @@ export function ConnectionPicker({
                       .toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-white/80">{conn.name}</p>
-                    <p className="truncate text-[11px] text-white/30">{conn.role}</p>
+                    <p className="truncate text-sm text-foreground/80">{conn.name}</p>
+                    <p className="truncate text-[11px] text-foreground/30">{conn.role}</p>
                   </div>
                   {isSelected && <Check className="h-4 w-4 shrink-0 text-neon-cyan" />}
                 </button>

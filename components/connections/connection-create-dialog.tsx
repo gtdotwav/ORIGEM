@@ -100,7 +100,7 @@ export function ConnectionCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-4 w-4 text-neon-cyan" />
@@ -116,62 +116,62 @@ export function ConnectionCreateDialog({
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Name */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">Nome *</label>
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">Nome *</label>
             <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nome completo"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">Email</label>
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">Email</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
           {/* Role + Title */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/50">Função</label>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">Função</label>
               <Input
                 type="text"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 placeholder="Ex: Desenvolvedor"
-                className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+                className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/50">Título</label>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">Título</label>
               <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Senior @ XPTO"
-                className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+                className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
               />
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">Tags (Enter para adicionar)</label>
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">Tags (Enter para adicionar)</label>
             <Input
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
               placeholder="Ex: tech, ia, design"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
             {tags.length > 0 && (
               <div className="mt-1.5 flex flex-wrap gap-1">
@@ -192,13 +192,13 @@ export function ConnectionCreateDialog({
 
           {/* Notes */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">Notas</label>
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">Notas</label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Observações sobre essa conexão..."
               rows={2}
-              className="min-h-[60px] resize-none border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="min-h-[60px] resize-none border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
@@ -208,7 +208,7 @@ export function ConnectionCreateDialog({
               variant="ghost"
               type="button"
               onClick={() => onOpenChange(false)}
-              className="text-xs text-white/50 hover:text-white/70"
+              className="text-xs text-foreground/50 hover:text-foreground/70"
             >
               Cancelar
             </Button>

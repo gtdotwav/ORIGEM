@@ -219,12 +219,12 @@ function GroupsPageContent() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Users className="h-5 w-5 text-green-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">Grupos de Execucao</h1>
-            <p className="mt-1 text-sm text-white/50">
+            <h1 className="text-2xl font-semibold text-foreground">Grupos de Execucao</h1>
+            <p className="mt-1 text-sm text-foreground/50">
               Colaboracao de agentes organizada para cumprir o plano do projeto.
             </p>
           </div>
@@ -238,7 +238,7 @@ function GroupsPageContent() {
                 targetSessionId,
                 selectedContext?.id
               )}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Projetos
@@ -257,24 +257,24 @@ function GroupsPageContent() {
       </div>
 
       {isHydrating ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 backdrop-blur-xl">
-          <div className="inline-flex items-center gap-2 text-sm text-white/70">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 text-sm text-foreground/70">
             <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
             Carregando grupos da sessao...
           </div>
         </div>
       ) : !targetSessionId ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-6 text-sm text-white/65">
+        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 text-sm text-foreground/65">
           Nenhuma sessao ativa encontrada. Inicie no chat para montar grupos.
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-            <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+          <div className="mb-4 rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+            <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
               Direcoes para grupos
             </p>
             {groupDirections.length === 0 ? (
-              <p className="mt-2 text-sm text-white/50">
+              <p className="mt-2 text-sm text-foreground/50">
                 Sem direcoes adicionais para grupos neste contexto.
               </p>
             ) : (
@@ -312,12 +312,12 @@ function GroupsPageContent() {
                 return (
                   <div
                     key={group.id}
-                    className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl"
+                    className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl"
                   >
                     <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="text-base font-semibold text-white/90">{group.name}</p>
-                        <p className="text-xs text-white/45">
+                        <p className="text-base font-semibold text-foreground/90">{group.name}</p>
+                        <p className="text-xs text-foreground/45">
                           {group.isVirtual
                             ? "grupo sintetico gerado a partir das tarefas"
                             : "grupo registrado na sessao"}
@@ -331,18 +331,18 @@ function GroupsPageContent() {
                       </span>
                     </div>
 
-                    <p className="mb-3 text-xs text-white/55">{meta.description}</p>
+                    <p className="mb-3 text-xs text-foreground/55">{meta.description}</p>
 
                     <div className="mb-3 flex flex-wrap gap-1.5">
                       {members.length === 0 ? (
-                        <span className="rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-1 text-xs text-white/45">
+                        <span className="rounded-md border border-foreground/[0.12] bg-foreground/[0.05] px-2 py-1 text-xs text-foreground/45">
                           Sem membros mapeados
                         </span>
                       ) : (
                         members.map((member) => (
                           <span
                             key={member.id}
-                            className="rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-1 text-xs text-white/70"
+                            className="rounded-md border border-foreground/[0.12] bg-foreground/[0.05] px-2 py-1 text-xs text-foreground/70"
                           >
                             {member.name}
                           </span>
@@ -350,17 +350,17 @@ function GroupsPageContent() {
                       )}
                     </div>
 
-                    <div className="space-y-1.5 rounded-lg border border-white/[0.08] bg-black/25 p-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-white/40">
+                    <div className="space-y-1.5 rounded-lg border border-foreground/[0.08] bg-black/25 p-2.5">
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-foreground/40">
                         Funcoes cobertas
                       </p>
                       {relatedTasks.length === 0 ? (
-                        <p className="text-xs text-white/45">Sem funcoes vinculadas ainda.</p>
+                        <p className="text-xs text-foreground/45">Sem funcoes vinculadas ainda.</p>
                       ) : (
                         relatedTasks
                           .sort((a, b) => a.priority - b.priority)
                           .map((task) => (
-                            <div key={task.id} className="text-xs text-white/70">
+                            <div key={task.id} className="text-xs text-foreground/70">
                               {task.priority}. {task.title} · {task.agentName} · {task.progress}%
                             </div>
                           ))
@@ -377,7 +377,7 @@ function GroupsPageContent() {
               <Sparkles className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
-            <p className="mt-1 text-xs text-white/70">
+            <p className="mt-1 text-xs text-foreground/70">
               Executar pipeline completo e acompanhar cada estagio da engrenagem em tempo real.
             </p>
             <div className="mt-2">

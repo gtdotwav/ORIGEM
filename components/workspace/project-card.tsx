@@ -78,11 +78,11 @@ export function ProjectCard({
               <Icon className={cn("h-4 w-4", colors.text)} />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white/85 transition-colors group-hover:text-white">
+              <p className="truncate text-sm font-medium text-foreground/85 transition-colors group-hover:text-foreground">
                 {project.name}
               </p>
               {project.description && (
-                <p className="truncate text-[11px] text-white/35">
+                <p className="truncate text-[11px] text-foreground/35">
                   {project.description}
                 </p>
               )}
@@ -93,25 +93,25 @@ export function ProjectCard({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="shrink-0 rounded-md p-1 text-white/25 opacity-0 transition-all hover:bg-white/[0.06] hover:text-white/50 group-hover:opacity-100"
+                className="shrink-0 rounded-md p-1 text-foreground/25 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl"
+              className="border-foreground/[0.08] bg-card/95 backdrop-blur-xl"
             >
               <DropdownMenuItem
                 onClick={() => onEdit(project)}
-                className="text-xs text-white/70"
+                className="text-xs text-foreground/70"
               >
                 <Pencil className="mr-2 h-3.5 w-3.5" />
                 Editar
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onArchive(project.id)}
-                className="text-xs text-white/70"
+                className="text-xs text-foreground/70"
               >
                 <Archive className="mr-2 h-3.5 w-3.5" />
                 Arquivar
@@ -130,24 +130,24 @@ export function ProjectCard({
         {/* Stats + footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="rounded-md border border-white/[0.06] bg-white/[0.03] px-1.5 py-0.5 text-[10px] text-white/40">
+            <span className="rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-1.5 py-0.5 text-[10px] text-foreground/40">
               {sessionCount} {sessionCount === 1 ? "sessao" : "sessoes"}
             </span>
-            <div className="flex items-center gap-1 text-[10px] text-white/25">
+            <div className="flex items-center gap-1 text-[10px] text-foreground/25">
               <span className={cn("h-1 w-1 rounded-full", colors.dot, "opacity-40")} />
               {formatRelativeTime(lastActivity)}
             </div>
           </div>
           <Link
             href={`/dashboard/workspaces/${project.workspaceId}/projects/${project.id}`}
-            className="inline-flex items-center gap-0.5 text-[10px] text-white/20 opacity-0 transition-all group-hover:text-white/50 group-hover:opacity-100"
+            className="inline-flex items-center gap-0.5 text-[10px] text-foreground/20 opacity-0 transition-all group-hover:text-foreground/50 group-hover:opacity-100"
           >
             <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
 
         {project.status === "archived" && (
-          <span className="mt-2 inline-block rounded-md border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-white/30">
+          <span className="mt-2 inline-block rounded-md border border-foreground/[0.08] bg-foreground/[0.03] px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-foreground/30">
             Arquivado
           </span>
         )}

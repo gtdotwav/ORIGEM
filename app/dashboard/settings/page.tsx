@@ -113,12 +113,12 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-8 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-          <Settings className="h-5 w-5 text-white/60" />
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
+          <Settings className="h-5 w-5 text-foreground/60" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Configuracoes</h1>
-          <p className="mt-1 text-sm text-white/40">
+          <h1 className="text-2xl font-semibold text-foreground">Configuracoes</h1>
+          <p className="mt-1 text-sm text-foreground/40">
             Configuracoes gerais da plataforma ORIGEM
           </p>
         </div>
@@ -128,30 +128,30 @@ export default function SettingsPage() {
         {SECTIONS.map((section) => (
           <div
             key={section.title}
-            className={`rounded-2xl border bg-neutral-900/70 p-5 backdrop-blur-xl transition-all ${section.borderClass}`}
+            className={`rounded-2xl border bg-card/70 p-5 backdrop-blur-xl transition-all ${section.borderClass}`}
           >
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-foreground/[0.06] bg-foreground/[0.03]">
                 <section.icon className={`h-4 w-4 ${section.iconClass}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-white/90">
+                  <h2 className="text-sm font-semibold text-foreground/90">
                     {section.title}
                   </h2>
                   {section.badge && (
-                    <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/50">
+                    <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/50">
                       {section.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-xs leading-relaxed text-white/45">
+                <p className="text-xs leading-relaxed text-foreground/45">
                   {section.description}
                 </p>
 
                 {section.title === "Aparencia" && (
-                  <div className="mt-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
-                    <span className="text-xs text-white/60">Reduzir animacoes</span>
+                  <div className="mt-3 flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-2">
+                    <span className="text-xs text-foreground/60">Reduzir animacoes</span>
                     <Switch
                       checked={reducedMotion}
                       onCheckedChange={handleMotionToggle}
@@ -162,13 +162,13 @@ export default function SettingsPage() {
                 {section.title === "Idioma" && (
                   <div className="mt-3">
                     <Select value={language} onValueChange={handleLanguageChange}>
-                      <SelectTrigger className="h-8 w-40 border-white/[0.08] bg-white/[0.04] text-xs text-white/70">
+                      <SelectTrigger className="h-8 w-40 border-foreground/[0.08] bg-foreground/[0.04] text-xs text-foreground/70">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl">
-                        <SelectItem value="pt-BR" className="text-xs text-white/70">Portugues (BR)</SelectItem>
-                        <SelectItem value="en-US" className="text-xs text-white/70">Ingles (US)</SelectItem>
-                        <SelectItem value="es-ES" className="text-xs text-white/70">Espanhol (ES)</SelectItem>
+                      <SelectContent className="border-foreground/[0.08] bg-card/95 backdrop-blur-xl">
+                        <SelectItem value="pt-BR" className="text-xs text-foreground/70">Portugues (BR)</SelectItem>
+                        <SelectItem value="en-US" className="text-xs text-foreground/70">Ingles (US)</SelectItem>
+                        <SelectItem value="es-ES" className="text-xs text-foreground/70">Espanhol (ES)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -176,28 +176,28 @@ export default function SettingsPage() {
 
                 {section.title === "Controle de Execucao" && (
                   <div className="mt-3 space-y-3">
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                    <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/35">
                         Configuracao do Ecossistema 360
                       </p>
                       <EcosystemConfig />
                     </div>
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                    <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/35">
                         Linguagem padrao das respostas
                       </p>
                       <Select value={runtimeLanguage} onValueChange={handleRuntimeLanguageChange}>
-                        <SelectTrigger className="h-8 w-48 border-white/[0.08] bg-white/[0.04] text-xs text-white/70">
+                        <SelectTrigger className="h-8 w-48 border-foreground/[0.08] bg-foreground/[0.04] text-xs text-foreground/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="border-white/[0.08] bg-neutral-900/95 backdrop-blur-xl">
-                          <SelectItem value="pt-BR" className="text-xs text-white/70">Portugues (BR)</SelectItem>
-                          <SelectItem value="en-US" className="text-xs text-white/70">Ingles (US)</SelectItem>
-                          <SelectItem value="es-ES" className="text-xs text-white/70">Espanhol (ES)</SelectItem>
+                        <SelectContent className="border-foreground/[0.08] bg-card/95 backdrop-blur-xl">
+                          <SelectItem value="pt-BR" className="text-xs text-foreground/70">Portugues (BR)</SelectItem>
+                          <SelectItem value="en-US" className="text-xs text-foreground/70">Ingles (US)</SelectItem>
+                          <SelectItem value="es-ES" className="text-xs text-foreground/70">Espanhol (ES)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <p className="text-[10px] leading-relaxed text-white/30">
+                    <p className="text-[10px] leading-relaxed text-foreground/30">
                       Prioridade de funcoes e notas de execucao sao configuradas por sessao, dentro do painel de Canvas/Orquestra de cada chat.
                     </p>
                   </div>
@@ -206,14 +206,14 @@ export default function SettingsPage() {
                 {section.title === "Provedores de IA" && (
                   <div className="mt-3 space-y-3">
                     {/* Provider list dropdown */}
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-                      <p className="mb-2 text-[10px] uppercase tracking-wide text-white/35">
+                    <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                      <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/35">
                         Provedores configurados
                       </p>
                       {providersLoading ? (
-                        <p className="text-xs text-white/25">Carregando...</p>
+                        <p className="text-xs text-foreground/25">Carregando...</p>
                       ) : configuredProviders.length === 0 ? (
-                        <p className="text-xs text-white/30">Nenhum provedor conectado</p>
+                        <p className="text-xs text-foreground/30">Nenhum provedor conectado</p>
                       ) : (
                         <div className="space-y-1.5">
                           {configuredProviders.map((cp) => {
@@ -222,16 +222,16 @@ export default function SettingsPage() {
                             return (
                               <div
                                 key={cp.provider}
-                                className="flex items-center justify-between rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                                className="flex items-center justify-between rounded-md border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-2"
                               >
                                 <div className="flex items-center gap-2">
                                   <Circle className="h-2 w-2 fill-neon-green text-neon-green" />
-                                  <span className="text-xs font-medium text-white/80">
+                                  <span className="text-xs font-medium text-foreground/80">
                                     {meta?.displayName ?? cp.provider}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-[10px] text-white/30">
+                                  <span className="text-[10px] text-foreground/30">
                                     {model?.name ?? cp.selectedModel}
                                   </span>
                                   <Check className="h-3 w-3 text-neon-green/60" />
@@ -253,8 +253,8 @@ export default function SettingsPage() {
                                 key={p.name}
                                 className="flex items-center gap-2 rounded-md px-3 py-1.5 opacity-40"
                               >
-                                <Circle className="h-2 w-2 text-white/20" />
-                                <span className="text-[11px] text-white/40">{p.displayName}</span>
+                                <Circle className="h-2 w-2 text-foreground/20" />
+                                <span className="text-[11px] text-foreground/40">{p.displayName}</span>
                               </div>
                             ))}
                           </div>
@@ -279,23 +279,23 @@ export default function SettingsPage() {
       </div>
 
       {/* About */}
-      <div className="mt-6 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl">
-        <div className="mb-3 inline-flex items-center gap-2 text-sm text-white/80">
+      <div className="mt-6 rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl">
+        <div className="mb-3 inline-flex items-center gap-2 text-sm text-foreground/80">
           <Sparkles className="h-4 w-4 text-neon-cyan" />
           Sobre ORIGEM
         </div>
-        <p className="text-xs leading-relaxed text-white/45">
+        <p className="text-xs leading-relaxed text-foreground/45">
           Motor de IA Psicossemantica — Decomponha linguagem em significado atomico,
           orquestre agentes especializados e visualize tudo em um canvas infinito.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">
+          <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
             v0.1.0
           </span>
-          <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">
+          <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
             Psychosemantic Engine
           </span>
-          <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">
+          <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
             Multi-Agent Orchestration
           </span>
         </div>

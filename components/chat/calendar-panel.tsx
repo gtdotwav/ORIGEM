@@ -191,7 +191,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative max-h-[88vh] w-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/[0.12] shadow-2xl shadow-black/40"
+              className="relative max-h-[88vh] w-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
                 backdropFilter: "blur(40px) saturate(1.8)",
@@ -203,19 +203,19 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
               {/* Header */}
               <div className="flex items-center justify-between px-4 pb-2 pt-4">
                 <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-3.5 w-3.5 text-white/40" />
-                  <span className="text-[11px] font-semibold uppercase tracking-widest text-white/40">Calendario</span>
+                  <CalendarIcon className="h-3.5 w-3.5 text-foreground/40" />
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40">Calendario</span>
                 </div>
-                <button type="button" onClick={onClose} className="flex h-5 w-5 items-center justify-center rounded-md text-white/20 transition-colors hover:bg-white/[0.08] hover:text-white/50">
+                <button type="button" onClick={onClose} className="flex h-5 w-5 items-center justify-center rounded-md text-foreground/20 transition-colors hover:bg-foreground/[0.08] hover:text-foreground/50">
                   <X className="h-3 w-3" />
                 </button>
               </div>
 
               {/* Month nav */}
               <div className="flex items-center justify-between px-4 pb-3 pt-1">
-                <button type="button" onClick={prevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60"><ChevronLeft className="h-3.5 w-3.5" /></button>
-                <button type="button" onClick={goToday} className="text-sm font-medium text-white/80 transition-colors hover:text-white">{MONTHS[currentMonth]} {currentYear}</button>
-                <button type="button" onClick={nextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-all hover:bg-white/[0.08] hover:text-white/60"><ChevronRight className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={prevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.08] hover:text-foreground/60"><ChevronLeft className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={goToday} className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground">{MONTHS[currentMonth]} {currentYear}</button>
+                <button type="button" onClick={nextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.08] hover:text-foreground/60"><ChevronRight className="h-3.5 w-3.5" /></button>
               </div>
 
               <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
@@ -223,7 +223,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
               {/* Weekday headers */}
               <div className="grid grid-cols-7 px-3 pt-3">
                 {WEEKDAYS.map((d) => (
-                  <div key={d} className="pb-2 text-center text-[10px] font-medium uppercase tracking-wider text-white/25">{d}</div>
+                  <div key={d} className="pb-2 text-center text-[10px] font-medium uppercase tracking-wider text-foreground/25">{d}</div>
                 ))}
               </div>
 
@@ -238,7 +238,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                       {_isSelected && <motion.div layoutId="calendar-selected" className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(0,210,210,0.25) 0%, rgba(0,210,210,0.10) 100%)", boxShadow: "0 0 12px rgba(0,210,210,0.15), inset 0 1px 0 rgba(255,255,255,0.1)" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} />}
                       {_isToday && !_isSelected && <div className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)" }} />}
                       {!_isSelected && <div className="absolute inset-0.5 rounded-lg opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)" }} />}
-                      <span className={`relative z-10 text-xs tabular-nums ${_isSelected ? "font-semibold text-neon-cyan" : _isToday ? "font-semibold text-white/90" : cell.inMonth ? "text-white/60 group-hover:text-white/80" : "text-white/15"}`}>{cell.day}</span>
+                      <span className={`relative z-10 text-xs tabular-nums ${_isSelected ? "font-semibold text-neon-cyan" : _isToday ? "font-semibold text-foreground/90" : cell.inMonth ? "text-foreground/60 group-hover:text-foreground/80" : "text-foreground/15"}`}>{cell.day}</span>
                       {_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-cyan shadow-[0_0_4px_rgba(0,210,210,0.5)]" />}
                       {hasEvents && !_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-orange shadow-[0_0_4px_rgba(255,160,0,0.4)]" />}
                     </button>
@@ -252,7 +252,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
                   <div className="px-4 py-3">
-                    <p className="text-xs font-medium text-white/50">
+                    <p className="text-xs font-medium text-foreground/50">
                       {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
                     </p>
 
@@ -267,7 +267,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                               {/* Timeline rail */}
                               <div className="flex w-4 flex-col items-center">
                                 <div className={`h-2.5 w-2.5 shrink-0 rounded-full border-2 ${c.border} ${c.bg}`} />
-                                {!isLast && <div className="w-px flex-1 bg-white/[0.06]" />}
+                                {!isLast && <div className="w-px flex-1 bg-foreground/[0.06]" />}
                               </div>
 
                               {/* Event card */}
@@ -276,27 +276,27 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
                                       {ev.time && (
-                                        <span className="shrink-0 font-mono text-[10px] font-semibold tabular-nums text-white/60">{ev.time}</span>
+                                        <span className="shrink-0 font-mono text-[10px] font-semibold tabular-nums text-foreground/60">{ev.time}</span>
                                       )}
                                       {!ev.time && (
-                                        <span className="shrink-0 text-[9px] text-white/25">dia todo</span>
+                                        <span className="shrink-0 text-[9px] text-foreground/25">dia todo</span>
                                       )}
-                                      <span className="text-[11px] font-medium text-white/80">{ev.title}</span>
+                                      <span className="text-[11px] font-medium text-foreground/80">{ev.title}</span>
                                     </div>
-                                    {ev.description && <p className="mt-0.5 text-[10px] text-white/30">{ev.description}</p>}
+                                    {ev.description && <p className="mt-0.5 text-[10px] text-foreground/30">{ev.description}</p>}
                                     <div className="mt-0.5 flex items-center gap-2">
                                       <span className={`text-[9px] uppercase tracking-wider ${c.text}`}>
                                         {ev.type === "note" ? "Nota" : ev.type === "agent" ? "Agente" : "Servico"}
                                       </span>
                                       {ev.time && ev.duration > 0 && (
-                                        <span className="text-[9px] text-white/20">{formatDuration(ev.duration)}</span>
+                                        <span className="text-[9px] text-foreground/20">{formatDuration(ev.duration)}</span>
                                       )}
                                     </div>
                                   </div>
                                   <button
                                     type="button"
                                     onClick={() => removeEvent(selectedDateKey, ev.id)}
-                                    className="shrink-0 text-white/0 transition-colors group-hover:text-white/30 hover:!text-red-400"
+                                    className="shrink-0 text-foreground/0 transition-colors group-hover:text-foreground/30 hover:!text-red-400"
                                   >
                                     <Trash2 className="h-3 w-3" />
                                   </button>
@@ -309,7 +309,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                     )}
 
                     {sortedEvents.length === 0 && addMode === null && (
-                      <p className="mt-1 text-[10px] text-white/20">Nenhum evento agendado</p>
+                      <p className="mt-1 text-[10px] text-foreground/20">Nenhum evento agendado</p>
                     )}
 
                     {/* ── Action Buttons ── */}
@@ -319,20 +319,20 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                         <button
                           type="button"
                           onClick={() => setAddMode("prompt")}
-                          className="flex w-full items-center gap-1.5 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] px-2.5 py-2 text-left text-[10px] text-white/35 transition-all hover:border-neon-green/30 hover:text-neon-green/70"
+                          className="flex w-full items-center gap-1.5 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] px-2.5 py-2 text-left text-[10px] text-foreground/35 transition-all hover:border-neon-green/30 hover:text-neon-green/70"
                         >
                           <Sparkles className="h-3 w-3 shrink-0 text-neon-green/50" />
                           <span>Descreva sua agenda com horarios...</span>
                         </button>
 
                         <div className="flex gap-1.5">
-                          <button type="button" onClick={() => setAddMode("note")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-cyan/20 hover:bg-neon-cyan/5 hover:text-neon-cyan">
+                          <button type="button" onClick={() => setAddMode("note")} className="flex items-center gap-1 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2 py-1.5 text-[10px] text-foreground/40 transition-all hover:border-neon-cyan/20 hover:bg-neon-cyan/5 hover:text-neon-cyan">
                             <StickyNote className="h-3 w-3" /> Nota
                           </button>
-                          <button type="button" onClick={() => setAddMode("agent")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5 hover:text-neon-purple">
+                          <button type="button" onClick={() => setAddMode("agent")} className="flex items-center gap-1 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2 py-1.5 text-[10px] text-foreground/40 transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5 hover:text-neon-purple">
                             <Bot className="h-3 w-3" /> Agente
                           </button>
-                          <button type="button" onClick={() => setAddMode("context")} className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] text-white/40 transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5 hover:text-neon-orange">
+                          <button type="button" onClick={() => setAddMode("context")} className="flex items-center gap-1 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2 py-1.5 text-[10px] text-foreground/40 transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5 hover:text-neon-orange">
                             <Layers className="h-3 w-3" /> Contexto
                           </button>
                         </div>
@@ -353,22 +353,22 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                               onChange={(e) => handlePromptChange(e.target.value)}
                               placeholder={"Ex: standup 9h, code review 10:30,\nplanning 14h, deploy 18h"}
                               rows={3}
-                              className="w-full resize-none rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-green/30"
+                              className="w-full resize-none rounded-md border border-foreground/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-green/30"
                               autoFocus
                               onKeyDown={(e) => { if (e.key === "Escape") { setAddMode(null); setPromptText(""); setParsedPreview([]); } }}
                             />
 
                             {/* Live preview */}
                             {parsedPreview.length > 0 && (
-                              <div className="space-y-1 rounded-md border border-white/[0.04] bg-black/15 p-2">
-                                <p className="text-[9px] font-semibold uppercase tracking-wider text-white/25">Interpretado ({parsedPreview.length})</p>
+                              <div className="space-y-1 rounded-md border border-foreground/[0.04] bg-black/15 p-2">
+                                <p className="text-[9px] font-semibold uppercase tracking-wider text-foreground/25">Interpretado ({parsedPreview.length})</p>
                                 {parsedPreview.map((item, idx) => {
                                   const c = COLOR_CLASSES[item.color];
                                   return (
                                     <div key={idx} className="flex items-center gap-2">
-                                      <span className="w-10 shrink-0 font-mono text-[10px] font-semibold tabular-nums text-white/50">{item.time}</span>
+                                      <span className="w-10 shrink-0 font-mono text-[10px] font-semibold tabular-nums text-foreground/50">{item.time}</span>
                                       <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${c.dot}`} />
-                                      <span className="text-[10px] text-white/60">{item.title}</span>
+                                      <span className="text-[10px] text-foreground/60">{item.title}</span>
                                       <span className={`ml-auto text-[8px] uppercase ${c.text}`}>
                                         {item.type === "note" ? "nota" : item.type === "agent" ? "agente" : "servico"}
                                       </span>
@@ -379,7 +379,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                             )}
 
                             <div className="flex justify-end gap-1.5">
-                              <button type="button" onClick={() => { setAddMode(null); setPromptText(""); setParsedPreview([]); }} className="rounded-md px-2 py-1 text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button type="button" onClick={() => { setAddMode(null); setPromptText(""); setParsedPreview([]); }} className="rounded-md px-2 py-1 text-[10px] text-foreground/30 hover:text-foreground/50">Cancelar</button>
                               <button
                                 type="button"
                                 onClick={handlePromptSubmit}
@@ -403,15 +403,15 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                               <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-cyan/60">Nova Nota</span>
                             </div>
                             <div className="flex gap-1.5">
-                              <input type="text" value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="Titulo..." className="flex-1 rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30" autoFocus onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(); if (e.key === "Escape") setAddMode(null); }} />
+                              <input type="text" value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="Titulo..." className="flex-1 rounded-md border border-foreground/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-cyan/30" autoFocus onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(); if (e.key === "Escape") setAddMode(null); }} />
                               <div className="relative">
-                                <Clock className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
-                                <input type="time" value={noteTime} onChange={(e) => setNoteTime(e.target.value)} className="w-20 rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-6 pr-1 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-cyan/30 [&::-webkit-calendar-picker-indicator]:invert" />
+                                <Clock className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-foreground/20" />
+                                <input type="time" value={noteTime} onChange={(e) => setNoteTime(e.target.value)} className="w-20 rounded-md border border-foreground/[0.06] bg-black/20 py-1.5 pl-6 pr-1 text-[11px] tabular-nums text-foreground/60 outline-none focus:border-neon-cyan/30 [&::-webkit-calendar-picker-indicator]:invert" />
                               </div>
                             </div>
-                            <textarea value={noteDesc} onChange={(e) => setNoteDesc(e.target.value)} placeholder="Descricao (opcional)..." rows={2} className="w-full resize-none rounded-md border border-white/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-neon-cyan/30" />
+                            <textarea value={noteDesc} onChange={(e) => setNoteDesc(e.target.value)} placeholder="Descricao (opcional)..." rows={2} className="w-full resize-none rounded-md border border-foreground/[0.06] bg-black/20 px-2 py-1.5 text-[11px] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-cyan/30" />
                             <div className="flex justify-end gap-1.5">
-                              <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); setNoteTime(""); }} className="rounded-md px-2 py-1 text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); setNoteTime(""); }} className="rounded-md px-2 py-1 text-[10px] text-foreground/30 hover:text-foreground/50">Cancelar</button>
                               <button type="button" onClick={handleAddNote} disabled={!noteTitle.trim()} className="flex items-center gap-1 rounded-md border border-neon-cyan/30 bg-neon-cyan/10 px-2 py-1 text-[10px] font-medium text-neon-cyan transition-all hover:bg-neon-cyan/20 disabled:opacity-30"><Check className="h-2.5 w-2.5" /> Salvar</button>
                             </div>
                           </div>
@@ -424,19 +424,19 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                           <div className="mt-3 space-y-1.5 rounded-lg border border-neon-purple/15 bg-neon-purple/[0.03] p-2.5">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5"><Bot className="h-3 w-3 text-neon-purple/60" /><span className="text-[10px] font-semibold uppercase tracking-wider text-neon-purple/60">Agendar Agente</span></div>
-                              <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-foreground/30 hover:text-foreground/50">Cancelar</button>
                             </div>
                             {/* Time picker for agent */}
                             <div className="relative">
-                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
-                              <input type="time" value={agentTime} onChange={(e) => setAgentTime(e.target.value)} placeholder="Horario" className="w-full rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-purple/30 [&::-webkit-calendar-picker-indicator]:invert" />
+                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-foreground/20" />
+                              <input type="time" value={agentTime} onChange={(e) => setAgentTime(e.target.value)} placeholder="Horario" className="w-full rounded-md border border-foreground/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-foreground/60 outline-none focus:border-neon-purple/30 [&::-webkit-calendar-picker-indicator]:invert" />
                             </div>
                             <div className="space-y-1">
                               {AGENTS.map((agent) => (
-                                <button key={agent.id} type="button" onClick={() => handleAddAgent(agent)} className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5">
+                                <button key={agent.id} type="button" onClick={() => handleAddAgent(agent)} className="flex w-full items-center gap-2 rounded-md border border-foreground/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-purple/20 hover:bg-neon-purple/5">
                                   <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-purple/10"><Bot className="h-2.5 w-2.5 text-neon-purple" /></div>
-                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-white/70">{agent.name}</p><p className="text-[9px] text-white/25">{agent.role}</p></div>
-                                  <Plus className="h-3 w-3 text-white/15" />
+                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-foreground/70">{agent.name}</p><p className="text-[9px] text-foreground/25">{agent.role}</p></div>
+                                  <Plus className="h-3 w-3 text-foreground/15" />
                                 </button>
                               ))}
                             </div>
@@ -450,19 +450,19 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                           <div className="mt-3 space-y-1.5 rounded-lg border border-neon-orange/15 bg-neon-orange/[0.03] p-2.5">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5"><Layers className="h-3 w-3 text-neon-orange/60" /><span className="text-[10px] font-semibold uppercase tracking-wider text-neon-orange/60">Agendar Servico</span></div>
-                              <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-white/30 hover:text-white/50">Cancelar</button>
+                              <button type="button" onClick={() => setAddMode(null)} className="text-[10px] text-foreground/30 hover:text-foreground/50">Cancelar</button>
                             </div>
                             {/* Time picker for context */}
                             <div className="relative">
-                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-white/20" />
-                              <input type="time" value={ctxTime} onChange={(e) => setCtxTime(e.target.value)} className="w-full rounded-md border border-white/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-white/60 outline-none focus:border-neon-orange/30 [&::-webkit-calendar-picker-indicator]:invert" />
+                              <Clock className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-foreground/20" />
+                              <input type="time" value={ctxTime} onChange={(e) => setCtxTime(e.target.value)} className="w-full rounded-md border border-foreground/[0.06] bg-black/20 py-1.5 pl-7 pr-2 text-[11px] tabular-nums text-foreground/60 outline-none focus:border-neon-orange/30 [&::-webkit-calendar-picker-indicator]:invert" />
                             </div>
                             <div className="space-y-1">
                               {CONTEXTS.map((ctx) => (
-                                <button key={ctx.id} type="button" onClick={() => handleAddContext(ctx)} className="flex w-full items-center gap-2 rounded-md border border-white/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5">
+                                <button key={ctx.id} type="button" onClick={() => handleAddContext(ctx)} className="flex w-full items-center gap-2 rounded-md border border-foreground/[0.04] bg-black/15 px-2 py-1.5 text-left transition-all hover:border-neon-orange/20 hover:bg-neon-orange/5">
                                   <div className="flex h-5 w-5 items-center justify-center rounded-md bg-neon-orange/10"><Layers className="h-2.5 w-2.5 text-neon-orange" /></div>
-                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-white/70">{ctx.label}</p><p className="text-[9px] text-white/25">{ctx.desc}</p></div>
-                                  <Plus className="h-3 w-3 text-white/15" />
+                                  <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-foreground/70">{ctx.label}</p><p className="text-[9px] text-foreground/25">{ctx.desc}</p></div>
+                                  <Plus className="h-3 w-3 text-foreground/15" />
                                 </button>
                               ))}
                             </div>

@@ -31,14 +31,14 @@ const ECOSYSTEM = [
 
 export default function AboutPage() {
   return (
-    <main className="isolate relative min-h-screen bg-[#04070d] text-white">
+    <main className="isolate relative min-h-screen bg-background text-foreground">
       <LiquidGradientBackground />
 
       {/* ── Nav ── */}
       <nav className="relative z-10 flex items-center justify-between px-6 pt-6 md:px-10">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/80"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1.5 text-xs text-foreground/60 backdrop-blur-md transition-all hover:border-foreground/20 hover:text-foreground/80"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Voltar
@@ -46,7 +46,7 @@ export default function AboutPage() {
 
         <div className="flex items-center gap-3">
           <Image src="/logo.png" alt="ORIGEM" width={72} height={72} />
-          <span className="text-xs font-semibold tracking-[0.25em] text-white/40">
+          <span className="text-xs font-semibold tracking-[0.25em] text-foreground/40">
             ORIGEM
           </span>
         </div>
@@ -62,12 +62,12 @@ export default function AboutPage() {
           da inteligencia.
         </h1>
 
-        <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-white/50 md:text-xl">
+        <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-foreground/50 md:text-xl">
           ORIGEM e a plataforma onde pessoas e inteligencias artificiais se
           encontram para criar, aprender e expandir possibilidades.
         </p>
 
-        <p className="mt-6 text-sm leading-relaxed text-white/30 md:text-base">
+        <p className="mt-6 text-sm leading-relaxed text-foreground/30 md:text-base">
           Nao e apenas uma IA.
           <br />
           E um novo ponto de partida.
@@ -76,14 +76,14 @@ export default function AboutPage() {
         <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-black transition-all hover:bg-white/90"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-all hover:bg-foreground/90"
           >
             Explorar ORIGEM
             <ArrowRight className="h-4 w-4" />
           </Link>
           <a
             href="#visao"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-medium text-white/70 backdrop-blur-md transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-7 py-3.5 text-sm font-medium text-foreground/70 backdrop-blur-md transition-all hover:border-foreground/25 hover:bg-foreground/10 hover:text-foreground"
           >
             Conheca a visao
           </a>
@@ -97,7 +97,7 @@ export default function AboutPage() {
         id="visao"
         className="relative z-10 mx-auto max-w-3xl px-6 py-32 md:px-10"
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/30">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-foreground/30">
           Nossa visao
         </p>
 
@@ -105,7 +105,7 @@ export default function AboutPage() {
           Acreditamos que a inteligencia pode evoluir.
         </h2>
 
-        <div className="mt-10 space-y-6 text-base leading-[1.8] text-white/50 md:text-lg">
+        <div className="mt-10 space-y-6 text-base leading-[1.8] text-foreground/50 md:text-lg">
           <p>
             A ORIGEM nasceu da ideia de que a inteligencia artificial nao deve
             apenas responder perguntas — ela deve expandir o potencial humano.
@@ -122,7 +122,7 @@ export default function AboutPage() {
           O QUE E A ORIGEM — 3 Pillars
          ════════════════════════════════════════════ */}
       <section className="relative z-10 mx-auto max-w-6xl px-6 py-24 md:px-10">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-white/30">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-foreground/30">
           O que e a ORIGEM
         </p>
 
@@ -130,12 +130,12 @@ export default function AboutPage() {
           {PILLARS.map((p) => (
             <div
               key={p.title}
-              className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_0_60px_rgba(255,255,255,0.04)] sm:p-10"
+              className="group rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03] p-8 backdrop-blur-xl transition-all duration-300 hover:border-foreground/20 hover:bg-foreground/[0.06] hover:shadow-[0_0_60px_rgba(255,255,255,0.04)] sm:p-10"
             >
               <h3 className="text-xl font-semibold tracking-tight">
                 {p.title}
               </h3>
-              <p className="mt-4 text-sm leading-relaxed text-white/40">
+              <p className="mt-4 text-sm leading-relaxed text-foreground/40">
                 {p.text}
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function AboutPage() {
           A tecnologia mais poderosa e aquela que amplia o pensamento humano.
         </h2>
 
-        <div className="mx-auto mt-10 max-w-2xl space-y-6 text-base leading-[1.8] text-white/45 md:text-lg">
+        <div className="mx-auto mt-10 max-w-2xl space-y-6 text-base leading-[1.8] text-foreground/45 md:text-lg">
           <p>
             A ORIGEM foi construida para ser simples na superficie e profunda em
             suas possibilidades.
@@ -167,7 +167,7 @@ export default function AboutPage() {
           ECOSSISTEMA
          ════════════════════════════════════════════ */}
       <section className="relative z-10 mx-auto max-w-6xl px-6 py-24 md:px-10">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-white/30">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-foreground/30">
           Ecossistema
         </p>
 
@@ -175,9 +175,9 @@ export default function AboutPage() {
           {ECOSYSTEM.map((item) => (
             <div
               key={item}
-              className="group cursor-default rounded-2xl border border-white/[0.08] bg-white/[0.03] px-8 py-6 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(255,255,255,0.04)]"
+              className="group cursor-default rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03] px-8 py-6 backdrop-blur-xl transition-all duration-300 hover:border-foreground/20 hover:bg-foreground/[0.06] hover:shadow-[0_0_40px_rgba(255,255,255,0.04)]"
             >
-              <span className="text-sm font-medium text-white/60 transition-colors group-hover:text-white/90">
+              <span className="text-sm font-medium text-foreground/60 transition-colors group-hover:text-foreground/90">
                 {item}
               </span>
             </div>
@@ -189,7 +189,7 @@ export default function AboutPage() {
           O FUTURO
          ════════════════════════════════════════════ */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-32 md:px-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/30">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-foreground/30">
           O futuro
         </p>
 
@@ -197,7 +197,7 @@ export default function AboutPage() {
           Estamos apenas no comeco.
         </h2>
 
-        <div className="mt-10 space-y-6 text-base leading-[1.8] text-white/50 md:text-lg">
+        <div className="mt-10 space-y-6 text-base leading-[1.8] text-foreground/50 md:text-lg">
           <p>
             A ORIGEM representa o inicio de uma nova era de interacao entre
             humanos e inteligencia artificial.
@@ -214,7 +214,7 @@ export default function AboutPage() {
           CTA FINAL
          ════════════════════════════════════════════ */}
       <section className="relative z-10 mx-auto max-w-4xl px-6 pb-32 pt-16 text-center md:px-10">
-        <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] px-8 py-20 backdrop-blur-xl sm:px-16">
+        <div className="rounded-3xl border border-foreground/[0.08] bg-foreground/[0.03] px-8 py-20 backdrop-blur-xl sm:px-16">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
             Explore o que pode nascer
             <br />
@@ -224,14 +224,14 @@ export default function AboutPage() {
           <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-black transition-all hover:bg-white/90"
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-all hover:bg-foreground/90"
             >
               Entrar na ORIGEM
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-medium text-white/70 backdrop-blur-md transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-7 py-3.5 text-sm font-medium text-foreground/70 backdrop-blur-md transition-all hover:border-foreground/25 hover:bg-foreground/10 hover:text-foreground"
             >
               Descobrir mais
             </Link>
@@ -240,8 +240,8 @@ export default function AboutPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/[0.06] px-6 py-10 text-center md:px-10">
-        <span className="text-xs tracking-[0.2em] text-white/20">
+      <footer className="relative z-10 border-t border-foreground/[0.06] px-6 py-10 text-center md:px-10">
+        <span className="text-xs tracking-[0.2em] text-foreground/20">
           ORIGEM &mdash; A nova origem da inteligencia.
         </span>
       </footer>

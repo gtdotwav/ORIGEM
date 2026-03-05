@@ -52,23 +52,23 @@ export function ChatHistoryPanel({
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-white/[0.06] bg-neutral-950/98 backdrop-blur-2xl"
+        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-foreground/[0.06] bg-card/98 backdrop-blur-2xl"
       >
         {/* Header — compact IDE toolbar */}
-        <div className="flex h-10 items-center justify-between border-b border-white/[0.05] px-3">
+        <div className="flex h-10 items-center justify-between border-b border-foreground/[0.05] px-3">
           <div className="flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5 text-white/30" />
-            <span className="text-[11px] font-medium tracking-wide text-white/50">
+            <FileText className="h-3.5 w-3.5 text-foreground/30" />
+            <span className="text-[11px] font-medium tracking-wide text-foreground/50">
               HISTORICO
             </span>
-            <span className="ml-1 rounded bg-white/[0.06] px-1 py-px text-[9px] tabular-nums text-white/25">
+            <span className="ml-1 rounded bg-foreground/[0.06] px-1 py-px text-[9px] tabular-nums text-foreground/25">
               {looseSessions.length}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-0.5 text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+            className="rounded p-0.5 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
@@ -78,8 +78,8 @@ export function ChatHistoryPanel({
         <div className="flex-1 overflow-y-auto py-1">
           {looseSessions.length === 0 ? (
             <div className="flex flex-col items-center px-3 py-10 text-center">
-              <MessageSquare className="mb-2 h-5 w-5 text-white/8" />
-              <p className="text-[11px] text-white/25">
+              <MessageSquare className="mb-2 h-5 w-5 text-foreground/8" />
+              <p className="text-[11px] text-foreground/25">
                 Nenhuma conversa avulsa
               </p>
             </div>
@@ -94,13 +94,13 @@ export function ChatHistoryPanel({
                       "group flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors",
                       isCurrent
                         ? "bg-neon-cyan/8 text-neon-cyan"
-                        : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
+                        : "text-foreground/50 hover:bg-foreground/[0.04] hover:text-foreground/70"
                     )}
                   >
                     <MessageSquare
                       className={cn(
                         "h-3 w-3 shrink-0",
-                        isCurrent ? "text-neon-cyan/60" : "text-white/15"
+                        isCurrent ? "text-neon-cyan/60" : "text-foreground/15"
                       )}
                     />
                     <Link
@@ -114,7 +114,7 @@ export function ChatHistoryPanel({
                       <p
                         className={cn(
                           "mt-px text-[9px] tabular-nums",
-                          isCurrent ? "text-neon-cyan/30" : "text-white/15"
+                          isCurrent ? "text-neon-cyan/30" : "text-foreground/15"
                         )}
                       >
                         {new Date(session.updatedAt).toLocaleDateString(
@@ -135,7 +135,7 @@ export function ChatHistoryPanel({
                           removeSession(session.id);
                           toast.success("Conversa removida");
                         }}
-                        className="shrink-0 rounded p-0.5 text-white/0 transition-colors group-hover:text-white/20 hover:!text-red-400/70"
+                        className="shrink-0 rounded p-0.5 text-foreground/0 transition-colors group-hover:text-foreground/20 hover:!text-red-400/70"
                         title="Remover"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -149,7 +149,7 @@ export function ChatHistoryPanel({
         </div>
 
         {/* Footer — compact actions */}
-        <div className="space-y-1 border-t border-white/[0.05] px-2 py-2">
+        <div className="space-y-1 border-t border-foreground/[0.05] px-2 py-2">
           {onCreateCanvas && (
             <button
               type="button"
@@ -157,7 +157,7 @@ export function ChatHistoryPanel({
                 onCreateCanvas();
                 onClose();
               }}
-              className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-white/35 transition-colors hover:bg-neon-purple/8 hover:text-neon-purple/70"
+              className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-foreground/35 transition-colors hover:bg-neon-purple/8 hover:text-neon-purple/70"
             >
               <Workflow className="h-3 w-3" />
               Canvas de Fluxos
@@ -166,7 +166,7 @@ export function ChatHistoryPanel({
           <button
             type="button"
             onClick={onClose}
-            className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-white/35 transition-colors hover:bg-white/[0.04] hover:text-white/50"
+            className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] text-foreground/35 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/50"
           >
             <Plus className="h-3 w-3" />
             Novo Chat

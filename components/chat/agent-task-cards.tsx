@@ -108,8 +108,8 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
 
   if (!runtime || (!runtime.distributionReady && runtime.tasks.length === 0)) {
     return (
-      <div className="mt-3 rounded-xl border border-white/[0.08] bg-black/35 p-3 backdrop-blur-md">
-        <div className="inline-flex items-center gap-1.5 text-[11px] text-white/70">
+      <div className="mt-3 rounded-xl border border-foreground/[0.08] bg-black/35 p-3 backdrop-blur-md">
+        <div className="inline-flex items-center gap-1.5 text-[11px] text-foreground/70">
           <Activity className="h-3 w-3 animate-pulse text-neon-cyan" />
           Preparando agentes...
         </div>
@@ -118,18 +118,18 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-white/[0.08] bg-black/35 p-3 backdrop-blur-md">
+    <div className="mt-3 rounded-xl border border-foreground/[0.08] bg-black/35 p-3 backdrop-blur-md">
       {/* Header */}
       <div className="mb-2.5 flex items-center justify-between">
-        <div className="inline-flex items-center gap-1.5 text-[11px] text-white/70">
+        <div className="inline-flex items-center gap-1.5 text-[11px] text-foreground/70">
           <Activity className="h-3 w-3 animate-pulse text-neon-cyan" />
           Agentes em acao
         </div>
-        <span className="text-[10px] text-white/35">{clock || "--:--:--"}</span>
+        <span className="text-[10px] text-foreground/35">{clock || "--:--:--"}</span>
       </div>
 
       {/* Overall progress */}
-      <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+      <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]">
         <div
           className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
           style={{ width: `${runtime.overallProgress}%` }}
@@ -150,8 +150,8 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
             >
               <div
                 className={cn(
-                  "rounded-lg border bg-white/[0.02] transition-all",
-                  isOpen ? colors.border : "border-white/[0.06]"
+                  "rounded-lg border bg-foreground/[0.02] transition-all",
+                  isOpen ? colors.border : "border-foreground/[0.06]"
                 )}
               >
                 <CollapsibleTrigger asChild>
@@ -167,10 +167,10 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
 
                     {/* Name + role */}
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-medium text-white/80">
+                      <p className="text-[11px] font-medium text-foreground/80">
                         {persona.name}
                       </p>
-                      <p className="text-[10px] text-white/30">{persona.role}</p>
+                      <p className="text-[10px] text-foreground/30">{persona.role}</p>
                     </div>
 
                     {/* Status badge */}
@@ -183,7 +183,7 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                           ? "border-amber-300/30 bg-amber-300/10 text-amber-300"
                           : status === "thinking"
                           ? `${colors.border} ${colors.bg} ${colors.text}`
-                          : "border-white/[0.10] bg-white/[0.03] text-white/45"
+                          : "border-foreground/[0.10] bg-foreground/[0.03] text-foreground/45"
                       )}
                     >
                       {STATUS_LABELS[status]}
@@ -191,7 +191,7 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
 
                     {/* Mini progress */}
                     <div className="flex items-center gap-1.5">
-                      <div className="h-1 w-10 overflow-hidden rounded-full bg-white/[0.08]">
+                      <div className="h-1 w-10 overflow-hidden rounded-full bg-foreground/[0.08]">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-300",
@@ -200,7 +200,7 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                           style={{ width: `${progress}%` }}
                         />
                       </div>
-                      <span className="w-6 text-right text-[9px] text-white/40">
+                      <span className="w-6 text-right text-[9px] text-foreground/40">
                         {progress}%
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                     {/* Chevron */}
                     <ChevronDown
                       className={cn(
-                        "h-3 w-3 text-white/25 transition-transform",
+                        "h-3 w-3 text-foreground/25 transition-transform",
                         isOpen && "rotate-180"
                       )}
                     />
@@ -216,9 +216,9 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                  <div className="border-t border-white/[0.04] px-2.5 pb-2 pt-1.5">
+                  <div className="border-t border-foreground/[0.04] px-2.5 pb-2 pt-1.5">
                     {tasks.length === 0 ? (
-                      <p className="text-[10px] text-white/25">
+                      <p className="text-[10px] text-foreground/25">
                         Nenhuma tarefa atribuida
                       </p>
                     ) : (
@@ -237,25 +237,25 @@ export function AgentTaskCards({ sessionId, intent }: AgentTaskCardsProps) {
                                     ? "bg-green-400"
                                     : task.status === "running"
                                     ? "bg-amber-400 animate-pulse"
-                                    : "bg-white/20"
+                                    : "bg-foreground/20"
                                 )}
                               />
                             </div>
 
                             {/* Task info */}
                             <div className="min-w-0 flex-1">
-                              <p className="text-[10px] text-white/60">
+                              <p className="text-[10px] text-foreground/60">
                                 {task.title}
                               </p>
                               {task.notes.length > 0 && (
-                                <p className="text-[9px] text-white/30">
+                                <p className="text-[9px] text-foreground/30">
                                   {task.notes[task.notes.length - 1]}
                                 </p>
                               )}
                             </div>
 
                             {/* Progress */}
-                            <span className="text-[9px] text-white/30">
+                            <span className="text-[9px] text-foreground/30">
                               {task.progress}%
                             </span>
                           </div>

@@ -231,12 +231,12 @@ export default function ProvidersPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Key className="h-5 w-5 text-neon-cyan" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">Provedores de IA</h1>
-            <p className="mt-1 text-sm text-white/40">
+            <h1 className="text-2xl font-semibold text-foreground">Provedores de IA</h1>
+            <p className="mt-1 text-sm text-foreground/40">
               Conecte suas API keys para ativar o motor de decomposicao e orquestracao de agentes do ORIGEM
             </p>
           </div>
@@ -251,7 +251,7 @@ export default function ProvidersPage() {
           return (
             <div
               key={provider.name}
-              className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-5 backdrop-blur-xl transition-all hover:border-white/[0.14] hover:bg-neutral-900/80"
+              className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl transition-all hover:border-foreground/[0.14] hover:bg-card/80"
             >
               {/* Header */}
               <div className="mb-3 flex items-center justify-between">
@@ -268,10 +268,10 @@ export default function ProvidersPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white/90">
+                    <h3 className="text-sm font-semibold text-foreground/90">
                       {provider.displayName}
                     </h3>
-                    <p className="text-[10px] text-white/30">
+                    <p className="text-[10px] text-foreground/30">
                       {provider.models.length} model
                       {provider.models.length !== 1 ? "s" : ""}
                     </p>
@@ -285,14 +285,14 @@ export default function ProvidersPage() {
                         ? "bg-red-400"
                         : state.status === "testing"
                           ? "bg-yellow-400 animate-pulse"
-                          : "bg-white/10"
+                          : "bg-foreground/10"
                   }`}
                 />
               </div>
 
               {/* API Key Input */}
               <div className="mb-3">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/25">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-foreground/25">
                   API Key
                 </label>
                 <div className="relative">
@@ -314,7 +314,7 @@ export default function ProvidersPage() {
                         ? `Key salva no backend (${state.savedKeyHint})`
                         : "sk-..."
                     }
-                    className="pr-10 font-mono text-xs bg-black/20 border-white/[0.06] text-white placeholder:text-white/20"
+                    className="pr-10 font-mono text-xs bg-black/20 border-foreground/[0.06] text-foreground placeholder:text-foreground/20"
                   />
                   <button
                     type="button"
@@ -323,7 +323,7 @@ export default function ProvidersPage() {
                         showKey: !state.showKey,
                       })
                     }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground/25 hover:text-foreground/50"
                   >
                     {state.showKey ? (
                       <EyeOff className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ export default function ProvidersPage() {
 
               {/* Model Selector */}
               <div className="mb-3">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/25">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-foreground/25">
                   Modelo padrao
                 </label>
                 <Select
@@ -349,7 +349,7 @@ export default function ProvidersPage() {
                     })
                   }
                 >
-                  <SelectTrigger className="text-xs bg-black/20 border-white/[0.06] text-white">
+                  <SelectTrigger className="text-xs bg-black/20 border-foreground/[0.06] text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -398,7 +398,7 @@ export default function ProvidersPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2 border-white/[0.06] bg-white/[0.03] text-xs text-white/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-white"
+                  className="gap-2 border-foreground/[0.06] bg-foreground/[0.03] text-xs text-foreground/60 hover:border-blue-400/30 hover:bg-blue-400/10 hover:text-foreground"
                   onClick={() => testConnection(provider.name)}
                   disabled={
                     (!state.apiKey.trim() && !state.savedKeyHint) ||
@@ -422,7 +422,7 @@ export default function ProvidersPage() {
                 </Button>
               </div>
 
-              <p className="mt-2 text-[10px] text-white/35">
+              <p className="mt-2 text-[10px] text-foreground/35">
                 {state.isDirty
                   ? "Alteracoes pendentes. Clique em Salvar Key."
                   : state.saveStatus === "saved"

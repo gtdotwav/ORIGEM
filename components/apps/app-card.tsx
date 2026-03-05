@@ -23,8 +23,8 @@ export function AppCard({ title, description, emoji, icon: Icon, color, href, ba
     <Link
       href={href}
       className={cn(
-        "group relative rounded-2xl border bg-neutral-900/70 p-6 backdrop-blur-xl transition-all",
-        "border-white/[0.08] hover:border-white/[0.15]",
+        "group relative rounded-2xl border bg-card/70 p-6 backdrop-blur-xl transition-all",
+        "border-foreground/[0.08] hover:border-foreground/[0.15]",
         colors.bgHover
       )}
     >
@@ -43,16 +43,16 @@ export function AppCard({ title, description, emoji, icon: Icon, color, href, ba
           )}
         </div>
         {badge && (
-          <span className="rounded-md border border-white/[0.10] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/40">
+          <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
             {badge}
           </span>
         )}
       </div>
 
-      <h3 className="mb-1.5 text-sm font-semibold text-white/90 transition-colors group-hover:text-white">
+      <h3 className="mb-1.5 text-sm font-semibold text-foreground/90 transition-colors group-hover:text-foreground">
         {title}
       </h3>
-      <p className="text-xs leading-relaxed text-white/40">
+      <p className="text-xs leading-relaxed text-foreground/40">
         {description}
       </p>
 

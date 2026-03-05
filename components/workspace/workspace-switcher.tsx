@@ -29,7 +29,7 @@ export function WorkspaceSwitcher() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs text-white/50 transition-all hover:border-white/[0.12] hover:text-white/70"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/[0.12] hover:text-foreground/70"
         >
           {activeWorkspace ? (
             <>
@@ -56,7 +56,7 @@ export function WorkspaceSwitcher() {
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-52 border-white/[0.08] bg-neutral-900/95 p-1.5 backdrop-blur-xl"
+        className="w-52 border-foreground/[0.08] bg-card/95 p-1.5 backdrop-blur-xl"
       >
         <button
           type="button"
@@ -65,8 +65,8 @@ export function WorkspaceSwitcher() {
             setOpen(false);
           }}
           className={cn(
-            "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-white/[0.06]",
-            !activeWorkspaceId ? "text-white/90" : "text-white/50"
+            "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-foreground/[0.06]",
+            !activeWorkspaceId ? "text-foreground/90" : "text-foreground/50"
           )}
         >
           <Layers className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function WorkspaceSwitcher() {
           )}
         </button>
 
-        <div className="my-1 border-t border-white/[0.06]" />
+        <div className="my-1 border-t border-foreground/[0.06]" />
 
         {activeWorkspaces.map((ws) => {
           const colors = WORKSPACE_COLORS[ws.color];
@@ -92,8 +92,8 @@ export function WorkspaceSwitcher() {
                 setOpen(false);
               }}
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-white/[0.06]",
-                isActive ? "text-white/90" : "text-white/50"
+                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-foreground/[0.06]",
+                isActive ? "text-foreground/90" : "text-foreground/50"
               )}
             >
               <Icon className={cn("h-3.5 w-3.5", colors.text)} />
@@ -105,7 +105,7 @@ export function WorkspaceSwitcher() {
           );
         })}
 
-        <div className="my-1 border-t border-white/[0.06]" />
+        <div className="my-1 border-t border-foreground/[0.06]" />
 
         <button
           type="button"
@@ -113,7 +113,7 @@ export function WorkspaceSwitcher() {
             router.push("/dashboard/workspaces");
             setOpen(false);
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-white/40 transition-all hover:bg-white/[0.06] hover:text-white/60"
+          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>Gerenciar workspaces</span>

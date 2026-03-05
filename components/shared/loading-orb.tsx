@@ -16,7 +16,7 @@ const colorMap = {
   cyan: "bg-neon-cyan",
   purple: "bg-neon-purple",
   green: "bg-neon-green",
-  white: "bg-white",
+  white: "bg-foreground",
 };
 
 export function LoadingOrb({

@@ -245,7 +245,7 @@ export function FloatingNav() {
         <div className="absolute right-4 top-6 flex items-center gap-2 md:right-6">
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white dark:border-white/20 dark:bg-white/10 dark:text-white/80"
+            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/20 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur-md transition-all hover:bg-foreground/15 hover:text-foreground"
           >
             Assinar
           </Link>
@@ -254,12 +254,12 @@ export function FloatingNav() {
             <button
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="relative inline-flex h-7 w-12 items-center rounded-full border border-black/10 bg-black/5 backdrop-blur-md transition-all dark:border-white/10 dark:bg-white/10"
+              className="relative inline-flex h-7 w-12 items-center rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-md transition-all"
               aria-label="Alternar tema"
             >
               <span
                 className={cn(
-                  "absolute flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] dark:bg-white/90",
+                  "absolute flex h-5 w-5 items-center justify-center rounded-full bg-foreground shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
                   theme === "dark" ? "left-[22px]" : "left-[3px]"
                 )}
               >
@@ -274,7 +274,7 @@ export function FloatingNav() {
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/5 px-3 py-1.5 text-xs font-medium text-black/50 backdrop-blur-md transition-all hover:border-black/20 hover:text-black/70 dark:border-white/10 dark:bg-black/45 dark:text-white/50 dark:hover:border-white/20 dark:hover:text-white/70"
+            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1.5 text-xs font-medium text-foreground/50 backdrop-blur-md transition-all hover:border-foreground/20 hover:text-foreground/70"
           >
             <LogOut className="h-3.5 w-3.5" />
             Sair
@@ -302,15 +302,15 @@ export function FloatingNav() {
             />
           </button>
           {/* Label beneath logo */}
-          <span className="text-xs font-semibold tracking-[0.3em] text-white/35">
+          <span className="text-xs font-semibold tracking-[0.3em] text-foreground/35">
             ORIGEM
           </span>
 
           {/* Dropdown */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-3 w-[calc(100vw-2rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-white/[0.08] bg-neutral-950/95 p-2.5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:w-[540px] sm:p-3">
+            <div className="absolute left-1/2 top-full mt-3 w-[calc(100vw-2rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-foreground/[0.08] bg-card/95 p-2.5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:w-[540px] sm:p-3">
               {/* Arrow */}
-              <div className="absolute -top-1.5 left-1/2 hidden h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/[0.08] bg-neutral-950/95 sm:block" />
+              <div className="absolute -top-1.5 left-1/2 hidden h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-foreground/[0.08] bg-card/95 sm:block" />
 
               {/* Nav grid */}
               <div className="relative grid grid-cols-1 gap-0.5 sm:grid-cols-2">
@@ -327,19 +327,19 @@ export function FloatingNav() {
                         onClick={() => setExpanded360((v) => !v)}
                         className={cn(
                           "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-all",
-                          groupActive ? colors.activeBg : "hover:bg-white/[0.05]"
+                          groupActive ? colors.activeBg : "hover:bg-foreground/[0.05]"
                         )}
                       >
                         <div
                           className={cn(
                             "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
-                            groupActive ? colors.activeBg : "bg-white/[0.03] group-hover:bg-white/[0.06]"
+                            groupActive ? colors.activeBg : "bg-foreground/[0.03] group-hover:bg-foreground/[0.06]"
                           )}
                         >
                           <entry.icon
                             className={cn(
                               "h-3.5 w-3.5 transition-colors",
-                              groupActive ? colors.icon : "text-white/30 group-hover:text-white/50"
+                              groupActive ? colors.icon : "text-foreground/30 group-hover:text-foreground/50"
                             )}
                           />
                         </div>
@@ -347,18 +347,18 @@ export function FloatingNav() {
                           <p
                             className={cn(
                               "truncate text-[13px] font-medium leading-tight",
-                              groupActive ? "text-white" : "text-white/75 group-hover:text-white/90"
+                              groupActive ? "text-foreground" : "text-foreground/75 group-hover:text-foreground/90"
                             )}
                           >
                             {entry.label}
                           </p>
-                          <p className="truncate text-[10px] leading-snug text-white/25">
+                          <p className="truncate text-[10px] leading-snug text-foreground/25">
                             {entry.description}
                           </p>
                         </div>
                         <ChevronRight
                           className={cn(
-                            "h-3 w-3 shrink-0 text-white/20 transition-transform duration-200",
+                            "h-3 w-3 shrink-0 text-foreground/20 transition-transform duration-200",
                             expanded360 && "rotate-90"
                           )}
                         />
@@ -381,19 +381,19 @@ export function FloatingNav() {
                       }}
                       className={cn(
                         "group flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all",
-                        isActive ? colors.activeBg : "hover:bg-white/[0.05]"
+                        isActive ? colors.activeBg : "hover:bg-foreground/[0.05]"
                       )}
                     >
                       <div
                         className={cn(
                           "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
-                          isActive ? colors.activeBg : "bg-white/[0.03] group-hover:bg-white/[0.06]"
+                          isActive ? colors.activeBg : "bg-foreground/[0.03] group-hover:bg-foreground/[0.06]"
                         )}
                       >
                         <entry.icon
                           className={cn(
                             "h-3.5 w-3.5 transition-colors",
-                            isActive ? colors.icon : "text-white/30 group-hover:text-white/50"
+                            isActive ? colors.icon : "text-foreground/30 group-hover:text-foreground/50"
                           )}
                         />
                       </div>
@@ -401,12 +401,12 @@ export function FloatingNav() {
                         <p
                           className={cn(
                             "truncate text-[13px] font-medium leading-tight",
-                            isActive ? "text-white" : "text-white/75 group-hover:text-white/90"
+                            isActive ? "text-foreground" : "text-foreground/75 group-hover:text-foreground/90"
                           )}
                         >
                           {entry.label}
                         </p>
-                        <p className="truncate text-[10px] leading-snug text-white/25">
+                        <p className="truncate text-[10px] leading-snug text-foreground/25">
                           {entry.description}
                         </p>
                       </div>
@@ -450,7 +450,7 @@ export function FloatingNav() {
                                 }}
                                 className={cn(
                                   "group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all",
-                                  isActive ? colors.activeBg : "hover:bg-white/[0.05]"
+                                  isActive ? colors.activeBg : "hover:bg-foreground/[0.05]"
                                 )}
                               >
                                 <div
@@ -458,13 +458,13 @@ export function FloatingNav() {
                                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
                                     isActive
                                       ? colors.activeBg
-                                      : "bg-white/[0.03] group-hover:bg-white/[0.06]"
+                                      : "bg-foreground/[0.03] group-hover:bg-foreground/[0.06]"
                                   )}
                                 >
                                   <child.icon
                                     className={cn(
                                       "h-3 w-3 transition-colors",
-                                      isActive ? colors.icon : "text-white/30 group-hover:text-white/50"
+                                      isActive ? colors.icon : "text-foreground/30 group-hover:text-foreground/50"
                                     )}
                                   />
                                 </div>
@@ -472,7 +472,7 @@ export function FloatingNav() {
                                   <p
                                     className={cn(
                                       "truncate text-[12px] font-medium leading-tight",
-                                      isActive ? "text-white" : "text-white/70 group-hover:text-white/85"
+                                      isActive ? "text-foreground" : "text-foreground/70 group-hover:text-foreground/85"
                                     )}
                                   >
                                     {child.label}
@@ -497,7 +497,7 @@ export function FloatingNav() {
               </AnimatePresence>
 
               {/* Quick links footer */}
-              <div className="mt-2 border-t border-white/[0.05] pt-2">
+              <div className="mt-2 border-t border-foreground/[0.05] pt-2">
                 <div className="flex items-center justify-center gap-1">
                   {QUICK_LINKS.map((link) => {
                     const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
@@ -513,8 +513,8 @@ export function FloatingNav() {
                         className={cn(
                           "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] transition-colors",
                           isActive && !isExactDashboard
-                            ? "text-white/60 bg-white/[0.04]"
-                            : "text-white/30 hover:text-white/50 hover:bg-white/[0.03]"
+                            ? "text-foreground/60 bg-foreground/[0.04]"
+                            : "text-foreground/30 hover:text-foreground/50 hover:bg-foreground/[0.03]"
                         )}
                       >
                         <link.icon className="h-3 w-3" />

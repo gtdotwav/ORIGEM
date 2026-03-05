@@ -247,7 +247,7 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
             <div
               key={item.id}
               className={cn(
-                "absolute inset-0 cursor-grab rounded-xl border border-white/[0.08] bg-neutral-900/80 backdrop-blur-xl transition-all",
+                "absolute inset-0 cursor-grab rounded-xl border border-foreground/[0.08] bg-card/80 backdrop-blur-xl transition-all",
                 displayOrder === 0 && isDragging && "cursor-grabbing",
                 displayOrder !== 0 && "pointer-events-none"
               )}
@@ -266,15 +266,15 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
                 <div className="flex items-start gap-3 mb-2">
                   <div className={cn(
                     "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                    "bg-white/[0.06] border border-white/[0.08]"
+                    "bg-foreground/[0.06] border border-foreground/[0.08]"
                   )}>
                     <ItemIcon className={cn("h-4.5 w-4.5", item.neonColor)} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-semibold text-white/90 leading-tight">
+                    <h3 className="text-sm font-semibold text-foreground/90 leading-tight">
                       {item.title}
                     </h3>
-                    <p className="mt-0.5 text-[11px] text-white/35 line-clamp-1">
+                    <p className="mt-0.5 text-[11px] text-foreground/35 line-clamp-1">
                       {item.description}
                     </p>
                   </div>
@@ -282,18 +282,18 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
 
                 {/* Prompt preview */}
                 <div className="flex-1 overflow-hidden">
-                  <p className="text-xs leading-relaxed text-white/55 line-clamp-3">
+                  <p className="text-xs leading-relaxed text-foreground/55 line-clamp-3">
                     {item.prompt}
                   </p>
                 </div>
 
                 {/* Footer: tags + actions */}
-                <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
+                <div className="flex items-center justify-between pt-2 border-t border-foreground/[0.05]">
                   <div className="flex gap-1.5">
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/30"
+                        className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-[10px] text-foreground/30"
                       >
                         {tag}
                       </span>
@@ -308,7 +308,7 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
                           e.stopPropagation();
                           onSelectIdea(item.prompt);
                         }}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-foreground/40 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/60"
                       >
                         <Wand2 className="h-3 w-3" />
                         Usar
@@ -338,7 +338,7 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
         <button
           type="button"
           onClick={() => navigate(activeIndex - 1)}
-          className="rounded-lg p-1.5 text-white/25 transition-colors hover:bg-white/[0.05] hover:text-white/50"
+          className="rounded-lg p-1.5 text-foreground/25 transition-colors hover:bg-foreground/[0.05] hover:text-foreground/50"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -354,7 +354,7 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
                 "h-1.5 rounded-full transition-all duration-300",
                 activeIndex === index
                   ? "w-4 bg-neon-cyan"
-                  : "w-1.5 bg-white/15 hover:bg-white/25"
+                  : "w-1.5 bg-foreground/15 hover:bg-foreground/25"
               )}
             />
           ))}
@@ -363,14 +363,14 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
         <button
           type="button"
           onClick={() => navigate(activeIndex + 1)}
-          className="rounded-lg p-1.5 text-white/25 transition-colors hover:bg-white/[0.05] hover:text-white/50"
+          className="rounded-lg p-1.5 text-foreground/25 transition-colors hover:bg-foreground/[0.05] hover:text-foreground/50"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
       {/* Hint */}
-      <p className="mt-1 text-center text-[10px] text-white/15">
+      <p className="mt-1 text-center text-[10px] text-foreground/15">
         Arraste para navegar · Enter para iniciar · Esc para fechar
       </p>
     </motion.div>

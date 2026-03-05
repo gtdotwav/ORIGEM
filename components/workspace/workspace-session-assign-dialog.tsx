@@ -62,7 +62,7 @@ export function WorkspaceSessionAssignDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             Adicionar sessoes a {workspaceName}
@@ -77,12 +77,12 @@ export function WorkspaceSessionAssignDialog({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar sessao..."
-            className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+            className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
           />
 
           <div className="max-h-[240px] space-y-1 overflow-y-auto pr-1">
             {unassigned.length === 0 ? (
-              <p className="py-6 text-center text-xs text-white/35">
+              <p className="py-6 text-center text-xs text-foreground/35">
                 Nenhuma sessao disponivel
               </p>
             ) : (
@@ -93,7 +93,7 @@ export function WorkspaceSessionAssignDialog({
                     "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-all",
                     selected.has(session.id)
                       ? "border-neon-cyan/30 bg-neon-cyan/5"
-                      : "border-transparent hover:bg-white/[0.03]"
+                      : "border-transparent hover:bg-foreground/[0.03]"
                   )}
                 >
                   <Checkbox
@@ -101,10 +101,10 @@ export function WorkspaceSessionAssignDialog({
                     onCheckedChange={() => toggle(session.id)}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-white/80">
+                    <p className="truncate text-xs font-medium text-foreground/80">
                       {session.title}
                     </p>
-                    <p className="text-[10px] text-white/35">
+                    <p className="text-[10px] text-foreground/35">
                       {new Date(session.updatedAt).toLocaleDateString("pt-BR")}
                     </p>
                   </div>
@@ -118,7 +118,7 @@ export function WorkspaceSessionAssignDialog({
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-xs text-white/50 hover:text-white/70"
+            className="text-xs text-foreground/50 hover:text-foreground/70"
           >
             Cancelar
           </Button>

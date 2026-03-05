@@ -16,16 +16,16 @@ export default function CelebrityChatPage() {
   return (
     <div className="relative flex h-[calc(100vh-80px)] flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 sm:px-6">
+      <div className="flex items-center justify-between border-b border-foreground/[0.06] px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-neon-purple/20 bg-neon-purple/10">
             <MessageSquare className="h-4 w-4 text-neon-purple" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white/90">
+            <h1 className="text-sm font-semibold text-foreground/90">
               Converse com uma Celebridade IA
             </h1>
-            <p className="text-[10px] text-white/35">
+            <p className="text-[10px] text-foreground/35">
               Escolha uma persona e inicie a conversa
             </p>
           </div>
@@ -39,10 +39,10 @@ export default function CelebrityChatPage() {
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center px-4">
           <Drama className="mb-4 h-16 w-16 text-neon-purple/60" />
-          <h2 className="mb-2 text-lg font-semibold text-white/80">
+          <h2 className="mb-2 text-lg font-semibold text-foreground/80">
             Escolha uma persona
           </h2>
-          <p className="mb-6 max-w-sm text-center text-sm text-white/40">
+          <p className="mb-6 max-w-sm text-center text-sm text-foreground/40">
             Selecione uma celebridade historica para iniciar uma conversa
             imersiva e didatica com IA
           </p>
@@ -59,10 +59,10 @@ export default function CelebrityChatPage() {
                   onClick={() =>
                     usePersonaStore.getState().setActivePersona(persona.id)
                   }
-                  className="flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 transition-all hover:border-white/[0.15] hover:bg-white/[0.05]"
+                  className="flex flex-col items-center gap-1.5 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-3 transition-all hover:border-foreground/[0.15] hover:bg-foreground/[0.05]"
                 >
                   {Icon && <Icon className={cn("h-6 w-6", colors.text)} />}
-                  <span className="text-[10px] text-white/50">
+                  <span className="text-[10px] text-foreground/50">
                     {persona.name.split(" ")[0]}
                   </span>
                 </button>

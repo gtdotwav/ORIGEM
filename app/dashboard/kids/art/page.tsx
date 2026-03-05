@@ -17,7 +17,7 @@ const TOOLS = [
   { icon: SprayCan, label: "Spray", color: "text-neon-purple" },
   { icon: Stamp, label: "Carimbo", color: "text-neon-orange" },
   { icon: Circle, label: "Formas", color: "text-neon-green" },
-  { icon: Eraser, label: "Borracha", color: "text-white/50" },
+  { icon: Eraser, label: "Borracha", color: "text-foreground/50" },
 ];
 
 const THEMES = [
@@ -36,7 +36,7 @@ export default function KidsArtPage() {
       <div className="mb-6 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -44,34 +44,34 @@ export default function KidsArtPage() {
           <span className="text-xl">{"\u{1F3A8}"}</span>
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Arte & Pintura</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Arte & Pintura</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Solte a criatividade! Desenhe, pinte e crie
           </p>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-3 backdrop-blur-xl">
+      <div className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
         {TOOLS.map((tool) => (
           <button
             key={tool.label}
             type="button"
-            className="flex flex-col items-center gap-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 transition-all hover:border-white/15 hover:bg-white/[0.06]"
+            className="flex flex-col items-center gap-1 rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] px-4 py-3 transition-all hover:border-foreground/15 hover:bg-foreground/[0.06]"
           >
             <tool.icon className={`h-5 w-5 ${tool.color}`} />
-            <span className="text-[10px] text-white/40">{tool.label}</span>
+            <span className="text-[10px] text-foreground/40">{tool.label}</span>
           </button>
         ))}
 
         {/* Color palette */}
         <div className="ml-auto flex items-center gap-1.5 px-2">
-          {["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-400", "bg-cyan-400", "bg-blue-400", "bg-purple-400", "bg-pink-400", "bg-white", "bg-neutral-600"].map(
+          {["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-400", "bg-cyan-400", "bg-blue-400", "bg-purple-400", "bg-pink-400", "bg-foreground", "bg-neutral-600"].map(
             (color) => (
               <button
                 key={color}
                 type="button"
-                className={`h-6 w-6 rounded-full ${color} border-2 border-white/10 transition-transform hover:scale-110`}
+                className={`h-6 w-6 rounded-full ${color} border-2 border-foreground/10 transition-transform hover:scale-110`}
               />
             )
           )}
@@ -79,24 +79,24 @@ export default function KidsArtPage() {
       </div>
 
       {/* Canvas area */}
-      <div className="mb-8 flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-white/[0.08] bg-neutral-950/50">
+      <div className="mb-8 flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-foreground/[0.08] bg-card/50">
         <div className="text-center">
           <span className="mb-2 block text-4xl">{"\u{1F3A8}"}</span>
-          <p className="text-sm text-white/30">
+          <p className="text-sm text-foreground/30">
             Selecione um tema abaixo para comecar a colorir
           </p>
         </div>
       </div>
 
       {/* Coloring themes */}
-      <h2 className="mb-4 text-sm font-semibold text-white/60">
+      <h2 className="mb-4 text-sm font-semibold text-foreground/60">
         Paginas para Colorir
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {THEMES.map((theme) => (
           <div
             key={theme.id}
-            className="group cursor-pointer rounded-2xl border border-white/[0.08] bg-neutral-900/70 backdrop-blur-xl transition-all hover:border-neon-pink/30"
+            className="group cursor-pointer rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all hover:border-neon-pink/30"
           >
             <div
               className={`flex h-28 items-center justify-center rounded-t-2xl bg-gradient-to-br ${theme.gradient}`}
@@ -106,10 +106,10 @@ export default function KidsArtPage() {
               </span>
             </div>
             <div className="p-4">
-              <h3 className="text-sm font-medium text-white/80">
+              <h3 className="text-sm font-medium text-foreground/80">
                 {theme.title}
               </h3>
-              <p className="text-[11px] text-white/35">
+              <p className="text-[11px] text-foreground/35">
                 {theme.count} desenhos disponiveis
               </p>
             </div>

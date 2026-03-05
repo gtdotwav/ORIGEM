@@ -31,7 +31,7 @@ export function GlassCard({
         "glass rounded-2xl p-4 shadow-xl shadow-black/10",
         hover && "transition-all duration-300",
         hover && neon && neonGlowMap[neon],
-        hover && !neon && "hover:border-white/15 hover:bg-white/[0.07]",
+        hover && !neon && "hover:border-foreground/15 hover:bg-foreground/[0.07]",
         className
       )}
     >

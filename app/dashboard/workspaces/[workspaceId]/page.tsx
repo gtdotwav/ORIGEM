@@ -165,7 +165,7 @@ function DetailContent() {
           <div className="flex items-start gap-4">
             <Link
               href="/dashboard/workspaces"
-              className="mt-1.5 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/35 transition-colors hover:text-white/60"
+              className="mt-1.5 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/35 transition-colors hover:text-foreground/60"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -179,11 +179,11 @@ function DetailContent() {
               <Icon className={cn("h-6 w-6", colors.text)} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-foreground">
                 {workspace.name}
               </h1>
               {workspace.description && (
-                <p className="mt-1 text-sm text-white/45">
+                <p className="mt-1 text-sm text-foreground/45">
                   {workspace.description}
                 </p>
               )}
@@ -193,7 +193,7 @@ function DetailContent() {
             <button
               type="button"
               onClick={() => setEditDialogOpen(true)}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-xs text-white/50 transition-all hover:border-white/[0.20] hover:text-white/70"
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.10] bg-foreground/[0.04] px-3 py-2 text-xs text-foreground/50 transition-all hover:border-foreground/[0.20] hover:text-foreground/70"
             >
               <Pencil className="h-3.5 w-3.5" />
               Editar
@@ -215,7 +215,7 @@ function DetailContent() {
                 "inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all",
                 isActive
                   ? `${colors.border} ${colors.bg} ${colors.text}`
-                  : "border-white/[0.10] bg-white/[0.04] text-white/50 hover:border-white/[0.20] hover:text-white/70"
+                  : "border-foreground/[0.10] bg-foreground/[0.04] text-foreground/50 hover:border-foreground/[0.20] hover:text-foreground/70"
               )}
             >
               <Filter className="h-3.5 w-3.5" />
@@ -227,43 +227,43 @@ function DetailContent() {
 
       {/* Metrics */}
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className={cn("flex h-6 w-6 items-center justify-center rounded-md border", colors.border, colors.bg)}>
               <FolderKanban className={cn("h-3 w-3", colors.text)} />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">Projetos</p>
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">Projetos</p>
           </div>
-          <p className="text-2xl font-bold text-white">{activeProjects.length}</p>
+          <p className="text-2xl font-bold text-foreground">{activeProjects.length}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-cyan/20 bg-neon-cyan/10">
               <MessageSquare className="h-3 w-3 text-neon-cyan" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">Sessoes</p>
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">Sessoes</p>
           </div>
-          <p className="text-2xl font-bold text-white">{stats.sessionCount}</p>
+          <p className="text-2xl font-bold text-foreground">{stats.sessionCount}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-purple/20 bg-neon-purple/10">
               <MessageSquare className="h-3 w-3 text-neon-purple" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">Mensagens</p>
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">Mensagens</p>
           </div>
-          <p className="text-2xl font-bold text-white">{stats.messageCount}</p>
+          <p className="text-2xl font-bold text-foreground">{stats.messageCount}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-green/20 bg-neon-green/10">
               <Activity className="h-3 w-3 text-neon-green" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">Progresso</p>
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">Progresso</p>
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-white">{stats.overallProgress}%</p>
-            <div className="mb-1.5 h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+            <p className="text-2xl font-bold text-foreground">{stats.overallProgress}%</p>
+            <div className="mb-1.5 h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.06]">
               <div
                 className="h-full rounded-full bg-neon-green/60 transition-all"
                 style={{ width: `${stats.overallProgress}%` }}
@@ -279,7 +279,7 @@ function DetailContent() {
           {/* Projects */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/50">
+              <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/50">
                 <FolderKanban className="h-3.5 w-3.5" />
                 Projetos
               </h2>
@@ -301,11 +301,11 @@ function DetailContent() {
             </div>
 
             {activeProjects.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/[0.08] bg-black/15 p-8 text-center">
+              <div className="rounded-2xl border border-dashed border-foreground/[0.08] bg-black/15 p-8 text-center">
                 <div className={cn("mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border", colors.border, colors.bg, "opacity-50")}>
                   <FolderKanban className={cn("h-5 w-5", colors.text)} />
                 </div>
-                <p className="text-xs text-white/35">
+                <p className="text-xs text-foreground/35">
                   Crie projetos para organizar as sessoes deste workspace
                 </p>
                 <button
@@ -343,11 +343,11 @@ function DetailContent() {
           {/* Loose Sessions */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/50">
+              <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/50">
                 <MessageSquare className="h-3.5 w-3.5" />
                 Sessoes avulsas
                 {looseSessions.length > 0 && (
-                  <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-normal text-white/30">
+                  <span className="rounded-md bg-foreground/[0.06] px-1.5 py-0.5 text-[9px] font-normal text-foreground/30">
                     {looseSessions.length}
                   </span>
                 )}
@@ -363,7 +363,7 @@ function DetailContent() {
             </div>
 
             {looseSessions.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-white/[0.06] bg-black/10 px-4 py-3 text-center text-[11px] text-white/25">
+              <p className="rounded-xl border border-dashed border-foreground/[0.06] bg-black/10 px-4 py-3 text-center text-[11px] text-foreground/25">
                 Todas as sessoes estao em projetos ou nenhuma atribuida
               </p>
             ) : (
@@ -379,14 +379,14 @@ function DetailContent() {
                   return (
                     <div
                       key={session.id}
-                      className="group/s rounded-xl border border-white/[0.06] bg-black/20 p-3 transition-all hover:border-white/[0.10] hover:bg-black/30"
+                      className="group/s rounded-xl border border-foreground/[0.06] bg-black/20 p-3 transition-all hover:border-foreground/[0.10] hover:bg-black/30"
                     >
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-white/80">
+                          <p className="truncate text-sm font-medium text-foreground/80">
                             {session.title}
                           </p>
-                          <p className="text-[10px] text-white/30">
+                          <p className="text-[10px] text-foreground/30">
                             {formatSessionTime(session.updatedAt)}
                           </p>
                         </div>
@@ -394,14 +394,14 @@ function DetailContent() {
                           className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] ${
                             running
                               ? "border border-amber-300/30 bg-amber-300/10 text-amber-200"
-                              : "border border-white/[0.08] bg-white/[0.04] text-white/40"
+                              : "border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40"
                           }`}
                         >
                           {running ? "Executando" : "Aguardando"}
                         </span>
                       </div>
 
-                      <div className="mb-2 h-1 overflow-hidden rounded-full bg-white/[0.05]">
+                      <div className="mb-2 h-1 overflow-hidden rounded-full bg-foreground/[0.05]">
                         <div
                           className="h-full rounded-full bg-neon-cyan/50 transition-all"
                           style={{ width: `${progress}%` }}
@@ -409,7 +409,7 @@ function DetailContent() {
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[10px] text-white/30">
+                        <div className="flex items-center gap-2 text-[10px] text-foreground/30">
                           <span>{sessionMessages.length} msgs</span>
                           <span>·</span>
                           <span>{runtime?.tasks.length ?? 0} tarefas</span>
@@ -440,8 +440,8 @@ function DetailContent() {
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-            <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+          <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+            <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
               Acoes rapidas
             </h2>
             <div className="space-y-2">
@@ -462,14 +462,14 @@ function DetailContent() {
               <button
                 type="button"
                 onClick={() => setAssignDialogOpen(true)}
-                className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left text-xs text-white/55 transition-all hover:border-white/[0.15] hover:text-white/75"
+                className="flex w-full items-center gap-2 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2.5 text-left text-xs text-foreground/55 transition-all hover:border-foreground/[0.15] hover:text-foreground/75"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Adicionar sessoes
               </button>
               <Link
                 href="/dashboard"
-                className="flex w-full items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left text-xs text-white/55 transition-all hover:border-white/[0.15] hover:text-white/75"
+                className="flex w-full items-center gap-2 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2.5 text-left text-xs text-foreground/55 transition-all hover:border-foreground/[0.15] hover:text-foreground/75"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
                 Nova sessao
@@ -482,7 +482,7 @@ function DetailContent() {
                     toast.success("Workspace arquivado");
                     router.push("/dashboard/workspaces");
                   }}
-                  className="flex w-full items-center gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 text-left text-xs text-white/30 transition-all hover:border-white/[0.10] hover:text-white/50"
+                  className="flex w-full items-center gap-2 rounded-lg border border-foreground/[0.05] bg-foreground/[0.02] px-3 py-2.5 text-left text-xs text-foreground/30 transition-all hover:border-foreground/[0.10] hover:text-foreground/50"
                 >
                   <Archive className="h-3.5 w-3.5" />
                   Arquivar workspace
@@ -492,11 +492,11 @@ function DetailContent() {
           </div>
 
           {stats.lastActivity && (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
-              <p className="text-[10px] uppercase tracking-wider text-white/30">
+            <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+              <p className="text-[10px] uppercase tracking-wider text-foreground/30">
                 Ultima atividade
               </p>
-              <p className="mt-1.5 text-xs font-medium text-white/60">
+              <p className="mt-1.5 text-xs font-medium text-foreground/60">
                 {formatSessionTime(stats.lastActivity)}
               </p>
             </div>

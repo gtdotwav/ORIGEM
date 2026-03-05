@@ -142,7 +142,7 @@ export default function CodeAppPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] dark:border-white/[0.08] dark:bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Code2 className="h-5 w-5 text-neon-green" />
           </div>
           <div>
@@ -264,7 +264,7 @@ export default function CodeAppPage() {
                   <table className="w-full border-collapse">
                     <tbody>
                       {lines.map((line, i) => (
-                        <tr key={i} className="group hover:bg-white/[0.02]">
+                        <tr key={i} className="group hover:bg-foreground/[0.02]">
                           <td className="select-none pr-4 text-right align-top font-mono text-xs text-muted-foreground/50 group-hover:text-muted-foreground">
                             {i + 1}
                           </td>

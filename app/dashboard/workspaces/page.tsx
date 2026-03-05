@@ -119,8 +119,8 @@ function WorkspacesContent() {
               <Layers className="h-6 w-6 text-neon-blue" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Workspaces</h1>
-              <p className="mt-1 text-sm text-white/45">
+              <h1 className="text-2xl font-bold text-foreground">Workspaces</h1>
+              <p className="mt-1 text-sm text-foreground/45">
                 Espacos de trabalho para organizar projetos e sessoes
               </p>
             </div>
@@ -141,59 +141,59 @@ function WorkspacesContent() {
 
       {/* Metrics */}
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-blue/20 bg-neon-blue/10">
               <Layers className="h-3 w-3 text-neon-blue" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
               Workspaces
             </p>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-foreground">
             {activeWorkspaces.length}
           </p>
           {archivedWorkspaces.length > 0 && (
-            <p className="mt-0.5 text-[10px] text-white/25">
+            <p className="mt-0.5 text-[10px] text-foreground/25">
               +{archivedWorkspaces.length} arquivados
             </p>
           )}
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-purple/20 bg-neon-purple/10">
               <FolderKanban className="h-3 w-3 text-neon-purple" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
               Projetos
             </p>
           </div>
-          <p className="text-2xl font-bold text-white">{totalProjects}</p>
+          <p className="text-2xl font-bold text-foreground">{totalProjects}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-cyan/20 bg-neon-cyan/10">
               <MessageSquare className="h-3 w-3 text-neon-cyan" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
               Sessoes
             </p>
           </div>
-          <p className="text-2xl font-bold text-white">{assignedCount}</p>
-          <p className="mt-0.5 text-[10px] text-white/25">
+          <p className="text-2xl font-bold text-foreground">{assignedCount}</p>
+          <p className="mt-0.5 text-[10px] text-foreground/25">
             de {sessions.length} total
           </p>
         </div>
-        <div className="rounded-xl border border-white/[0.08] bg-neutral-900/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-green/20 bg-neon-green/10">
               <Filter className="h-3 w-3 text-neon-green" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
               Filtro ativo
             </p>
           </div>
-          <p className="truncate text-sm font-semibold text-white/80">
+          <p className="truncate text-sm font-semibold text-foreground/80">
             {activeWsName ?? "Nenhum"}
           </p>
           {activeWorkspaceId && (
@@ -243,7 +243,7 @@ function WorkspacesContent() {
 
           {archivedWorkspaces.length > 0 && (
             <div className="mt-8">
-              <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-white/25">
+              <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-foreground/25">
                 Arquivados ({archivedWorkspaces.length})
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -269,20 +269,20 @@ function WorkspacesContent() {
       {/* Unassigned Sessions */}
       {unassignedSessions.length > 0 && (
         <div className="mt-8">
-          <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-white/25">
+          <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-foreground/25">
             Sem workspace ({unassignedSessions.length})
           </h3>
           <div className="space-y-1.5">
             {unassignedSessions.slice(0, 5).map((session) => (
               <div
                 key={session.id}
-                className="group/s flex items-center justify-between rounded-xl border border-white/[0.06] bg-black/20 px-3.5 py-2.5 transition-all hover:border-white/[0.10] hover:bg-black/30"
+                className="group/s flex items-center justify-between rounded-xl border border-foreground/[0.06] bg-black/20 px-3.5 py-2.5 transition-all hover:border-foreground/[0.10] hover:bg-black/30"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-white/60 group-hover/s:text-white/80">
+                  <p className="truncate text-xs font-medium text-foreground/60 group-hover/s:text-foreground/80">
                     {session.title}
                   </p>
-                  <p className="text-[10px] text-white/25">
+                  <p className="text-[10px] text-foreground/25">
                     {new Date(session.updatedAt).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
@@ -296,7 +296,7 @@ function WorkspacesContent() {
               </div>
             ))}
             {unassignedSessions.length > 5 && (
-              <p className="py-1 text-center text-[10px] text-white/20">
+              <p className="py-1 text-center text-[10px] text-foreground/20">
                 +{unassignedSessions.length - 5} sessoes sem workspace
               </p>
             )}

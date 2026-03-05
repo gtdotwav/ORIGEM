@@ -81,17 +81,17 @@ export function AppBuilderDialog() {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="flex h-full min-h-[140px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/[0.08] bg-neutral-900/30 p-6 transition-all hover:border-neon-cyan/30 hover:bg-neon-cyan/5"
+          className="flex h-full min-h-[140px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-foreground/[0.08] bg-card/30 p-6 transition-all hover:border-neon-cyan/30 hover:bg-neon-cyan/5"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Plus className="h-5 w-5 text-neon-cyan" />
           </div>
-          <p className="text-xs font-medium text-white/40">
+          <p className="text-xs font-medium text-foreground/40">
             Desenvolver App
           </p>
         </button>
       </DialogTrigger>
-      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Rocket className="h-4 w-4 text-neon-cyan" />
@@ -105,7 +105,7 @@ export function AppBuilderDialog() {
         <div className="space-y-3">
           {/* Name */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Nome
             </label>
             <Input
@@ -113,13 +113,13 @@ export function AppBuilderDialog() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Assistente de Vendas"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
           {/* Intention */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Intencao
             </label>
             <Input
@@ -127,13 +127,13 @@ export function AppBuilderDialog() {
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
               placeholder="Ex: Ajudar na qualificacao de leads"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Descricao
             </label>
             <Textarea
@@ -141,7 +141,7 @@ export function AppBuilderDialog() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descreva o que o app deve fazer, como e para quem..."
               rows={3}
-              className="min-h-[60px] resize-none border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="min-h-[60px] resize-none border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
             />
           </div>
 
@@ -151,11 +151,11 @@ export function AppBuilderDialog() {
               id="advanced-ctx"
               checked={showAdvanced}
               onCheckedChange={(v) => setShowAdvanced(v === true)}
-              className="border-white/20"
+              className="border-foreground/20"
             />
             <label
               htmlFor="advanced-ctx"
-              className="cursor-pointer text-xs text-white/50"
+              className="cursor-pointer text-xs text-foreground/50"
             >
               Habilitar contexto avancado (sites, midias, fontes)
             </label>
@@ -165,7 +165,7 @@ export function AppBuilderDialog() {
           {showAdvanced && (
             <div className="dialog-section space-y-3">
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/35">
                   <Globe className="h-3 w-3" />
                   Sites / URLs
                 </label>
@@ -174,12 +174,12 @@ export function AppBuilderDialog() {
                   onChange={(e) => setUrls(e.target.value)}
                   placeholder="Cole links de sites relevantes (um por linha)..."
                   rows={2}
-                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
+                  className="min-h-[48px] resize-none border-foreground/[0.06] bg-foreground/[0.03] text-[11px] text-foreground/70 placeholder:text-foreground/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/35">
                   <Image className="h-3 w-3" />
                   Midias
                 </label>
@@ -188,12 +188,12 @@ export function AppBuilderDialog() {
                   onChange={(e) => setMedia(e.target.value)}
                   placeholder="Referencias de midia, imagens, videos (um por linha)..."
                   rows={2}
-                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
+                  className="min-h-[48px] resize-none border-foreground/[0.06] bg-foreground/[0.03] text-[11px] text-foreground/70 placeholder:text-foreground/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-white/35">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/35">
                   <BookOpen className="h-3 w-3" />
                   Fontes
                 </label>
@@ -202,7 +202,7 @@ export function AppBuilderDialog() {
                   onChange={(e) => setSources(e.target.value)}
                   placeholder="Fontes que fortalecem o contexto do app (um por linha)..."
                   rows={2}
-                  className="min-h-[48px] resize-none border-white/[0.06] bg-white/[0.03] text-[11px] text-white/70 placeholder:text-white/20"
+                  className="min-h-[48px] resize-none border-foreground/[0.06] bg-foreground/[0.03] text-[11px] text-foreground/70 placeholder:text-foreground/20"
                 />
               </div>
             </div>
@@ -214,7 +214,7 @@ export function AppBuilderDialog() {
           <Button
             variant="ghost"
             onClick={() => setOpen(false)}
-            className="text-xs text-white/50 hover:text-white/70"
+            className="text-xs text-foreground/50 hover:text-foreground/70"
           >
             Cancelar
           </Button>

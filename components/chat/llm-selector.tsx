@@ -98,12 +98,12 @@ export function LLMSelector({ className }: { className?: string }) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-72 border-white/[0.08] bg-neutral-950/95 p-3 shadow-2xl backdrop-blur-xl"
+        className="w-72 border-foreground/[0.08] bg-card/95 p-3 shadow-2xl backdrop-blur-xl"
         align="start"
         sideOffset={8}
       >
         {/* Tier pills */}
-        <p className="mb-2 text-[10px] uppercase tracking-wide text-white/30">
+        <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/30">
           Nivel de resposta
         </p>
         <div className="mb-3 flex gap-1">
@@ -126,7 +126,7 @@ export function LLMSelector({ className }: { className?: string }) {
                   "flex flex-1 items-center justify-center gap-1 rounded-md border px-1.5 py-1 text-[10px] font-medium transition-all",
                   isActive && !hasManualSelection
                     ? `${colors.border} ${colors.bg} ${colors.text}`
-                    : "border-white/[0.06] bg-white/[0.02] text-white/35 hover:bg-white/[0.05] hover:text-white/50"
+                    : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/35 hover:bg-foreground/[0.05] hover:text-foreground/50"
                 )}
               >
                 <TierIcon className="h-3 w-3" />
@@ -137,7 +137,7 @@ export function LLMSelector({ className }: { className?: string }) {
         </div>
 
         {/* Auto option */}
-        <div className="border-t border-white/[0.06] pt-2">
+        <div className="border-t border-foreground/[0.06] pt-2">
           <button
             type="button"
             onClick={selectAuto}
@@ -145,7 +145,7 @@ export function LLMSelector({ className }: { className?: string }) {
               "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
               !hasManualSelection
                 ? "bg-neon-cyan/8 text-neon-cyan"
-                : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
+                : "text-foreground/50 hover:bg-foreground/[0.04] hover:text-foreground/70"
             )}
           >
             <Zap className="h-3 w-3" />
@@ -161,20 +161,20 @@ export function LLMSelector({ className }: { className?: string }) {
 
         {/* Provider + model list */}
         {loading ? (
-          <p className="mt-2 text-center text-[10px] text-white/25">
+          <p className="mt-2 text-center text-[10px] text-foreground/25">
             Carregando provedores...
           </p>
         ) : configuredNames.length === 0 ? (
-          <p className="mt-2 text-center text-[10px] text-white/25">
+          <p className="mt-2 text-center text-[10px] text-foreground/25">
             Nenhum provedor configurado
           </p>
         ) : (
-          <div className="mt-2 max-h-52 space-y-1 overflow-y-auto border-t border-white/[0.06] pt-2">
+          <div className="mt-2 max-h-52 space-y-1 overflow-y-auto border-t border-foreground/[0.06] pt-2">
             {PROVIDER_CATALOG.filter((p) =>
               configuredNames.includes(p.name)
             ).map((provMeta) => (
               <div key={provMeta.name}>
-                <p className="mb-0.5 px-2 text-[9px] uppercase tracking-wider text-white/25">
+                <p className="mb-0.5 px-2 text-[9px] uppercase tracking-wider text-foreground/25">
                   {provMeta.displayName}
                 </p>
                 {provMeta.models.map((model) => {
@@ -191,7 +191,7 @@ export function LLMSelector({ className }: { className?: string }) {
                         "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
                         isSelected
                           ? "bg-neon-purple/8 text-neon-purple"
-                          : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
+                          : "text-foreground/50 hover:bg-foreground/[0.04] hover:text-foreground/70"
                       )}
                     >
                       <div className="flex-1">

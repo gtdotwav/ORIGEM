@@ -66,7 +66,7 @@ export function CriticAnnotations({
   return (
     <div
       className={cn(
-        "mt-2 rounded-lg border border-white/[0.06] bg-white/[0.02]",
+        "mt-2 rounded-lg border border-foreground/[0.06] bg-foreground/[0.02]",
         className
       )}
     >
@@ -76,7 +76,7 @@ export function CriticAnnotations({
         className="flex w-full items-center gap-2 px-3 py-2 text-left"
       >
         <Shield className="h-3 w-3 text-neon-pink/60" />
-        <span className="text-[11px] font-medium text-white/50">
+        <span className="text-[11px] font-medium text-foreground/50">
           Revisado por {results.length} critico
           {results.length > 1 ? "s" : ""}
         </span>
@@ -98,7 +98,7 @@ export function CriticAnnotations({
           })}
           <ChevronDown
             className={cn(
-              "ml-1 h-3 w-3 text-white/25 transition-transform",
+              "ml-1 h-3 w-3 text-foreground/25 transition-transform",
               expanded && "rotate-180"
             )}
           />
@@ -106,7 +106,7 @@ export function CriticAnnotations({
       </button>
 
       {expanded && (
-        <div className="space-y-2 border-t border-white/[0.04] px-3 pb-3 pt-2">
+        <div className="space-y-2 border-t border-foreground/[0.04] px-3 pb-3 pt-2">
           {results.map((result) => {
             const Icon =
               CRITIC_ICONS[result.criticType] ?? Shield;
@@ -116,11 +116,11 @@ export function CriticAnnotations({
             return (
               <div
                 key={result.criticType}
-                className="rounded-md border border-white/[0.04] bg-white/[0.02] p-2.5"
+                className="rounded-md border border-foreground/[0.04] bg-foreground/[0.02] p-2.5"
               >
                 <div className="mb-1.5 flex items-center gap-2">
-                  <Icon className="h-3 w-3 text-white/40" />
-                  <span className="text-[11px] font-medium text-white/60">
+                  <Icon className="h-3 w-3 text-foreground/40" />
+                  <span className="text-[11px] font-medium text-foreground/60">
                     {CRITIC_LABELS[result.criticType] ?? result.criticType}
                   </span>
                   <span
@@ -133,7 +133,7 @@ export function CriticAnnotations({
                     {vs.label}
                   </span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-white/40">
+                <p className="text-[11px] leading-relaxed text-foreground/40">
                   {result.annotation.length > 300
                     ? result.annotation.slice(0, 300) + "..."
                     : result.annotation}

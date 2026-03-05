@@ -85,8 +85,8 @@ function ConnectionsPageContent() {
             <Users2 className="h-6 w-6 text-neon-cyan" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white/95">Conexões</h1>
-            <p className="text-sm text-white/40">
+            <h1 className="text-2xl font-bold text-foreground/95">Conexões</h1>
+            <p className="text-sm text-foreground/40">
               Gerencie sua rede de contatos e colaboradores
             </p>
           </div>
@@ -117,39 +117,39 @@ function ConnectionsPageContent() {
 
       {/* Metrics */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Users2 className="h-3.5 w-3.5 text-neon-cyan/60" />
-            <span className="text-xs text-white/30">Total</span>
+            <span className="text-xs text-foreground/30">Total</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{counts.all}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{counts.all}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <UserPlus className="h-3.5 w-3.5 text-neon-orange/60" />
-            <span className="text-xs text-white/30">Pendentes</span>
+            <span className="text-xs text-foreground/30">Pendentes</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{counts.pending}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{counts.pending}</p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Link2 className="h-3.5 w-3.5 text-neon-purple/60" />
-            <span className="text-xs text-white/30">Links ativos</span>
+            <span className="text-xs text-foreground/30">Links ativos</span>
           </div>
-          <p className="mt-1 text-xl font-bold text-white/90">{inviteLinks.length}</p>
+          <p className="mt-1 text-xl font-bold text-foreground/90">{inviteLinks.length}</p>
         </div>
       </div>
 
       {/* Search + Tabs */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/25" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, função ou tag..."
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3 text-sm text-white/80 placeholder:text-white/25 focus:border-white/15 focus:outline-none"
+            className="w-full rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] py-2.5 pl-10 pr-3 text-sm text-foreground/80 placeholder:text-foreground/25 focus:border-foreground/15 focus:outline-none"
           />
         </div>
 
@@ -163,7 +163,7 @@ function ConnectionsPageContent() {
                 "rounded-full border px-3 py-1 text-xs font-medium transition-all",
                 tab === t.value
                   ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-                  : "border-white/[0.06] text-white/35 hover:border-white/15 hover:text-white/50"
+                  : "border-foreground/[0.06] text-foreground/35 hover:border-foreground/15 hover:text-foreground/50"
               )}
             >
               {t.label}

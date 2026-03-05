@@ -105,8 +105,8 @@ export default function KidsPage() {
           <span className="text-xl">{"\u{1F31F}"}</span>
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">ORIGEM Kids</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">ORIGEM Kids</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Mundo magico de aprendizado e diversao
           </p>
         </div>
@@ -117,10 +117,10 @@ export default function KidsPage() {
         <div className="flex items-center gap-4">
           <span className="text-5xl">{"\u{1F680}"}</span>
           <div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-foreground">
               Ola, explorador! {"\u{1F44B}"}
             </h2>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-foreground/60">
               Escolha uma aventura para comecar. Aprenda, brinque e descubra
               coisas incriveis com a inteligencia artificial!
             </p>
@@ -136,7 +136,7 @@ export default function KidsPage() {
             <Link
               key={section.href}
               href={section.href}
-              className={`group rounded-2xl border ${colors.border} ${colors.hoverBorder} bg-neutral-900/70 p-6 backdrop-blur-xl transition-all ${colors.glow}`}
+              className={`group rounded-2xl border ${colors.border} ${colors.hoverBorder} bg-card/70 p-6 backdrop-blur-xl transition-all ${colors.glow}`}
             >
               <div
                 className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl border ${colors.border} ${colors.bg}`}
@@ -146,14 +146,14 @@ export default function KidsPage() {
               <h3 className={`mb-1 text-sm font-semibold ${colors.text}`}>
                 {section.title}
               </h3>
-              <p className="text-xs text-white/40">{section.description}</p>
+              <p className="text-xs text-foreground/40">{section.description}</p>
             </Link>
           );
         })}
       </div>
 
       {/* Footer — safety + parental */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-neutral-900/50 px-5 py-3 backdrop-blur-xl">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-foreground/[0.06] bg-card/50 px-5 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <Shield className="h-4 w-4 text-neon-green" />
           <span className="text-xs text-neon-green/80">
@@ -162,7 +162,7 @@ export default function KidsPage() {
         </div>
         <Link
           href="/dashboard/kids/parental"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs text-white/40 transition-all hover:bg-white/[0.06] hover:text-white/60"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-1.5 text-xs text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
         >
           <Lock className="h-3 w-3" />
           Controle Parental

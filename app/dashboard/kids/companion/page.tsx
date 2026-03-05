@@ -46,7 +46,7 @@ export default function KidsCompanionPage() {
       <div className="mb-4 flex items-start gap-3">
         <Link
           href="/dashboard/kids"
-          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors hover:text-white/70"
+          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -54,8 +54,8 @@ export default function KidsCompanionPage() {
           <span className="text-xl">{"\u{1F916}"}</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-white">Ori — Companheiro IA</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-semibold text-foreground">Ori — Companheiro IA</h1>
+          <p className="mt-1 text-sm text-foreground/50">
             Seu amigo virtual inteligente e divertido
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function KidsCompanionPage() {
       </div>
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 backdrop-blur-xl">
+      <div className="flex-1 overflow-y-auto rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
         <div className="space-y-4">
           {messages.map((msg, i) => (
             <div
@@ -76,8 +76,8 @@ export default function KidsCompanionPage() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === "user"
-                    ? "bg-neon-cyan/15 text-white/90"
-                    : "border border-white/[0.06] bg-white/[0.03] text-white/80"
+                    ? "bg-neon-cyan/15 text-foreground/90"
+                    : "border border-foreground/[0.06] bg-foreground/[0.03] text-foreground/80"
                 }`}
               >
                 {msg.role === "assistant" && (
@@ -99,7 +99,7 @@ export default function KidsCompanionPage() {
             key={s.label}
             type="button"
             onClick={() => handleSend(s.label)}
-            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/50 transition-all hover:border-neon-orange/30 hover:bg-neon-orange/8 hover:text-white/70"
+            className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-neon-orange/30 hover:bg-neon-orange/8 hover:text-foreground/70"
           >
             {s.emoji} {s.label}
           </button>
@@ -107,7 +107,7 @@ export default function KidsCompanionPage() {
       </div>
 
       {/* Input */}
-      <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-black/30 p-2.5">
+      <div className="mt-3 flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2.5">
         <input
           type="text"
           value={input}
@@ -119,7 +119,7 @@ export default function KidsCompanionPage() {
             }
           }}
           placeholder="Pergunte algo para o Ori..."
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
         />
         <button
           type="button"

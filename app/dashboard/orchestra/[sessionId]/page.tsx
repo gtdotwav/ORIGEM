@@ -50,7 +50,7 @@ const STAGE_LABELS: Record<PipelineStage, string> = {
 };
 
 const STATUS_STYLE = {
-  pending: "text-white/50 border-white/[0.12] bg-white/[0.05]",
+  pending: "text-foreground/50 border-foreground/[0.12] bg-foreground/[0.05]",
   running: "text-amber-200 border-amber-300/30 bg-amber-300/10",
   done: "text-green-200 border-green-300/30 bg-green-300/10",
   blocked: "text-red-200 border-red-300/30 bg-red-300/10",
@@ -255,12 +255,12 @@ function OrchestraPage() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
             <Orbit className="h-5 w-5 text-fuchsia-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-white">Orquestra Final</h1>
-            <p className="mt-1 text-sm text-white/50">
+            <h1 className="text-2xl font-semibold text-foreground">Orquestra Final</h1>
+            <p className="mt-1 text-sm text-foreground/50">
               Contexto, agentes, projetos, grupos e fluxos trabalhando em conjunto.
             </p>
           </div>
@@ -269,7 +269,7 @@ function OrchestraPage() {
         <div className="flex items-center gap-2">
           <Link
             href={getJourneyStepHref("flows", sessionId, selectedContext?.id)}
-            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition-all hover:border-white/[0.24] hover:bg-white/[0.08]"
+            className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Fluxos
@@ -305,16 +305,16 @@ function OrchestraPage() {
         </div>
       ) : (
         <>
-          <div className="mb-4 rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
+          <div className="mb-4 rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
                 Estado da orquestracao
               </p>
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-foreground/60">
                 {STAGE_LABELS[pipelineStage]} · {overallProgress}%
               </span>
             </div>
-            <div className="mb-3 h-2 overflow-hidden rounded-full bg-white/[0.07]">
+            <div className="mb-3 h-2 overflow-hidden rounded-full bg-foreground/[0.07]">
               <div
                 className="h-full rounded-full bg-neon-cyan/70 transition-all duration-300"
                 style={{ width: `${overallProgress}%` }}
@@ -346,19 +346,19 @@ function OrchestraPage() {
 
           <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
             <section className="space-y-3">
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+              <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
                   <Brain className="h-4 w-4 text-cyan-300" />
                   Contexto ativo
                 </div>
                 {selectedContext ? (
                   <>
-                    <p className="text-sm text-white/85">{selectedContext.inputText}</p>
+                    <p className="text-sm text-foreground/85">{selectedContext.inputText}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {selectedContext.context.domains.map((domain) => (
                         <span
                           key={domain.domain}
-                          className="rounded-full border border-white/[0.12] bg-white/[0.05] px-2 py-0.5 text-[11px] text-white/70"
+                          className="rounded-full border border-foreground/[0.12] bg-foreground/[0.05] px-2 py-0.5 text-[11px] text-foreground/70"
                         >
                           {domain.domain}
                         </span>
@@ -366,17 +366,17 @@ function OrchestraPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-white/50">Sem contexto selecionado.</p>
+                  <p className="text-sm text-foreground/50">Sem contexto selecionado.</p>
                 )}
               </div>
 
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+              <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
                   <Sparkles className="h-4 w-4 text-amber-200" />
                   Direcoes coletadas
                 </div>
                 {contextDirections.length === 0 ? (
-                  <p className="text-sm text-white/50">Sem direcoes contextuais registradas.</p>
+                  <p className="text-sm text-foreground/50">Sem direcoes contextuais registradas.</p>
                 ) : (
                   <div className="space-y-2">
                     {contextDirections.map((direction) => (
@@ -396,22 +396,22 @@ function OrchestraPage() {
             </section>
 
             <section className="space-y-3">
-              <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+              <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+                <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
                   <FolderKanban className="h-4 w-4 text-blue-300" />
                   Plano de projeto e execucao
                 </div>
                 {runtimeTasks.length === 0 ? (
-                  <p className="text-sm text-white/50">Sem tarefas orquestradas ainda.</p>
+                  <p className="text-sm text-foreground/50">Sem tarefas orquestradas ainda.</p>
                 ) : (
                   <div className="space-y-2">
                     {runtimeTasks.map((task) => (
                       <div
                         key={task.id}
-                        className="rounded-lg border border-white/[0.08] bg-black/25 px-3 py-2"
+                        className="rounded-lg border border-foreground/[0.08] bg-black/25 px-3 py-2"
                       >
                         <div className="mb-1 flex items-start justify-between gap-2">
-                          <p className="text-sm text-white/85">
+                          <p className="text-sm text-foreground/85">
                             {task.priority}. {task.title}
                           </p>
                           <span
@@ -420,8 +420,8 @@ function OrchestraPage() {
                             {task.status}
                           </span>
                         </div>
-                        <p className="text-xs text-white/45">{task.agentName}</p>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                        <p className="text-xs text-foreground/45">{task.agentName}</p>
+                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-foreground/[0.06]">
                           <div
                             className="h-full rounded-full bg-neon-cyan/70"
                             style={{ width: `${task.progress}%` }}
@@ -434,44 +434,44 @@ function OrchestraPage() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-                  <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+                <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+                  <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
                     <Bot className="h-4 w-4 text-green-300" />
                     Agentes
                   </div>
                   <div className="space-y-1.5">
                     {sessionAgents.length === 0 ? (
-                      <p className="text-xs text-white/50">Sem agentes registrados.</p>
+                      <p className="text-xs text-foreground/50">Sem agentes registrados.</p>
                     ) : (
                       sessionAgents.map((agent) => (
                         <div
                           key={agent.id}
-                          className="rounded-lg border border-white/[0.08] bg-black/25 px-2.5 py-2"
+                          className="rounded-lg border border-foreground/[0.08] bg-black/25 px-2.5 py-2"
                         >
-                          <p className="text-xs text-white/80">{agent.name}</p>
-                          <p className="text-[11px] text-white/45">{agent.role}</p>
+                          <p className="text-xs text-foreground/80">{agent.name}</p>
+                          <p className="text-[11px] text-foreground/45">{agent.role}</p>
                         </div>
                       ))
                     )}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-                  <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+                <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+                  <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
                     <Users className="h-4 w-4 text-orange-300" />
                     Grupos
                   </div>
                   <div className="space-y-1.5">
                     {sessionGroups.length === 0 ? (
-                      <p className="text-xs text-white/50">Sem grupos registrados.</p>
+                      <p className="text-xs text-foreground/50">Sem grupos registrados.</p>
                     ) : (
                       sessionGroups.map((group) => (
                         <div
                           key={group.id}
-                          className="rounded-lg border border-white/[0.08] bg-black/25 px-2.5 py-2"
+                          className="rounded-lg border border-foreground/[0.08] bg-black/25 px-2.5 py-2"
                         >
-                          <p className="text-xs text-white/80">{group.name}</p>
-                          <p className="text-[11px] text-white/45">{group.strategy}</p>
+                          <p className="text-xs text-foreground/80">{group.name}</p>
+                          <p className="text-[11px] text-foreground/45">{group.strategy}</p>
                         </div>
                       ))
                     )}
@@ -481,22 +481,22 @@ function OrchestraPage() {
             </section>
           </div>
 
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4">
-            <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/80">
+          <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
+            <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
               <GitBranch className="h-4 w-4 text-neon-cyan" />
               Trilha de checkpoints da orquestra
             </div>
             {checkpointMessages.length === 0 ? (
-              <p className="text-sm text-white/50">Sem checkpoints registrados ainda.</p>
+              <p className="text-sm text-foreground/50">Sem checkpoints registrados ainda.</p>
             ) : (
               <div className="space-y-2">
                 {checkpointMessages.map((message) => (
                   <div
                     key={message.id}
-                    className="rounded-lg border border-white/[0.08] bg-black/25 px-3 py-2"
+                    className="rounded-lg border border-foreground/[0.08] bg-black/25 px-3 py-2"
                   >
-                    <p className="text-xs text-white/80">{message.content}</p>
-                    <p className="mt-1 text-[10px] text-white/40">
+                    <p className="text-xs text-foreground/80">{message.content}</p>
+                    <p className="mt-1 text-[10px] text-foreground/40">
                       {new Date(message.createdAt).toLocaleTimeString("pt-BR", {
                         hour: "2-digit",
                         minute: "2-digit",

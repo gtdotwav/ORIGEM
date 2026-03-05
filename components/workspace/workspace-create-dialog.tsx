@@ -100,7 +100,7 @@ export function WorkspaceCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/[0.08] backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {editWorkspace ? "Editar workspace" : "Novo workspace"}
@@ -114,14 +114,14 @@ export function WorkspaceCreateDialog({
 
         <div className="space-y-4 py-2">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Nome
             </label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Projeto Alpha"
-              className="border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSubmit();
@@ -130,20 +130,20 @@ export function WorkspaceCreateDialog({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Descricao
             </label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descricao opcional do workspace..."
-              className="min-h-[60px] resize-none border-white/[0.08] bg-white/[0.04] text-sm text-white/90 placeholder:text-white/25"
+              className="min-h-[60px] resize-none border-foreground/[0.08] bg-foreground/[0.04] text-sm text-foreground/90 placeholder:text-foreground/25"
               rows={2}
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Cor
             </label>
             <div className="flex gap-2">
@@ -168,7 +168,7 @@ export function WorkspaceCreateDialog({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/50">
+            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
               Icone
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -184,7 +184,7 @@ export function WorkspaceCreateDialog({
                       "flex h-9 items-center justify-center rounded-lg border transition-all",
                       icon === i
                         ? `${colors.border} ${colors.bg} ${colors.text}`
-                        : "border-white/[0.06] bg-white/[0.02] text-white/40 hover:border-white/[0.12] hover:text-white/60"
+                        : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/40 hover:border-foreground/[0.12] hover:text-foreground/60"
                     )}
                   >
                     <LucideIcon className="h-4 w-4" />
@@ -199,7 +199,7 @@ export function WorkspaceCreateDialog({
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-xs text-white/50 hover:text-white/70"
+            className="text-xs text-foreground/50 hover:text-foreground/70"
           >
             Cancelar
           </Button>
