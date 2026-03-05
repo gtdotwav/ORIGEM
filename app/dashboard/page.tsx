@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Atom, Send, Loader2, MessageCircle, Workflow, History, Plug, Calendar } from "lucide-react";
-import { motion } from "motion/react";
+import { ImageIcon, Settings, Atom, Send, Loader2, MessageCircle, Workflow, History, Plug, Calendar, Sparkles as SparklesIcon } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
+import { IdeaSwiper } from "@/components/chat/idea-swiper";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -70,6 +71,7 @@ export default function DashboardPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [ideasOpen, setIdeasOpen] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -340,15 +342,31 @@ export default function DashboardPage() {
                 <Settings className="h-4 w-4" />
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => void startSessionFromHome()}
-              disabled={!input.trim() || sending || uploadingImage}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send className="h-3.5 w-3.5" />
-              {sending || uploadingImage ? "Enviando..." : "Enviar"}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setIdeasOpen((v) => !v)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
+                  ideasOpen
+                    ? "border-neon-purple/40 bg-neon-purple/15 text-neon-purple"
+                    : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:border-neon-purple/30 hover:bg-neon-purple/5 hover:text-neon-purple/70"
+                )}
+                title="Gerar ideias"
+              >
+                <SparklesIcon className="h-3.5 w-3.5" />
+                Ideias
+              </button>
+              <button
+                type="button"
+                onClick={() => void startSessionFromHome()}
+                disabled={!input.trim() || sending || uploadingImage}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {sending || uploadingImage ? "Enviando..." : "Enviar"}
+              </button>
+            </div>
           </div>
 
           <input
@@ -368,6 +386,24 @@ export default function DashboardPage() {
               <span className="text-xs text-neon-cyan">Processando imagem...</span>
             </div>
           )}
+
+          {/* Idea swiper */}
+          <AnimatePresence>
+            {ideasOpen && (
+              <IdeaSwiper
+                onSelectIdea={(prompt) => {
+                  setInput(prompt);
+                  setIdeasOpen(false);
+                  inputRef.current?.focus();
+                }}
+                onStartChat={(prompt) => {
+                  setIdeasOpen(false);
+                  void startSessionFromHome({ prompt });
+                }}
+                onClose={() => setIdeasOpen(false)}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Suggestion badges */}
           <div className="flex flex-wrap gap-2 overflow-x-auto">
