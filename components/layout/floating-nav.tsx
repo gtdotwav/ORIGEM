@@ -27,7 +27,7 @@ import {
   Compass,
   Rss,
   Users2,
-  Sun,
+  Monitor,
   Moon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -266,7 +266,7 @@ export function FloatingNav() {
                 {theme === "dark" ? (
                   <Moon className="h-3 w-3 text-neutral-800" />
                 ) : (
-                  <Sun className="h-3 w-3 text-amber-500" />
+                  <Monitor className="h-3 w-3 text-neutral-400" />
                 )}
               </span>
             </button>
