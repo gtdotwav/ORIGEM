@@ -92,9 +92,9 @@ const VERTEX_SHADER = `
 `;
 
 /*
- * Domain warping technique: fbm(p + fbm(p + fbm(p)))
- * Creates organic, smoke/nebula patterns that flow continuously.
- * Colors mapped through noise regions, not discrete blobs.
+ * Domain warping: fbm(p + fbm(p + fbm(p)))
+ * Smooth, slow, vast — like a calm deep-space nebula.
+ * Low-frequency forms with gentle color emergence.
  */
 const FRAGMENT_SHADER = `
   precision highp float;
@@ -133,15 +133,15 @@ const FRAGMENT_SHADER = `
     return 130.0 * dot(m, g);
   }
 
-  /* fractal brownian motion — 5 octaves for rich detail */
+  /* smooth FBM — 3 octaves, large scale, gentle falloff */
   float fbm(vec2 p) {
     float val = 0.0;
-    float amp = 0.5;
+    float amp = 0.55;
     float freq = 1.0;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       val += amp * snoise(p * freq);
-      freq *= 2.0;
-      amp *= 0.5;
+      freq *= 1.9;
+      amp *= 0.45;
     }
     return val;
   }
@@ -154,87 +154,84 @@ const FRAGMENT_SHADER = `
   void main() {
     vec2 uv = vUv;
     float aspect = uResolution.x / uResolution.y;
-    vec2 p = vec2(uv.x * aspect, uv.y);
+    /* low base frequency — creates vast, sweeping forms */
+    vec2 p = vec2(uv.x * aspect, uv.y) * 0.7;
 
-    /* touch distortion — subtle warp */
+    /* touch distortion — gentle warp */
     vec4 touchTex = texture2D(uTouchTexture, uv);
-    p.x += (touchTex.r * 2.0 - 1.0) * 0.15 * touchTex.b;
-    p.y += (touchTex.g * 2.0 - 1.0) * 0.15 * touchTex.b;
+    p += vec2(
+      (touchTex.r * 2.0 - 1.0) * 0.1 * touchTex.b,
+      (touchTex.g * 2.0 - 1.0) * 0.1 * touchTex.b
+    );
 
-    float t = uTime * 0.08;
+    float t = uTime * 0.055;
 
-    /* ── triple domain warping ── */
-    /* layer 1: base flow */
+    /* ── domain warping — gentle multipliers ── */
     vec2 q = vec2(
-      fbm(p + vec2(0.0, 0.0) + t * 0.4),
-      fbm(p + vec2(5.2, 1.3) + t * 0.3)
+      fbm(p + t * 0.3),
+      fbm(p + vec2(5.2, 1.3) + t * 0.22)
     );
 
-    /* layer 2: warp the warp */
     vec2 r = vec2(
-      fbm(p + 4.0 * q + vec2(1.7, 9.2) + t * 0.35),
-      fbm(p + 4.0 * q + vec2(8.3, 2.8) + t * 0.28)
+      fbm(p + 1.6 * q + vec2(1.7, 9.2) + t * 0.18),
+      fbm(p + 1.6 * q + vec2(8.3, 2.8) + t * 0.15)
     );
 
-    /* layer 3: final pattern value */
-    float f = fbm(p + 3.5 * r + t * 0.2);
+    float f = fbm(p + 1.4 * r + t * 0.12);
 
     /* ── color palette ──
-     * Not discrete blobs — colors emerge from noise topology.
-     * Deep space base → cyan/blue core → purple veins → pink highlights
+     * Mostly dark void. Color emerges softly from noise topology.
      */
-    vec3 deepSpace  = vec3(0.008, 0.012, 0.035);
-    vec3 midnight   = vec3(0.02, 0.04, 0.12);
-    vec3 cyan       = vec3(0.0, 0.65, 0.78);
-    vec3 blue       = vec3(0.10, 0.28, 0.85);
-    vec3 purple     = vec3(0.40, 0.10, 0.80);
-    vec3 pink       = vec3(0.75, 0.15, 0.45);
+    vec3 void_     = vec3(0.006, 0.010, 0.028);
+    vec3 deep      = vec3(0.015, 0.025, 0.08);
+    vec3 cyan      = vec3(0.0, 0.55, 0.70);
+    vec3 blue      = vec3(0.08, 0.22, 0.72);
+    vec3 purple    = vec3(0.35, 0.08, 0.65);
+    vec3 rose      = vec3(0.60, 0.12, 0.38);
 
-    /* map noise values to color — smooth transitions */
-    float ff = f * f * 4.0;
+    /* derived values */
     float ql = length(q);
     float rl = length(r);
 
-    vec3 color = deepSpace;
+    /* soft threshold — controls how much of the screen has color */
+    float mask = smoothstep(-0.1, 0.55, f);
 
-    /* base: midnight blue tinted by pattern density */
-    color = mix(color, midnight, clamp(ff * 0.6, 0.0, 1.0));
+    vec3 color = void_;
 
-    /* primary: cyan/blue emerging from noise ridges */
-    color = mix(color, mix(blue, cyan, clamp(f * 0.5 + 0.5, 0.0, 1.0)),
-                clamp(ff * 0.8, 0.0, 0.65));
+    /* deep blue undertone where noise has any presence */
+    color = mix(color, deep, smoothstep(-0.3, 0.3, f) * 0.8);
 
-    /* secondary: purple in warp-dense regions */
-    color = mix(color, purple,
-                clamp(ql * ql * 0.9, 0.0, 0.45));
+    /* primary: blue/cyan in noise ridges — soft emergence */
+    vec3 primary = mix(blue, cyan, smoothstep(-0.2, 0.4, f));
+    color = mix(color, primary, mask * 0.45);
 
-    /* accent: pink on high-energy peaks */
-    color = mix(color, pink,
-                clamp(rl * 0.6 * smoothstep(0.3, 0.8, f), 0.0, 0.3));
+    /* purple glow in warped regions */
+    float purpleMask = smoothstep(0.15, 0.55, ql) * smoothstep(-0.1, 0.3, f);
+    color = mix(color, purple, purpleMask * 0.35);
 
-    /* subtle warm glow in sparse areas */
-    float warmth = smoothstep(-0.3, 0.1, -f) * 0.15;
-    color += vec3(0.08, 0.02, 0.0) * warmth;
+    /* rose accent — very rare, only at peaks */
+    float roseMask = smoothstep(0.3, 0.6, rl) * smoothstep(0.2, 0.5, f);
+    color = mix(color, rose, roseMask * 0.2);
 
-    /* ── luminance + glow ── */
-    /* soft HDR bloom on bright regions */
+    /* ── soft glow ── */
     float lum = dot(color, vec3(0.299, 0.587, 0.114));
-    vec3 bloom = color * smoothstep(0.08, 0.25, lum) * 0.6;
-    color += bloom;
+    /* bloom: gentle halo on bright areas */
+    color += color * smoothstep(0.04, 0.15, lum) * 0.4;
 
-    /* saturation boost — controlled */
-    color = mix(vec3(lum), color, 1.35);
+    /* saturation — subtle, not screaming */
+    float lum2 = dot(color, vec3(0.299, 0.587, 0.114));
+    color = mix(vec3(lum2), color, 1.25);
 
-    /* gentle tone curve — keeps darks rich */
-    color = pow(color, vec3(0.95));
+    /* tone curve — lift shadows slightly for richness */
+    color = pow(color, vec3(0.96));
 
-    /* ── vignette — radial fade to deep space ── */
+    /* ── vignette ── */
     float dist = length(uv - vec2(0.5));
-    float vig = 1.0 - smoothstep(0.3, 0.95, dist);
-    color *= mix(0.35, 1.0, vig);
+    float vig = 1.0 - smoothstep(0.35, 1.0, dist);
+    color *= mix(0.4, 1.0, vig);
 
-    /* film grain — very subtle */
-    color += grain(uv, uTime) * 0.03;
+    /* grain — barely perceptible */
+    color += grain(uv, uTime) * 0.025;
 
     color = clamp(color, vec3(0.0), vec3(1.0));
     gl_FragColor = vec4(color, 1.0);
