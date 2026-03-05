@@ -7,27 +7,45 @@ import { LiquidGradientBackground } from "@/components/shared/liquid-gradient-bg
 
 const PLANS = [
   {
-    name: "Starter",
+    name: "Free",
     description:
-      "Para criadores independentes e projetos pessoais que querem explorar o poder da IA psicossemantica.",
-    price: "Gratis",
+      "Explore a ORIGEM sem compromisso. Ideal para conhecer a plataforma e testar suas possibilidades.",
+    price: "$0",
     priceSub: "para sempre",
     features: [
-      "3 sessoes ativas",
+      "2 sessoes ativas",
       "Chat direto com LLM",
       "Decomposicao basica",
       "1 workspace",
-      "Historico de 7 dias",
+      "Historico de 3 dias",
     ],
-    cta: "Comecar agora",
+    cta: "Comecar gratis",
     href: "/dashboard",
+    highlight: false,
+  },
+  {
+    name: "Starter",
+    description:
+      "Para criadores independentes e projetos pessoais que querem ir alem do basico.",
+    price: "$12",
+    priceSub: "/mes",
+    features: [
+      "10 sessoes ativas",
+      "Chat direto com LLM",
+      "Decomposicao intermediaria",
+      "3 workspaces",
+      "Historico de 30 dias",
+      "Modo 360 basico",
+    ],
+    cta: "Assinar Starter",
+    href: "#",
     highlight: false,
   },
   {
     name: "Pro",
     description:
-      "Para profissionais e equipes que precisam do ecossistema 360 completo com agentes, orquestracao e analise profunda.",
-    price: "R$97",
+      "Para profissionais que precisam do ecossistema 360 completo com agentes e orquestracao.",
+    price: "$29",
     priceSub: "/mes",
     features: [
       "Sessoes ilimitadas",
@@ -43,15 +61,32 @@ const PLANS = [
     highlight: true,
   },
   {
+    name: "Creator",
+    description:
+      "Para criadores e equipes que exigem performance maxima e recursos exclusivos.",
+    price: "$59",
+    priceSub: "/mes",
+    features: [
+      "Tudo do Pro",
+      "Agentes customizados",
+      "API de integracao",
+      "Prioridade no processamento",
+      "Analytics avancado",
+      "Suporte dedicado",
+    ],
+    cta: "Assinar Creator",
+    href: "#",
+    highlight: false,
+  },
+  {
     name: "Enterprise",
     description:
       "Para organizacoes que precisam de solucoes customizadas, integracao dedicada e suporte premium.",
-    price: "Custom",
-    priceSub: "sob consulta",
+    price: "$199+",
+    priceSub: "/mes",
     features: [
-      "Tudo do Pro",
+      "Tudo do Creator",
       "API dedicada",
-      "Agentes customizados",
       "Integracao com sistemas internos",
       "SLA garantido",
       "Onboarding dedicado",
@@ -98,8 +133,8 @@ export default function PricingPage() {
       </header>
 
       {/* Pricing grid */}
-      <section className="relative z-10 mx-auto max-w-6xl px-4 pb-24 md:px-8">
-        <div className="grid gap-6 lg:grid-cols-3">
+      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-24 md:px-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
@@ -111,7 +146,7 @@ export default function PricingPage() {
             >
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/70 backdrop-blur-md">
-                  Mais popular
+                  Mais Popular
                 </div>
               )}
 
