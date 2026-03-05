@@ -261,9 +261,9 @@ export function FloatingNav() {
             <Image
               src="/logo.png"
               alt="ORIGEM"
-              width={48}
-              height={48}
-              className="pointer-events-none drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]"
+              width={72}
+              height={72}
+              className="pointer-events-none drop-shadow-[0_0_16px_rgba(255,255,255,0.15)]"
             />
           </button>
           {/* Label beneath logo */}
