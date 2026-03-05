@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Trash2, Drama, Rocket } from "lucide-react";
+import { Sparkles, Trash2, Drama, Rocket, Code2 } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
 import { useCustomAppStore } from "@/stores/custom-app-store";
@@ -33,6 +33,15 @@ export default function AppsPage() {
 
       {/* Apps grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <AppCard
+          title="Code"
+          description="Explore e acompanhe arquivos do seu projeto em tempo real. Conecte um agente de codigo para analise e edicao inteligente."
+          icon={Code2}
+          color="green"
+          href="/dashboard/apps/code"
+          badge="Novo"
+        />
+
         <AppCard
           title="Converse com uma Celebridade IA"
           description="Escolha uma persona historica e converse com ela. A IA responde em personagem, usando analise psicossemantica para criar uma experiencia didatica e imersiva."
