@@ -206,6 +206,17 @@ export const PROVIDER_CATALOG: ProviderMeta[] = [
     website: "https://baseten.co",
     models: [
       {
+        id: "moonshotai/Kimi-K2",
+        name: "Kimi K2",
+        provider: "baseten",
+        contextWindow: 131072,
+        supportsTools: true,
+        supportsVision: false,
+        supportsStreaming: true,
+        costTier: "low",
+        bestFor: ["complex-reasoning", "code", "general"],
+      },
+      {
         id: "moonshotai/Kimi-K2.5",
         name: "Kimi K2.5",
         provider: "baseten",
