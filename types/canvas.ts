@@ -12,7 +12,7 @@ export type OrigemNodeType =
   | "group"
   | "chat-session";
 
-export type OrigemEdgeType = "flow" | "branch" | "group" | "spawn";
+export type OrigemEdgeType = "flow" | "branch" | "group" | "spawn" | "smoothstep";
 
 export interface InputNodeData {
   type: "input";

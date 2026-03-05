@@ -8,6 +8,7 @@ import type {
   Intent,
   TokenAnalysis,
 } from "@/types/decomposition";
+import type { ProviderName } from "@/types/provider";
 import type { Message, Session } from "@/types/session";
 import type {
   RuntimeFunctionKey,
@@ -15,11 +16,22 @@ import type {
   RuntimeTask,
 } from "@/types/runtime";
 import { useAgentStore } from "@/stores/agent-store";
+import { useChatSettingsStore } from "@/stores/chat-settings-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
 import { JOURNEY_STEPS } from "@/lib/journey";
+
+/** Read the user's configured provider/model from the ecosystem config store. */
+function getConfiguredProviderModel(): { provider: ProviderName; model: string } {
+  const { ecosystemConfig } = useChatSettingsStore.getState();
+  if (ecosystemConfig.provider && ecosystemConfig.model) {
+    return { provider: ecosystemConfig.provider, model: ecosystemConfig.model };
+  }
+  // Fallback — last resort defaults
+  return { provider: "openai" as ProviderName, model: "gpt-4o" };
+}
 
 interface MetricSnapshot {
   contexts: number;
@@ -370,8 +382,8 @@ function buildDecomposition(prompt: string): DecompositionResult {
           templateId: agent.name.toLowerCase(),
           reason: agent.role,
           priority: index + 1,
-          suggestedModel: "gpt-4o",
-          suggestedProvider: "openai",
+          suggestedModel: getConfiguredProviderModel().model,
+          suggestedProvider: getConfiguredProviderModel().provider,
           inputContext: prompt,
         })
       ),
@@ -441,8 +453,8 @@ function ensureAgentsForSession(
         name: blueprint.name,
         role: blueprint.role,
         status: "idle",
-        provider: "openai",
-        model: "gpt-4o",
+        provider: getConfiguredProviderModel().provider,
+        model: getConfiguredProviderModel().model,
         systemPrompt: `You are ${blueprint.name}, focus on ${blueprint.role}.`,
         outputs: [],
         createdAt: now,

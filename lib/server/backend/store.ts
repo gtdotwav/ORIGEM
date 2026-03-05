@@ -7,6 +7,7 @@ import type {
   SessionSnapshotRecord,
 } from "@/lib/server/backend/types";
 import type { ProviderName } from "@/types/provider";
+import { encrypt, decrypt } from "@/lib/server/crypto";
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), ".data", "origem-backend.json");
 
@@ -101,13 +102,17 @@ class SnapshotStore {
     await this.queueWrite();
   }
 
+  private decryptRecord(record: ProviderSecretRecord): ProviderSecretRecord {
+    return { ...record, apiKey: decrypt(record.apiKey) };
+  }
+
   async listProviderRecords(): Promise<ProviderSecretRecord[]> {
     await this.ensureLoaded();
 
     return Object.values(this.db.providers)
       .filter((item): item is ProviderSecretRecord => Boolean(item))
       .sort((a, b) => b.updatedAt - a.updatedAt)
-      .map((item) => clone(item));
+      .map((item) => this.decryptRecord(clone(item)));
   }
 
   async getProviderRecord(
@@ -115,7 +120,7 @@ class SnapshotStore {
   ): Promise<ProviderSecretRecord | null> {
     await this.ensureLoaded();
     const record = this.db.providers[provider];
-    return record ? clone(record) : null;
+    return record ? this.decryptRecord(clone(record)) : null;
   }
 
   async upsertProviderRecord(
@@ -126,14 +131,14 @@ class SnapshotStore {
 
     const nextRecord: ProviderSecretRecord = {
       provider,
-      apiKey: input.apiKey,
+      apiKey: encrypt(input.apiKey),
       selectedModel: input.selectedModel,
       updatedAt: Date.now(),
     };
 
     this.db.providers[provider] = nextRecord;
     await this.queueWrite();
-    return clone(nextRecord);
+    return { ...clone(nextRecord), apiKey: input.apiKey };
   }
 }
 

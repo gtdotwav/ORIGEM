@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Atom,
   ChevronDown,
@@ -15,12 +16,12 @@ import {
   Users,
   GitBranch,
   Workflow,
-  LogIn,
   Sparkles,
   Settings,
   Palette,
   Key,
   Baby,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -163,15 +164,16 @@ export function FloatingNav() {
 
   return (
     <div className="relative z-50 w-full px-4 pt-6 md:px-6">
-      {/* Login button */}
+      {/* Sign out button */}
       <div className="absolute right-4 top-6 md:right-6">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/30 bg-black/45 px-3 py-1.5 text-xs font-medium text-neon-cyan backdrop-blur-md transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/15 hover:shadow-[0_0_12px_rgba(0,210,210,0.15)]"
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-xs font-medium text-white/50 backdrop-blur-md transition-all hover:border-white/20 hover:text-white/70"
         >
-          <LogIn className="h-3.5 w-3.5" />
-          Login
-        </Link>
+          <LogOut className="h-3.5 w-3.5" />
+          Sair
+        </button>
       </div>
 
       <div className="flex w-full justify-center">
