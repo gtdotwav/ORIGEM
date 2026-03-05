@@ -3,9 +3,23 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import type { ProviderName } from "@/types/provider";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 
+/** Env var fallback map — checked when no key in store */
+const ENV_KEY_MAP: Partial<Record<ProviderName, string>> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  google: "GOOGLE_API_KEY",
+  groq: "GROQ_API_KEY",
+  fireworks: "FIREWORKS_API_KEY",
+  together: "TOGETHER_API_KEY",
+  mistral: "MISTRAL_API_KEY",
+  perplexity: "PERPLEXITY_API_KEY",
+  cohere: "COHERE_API_KEY",
+  baseten: "BASETEN_API_KEY",
+};
+
 /**
  * Returns a Vercel AI SDK language model instance for the given provider + model.
- * Reads API key from server-side SnapshotStore.
+ * Reads API key from SnapshotStore first, falls back to env var.
  */
 export async function getLanguageModel(
   provider: ProviderName,
@@ -14,11 +28,13 @@ export async function getLanguageModel(
   const store = getSnapshotStore();
   const record = await store.getProviderRecord(provider);
 
-  if (!record || !record.apiKey) {
+  const apiKey =
+    record?.apiKey ||
+    (ENV_KEY_MAP[provider] ? process.env[ENV_KEY_MAP[provider]!] : undefined);
+
+  if (!apiKey) {
     throw new Error(`no_api_key_for_${provider}`);
   }
-
-  const { apiKey } = record;
 
   switch (provider) {
     case "openai":

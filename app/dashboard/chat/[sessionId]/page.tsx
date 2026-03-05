@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Calendar,
+  ChevronDown,
   Copy,
   History,
   Loader2,
@@ -24,6 +25,7 @@ import { CriticAnnotations } from "@/components/chat/critic-annotations";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
 import { CalendarPanel } from "@/components/chat/calendar-panel";
+import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import {
   ensureSessionRecord,
   hydrateSessionSnapshot,
@@ -116,6 +118,7 @@ export default function ChatPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
@@ -549,15 +552,23 @@ export default function ChatPage() {
               void sendMessage();
             }}
           >
-            <div className="mb-2">
-              <LLMSelector />
-            </div>
+            {/* Expanded tools row */}
+            {toolsExpanded && (
+              <div className="mb-2 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <LLMSelector />
+                <ChatModeToggle />
+              </div>
+            )}
+
+            {/* Main input row */}
             <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2.5">
-              <AIVoiceInput
-                onStop={(dur) => {
-                  if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
-                }}
-              />
+              {toolsExpanded && (
+                <AIVoiceInput
+                  onStop={(dur) => {
+                    if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
+                  }}
+                />
+              )}
               <input
                 type="text"
                 value={input}
@@ -565,7 +576,14 @@ export default function ChatPage() {
                 placeholder="Digite sua mensagem..."
                 className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
               />
-              <CriticPanel />
+              {toolsExpanded && <CriticPanel />}
+              <button
+                type="button"
+                onClick={() => setToolsExpanded(!toolsExpanded)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
+              >
+                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", toolsExpanded && "rotate-180")} />
+              </button>
               <button
                 type="submit"
                 disabled={!input.trim() || isSending}
@@ -574,6 +592,13 @@ export default function ChatPage() {
                 <Send className="h-3.5 w-3.5" />
                 Enviar
               </button>
+            </div>
+
+            {/* Mode indicator */}
+            <div className="mt-1.5 px-1">
+              <span className="text-[10px] text-foreground/25">
+                {chatMode === "ecosystem" ? "agent ∞" : "chat direto"}
+              </span>
             </div>
           </form>
         </div>

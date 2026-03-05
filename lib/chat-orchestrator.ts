@@ -1018,6 +1018,7 @@ export async function runChatOrchestration(
   // Final LLM aggregation — synthesize all agent outputs
   let finalResponse: string;
   try {
+    const { ORIGEM_SYSTEM_PROMPT } = await import("@/config/origem-prompt");
     const { callChatCompletion } = await import("@/lib/chat-api");
     const { ecosystemConfig, selectedTier } = useChatSettingsStore.getState();
     const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
@@ -1039,7 +1040,7 @@ export async function runChatOrchestration(
       ...(hasManual
         ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
         : { tier: selectedTier }),
-      systemPrompt: `Voce e o ORIGEM, orquestrador de IA psicossemantica. Sintetize os resultados dos agentes em uma resposta final coesa, clara e acionavel. ${langInstruction}`,
+      systemPrompt: `${ORIGEM_SYSTEM_PROMPT}\n\nADDITIONAL CONTEXT: You are now in aggregation mode. Synthesize the agent results into a final cohesive, clear, and actionable response. ${langInstruction}`,
       maxTokens: 4096,
     });
 
@@ -1236,14 +1237,14 @@ export async function runSimpleChat(
     const { ecosystemConfig } = useChatSettingsStore.getState();
     const hasManualSelection = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
 
+    const { ORIGEM_SYSTEM_PROMPT } = await import("@/config/origem-prompt");
     const { callChatCompletion } = await import("@/lib/chat-api");
     const result = await callChatCompletion({
       messages: history,
       ...(hasManualSelection
         ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
         : { tier: selectedTier }),
-      systemPrompt:
-        "Voce e o ORIGEM, uma plataforma de IA psicossemantica. Responda em portugues brasileiro de forma clara, util e objetiva.",
+      systemPrompt: ORIGEM_SYSTEM_PROMPT,
     });
 
     response = result.content;

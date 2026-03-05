@@ -4,6 +4,7 @@ import { getLanguageModel } from "@/lib/server/ai/provider-factory";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 import { selectModelForTier } from "@/config/token-tiers";
 import { checkRateLimit, getClientIp } from "@/lib/server/rate-limit";
+import { ORIGEM_TOOLS } from "@/config/origem-tools";
 import type { ProviderName } from "@/types/provider";
 import type { TokenTier } from "@/types/chat";
 
@@ -69,6 +70,19 @@ export async function POST(request: Request) {
         .filter((r) => r.apiKey.length > 0)
         .map((r) => r.provider);
 
+      // Also check env var fallbacks for providers not in the store
+      const ENV_PROVIDERS: Array<{ provider: ProviderName; env: string }> = [
+        { provider: "baseten", env: "BASETEN_API_KEY" },
+        { provider: "openai", env: "OPENAI_API_KEY" },
+        { provider: "anthropic", env: "ANTHROPIC_API_KEY" },
+        { provider: "groq", env: "GROQ_API_KEY" },
+      ];
+      for (const { provider: p, env } of ENV_PROVIDERS) {
+        if (!configured.includes(p) && process.env[env]) {
+          configured.push(p);
+        }
+      }
+
       if (configured.length === 0) {
         return NextResponse.json(
           { error: "no_configured_providers" },
@@ -113,6 +127,7 @@ export async function POST(request: Request) {
     const result = await generateText({
       model: languageModel,
       messages: allMessages,
+      tools: ORIGEM_TOOLS,
       maxOutputTokens: resolvedMaxTokens,
     });
 
@@ -120,6 +135,7 @@ export async function POST(request: Request) {
       content: result.text,
       provider: resolvedProvider,
       model: resolvedModel,
+      toolCalls: result.toolCalls?.length ? result.toolCalls : undefined,
       usage: result.usage
         ? {
             inputTokens: result.usage.inputTokens,
