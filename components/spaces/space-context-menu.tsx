@@ -227,6 +227,7 @@ export function SpaceContextMenu({ items, position, onClose }: SpaceContextMenuP
 
 export function useSpaceContextMenuItems(
   createCard: (spaceId: string, prompt: string, position?: { x: number; y: number }) => string,
+  addTextNode: (spaceId: string, position?: { x: number; y: number }) => string,
   spaceId: string | undefined
 ): ContextMenuItem[] {
   return [
@@ -238,7 +239,7 @@ export function useSpaceContextMenuItems(
       color: "text-neon-cyan/70",
       section: "Basics",
       category: ["text"],
-      action: (pos) => spaceId && createCard(spaceId, "", pos),
+      action: (pos) => spaceId && addTextNode(spaceId, pos),
     },
     {
       id: "image-gen",

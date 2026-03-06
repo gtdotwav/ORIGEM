@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, Plus, PanelRightOpen, PanelRightClose, Orbit } from "lucide-react";
 import { SpacesSidebar } from "@/components/spaces/spaces-sidebar";
 import GenerationCardNode from "@/components/spaces/generation-card-node";
+import TextNode from "@/components/spaces/text-node";
 import { ControlPanel } from "@/components/spaces/control-panel";
 import { SpaceContextMenu, useSpaceContextMenuItems } from "@/components/spaces/space-context-menu";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -23,6 +24,7 @@ import { cn } from "@/lib/utils";
 
 const NODE_TYPES = {
   generation: GenerationCardNode,
+  text: TextNode,
 };
 
 const EDGE_DEFAULTS = {
@@ -46,6 +48,7 @@ export default function SpaceCanvasPage() {
   const addEdge = useSpacesStore((s) => s.addEdge);
   const setViewport = useSpacesStore((s) => s.setViewport);
   const createCard = useSpacesStore((s) => s.createCard);
+  const addTextNode = useSpacesStore((s) => s.addTextNode);
   const selectedCardId = useSpacesStore((s) => s.selectedCardId);
   const selectCard = useSpacesStore((s) => s.selectCard);
 
@@ -82,7 +85,7 @@ export default function SpaceCanvasPage() {
     [addEdge]
   );
 
-  const contextMenuItems = useSpaceContextMenuItems(createCard, spaceId);
+  const contextMenuItems = useSpaceContextMenuItems(createCard, addTextNode, spaceId);
 
   const handlePaneClick = useCallback(() => {
     selectCard(null);

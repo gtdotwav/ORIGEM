@@ -99,6 +99,12 @@ export interface PromptNodeData {
   [key: string]: unknown;
 }
 
+export interface TextNodeData {
+  type: "text";
+  text: string;
+  [key: string]: unknown;
+}
+
 export interface ReferenceNodeData {
   type: "reference";
   imageUrl: string;
@@ -106,7 +112,7 @@ export interface ReferenceNodeData {
   [key: string]: unknown;
 }
 
-export type SpacesNodeData = GenerationNodeData | PromptNodeData | ReferenceNodeData;
+export type SpacesNodeData = GenerationNodeData | PromptNodeData | TextNodeData | ReferenceNodeData;
 export type SpacesNode = Node<SpacesNodeData>;
 export type SpacesEdge = Edge & { type?: "flow" | "variation" | "upscale" };
 

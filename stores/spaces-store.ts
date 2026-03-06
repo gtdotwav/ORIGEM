@@ -66,6 +66,10 @@ interface SpacesState {
   setActiveSettings: (settings: Partial<GenerationSettings>) => void;
   setActivePromptBlocks: (blocks: Partial<PromptBlock>) => void;
 
+  /* Text nodes */
+  addTextNode: (spaceId: string, position?: { x: number; y: number }) => string;
+  updateNodeData: (nodeId: string, data: Record<string, unknown>) => void;
+
   /* Canvas (React Flow) */
   setNodes: (nodes: SpacesNode[]) => void;
   setEdges: (edges: SpacesEdge[]) => void;
@@ -269,6 +273,27 @@ export const useSpacesStore = create<SpacesState>()(
       setActivePromptBlocks: (blocks) =>
         set((s) => ({
           activePromptBlocks: { ...s.activePromptBlocks, ...blocks },
+        })),
+
+      /* ---- Text nodes ---- */
+
+      addTextNode: (spaceId, position) => {
+        const id = uid("txt");
+        const node: SpacesNode = {
+          id,
+          type: "text",
+          position: position ?? { x: 250 + Math.random() * 200, y: 150 + Math.random() * 200 },
+          data: { type: "text", text: "" },
+        };
+        set((s) => ({ nodes: [...s.nodes, node] }));
+        return id;
+      },
+
+      updateNodeData: (nodeId, data) =>
+        set((s) => ({
+          nodes: s.nodes.map((n) =>
+            n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n
+          ),
         })),
 
       /* ---- Canvas ---- */
