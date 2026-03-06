@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   X,
@@ -71,7 +71,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(today);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([today]);
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteDesc, setNoteDesc] = useState("");
@@ -81,14 +81,29 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const [promptText, setPromptText] = useState("");
   const [parsedPreview, setParsedPreview] = useState<ReturnType<typeof parseSchedulePrompt>>([]);
 
+  // Drag-select state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragAnchorRef = useRef<Date | null>(null);
+
   const { events, addEvent, removeEvent } = useCalendarStore();
 
+  // Derived: primary selected date (first in selection)
+  const selectedDate = selectedDates[0] ?? null;
   const selectedDateKey = selectedDate ? toDateKey(selectedDate) : "";
-  const dateEvents = selectedDateKey ? (events[selectedDateKey] ?? []) : [];
 
-  // Sort events by time for timeline
+  // All selected date keys
+  const selectedDateKeys = useMemo(() => selectedDates.map(toDateKey), [selectedDates]);
+
+  // Aggregate events across all selected dates
+  const dateEvents = useMemo(
+    () => selectedDateKeys.flatMap((dk) => events[dk] ?? []),
+    [selectedDateKeys, events]
+  );
+
+  // Sort events by date then time for timeline
   const sortedEvents = useMemo(
     () => [...dateEvents].sort((a, b) => {
+      if (a.dateKey !== b.dateKey) return a.dateKey.localeCompare(b.dateKey);
       if (!a.time && !b.time) return 0;
       if (!a.time) return 1;
       if (!b.time) return -1;
@@ -98,6 +113,54 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   );
 
   const eventDateKeys = useMemo(() => new Set(Object.keys(events).filter((k) => (events[k]?.length ?? 0) > 0)), [events]);
+
+  // Date range helper
+  const getDateRange = useCallback((a: Date, b: Date): Date[] => {
+    const start = a < b ? a : b;
+    const end = a < b ? b : a;
+    const dates: Date[] = [];
+    const current = new Date(start);
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  }, []);
+
+  // Drag handlers
+  const handleDayMouseDown = useCallback((date: Date) => {
+    setIsDragging(true);
+    dragAnchorRef.current = date;
+    setSelectedDates([date]);
+    setAddMode(null);
+  }, []);
+
+  const handleDayMouseEnter = useCallback((date: Date) => {
+    if (!isDragging || !dragAnchorRef.current) return;
+    setSelectedDates(getDateRange(dragAnchorRef.current, date));
+  }, [isDragging, getDateRange]);
+
+  const handleMouseUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
+  }, [isDragging]);
+
+  // Listen for mouseup on document to handle releasing outside the grid
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => document.removeEventListener("mouseup", handleMouseUp);
+    }
+  }, [isDragging, handleMouseUp]);
+
+  // Check if a date is in the selection
+  const isSelected = useCallback((date: Date) =>
+    selectedDates.some((d) =>
+      d.getDate() === date.getDate() &&
+      d.getMonth() === date.getMonth() &&
+      d.getFullYear() === date.getFullYear()
+    ), [selectedDates]);
 
   const days = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -120,26 +183,31 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
   const prevMonth = () => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } else setCurrentMonth(currentMonth - 1); };
   const nextMonth = () => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } else setCurrentMonth(currentMonth + 1); };
-  const goToday = () => { setCurrentMonth(today.getMonth()); setCurrentYear(today.getFullYear()); setSelectedDate(today); };
+  const goToday = () => { setCurrentMonth(today.getMonth()); setCurrentYear(today.getFullYear()); setSelectedDates([today]); };
 
   const isToday = (date: Date) => date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
-  const isSelected = (date: Date) => selectedDate && date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth() && date.getFullYear() === selectedDate.getFullYear();
 
   const handleAddNote = () => {
-    if (!noteTitle.trim() || !selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "note", title: noteTitle.trim(), description: noteDesc.trim(), time: noteTime, duration: 60, color: "cyan" });
+    if (!noteTitle.trim() || selectedDateKeys.length === 0) return;
+    for (const dk of selectedDateKeys) {
+      addEvent({ dateKey: dk, type: "note", title: noteTitle.trim(), description: noteDesc.trim(), time: noteTime, duration: 60, color: "cyan" });
+    }
     setNoteTitle(""); setNoteDesc(""); setNoteTime(""); setAddMode(null);
   };
 
   const handleAddAgent = (agent: typeof AGENTS[0]) => {
-    if (!selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "agent", title: agent.name, description: agent.role, agent: agent.id, time: agentTime, duration: 60, color: "purple" });
+    if (selectedDateKeys.length === 0) return;
+    for (const dk of selectedDateKeys) {
+      addEvent({ dateKey: dk, type: "agent", title: agent.name, description: agent.role, agent: agent.id, time: agentTime, duration: 60, color: "purple" });
+    }
     setAgentTime(""); setAddMode(null);
   };
 
   const handleAddContext = (ctx: typeof CONTEXTS[0]) => {
-    if (!selectedDateKey) return;
-    addEvent({ dateKey: selectedDateKey, type: "context", title: ctx.label, description: ctx.desc, context: ctx.id, time: ctxTime, duration: 60, color: "orange" });
+    if (selectedDateKeys.length === 0) return;
+    for (const dk of selectedDateKeys) {
+      addEvent({ dateKey: dk, type: "context", title: ctx.label, description: ctx.desc, context: ctx.id, time: ctxTime, duration: 60, color: "orange" });
+    }
     setCtxTime(""); setAddMode(null);
   };
 
@@ -154,19 +222,21 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   };
 
   const handlePromptSubmit = () => {
-    if (!selectedDateKey || parsedPreview.length === 0) return;
-    for (const item of parsedPreview) {
-      addEvent({
-        dateKey: selectedDateKey,
-        type: item.type,
-        title: item.title,
-        description: "",
-        time: item.time,
-        duration: item.duration,
-        agent: item.agent,
-        context: item.context,
-        color: item.color,
-      });
+    if (selectedDateKeys.length === 0 || parsedPreview.length === 0) return;
+    for (const dk of selectedDateKeys) {
+      for (const item of parsedPreview) {
+        addEvent({
+          dateKey: dk,
+          type: item.type,
+          title: item.title,
+          description: "",
+          time: item.time,
+          duration: item.duration,
+          agent: item.agent,
+          context: item.context,
+          color: item.color,
+        });
+      }
     }
     setPromptText(""); setParsedPreview([]); setAddMode(null);
   };
@@ -236,34 +306,62 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                 ))}
               </div>
 
-              {/* Day grid */}
-              <div className="grid grid-cols-7 gap-0.5 px-3 pb-3">
+              {/* Day grid — drag to select range */}
+              <div
+                className="grid grid-cols-7 gap-0.5 px-3 pb-3 select-none"
+                onMouseLeave={() => { if (isDragging) setIsDragging(false); }}
+              >
                 {days.map((cell, i) => {
                   const _isToday = isToday(cell.date);
                   const _isSelected = isSelected(cell.date);
                   const hasEvents = eventDateKeys.has(toDateKey(cell.date));
                   return (
-                    <button key={i} type="button" onClick={() => { setSelectedDate(cell.date); setAddMode(null); }} className="group relative flex h-8 w-full items-center justify-center rounded-lg transition-all">
-                      {_isSelected && <motion.div layoutId="calendar-selected" className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(0,210,210,0.25) 0%, rgba(0,210,210,0.10) 100%)", boxShadow: "0 0 12px rgba(0,210,210,0.15), inset 0 1px 0 rgba(255,255,255,0.1)" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} />}
+                    <div
+                      key={i}
+                      role="button"
+                      tabIndex={0}
+                      onMouseDown={(e) => { e.preventDefault(); handleDayMouseDown(cell.date); }}
+                      onMouseEnter={() => handleDayMouseEnter(cell.date)}
+                      className="group relative flex h-8 w-full cursor-pointer items-center justify-center rounded-lg transition-all"
+                    >
+                      {_isSelected && selectedDates.length === 1 && (
+                        <motion.div layoutId="calendar-selected" className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(0,210,210,0.25) 0%, rgba(0,210,210,0.10) 100%)", boxShadow: "0 0 12px rgba(0,210,210,0.15), inset 0 1px 0 rgba(255,255,255,0.1)" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} />
+                      )}
+                      {_isSelected && selectedDates.length > 1 && (
+                        <div className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(0,210,210,0.20) 0%, rgba(0,210,210,0.08) 100%)" }} />
+                      )}
                       {_isToday && !_isSelected && <div className="absolute inset-0.5 rounded-lg" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)" }} />}
                       {!_isSelected && <div className="absolute inset-0.5 rounded-lg opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)" }} />}
                       <span className={`relative z-10 text-xs tabular-nums ${_isSelected ? "font-semibold text-neon-cyan" : _isToday ? "font-semibold text-foreground/90" : cell.inMonth ? "text-foreground/60 group-hover:text-foreground/80" : "text-foreground/15"}`}>{cell.day}</span>
                       {_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-cyan shadow-[0_0_4px_rgba(0,210,210,0.5)]" />}
                       {hasEvents && !_isToday && <div className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neon-orange shadow-[0_0_4px_rgba(255,160,0,0.4)]" />}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
 
               {/* ── Date Detail Section ── */}
-              {selectedDate && (
+              {selectedDates.length > 0 && (
                 <>
                   <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
                   <div className="px-4 py-3">
-                    <p className="text-xs font-medium text-foreground/50">
-                      {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-                    </p>
+                    {selectedDates.length === 1 && selectedDate ? (
+                      <p className="text-xs font-medium text-foreground/50">
+                        {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+                      </p>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-neon-cyan/10 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-neon-cyan">
+                          {selectedDates.length} dias
+                        </span>
+                        <p className="text-[10px] text-foreground/40">
+                          {selectedDates[0].toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+                          {" — "}
+                          {selectedDates[selectedDates.length - 1].toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
+                        </p>
+                      </div>
+                    )}
 
                     {/* ── Timeline View ── */}
                     {sortedEvents.length > 0 && (
@@ -284,6 +382,11 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                                 <div className="flex items-start justify-between gap-1">
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
+                                      {selectedDates.length > 1 && (
+                                        <span className="shrink-0 rounded bg-foreground/[0.06] px-1 py-0.5 text-[8px] font-medium tabular-nums text-foreground/35">
+                                          {ev.dateKey.slice(5)}
+                                        </span>
+                                      )}
                                       {ev.time && (
                                         <span className="shrink-0 font-mono text-[10px] font-semibold tabular-nums text-foreground/60">{ev.time}</span>
                                       )}
@@ -304,7 +407,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                                   </div>
                                   <button
                                     type="button"
-                                    onClick={() => removeEvent(selectedDateKey, ev.id)}
+                                    onClick={() => removeEvent(ev.dateKey, ev.id)}
                                     className="shrink-0 text-foreground/0 transition-colors group-hover:text-foreground/30 hover:!text-red-400"
                                   >
                                     <Trash2 className="h-3 w-3" />
