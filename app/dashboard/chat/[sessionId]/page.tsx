@@ -5,13 +5,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
-  Calendar,
   ChevronDown,
   Copy,
-  History,
   Loader2,
-  Orbit,
-  Plug,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -23,9 +19,7 @@ import { LLMSelector } from "@/components/chat/llm-selector";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticPanel } from "@/components/chat/critic-panel";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
-import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
-import { ConnectorsPanel } from "@/components/chat/connectors-panel";
-import { CalendarPanel } from "@/components/chat/calendar-panel";
+import { LeftToolbar } from "@/components/layout/left-toolbar";
 import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import {
   ensureSessionRecord,
@@ -116,9 +110,6 @@ export default function ChatPage() {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [connectorsOpen, setConnectorsOpen] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -290,62 +281,7 @@ export default function ChatPage() {
 
   return (
     <div className="mx-auto flex h-[calc(100vh-130px)] w-full max-w-4xl flex-col px-4 pb-6 pt-4 md:px-6">
-      {/* Left toolbar — vertical button strip */}
-      <div className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-xl border border-foreground/[0.06] bg-card/80 p-1 shadow-lg backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={() => { setHistoryOpen(!historyOpen); setConnectorsOpen(false); setCalendarOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
-          title="Historico"
-        >
-          <History className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => { setConnectorsOpen(!connectorsOpen); setHistoryOpen(false); setCalendarOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
-          title="Conectores"
-        >
-          <Plug className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => { setCalendarOpen(!calendarOpen); setHistoryOpen(false); setConnectorsOpen(false); }}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
-          title="Calendario"
-        >
-          <Calendar className="h-3.5 w-3.5" />
-        </button>
-        <div className="my-0.5 h-px w-5 self-center bg-foreground/[0.06]" />
-        <button
-          type="button"
-          onClick={() => router.push("/dashboard/spaces")}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-neon-pink"
-          title="Spaces"
-        >
-          <Orbit className="h-3.5 w-3.5" />
-        </button>
-      </div>
-
-      <ChatHistoryPanel
-        open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
-        currentSessionId={sessionId}
-        onCreateCanvas={() => {
-          setHistoryOpen(false);
-          router.push("/dashboard/canvas");
-        }}
-      />
-
-      <ConnectorsPanel
-        open={connectorsOpen}
-        onClose={() => setConnectorsOpen(false)}
-      />
-
-      <CalendarPanel
-        open={calendarOpen}
-        onClose={() => setCalendarOpen(false)}
-      />
+      <LeftToolbar currentSessionId={sessionId} />
 
       {/* Header with glow */}
       <div className="relative mb-4">

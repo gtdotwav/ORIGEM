@@ -54,18 +54,23 @@ export function LLMSelector({ className }: { className?: string }) {
   }, []);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         ref.current && !ref.current.contains(e.target as Node) &&
         dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
       )
         setOpen(false);
     };
-    if (open) {
-      document.addEventListener("mousedown", handler);
-      updatePosition();
-    }
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    updatePosition();
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
   }, [open, updatePosition]);
 
   const currentTierConfig = TOKEN_TIERS[selectedTier];

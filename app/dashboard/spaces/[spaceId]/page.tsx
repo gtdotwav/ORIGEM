@@ -89,15 +89,15 @@ export default function SpaceCanvasPage() {
     createCard(spaceId, "", { x: 300, y: 200 });
   };
 
+  const cards = useSpacesStore((s) => s.cards);
+
   const spaceNodes = useMemo(
     () =>
       nodes.filter((n) => {
-        const card = useSpacesStore
-          .getState()
-          .cards.find((c) => c.id === n.id);
+        const card = cards.find((c) => c.id === n.id);
         return card?.spaceId === spaceId;
       }),
-    [nodes, spaceId]
+    [nodes, cards, spaceId]
   );
 
   const spaceEdges = useMemo(() => {

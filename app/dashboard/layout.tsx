@@ -19,6 +19,8 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const isSpaceCanvas = pathname.startsWith("/dashboard/spaces/");
+  const isCodeIDE = pathname === "/dashboard/code";
+  const isFullscreen = isSpaceCanvas || isCodeIDE;
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const activeWorkspace = useWorkspaceStore((s) =>
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)
@@ -28,15 +30,15 @@ export default function DashboardLayout({
   return (
     <main className="isolate relative flex min-h-screen flex-col bg-background">
       <BackendSessionBootstrap />
-      {!isSpaceCanvas && <LiquidGradientBackground />}
+      {!isFullscreen && <LiquidGradientBackground />}
 
       {/* Floating nav — hidden inside Spaces canvas */}
-      {!isSpaceCanvas && <FloatingNav />}
+      {!isFullscreen && <FloatingNav />}
       <CommandPalette />
-      {!isSpaceCanvas && <GuidedTour />}
+      {!isFullscreen && <GuidedTour />}
 
       {/* Workspace active context bar */}
-      {activeWorkspace && !isSpaceCanvas && (
+      {activeWorkspace && !isFullscreen && (
         <div className="relative z-20 flex items-center justify-center gap-3 border-b border-border/30 bg-card/50 px-4 py-1.5 backdrop-blur-sm">
           <span
             className={`h-1.5 w-1.5 rounded-full ${WORKSPACE_COLORS[activeWorkspace.color].bg} ${WORKSPACE_COLORS[activeWorkspace.color].border} border`}

@@ -6,6 +6,7 @@ import type { Node, Edge } from "@xyflow/react";
 
 export type ImageModel =
   | "origem-native"
+  | "nano-banana-pro"
   | "google-imagen-4"
   | "gpt-image"
   | "flux-pro"
@@ -110,7 +111,7 @@ export type SpacesNode = Node<SpacesNodeData>;
 export type SpacesEdge = Edge & { type?: "flow" | "variation" | "upscale" };
 
 export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
-  model: "flux-pro",
+  model: "nano-banana-pro",
   generationType: "image",
   quantity: 4,
   resolution: "1024",
@@ -129,6 +130,7 @@ export interface ModelInfo {
 }
 
 export const IMAGE_MODELS: ModelInfo[] = [
+  { id: "nano-banana-pro", label: "Nano Banana Pro", provider: "Banana", type: "image" },
   { id: "google-imagen-4", label: "Imagen 4", provider: "Google", type: "image" },
   { id: "gpt-image", label: "GPT Image", provider: "OpenAI", type: "image" },
   { id: "flux-pro", label: "Flux Pro 1.1", provider: "BFL", type: "image" },
