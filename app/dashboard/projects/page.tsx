@@ -45,6 +45,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type { Project } from "@/types/project";
 import type { DecompositionResult } from "@/types/decomposition";
+import type { Message } from "@/types/session";
 
 function formatExecutionStrategy(strategy: string | undefined) {
   if (strategy === "consensus") return "consenso";
@@ -85,7 +86,7 @@ function SessionBrowser({
 }: {
   sessions: ReturnType<typeof useWorkspaceFilteredSessions>;
   decompositions: Record<string, DecompositionResult>;
-  messages: import("@/types/session").Message[];
+  messages: Message[];
 }) {
   const sorted = useMemo(
     () =>
