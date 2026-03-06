@@ -1277,54 +1277,66 @@ export default function DesignBankingPage() {
     <div className="relative min-h-screen pb-16">
       {/* Ambient background glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 opacity-20 blur-[120px]">
-          <div className="h-[400px] w-[800px] rounded-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-cyan mix-blend-screen" />
+        {/* Advanced Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+
+        {/* Intense core glow */}
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+          <div className="h-[300px] w-[700px] rounded-full bg-neon-cyan/25 blur-[100px] mix-blend-screen" />
+          <div className="absolute left-1/2 top-1/2 h-[150px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-purple/40 blur-[80px] mix-blend-screen" />
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-8 md:py-12">
+      <div className="relative mx-auto max-w-7xl px-6 py-12 md:py-20 lg:py-24">
         {/* --- Hero Section --- */}
-        <div className="mb-12 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-neon-cyan/20 bg-neon-cyan/10 shadow-[0_0_40px_-10px_oklch(0.78_0.15_195/0.3)] backdrop-blur-xl">
-            <Palette className="h-8 w-8 text-neon-cyan" />
+        <div className="mb-16 flex flex-col items-center text-center">
+          <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-neon-cyan shadow-[0_0_20px_-5px_oklch(0.78_0.15_195/0.3)] backdrop-blur-xl transition-all hover:scale-105">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon-cyan opacity-80"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-neon-cyan"></span>
+            </span>
+            Design System AI-Powered v1.0
           </div>
-          <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
-            ORIGEM <GradientText variant="neon">UXUI SPACE</GradientText>
+
+          <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+            <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">ORIGEM</span>{" "}
+            <GradientText variant="neon">UXUI SPACE</GradientText>
           </h1>
-          <p className="mx-auto max-w-2xl text-base text-foreground/50 sm:text-lg">
-            Um ecossistema unificado de tokens, componentes e padrões de interação guiados por IA. O "Figma + Framer + v0" interno da ORIGEM.
+
+          <p className="mx-auto max-w-2xl text-lg text-foreground/50 sm:text-xl leading-relaxed">
+            Um ecossistema unificado de tokens, componentes e padrões de interação guiados por IA. O <strong className="font-medium text-foreground/80">Figma + Framer + v0</strong> interno da ORIGEM.
           </p>
         </div>
 
         {/* --- AI Intelligence Layer (Prompt) --- */}
-        <div className="mx-auto mb-16 max-w-3xl">
-          <div className="group relative rounded-2xl border border-neon-cyan/30 bg-black/40 p-2 shadow-[0_0_30px_-10px_oklch(0.78_0.15_195/0.15)] backdrop-blur-xl transition-all focus-within:border-neon-cyan focus-within:shadow-[0_0_40px_-5px_oklch(0.78_0.15_195/0.3)] hover:border-neon-cyan/50">
+        <div className="mx-auto mb-24 max-w-3xl">
+          <div className="group relative rounded-[2rem] border border-foreground/10 bg-black/40 p-2 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:border-neon-cyan/40 focus-within:border-neon-cyan/50 focus-within:shadow-[0_0_50px_-10px_oklch(0.78_0.15_195/0.3)]">
             {/* Animated border glow */}
-            <div className="pointer-events-none absolute inset-[-1px] rounded-2xl bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/50 to-neon-purple/0 opacity-0 transition-opacity duration-500 group-focus-within:opacity-100" />
+            <div className="pointer-events-none absolute inset-[-1px] rounded-[2rem] bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/40 to-neon-purple/0 opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
 
-            <div className="relative flex items-center gap-3 rounded-xl bg-black/50 px-4 py-3">
-              <Blocks className="h-5 w-5 animate-pulse text-neon-cyan" />
+            <div className="relative flex min-h-[72px] items-center gap-4 rounded-3xl border border-foreground/5 bg-black/60 px-6 py-2 shadow-inner">
+              <Blocks className="h-6 w-6 animate-pulse text-neon-cyan shrink-0" />
               <input
                 type="text"
                 placeholder="Gerar uma Landing Page SaaS com tema Liquid Glass..."
-                className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
+                className="w-full bg-transparent text-base text-foreground placeholder:text-foreground/30 outline-none"
               />
-              <button className="flex shrink-0 items-center justify-center rounded-lg bg-neon-cyan px-4 py-2 opacity-90 transition-all hover:bg-neon-cyan hover:opacity-100 hover:shadow-[0_0_15px_oklch(0.78_0.15_195/0.5)]">
-                <Wand2 className="h-4 w-4 text-black" />
-                <span className="ml-2 text-sm font-semibold text-black">Gerar UI</span>
+              <button className="flex h-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-neon-cyan to-neon-cyan/80 px-6 font-bold tracking-wide text-black transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_25px_oklch(0.78_0.15_195/0.4)]">
+                <Wand2 className="mr-2 h-4 w-4" />
+                Gerar UI
               </button>
             </div>
             {/* Quick Prompts */}
-            <div className="mt-3 flex flex-wrap justify-center gap-2 px-2 pb-1">
+            <div className="mt-4 flex flex-wrap justify-center gap-2.5 px-2 pb-2">
               {[
                 "Dashboard Financeiro",
                 "Formulário Multistep Dark",
                 "Pricing Tier Glass",
                 "Tabela de Dados Complexa"
-              ].map((prompt) => (
+              ].map((prompt, i) => (
                 <button
                   key={prompt}
-                  className="rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1 text-[10px] text-foreground/40 transition-colors hover:border-neon-cyan/30 hover:bg-neon-cyan/10 hover:text-neon-cyan"
+                  className="rounded-full border border-foreground/10 bg-gradient-to-b from-foreground/5 to-transparent px-4 py-1.5 text-xs font-medium text-foreground/50 transition-all hover:-translate-y-0.5 hover:border-neon-cyan/40 hover:text-neon-cyan hover:shadow-[0_0_15px_-3px_oklch(0.78_0.15_195/0.2)]"
                 >
                   {prompt}
                 </button>
