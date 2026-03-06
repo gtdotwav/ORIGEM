@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
   Paintbrush,
@@ -9,6 +10,12 @@ import {
   Stamp,
   Circle,
   Eraser,
+  PawPrint,
+  Rocket,
+  Bone,
+  Waves,
+  Wand2,
+  UtensilsCrossed,
 } from "lucide-react";
 
 const TOOLS = [
@@ -20,13 +27,21 @@ const TOOLS = [
   { icon: Eraser, label: "Borracha", color: "text-foreground/50" },
 ];
 
-const THEMES = [
-  { id: "animals", emoji: "\u{1F981}", title: "Animais", count: 8, gradient: "from-amber-500/20 to-orange-500/15" },
-  { id: "space", emoji: "\u{1F680}", title: "Espaco", count: 6, gradient: "from-purple-500/20 to-indigo-500/15" },
-  { id: "dinos", emoji: "\u{1F996}", title: "Dinossauros", count: 5, gradient: "from-green-500/20 to-emerald-500/15" },
-  { id: "ocean", emoji: "\u{1F30A}", title: "Oceano", count: 7, gradient: "from-cyan-500/20 to-blue-500/15" },
-  { id: "fairy", emoji: "\u{1F9DA}", title: "Fantasia", count: 6, gradient: "from-pink-500/20 to-fuchsia-500/15" },
-  { id: "food", emoji: "\u{1F370}", title: "Comidas", count: 9, gradient: "from-rose-500/20 to-red-500/15" },
+type Theme = {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  count: number;
+  gradient: string;
+};
+
+const THEMES: Theme[] = [
+  { id: "animals", icon: PawPrint, title: "Animais", count: 8, gradient: "from-amber-500/20 to-orange-500/15" },
+  { id: "space", icon: Rocket, title: "Espaco", count: 6, gradient: "from-purple-500/20 to-indigo-500/15" },
+  { id: "dinos", icon: Bone, title: "Dinossauros", count: 5, gradient: "from-green-500/20 to-emerald-500/15" },
+  { id: "ocean", icon: Waves, title: "Oceano", count: 7, gradient: "from-cyan-500/20 to-blue-500/15" },
+  { id: "fairy", icon: Wand2, title: "Fantasia", count: 6, gradient: "from-pink-500/20 to-fuchsia-500/15" },
+  { id: "food", icon: UtensilsCrossed, title: "Comidas", count: 9, gradient: "from-rose-500/20 to-red-500/15" },
 ];
 
 export default function KidsArtPage() {
@@ -41,7 +56,7 @@ export default function KidsArtPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-pink/25 bg-neon-pink/10">
-          <span className="text-xl">{"\u{1F3A8}"}</span>
+          <Paintbrush className="h-5 w-5 text-neon-pink" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Arte & Pintura</h1>
@@ -81,7 +96,7 @@ export default function KidsArtPage() {
       {/* Canvas area */}
       <div className="mb-8 flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-foreground/[0.08] bg-card/50">
         <div className="text-center">
-          <span className="mb-2 block text-4xl">{"\u{1F3A8}"}</span>
+          <Paintbrush className="mb-2 h-8 w-8 text-foreground/30" />
           <p className="text-sm text-foreground/30">
             Selecione um tema abaixo para comecar a colorir
           </p>
@@ -101,9 +116,7 @@ export default function KidsArtPage() {
             <div
               className={`flex h-28 items-center justify-center rounded-t-2xl bg-gradient-to-br ${theme.gradient}`}
             >
-              <span className="text-4xl transition-transform group-hover:scale-110">
-                {theme.emoji}
-              </span>
+              <theme.icon className="h-8 w-8 text-foreground/60 transition-transform group-hover:scale-110" />
             </div>
             <div className="p-4">
               <h3 className="text-sm font-medium text-foreground/80">

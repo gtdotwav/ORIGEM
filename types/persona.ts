@@ -5,7 +5,7 @@ export type ChatMode = "direct" | "ecosystem";
 export interface Persona {
   id: string;
   name: string;
-  emoji: string;
+  iconId: string;
   description: string;
   systemPrompt: string;
   color: PersonaColor;

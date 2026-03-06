@@ -18,6 +18,12 @@ import {
   Users,
   Bot,
   Layers,
+  MessageCircle,
+  ChevronUp,
+  Navigation,
+  SunMoon,
+  PanelLeft,
+  type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -34,6 +40,9 @@ interface ModalStep {
   type: "modal";
   title: string;
   description: string;
+  icon?: LucideIcon;
+  iconColor?: string;
+  iconBg?: string;
 }
 
 interface SpotlightStep {
@@ -43,6 +52,9 @@ interface SpotlightStep {
   title: string;
   description: string;
   position: Position;
+  icon?: LucideIcon;
+  iconColor?: string;
+  iconBg?: string;
 }
 
 type TourStep = ModalStep | SpotlightStep;
@@ -63,6 +75,9 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Digite qualquer ideia, conceito ou pergunta. O ORIGEM decompoe, analisa e orquestra multiplas camadas de IA para gerar respostas profundas.",
     position: "top",
+    icon: MessageCircle,
+    iconColor: "text-neon-cyan",
+    iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
   },
   {
     id: "tools-chevron",
@@ -72,6 +87,9 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Expanda para acessar seletor de LLM, entrada por voz, painel critico e modo de operacao.",
     position: "top",
+    icon: ChevronUp,
+    iconColor: "text-neon-purple",
+    iconBg: "bg-neon-purple/10 border-neon-purple/20",
   },
   {
     id: "floating-nav",
@@ -81,6 +99,9 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Clique no logo para acessar todas as areas: Dashboard, Pipeline 360\u00b0, Space, Workspaces, Apps e muito mais.",
     position: "bottom",
+    icon: Navigation,
+    iconColor: "text-neon-green",
+    iconBg: "bg-neon-green/10 border-neon-green/20",
   },
   {
     id: "theme-toggle",
@@ -90,6 +111,9 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Alterne entre o modo escuro e o modo plain para ajustar a interface ao seu conforto.",
     position: "bottom",
+    icon: SunMoon,
+    iconColor: "text-neon-orange",
+    iconBg: "bg-neon-orange/10 border-neon-orange/20",
   },
   {
     id: "left-toolbar",
@@ -99,6 +123,9 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Acesso rapido ao historico de chats, conectores, calendario e ORIGEM Spaces para geracao de imagens.",
     position: "right",
+    icon: PanelLeft,
+    iconColor: "text-neon-pink",
+    iconBg: "bg-neon-pink/10 border-neon-pink/20",
   },
   {
     id: "completion",
@@ -195,11 +222,11 @@ const START_PATHS: StartPath[] = [
     icon: Palette,
     iconColor: "text-neon-purple",
     iconBg: "bg-neon-purple/10",
-    title: "Design",
+    title: "UX/UI",
     subtitle: "Criacao visual",
-    description: "Ferramentas de design assistidas por IA. Gere layouts, paletas, tipografia e componentes visuais automaticamente.",
+    description: "Ferramentas de UX/UI assistidas por IA. Gere layouts, paletas, tipografia e componentes visuais automaticamente.",
     route: "/dashboard/design",
-    ctaLabel: "Explorar design",
+    ctaLabel: "Explorar UX/UI",
   },
   {
     id: "agents",
@@ -508,9 +535,9 @@ export function GuidedTour() {
         {/* Spotlight cutout */}
         {isSpotlight && targetRect && (
           <motion.div
-            className="absolute rounded-2xl ring-2 ring-neon-cyan/30"
+            className="absolute rounded-2xl ring-2 ring-neon-cyan/40"
             style={{
-              boxShadow: "0 0 0 9999px rgba(0,0,0,0.75)",
+              boxShadow: "0 0 0 9999px rgba(0,0,0,0.78), 0 0 30px 4px rgba(64,224,208,0.15)",
             }}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{
@@ -640,18 +667,18 @@ export function GuidedTour() {
               key={step.id}
               ref={cardRef}
               className={cn(
-                "absolute rounded-2xl border border-foreground/[0.10] bg-card/95 shadow-2xl shadow-black/50 backdrop-blur-xl",
+                "absolute rounded-2xl border bg-card/95 shadow-2xl shadow-black/50 backdrop-blur-xl",
                 step.type === "modal"
-                  ? "left-1/2 top-1/2 w-[90vw] max-w-[420px] -translate-x-1/2 -translate-y-1/2"
-                  : "w-[320px]"
+                  ? "left-1/2 top-1/2 w-[90vw] max-w-[460px] -translate-x-1/2 -translate-y-1/2 border-foreground/[0.12]"
+                  : "w-[360px] border-neon-cyan/20"
               )}
               style={
                 isSpotlight && targetRect
                   ? getCardPosition(
                       targetRect,
                       spotlightStep!.position,
-                      320,
-                      200
+                      360,
+                      240
                     )
                   : undefined
               }
@@ -660,20 +687,39 @@ export function GuidedTour() {
               exit={{ opacity: 0, y: -12, scale: 0.96 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             >
+              {/* Glow accent line at top */}
+              {isSpotlight && (
+                <div className={cn("absolute inset-x-0 top-0 h-px rounded-t-2xl", step.iconColor?.replace("text-", "bg-") ?? "bg-neon-cyan")} style={{ opacity: 0.5 }} />
+              )}
+
+              {/* Step counter badge */}
+              {!isFirstStep && !isLastStep && (
+                <motion.div
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-foreground/[0.10] bg-card px-3 py-0.5 shadow-lg"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05, duration: 0.3 }}
+                >
+                  <span className="text-[10px] font-bold tabular-nums text-foreground/50">
+                    {currentStep} / {TOUR_STEPS.length - 1}
+                  </span>
+                </motion.div>
+              )}
+
               {/* Close button */}
               <button
                 type="button"
                 onClick={skipTour}
-                className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-lg text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
+                className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
 
-              <div className="p-6">
+              <div className="p-7">
                 {/* Welcome modal decoration */}
                 {step.id === "welcome" && (
                   <motion.div
-                    className="mb-5 flex justify-center"
+                    className="mb-6 flex justify-center"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.15, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -682,8 +728,8 @@ export function GuidedTour() {
                       <Image
                         src="/logo.png"
                         alt="ORIGEM"
-                        width={80}
-                        height={80}
+                        width={88}
+                        height={88}
                         className="pointer-events-none"
                       />
                       <motion.div
@@ -702,23 +748,28 @@ export function GuidedTour() {
                   </motion.div>
                 )}
 
-                {/* Step icon for spotlight steps */}
-                {isSpotlight && (
-                  <motion.div
-                    className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl border border-neon-cyan/20 bg-neon-cyan/10"
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.1, duration: 0.4, type: "spring", bounce: 0.35 }}
-                  >
-                    <Sparkles className="h-4 w-4 text-neon-cyan" />
-                  </motion.div>
-                )}
+                {/* Step icon — unique per step */}
+                {isSpotlight && (() => {
+                  const StepIcon = step.icon ?? Sparkles;
+                  const iconColor = step.iconColor ?? "text-neon-cyan";
+                  const iconBg = step.iconBg ?? "bg-neon-cyan/10 border-neon-cyan/20";
+                  return (
+                    <motion.div
+                      className={cn("mb-4 flex h-10 w-10 items-center justify-center rounded-xl border", iconBg)}
+                      initial={{ scale: 0, rotate: -20 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.1, duration: 0.4, type: "spring", bounce: 0.35 }}
+                    >
+                      <StepIcon className={cn("h-5 w-5", iconColor)} />
+                    </motion.div>
+                  );
+                })()}
 
                 {/* Title */}
                 <motion.h3
                   className={cn(
-                    "font-semibold text-foreground",
-                    step.type === "modal" ? "mb-3 text-center text-xl" : "mb-2 text-sm"
+                    "font-bold text-foreground",
+                    step.type === "modal" ? "mb-3 text-center text-xl" : "mb-2 text-base"
                   )}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -730,10 +781,10 @@ export function GuidedTour() {
                 {/* Description */}
                 <motion.p
                   className={cn(
-                    "text-foreground/50",
+                    "text-foreground/55",
                     step.type === "modal"
                       ? "mb-6 text-center text-sm leading-relaxed"
-                      : "mb-5 text-xs leading-relaxed"
+                      : "mb-6 text-[13px] leading-relaxed"
                   )}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -756,19 +807,19 @@ export function GuidedTour() {
                       <button
                         type="button"
                         onClick={prevStep}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-foreground/[0.08] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-foreground/[0.08] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
                       >
-                        <ArrowLeft className="h-3.5 w-3.5" />
+                        <ArrowLeft className="h-4 w-4" />
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={handleNext}
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all",
+                        "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold transition-all",
                         isFirstStep
                           ? "border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20"
-                          : "border border-foreground/[0.10] bg-foreground/[0.05] text-foreground/70 hover:bg-foreground/[0.08]"
+                          : "border border-foreground/[0.10] bg-foreground/[0.06] text-foreground/70 hover:bg-foreground/[0.10]"
                       )}
                     >
                       {isFirstStep ? "Iniciar tour" : "Proximo"}
@@ -779,7 +830,7 @@ export function GuidedTour() {
 
                 {/* Skip hint */}
                 <motion.p
-                  className="mt-3 text-center text-[10px] text-foreground/20"
+                  className="mt-4 text-center text-[10px] text-foreground/20"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}

@@ -17,7 +17,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "mentor-negocios",
     name: "Mentor de Negocios",
-    emoji: "\u{1F4BC}",
+    iconId: "mentor-negocios",
     role: "Estrategia e modelo de negocio",
     color: "orange",
     specialties: ["business", "strategy", "product", "marketing"],
@@ -25,7 +25,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "professor-ia",
     name: "Professor IA",
-    emoji: "\u{1F9D1}\u200D\u{1F393}",
+    iconId: "professor-ia",
     role: "Ensino e didatica de IA",
     color: "cyan",
     specialties: ["education", "ai", "tutorial", "explanation"],
@@ -33,7 +33,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "criador-conteudo",
     name: "Criador de Conteudo",
-    emoji: "\u{1F4AC}",
+    iconId: "criador-conteudo",
     role: "Texto, copy e marketing",
     color: "pink",
     specialties: ["content", "marketing", "writing", "copy"],
@@ -41,7 +41,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "programador-ia",
     name: "Programador IA",
-    emoji: "\u{1F9D1}\u200D\u{1F4BB}",
+    iconId: "programador-ia",
     role: "Codigo, debug e arquitetura",
     color: "green",
     specialties: ["code", "backend", "frontend", "debug", "architecture"],
@@ -49,7 +49,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "psicologo-ia",
     name: "Psicologo IA",
-    emoji: "\u{1F9E0}",
+    iconId: "psicologo-ia",
     role: "Comportamento e bem-estar",
     color: "purple",
     specialties: ["psychology", "behavior", "wellness", "emotional"],
@@ -57,7 +57,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "criador-imagens",
     name: "Criador de Imagens",
-    emoji: "\u{1F3A8}",
+    iconId: "criador-imagens",
     role: "Design visual e imagens IA",
     color: "pink",
     specialties: ["image", "design", "visual", "art"],
@@ -65,7 +65,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "criador-videos",
     name: "Criador de Videos",
-    emoji: "\u{1F3AC}",
+    iconId: "criador-videos",
     role: "Video e producao audiovisual",
     color: "orange",
     specialties: ["video", "audio", "production", "media"],
@@ -73,7 +73,7 @@ export const AGENT_PERSONAS: AgentPersona[] = [
   {
     id: "companheiro-ia",
     name: "Companheiro IA",
-    emoji: "\u{1F469}\u200D\u2764\uFE0F\u200D\u{1F468}",
+    iconId: "companheiro-ia",
     role: "Suporte emocional e conversa",
     color: "blue",
     specialties: ["companion", "emotional", "social", "chat"],

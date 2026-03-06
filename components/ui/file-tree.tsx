@@ -29,9 +29,9 @@ interface FileItemProps {
 
 const getFileIcon = (extension?: string) => {
   const iconMap: Record<string, { color: string; icon: string }> = {
-    tsx: { color: "text-[oklch(0.65_0.18_220)]", icon: "⚛" },
+    tsx: { color: "text-[oklch(0.65_0.18_220)]", icon: "◈" },
     ts: { color: "text-[oklch(0.6_0.15_230)]", icon: "◆" },
-    jsx: { color: "text-[oklch(0.7_0.2_200)]", icon: "⚛" },
+    jsx: { color: "text-[oklch(0.7_0.2_200)]", icon: "◈" },
     js: { color: "text-[oklch(0.8_0.18_90)]", icon: "◆" },
     css: { color: "text-[oklch(0.65_0.2_280)]", icon: "◈" },
     json: { color: "text-[oklch(0.75_0.15_85)]", icon: "{}" },

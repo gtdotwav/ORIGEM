@@ -9,7 +9,7 @@ export type AgentPersonaColor =
 export interface AgentPersona {
   id: string;
   name: string;
-  emoji: string;
+  iconId: string;
   role: string;
   color: AgentPersonaColor;
   specialties: string[];

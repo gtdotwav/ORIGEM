@@ -1,10 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Star, Trophy, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  Trophy,
+  Sparkles,
+  Paintbrush,
+  Calculator,
+  Lightbulb,
+  Search,
+  BookOpen,
+  Target,
+  Check,
+} from "lucide-react";
 
 const TODAY_CHALLENGE = {
-  emoji: "\u{1F3A8}",
+  icon: Paintbrush,
   title: "Desenhe um animal fantastico",
   description:
     "Use sua imaginacao para criar um animal que nao existe. Pode ter asas, tentaculos, chifres — o que voce quiser!",
@@ -12,12 +25,18 @@ const TODAY_CHALLENGE = {
   reward: 3,
 };
 
-const CATEGORIES = [
-  { emoji: "\u{1F3A8}", name: "Desenho", color: "border-neon-pink/20 bg-neon-pink/5 text-neon-pink" },
-  { emoji: "\u{1F522}", name: "Matematica", color: "border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan" },
-  { emoji: "\u{1F4A1}", name: "Logica", color: "border-neon-purple/20 bg-neon-purple/5 text-neon-purple" },
-  { emoji: "\u{1F50D}", name: "Curiosidades", color: "border-neon-orange/20 bg-neon-orange/5 text-neon-orange" },
-  { emoji: "\u{1F4D6}", name: "Leitura", color: "border-neon-green/20 bg-neon-green/5 text-neon-green" },
+type Category = {
+  icon: LucideIcon;
+  name: string;
+  color: string;
+};
+
+const CATEGORIES: Category[] = [
+  { icon: Paintbrush, name: "Desenho", color: "border-neon-pink/20 bg-neon-pink/5 text-neon-pink" },
+  { icon: Calculator, name: "Matematica", color: "border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan" },
+  { icon: Lightbulb, name: "Logica", color: "border-neon-purple/20 bg-neon-purple/5 text-neon-purple" },
+  { icon: Search, name: "Curiosidades", color: "border-neon-orange/20 bg-neon-orange/5 text-neon-orange" },
+  { icon: BookOpen, name: "Leitura", color: "border-neon-green/20 bg-neon-green/5 text-neon-green" },
 ];
 
 const PAST_CHALLENGES = [
@@ -46,7 +65,7 @@ export default function KidsChallengesPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-blue/25 bg-neon-blue/10">
-          <span className="text-xl">{"\u2B50"}</span>
+          <Target className="h-5 w-5 text-neon-blue" />
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold text-foreground">Desafios do Dia</h1>
@@ -70,7 +89,7 @@ export default function KidsChallengesPage() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-5xl">{TODAY_CHALLENGE.emoji}</span>
+          <TODAY_CHALLENGE.icon className="h-8 w-8 text-neon-blue" />
           <div>
             <h2 className="text-lg font-semibold text-foreground">
               {TODAY_CHALLENGE.title}
@@ -99,7 +118,7 @@ export default function KidsChallengesPage() {
             key={cat.name}
             className={`flex items-center gap-2 rounded-xl border px-4 py-2 ${cat.color}`}
           >
-            <span className="text-lg">{cat.emoji}</span>
+            <cat.icon className="h-5 w-5" />
             <span className="text-xs font-medium">{cat.name}</span>
           </div>
         ))}
@@ -123,7 +142,7 @@ export default function KidsChallengesPage() {
               }`}
             >
               {challenge.completed ? (
-                <span className="text-xs text-neon-green">{"\u2713"}</span>
+                <Check className="h-3.5 w-3.5 text-neon-green" />
               ) : (
                 <span className="text-xs text-foreground/25">?</span>
               )}

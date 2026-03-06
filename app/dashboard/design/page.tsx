@@ -321,7 +321,7 @@ function PreviewFloatingNav() {
         <Atom className="h-3 w-3 text-blue-400" />
         <span className="text-[10px] font-medium text-foreground/90">ORIGEM</span>
         <span className="text-foreground/20">/</span>
-        <span className="text-[10px] text-foreground/50">Design</span>
+        <span className="text-[10px] text-foreground/50">UX/UI</span>
         <ChevronDown className="h-2.5 w-2.5 text-foreground/40" />
       </div>
       <div className="w-full max-w-[280px] rounded-xl border border-foreground/[0.08] bg-card/95 p-2">
@@ -354,7 +354,7 @@ function PreviewBreadcrumb() {
       <span className="text-foreground/15">/</span>
       <span className="text-[10px] text-foreground/50">Dashboard</span>
       <span className="text-foreground/15">/</span>
-      <span className="text-[10px] text-foreground/90">Design</span>
+      <span className="text-[10px] text-foreground/90">UX/UI</span>
     </div>
   );
 }
@@ -1355,7 +1355,7 @@ export default function DesignBankingPage() {
       {/* Footer */}
       <div className="mt-10 text-center">
         <p className="text-[10px] text-foreground/15">
-          ORIGEM Design Banking v0.2.0 — Psychosemantic AI Engine
+          ORIGEM UX/UI Banking v0.2.0 — Psychosemantic AI Engine
         </p>
       </div>
 

@@ -1,18 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Star, Trophy } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  Trophy,
+  Calculator,
+  Brain,
+  Puzzle,
+  Type,
+  Lightbulb,
+  Palette,
+  PawPrint,
+  Globe,
+  Music,
+  Gamepad2,
+} from "lucide-react";
 
-const GAMES = [
-  { id: "math", emoji: "\u{1F522}", name: "Matematica Divertida", description: "Somas, subtracoes e multiplicacoes", difficulty: "Facil", stars: 2, color: "border-neon-cyan/20 hover:border-neon-cyan/50" },
-  { id: "memory", emoji: "\u{1F9E0}", name: "Jogo da Memoria", description: "Encontre os pares escondidos", difficulty: "Facil", stars: 3, color: "border-neon-purple/20 hover:border-neon-purple/50" },
-  { id: "puzzle", emoji: "\u{1F9E9}", name: "Quebra-Cabeca", description: "Monte as imagens divertidas", difficulty: "Medio", stars: 1, color: "border-neon-green/20 hover:border-neon-green/50" },
-  { id: "spell", emoji: "\u{1F524}", name: "Soletrar", description: "Forme palavras com as letras", difficulty: "Medio", stars: 0, color: "border-neon-orange/20 hover:border-neon-orange/50" },
-  { id: "logic", emoji: "\u{1F4A1}", name: "Logica", description: "Resolva enigmas e sequencias", difficulty: "Dificil", stars: 1, color: "border-neon-pink/20 hover:border-neon-pink/50" },
-  { id: "colors", emoji: "\u{1F308}", name: "Cores e Formas", description: "Aprenda cores, formas e padroes", difficulty: "Facil", stars: 3, color: "border-neon-blue/20 hover:border-neon-blue/50" },
-  { id: "animals", emoji: "\u{1F981}", name: "Montar Animais", description: "Monte animais com pecas", difficulty: "Facil", stars: 2, color: "border-neon-green/20 hover:border-neon-green/50" },
-  { id: "geo", emoji: "\u{1F30D}", name: "Geografia", description: "Descubra paises e capitais", difficulty: "Medio", stars: 0, color: "border-neon-cyan/20 hover:border-neon-cyan/50" },
-  { id: "music", emoji: "\u{1F3B5}", name: "Musica e Ritmo", description: "Siga o ritmo e crie melodias", difficulty: "Facil", stars: 2, color: "border-neon-purple/20 hover:border-neon-purple/50" },
+type Game = {
+  id: string;
+  icon: LucideIcon;
+  name: string;
+  description: string;
+  difficulty: string;
+  stars: number;
+  color: string;
+};
+
+const GAMES: Game[] = [
+  { id: "math", icon: Calculator, name: "Matematica Divertida", description: "Somas, subtracoes e multiplicacoes", difficulty: "Facil", stars: 2, color: "border-neon-cyan/20 hover:border-neon-cyan/50" },
+  { id: "memory", icon: Brain, name: "Jogo da Memoria", description: "Encontre os pares escondidos", difficulty: "Facil", stars: 3, color: "border-neon-purple/20 hover:border-neon-purple/50" },
+  { id: "puzzle", icon: Puzzle, name: "Quebra-Cabeca", description: "Monte as imagens divertidas", difficulty: "Medio", stars: 1, color: "border-neon-green/20 hover:border-neon-green/50" },
+  { id: "spell", icon: Type, name: "Soletrar", description: "Forme palavras com as letras", difficulty: "Medio", stars: 0, color: "border-neon-orange/20 hover:border-neon-orange/50" },
+  { id: "logic", icon: Lightbulb, name: "Logica", description: "Resolva enigmas e sequencias", difficulty: "Dificil", stars: 1, color: "border-neon-pink/20 hover:border-neon-pink/50" },
+  { id: "colors", icon: Palette, name: "Cores e Formas", description: "Aprenda cores, formas e padroes", difficulty: "Facil", stars: 3, color: "border-neon-blue/20 hover:border-neon-blue/50" },
+  { id: "animals", icon: PawPrint, name: "Montar Animais", description: "Monte animais com pecas", difficulty: "Facil", stars: 2, color: "border-neon-green/20 hover:border-neon-green/50" },
+  { id: "geo", icon: Globe, name: "Geografia", description: "Descubra paises e capitais", difficulty: "Medio", stars: 0, color: "border-neon-cyan/20 hover:border-neon-cyan/50" },
+  { id: "music", icon: Music, name: "Musica e Ritmo", description: "Siga o ritmo e crie melodias", difficulty: "Facil", stars: 2, color: "border-neon-purple/20 hover:border-neon-purple/50" },
 ];
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -52,7 +77,7 @@ export default function KidsGamesPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-green/25 bg-neon-green/10">
-          <span className="text-xl">{"\u{1F3AE}"}</span>
+          <Gamepad2 className="h-5 w-5 text-neon-green" />
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold text-foreground">Minigames Educativos</h1>
@@ -75,7 +100,7 @@ export default function KidsGamesPage() {
             className={`group cursor-pointer rounded-2xl border bg-card/70 p-5 backdrop-blur-xl transition-all ${game.color}`}
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-3xl">{game.emoji}</span>
+              <game.icon className="h-6 w-6 text-foreground/70" />
               <Stars count={game.stars} />
             </div>
             <h3 className="mb-1 text-sm font-semibold text-foreground/85">

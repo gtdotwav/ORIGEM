@@ -1,52 +1,72 @@
 "use client";
 
 import Link from "next/link";
-import { Shield, Lock } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Film,
+  Gamepad2,
+  Paintbrush,
+  BookOpen,
+  Bot,
+  Star,
+  Sparkles,
+  Rocket,
+} from "lucide-react";
 
-const SECTIONS = [
+type Section = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  href: string;
+  color: string;
+};
+
+const SECTIONS: Section[] = [
   {
-    emoji: "\u{1F3AC}",
+    icon: Film,
     title: "Videos Educativos",
     description: "Videos curtos, curiosidades e desenhos animados",
     href: "/dashboard/kids/videos",
     color: "cyan",
   },
   {
-    emoji: "\u{1F3AE}",
+    icon: Gamepad2,
     title: "Minigames",
     description: "Jogos didaticos de matematica, memoria e logica",
     href: "/dashboard/kids/games",
     color: "green",
   },
   {
-    emoji: "\u{1F3A8}",
+    icon: Paintbrush,
     title: "Arte & Pintura",
     description: "Desenhe, pinte e solte a criatividade",
     href: "/dashboard/kids/art",
     color: "pink",
   },
   {
-    emoji: "\u{1F4D6}",
+    icon: BookOpen,
     title: "Historias",
     description: "Historias interativas, narradas e animadas",
     href: "/dashboard/kids/stories",
     color: "purple",
   },
   {
-    emoji: "\u{1F916}",
+    icon: Bot,
     title: "Companheiro IA",
     description: "Seu amigo virtual inteligente e divertido",
     href: "/dashboard/kids/companion",
     color: "orange",
   },
   {
-    emoji: "\u2B50",
+    icon: Star,
     title: "Desafios do Dia",
     description: "Desafios educativos diarios com recompensas",
     href: "/dashboard/kids/challenges",
     color: "blue",
   },
-] as const;
+];
 
 const COLOR_CLASSES: Record<
   string,
@@ -102,7 +122,7 @@ export default function KidsPage() {
       {/* Header */}
       <div className="mb-8 flex items-start gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-green/25 bg-neon-green/10">
-          <span className="text-xl">{"\u{1F31F}"}</span>
+          <Sparkles className="h-5 w-5 text-neon-green" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">ORIGEM Kids</h1>
@@ -115,10 +135,10 @@ export default function KidsPage() {
       {/* Welcome banner */}
       <div className="mb-8 overflow-hidden rounded-2xl border border-neon-green/15 bg-gradient-to-r from-neon-green/8 via-neon-cyan/5 to-neon-purple/8 p-6 backdrop-blur-xl">
         <div className="flex items-center gap-4">
-          <span className="text-5xl">{"\u{1F680}"}</span>
+          <Rocket className="h-8 w-8 text-neon-green" />
           <div>
             <h2 className="text-lg font-semibold text-foreground">
-              Ola, explorador! {"\u{1F44B}"}
+              Ola, explorador!
             </h2>
             <p className="mt-1 text-sm text-foreground/60">
               Escolha uma aventura para comecar. Aprenda, brinque e descubra
@@ -141,7 +161,7 @@ export default function KidsPage() {
               <div
                 className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl border ${colors.border} ${colors.bg}`}
               >
-                <span className="text-3xl">{section.emoji}</span>
+                <section.icon className={`h-6 w-6 ${colors.text}`} />
               </div>
               <h3 className={`mb-1 text-sm font-semibold ${colors.text}`}>
                 {section.title}

@@ -2,13 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Send, Shield } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  Shield,
+  BookOpen,
+  Lightbulb,
+  Search,
+  Target,
+  Bot,
+} from "lucide-react";
 
-const SUGGESTIONS = [
-  { emoji: "\u{1F4D6}", label: "Conte uma historia" },
-  { emoji: "\u{1F4A1}", label: "Me ensine algo" },
-  { emoji: "\u{1F50D}", label: "Curiosidade" },
-  { emoji: "\u{1F3AF}", label: "Desafio" },
+type Suggestion = {
+  icon: LucideIcon;
+  label: string;
+};
+
+const SUGGESTIONS: Suggestion[] = [
+  { icon: BookOpen, label: "Conte uma historia" },
+  { icon: Lightbulb, label: "Me ensine algo" },
+  { icon: Search, label: "Curiosidade" },
+  { icon: Target, label: "Desafio" },
 ];
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -17,7 +32,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     role: "assistant",
     content:
-      "Ola! Eu sou o Ori, seu amigo virtual! \u{1F916}\u2728 Posso contar historias, ensinar coisas legais, responder suas perguntas e propor desafios divertidos. O que voce quer fazer?",
+      "Ola! Eu sou o Ori, seu amigo virtual! Posso contar historias, ensinar coisas legais, responder suas perguntas e propor desafios divertidos. O que voce quer fazer?",
   },
 ];
 
@@ -34,7 +49,7 @@ export default function KidsCompanionPage() {
       {
         role: "assistant" as const,
         content:
-          "Que pergunta legal! \u{1F31F} Eu ainda estou aprendendo a responder direitinho, mas em breve vou poder conversar com voce sobre tudo! Continue explorando as outras secoes do ORIGEM Kids enquanto isso. \u{1F680}",
+          "Que pergunta legal! Eu ainda estou aprendendo a responder direitinho, mas em breve vou poder conversar com voce sobre tudo! Continue explorando as outras secoes do ORIGEM Kids enquanto isso.",
       },
     ]);
     setInput("");
@@ -51,7 +66,7 @@ export default function KidsCompanionPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-orange/25 bg-neon-orange/10">
-          <span className="text-xl">{"\u{1F916}"}</span>
+          <Bot className="h-5 w-5 text-neon-orange" />
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold text-foreground">Ori — Companheiro IA</h1>
@@ -81,8 +96,8 @@ export default function KidsCompanionPage() {
                 }`}
               >
                 {msg.role === "assistant" && (
-                  <span className="mb-1 block text-xs font-semibold text-neon-orange">
-                    Ori {"\u{1F916}"}
+                  <span className="mb-1 flex items-center gap-1 text-xs font-semibold text-neon-orange">
+                    Ori <Bot className="inline h-3.5 w-3.5" />
                   </span>
                 )}
                 <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -99,9 +114,9 @@ export default function KidsCompanionPage() {
             key={s.label}
             type="button"
             onClick={() => handleSend(s.label)}
-            className="rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-neon-orange/30 hover:bg-neon-orange/8 hover:text-foreground/70"
+            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/[0.08] bg-foreground/[0.04] px-3.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-neon-orange/30 hover:bg-neon-orange/8 hover:text-foreground/70"
           >
-            {s.emoji} {s.label}
+            <s.icon className="h-3.5 w-3.5" /> {s.label}
           </button>
         ))}
       </div>

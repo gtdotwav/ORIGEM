@@ -179,7 +179,7 @@ interface QuickLink {
 const QUICK_LINKS: QuickLink[] = [
   { label: "Início", href: "/dashboard", icon: LayoutDashboard },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
-  { label: "Design", href: "/dashboard/design", icon: Palette },
+  { label: "UX/UI", href: "/dashboard/design", icon: Palette },
   { label: "Provedores", href: "/dashboard/settings/providers", icon: Key },
 ];
 

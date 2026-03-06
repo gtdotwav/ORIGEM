@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
   Lock,
@@ -10,6 +11,12 @@ import {
   Shield,
   FileText,
   Check,
+  Film,
+  Gamepad2,
+  Paintbrush,
+  BookOpen,
+  Bot,
+  Star,
 } from "lucide-react";
 import { useKidsStore, type AgeRange } from "@/stores/kids-store";
 
@@ -26,13 +33,19 @@ const AGE_OPTIONS: { value: AgeRange; label: string }[] = [
   { value: "10-12", label: "10 — 12 anos" },
 ];
 
-const SECTION_OPTIONS = [
-  { id: "videos", emoji: "\u{1F3AC}", label: "Videos" },
-  { id: "games", emoji: "\u{1F3AE}", label: "Jogos" },
-  { id: "art", emoji: "\u{1F3A8}", label: "Arte" },
-  { id: "stories", emoji: "\u{1F4D6}", label: "Historias" },
-  { id: "companion", emoji: "\u{1F916}", label: "Companheiro IA" },
-  { id: "challenges", emoji: "\u2B50", label: "Desafios" },
+type SectionOption = {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+};
+
+const SECTION_OPTIONS: SectionOption[] = [
+  { id: "videos", icon: Film, label: "Videos" },
+  { id: "games", icon: Gamepad2, label: "Jogos" },
+  { id: "art", icon: Paintbrush, label: "Arte" },
+  { id: "stories", icon: BookOpen, label: "Historias" },
+  { id: "companion", icon: Bot, label: "Companheiro IA" },
+  { id: "challenges", icon: Star, label: "Desafios" },
 ];
 
 const ACTIVITY_LOG = [
@@ -204,7 +217,7 @@ export default function KidsParentalPage() {
                       : "border-foreground/[0.06] bg-foreground/[0.02]"
                   }`}
                 >
-                  <span className="text-lg">{sec.emoji}</span>
+                  <sec.icon className="h-5 w-5 text-foreground/60" />
                   <span
                     className={`flex-1 text-sm ${
                       enabled ? "text-foreground/75" : "text-foreground/30"

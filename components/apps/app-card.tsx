@@ -9,14 +9,13 @@ import { cn } from "@/lib/utils";
 interface AppCardProps {
   title: string;
   description: string;
-  emoji?: string;
   icon?: LucideIcon;
   color: PersonaColor;
   href: string;
   badge?: string;
 }
 
-export function AppCard({ title, description, emoji, icon: Icon, color, href, badge }: AppCardProps) {
+export function AppCard({ title, description, icon: Icon, color, href, badge }: AppCardProps) {
   const colors = PERSONA_COLORS[color];
 
   return (
@@ -36,11 +35,7 @@ export function AppCard({ title, description, emoji, icon: Icon, color, href, ba
             colors.bg
           )}
         >
-          {Icon ? (
-            <Icon className={cn("h-6 w-6", colors.text)} />
-          ) : (
-            <span className="text-2xl">{emoji}</span>
-          )}
+          {Icon && <Icon className={cn("h-6 w-6", colors.text)} />}
         </div>
         {badge && (
           <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
