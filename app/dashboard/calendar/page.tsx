@@ -37,6 +37,7 @@ import {
   type CalendarEventType,
 } from "@/stores/calendar-store";
 import { AutomationSection } from "@/components/calendar/automation-section";
+import { KanbanCardModal } from "@/components/calendar/kanban-card-modal";
 import { useAutomationStore } from "@/stores/automation-store";
 
 /* ── Constants ── */
@@ -138,6 +139,7 @@ export default function CalendarFullPage() {
   // Drag state for kanban
   const [draggedEvent, setDraggedEvent] = useState<(CalendarEvent & { _dateKey: string }) | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
+  const [modalEvent, setModalEvent] = useState<(CalendarEvent & { _dateKey: string }) | null>(null);
 
   // Form state
   const [noteTitle, setNoteTitle] = useState("");
@@ -683,8 +685,9 @@ export default function CalendarFullPage() {
                           draggable
                           onDragStart={() => handleDragStart(ev)}
                           onDragEnd={handleDragEnd}
+                          onClick={() => setModalEvent(ev)}
                           className={cn(
-                            "group cursor-grab rounded-xl border bg-background/60 p-3 transition-all hover:shadow-lg active:cursor-grabbing",
+                            "group cursor-grab rounded-xl border bg-background/60 p-3 transition-all hover:shadow-lg hover:border-foreground/[0.15] active:cursor-grabbing",
                             c.border,
                             isDragging && "opacity-40 scale-95"
                           )}
@@ -1281,6 +1284,9 @@ export default function CalendarFullPage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Kanban card detail modal */}
+      <KanbanCardModal event={modalEvent} onClose={() => setModalEvent(null)} />
     </div>
   );
 }

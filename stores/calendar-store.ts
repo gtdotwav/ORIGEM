@@ -25,6 +25,7 @@ export interface CalendarEvent {
 interface CalendarState {
   events: Record<string, CalendarEvent[]>; // keyed by dateKey
   addEvent: (event: Omit<CalendarEvent, "id" | "createdAt">) => void;
+  updateEvent: (dateKey: string, eventId: string, updates: Partial<Omit<CalendarEvent, "id" | "createdAt">>) => void;
   removeEvent: (dateKey: string, eventId: string) => void;
   getEventsForDate: (dateKey: string) => CalendarEvent[];
 }
@@ -50,6 +51,17 @@ export const useCalendarStore = create<CalendarState>()(
             events: {
               ...s.events,
               [input.dateKey]: [...(s.events[input.dateKey] ?? []), event],
+            },
+          }));
+        },
+
+        updateEvent: (dateKey, eventId, updates) => {
+          set((s) => ({
+            events: {
+              ...s.events,
+              [dateKey]: (s.events[dateKey] ?? []).map((e) =>
+                e.id === eventId ? { ...e, ...updates } : e
+              ),
             },
           }));
         },
