@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.51",
+    "@ai-sdk/google": "^3.0.43",
     "@ai-sdk/openai": "^3.0.38",
     "@auth/core": "^0.41.0",
     "@codesandbox/sandpack-react": "^2.20.0",
