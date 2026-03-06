@@ -36,6 +36,8 @@ import {
   type CalendarEvent,
   type CalendarEventType,
 } from "@/stores/calendar-store";
+import { AutomationSection } from "@/components/calendar/automation-section";
+import { useAutomationStore } from "@/stores/automation-store";
 
 /* ── Constants ── */
 
@@ -149,6 +151,8 @@ export default function CalendarFullPage() {
   >([]);
 
   const { events, addEvent, removeEvent } = useCalendarStore();
+  const automationJobs = useAutomationStore((s) => s.jobs);
+  const eventIdsWithAutomations = new Set(automationJobs.filter((j) => j.calendarEventId).map((j) => j.calendarEventId));
 
   const selectedDateKey = toDateKey(selectedDate);
   const dateEvents = events[selectedDateKey] ?? [];
@@ -838,6 +842,11 @@ export default function CalendarFullPage() {
                                   {ev.agent}
                                 </span>
                               )}
+                              {eventIdsWithAutomations.has(ev.id) && (
+                                <span className="flex items-center gap-0.5 rounded-full bg-neon-green/10 px-1.5 py-0.5 text-[8px] font-medium text-neon-green" title="Automacao vinculada">
+                                  <Zap className="h-2 w-2" /> Auto
+                                </span>
+                              )}
                             </div>
                           </div>
                           <button
@@ -860,6 +869,13 @@ export default function CalendarFullPage() {
                 <CalendarIcon className="h-6 w-6 text-foreground/10" />
                 <p className="text-[11px] font-medium text-foreground/25">Nenhum evento neste dia</p>
                 <p className="text-[10px] text-foreground/15">Clique abaixo para adicionar</p>
+              </div>
+            )}
+
+            {/* ── Automations ── */}
+            {addMode === null && (
+              <div className="mt-4 border-t border-foreground/[0.06] pt-4">
+                <AutomationSection eventId={sortedEvents[0]?.id} />
               </div>
             )}
 

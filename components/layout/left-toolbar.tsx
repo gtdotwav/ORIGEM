@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, History, Orbit, Plug } from "lucide-react";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
+import { CalendarPanel } from "@/components/chat/calendar-panel";
 
 interface LeftToolbarProps {
   currentSessionId?: string;
@@ -14,15 +15,18 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
   const router = useRouter();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const closeAll = () => {
     setHistoryOpen(false);
     setConnectorsOpen(false);
+    setCalendarOpen(false);
   };
 
-  const toggle = (panel: "history" | "connectors") => {
+  const toggle = (panel: "history" | "connectors" | "calendar") => {
     setHistoryOpen(panel === "history" ? (v) => !v : false);
     setConnectorsOpen(panel === "connectors" ? (v) => !v : false);
+    setCalendarOpen(panel === "calendar" ? (v) => !v : false);
   };
 
   return (
@@ -49,7 +53,7 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.push("/dashboard/calendar")}
+          onClick={() => toggle("calendar")}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
           title="Calendario"
         >
@@ -79,6 +83,11 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
       <ConnectorsPanel
         open={connectorsOpen}
         onClose={() => setConnectorsOpen(false)}
+      />
+
+      <CalendarPanel
+        open={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
       />
     </>
   );

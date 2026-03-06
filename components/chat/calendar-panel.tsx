@@ -25,6 +25,8 @@ import {
   parseSchedulePrompt,
   type CalendarEvent,
 } from "@/stores/calendar-store";
+import { AutomationSection } from "@/components/calendar/automation-section";
+import { useAutomationStore } from "@/stores/automation-store";
 
 interface CalendarPanelProps {
   open: boolean;
@@ -317,6 +319,16 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
                     {sortedEvents.length === 0 && addMode === null && (
                       <p className="mt-1 text-[10px] text-foreground/20">Nenhum evento agendado</p>
+                    )}
+
+                    {/* ── Automations for selected events ── */}
+                    {sortedEvents.length > 0 && addMode === null && (
+                      <div className="mt-3">
+                        <AutomationSection
+                          eventId={sortedEvents[0]?.id}
+                          compact
+                        />
+                      </div>
                     )}
 
                     {/* ── Action Buttons ── */}
