@@ -52,7 +52,7 @@ export default function KidsStoriesPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-purple/25 bg-neon-purple/10">
-          <span className="text-xl">{"\u{1F4D6}"}</span>
+          <BookOpen className="h-5 w-5 text-neon-purple" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Historias Interativas</h1>

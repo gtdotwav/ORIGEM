@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, Shield, Clock } from "lucide-react";
+import { ArrowLeft, Play, Shield, Clock, Film } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -49,7 +49,7 @@ export default function KidsVideosPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-cyan/25 bg-neon-cyan/10">
-          <span className="text-xl">{"\u{1F3AC}"}</span>
+          <Film className="h-5 w-5 text-neon-cyan" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Videos Educativos</h1>
