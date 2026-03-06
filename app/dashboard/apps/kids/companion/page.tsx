@@ -60,7 +60,7 @@ export default function KidsCompanionPage() {
       {/* Header */}
       <div className="mb-4 flex items-start gap-3">
         <Link
-          href="/dashboard/kids"
+          href="/dashboard/apps/kids"
           className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />

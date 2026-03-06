@@ -155,7 +155,7 @@ const NAV_ENTRIES: NavEntry[] = [
   {
     label: "Kids",
     description: "Aprendizado e diversão para crianças",
-    href: "/dashboard/kids",
+    href: "/dashboard/apps/kids",
     icon: Baby,
     color: "green",
   },

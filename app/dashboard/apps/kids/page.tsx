@@ -28,42 +28,42 @@ const SECTIONS: Section[] = [
     icon: Film,
     title: "Videos Educativos",
     description: "Videos curtos, curiosidades e desenhos animados",
-    href: "/dashboard/kids/videos",
+    href: "/dashboard/apps/kids/videos",
     color: "cyan",
   },
   {
     icon: Gamepad2,
     title: "Minigames",
     description: "Jogos didaticos de matematica, memoria e logica",
-    href: "/dashboard/kids/games",
+    href: "/dashboard/apps/kids/games",
     color: "green",
   },
   {
     icon: Paintbrush,
     title: "Arte & Pintura",
     description: "Desenhe, pinte e solte a criatividade",
-    href: "/dashboard/kids/art",
+    href: "/dashboard/apps/kids/art",
     color: "pink",
   },
   {
     icon: BookOpen,
     title: "Historias",
     description: "Historias interativas, narradas e animadas",
-    href: "/dashboard/kids/stories",
+    href: "/dashboard/apps/kids/stories",
     color: "purple",
   },
   {
     icon: Bot,
     title: "Companheiro IA",
     description: "Seu amigo virtual inteligente e divertido",
-    href: "/dashboard/kids/companion",
+    href: "/dashboard/apps/kids/companion",
     color: "orange",
   },
   {
     icon: Star,
     title: "Desafios do Dia",
     description: "Desafios educativos diarios com recompensas",
-    href: "/dashboard/kids/challenges",
+    href: "/dashboard/apps/kids/challenges",
     color: "blue",
   },
 ];
@@ -181,7 +181,7 @@ export default function KidsPage() {
           </span>
         </div>
         <Link
-          href="/dashboard/kids/parental"
+          href="/dashboard/apps/kids/parental"
           className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-1.5 text-xs text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
         >
           <Lock className="h-3 w-3" />

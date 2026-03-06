@@ -110,7 +110,7 @@ export default function KidsParentalPage() {
         </div>
         <p className="mt-3 text-[11px] text-foreground/30">PIN padrao: 1234</p>
         <Link
-          href="/dashboard/kids"
+          href="/dashboard/apps/kids"
           className="mt-6 text-xs text-foreground/40 hover:text-foreground/60"
         >
           Voltar ao ORIGEM Kids
@@ -124,7 +124,7 @@ export default function KidsParentalPage() {
       {/* Header */}
       <div className="mb-6 flex items-start gap-3">
         <Link
-          href="/dashboard/kids"
+          href="/dashboard/apps/kids"
           className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] text-foreground/40 transition-colors hover:text-foreground/70"
         >
           <ArrowLeft className="h-4 w-4" />

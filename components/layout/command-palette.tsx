@@ -46,7 +46,7 @@ const navItems = [
   { label: "Conexões", href: "/dashboard/connections", icon: Users2 },
   { label: "Apps", href: "/dashboard/apps", icon: Blocks },
   { label: "Celebridade IA", href: "/dashboard/apps/celebrity-chat", icon: MessageSquare },
-  { label: "ORIGEM Kids", href: "/dashboard/kids", icon: Baby },
+  { label: "ORIGEM Kids", href: "/dashboard/apps/kids", icon: Baby },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
   { label: "Provedores", href: "/dashboard/settings/providers", icon: Key },
   { label: "Controle", href: "/dashboard/control", icon: Gauge },

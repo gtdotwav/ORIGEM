@@ -1,6 +1,6 @@
 "use client";
 
-import { Blocks, Trash2, Drama, Rocket, Code2, Presentation } from "lucide-react";
+import { Blocks, Trash2, Drama, Rocket, Presentation, Baby } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
 import { useCustomAppStore } from "@/stores/custom-app-store";
@@ -34,12 +34,11 @@ export default function AppsPage() {
       {/* Apps grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <AppCard
-          title="Code"
-          description="Explore e acompanhe arquivos do seu projeto em tempo real. Conecte um agente de codigo para analise e edicao inteligente."
-          icon={Code2}
+          title="ORIGEM Kids"
+          description="Mundo magico de aprendizado e diversao. Videos educativos, minigames, historias interativas e companheiro IA para criancas."
+          icon={Baby}
           color="green"
-          href="/dashboard/apps/code"
-          badge="Novo"
+          href="/dashboard/apps/kids"
         />
 
         <AppCard
