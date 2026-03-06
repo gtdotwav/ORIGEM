@@ -1,99 +1,117 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
+import type {
+  Presentation,
+  Slide,
+  SlideElement,
+  SlideCreationMode,
+} from "@/types/slides";
 
-export type SlideLayout = "title" | "content" | "two-column" | "image" | "quote" | "blank";
+function createId() {
+  return `slide-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
-export interface SlideElement {
-  id: string;
-  type: "title" | "subtitle" | "body" | "image" | "quote" | "author";
-  content: string;
-  style?: {
-    fontSize?: string;
-    textAlign?: "left" | "center" | "right";
-    fontWeight?: string;
-    color?: string;
+export function createBlankSlide(layout: Slide["layout"] = "blank"): Slide {
+  return {
+    id: createId(),
+    elements: [],
+    background: "transparent",
+    layout,
   };
 }
 
-export interface Slide {
-  id: string;
-  layout: SlideLayout;
-  elements: SlideElement[];
-  bg: string;
-}
+export function createTitleSlide(title: string, subtitle?: string): Slide {
+  const elements: SlideElement[] = [
+    {
+      id: createId(),
+      type: "text",
+      x: 80,
+      y: 160,
+      width: 800,
+      height: 80,
+      content: title,
+      style: { fontSize: 44, fontWeight: "bold", color: "#ffffff", textAlign: "center" },
+    },
+  ];
 
-export interface Presentation {
-  id: string;
-  title: string;
-  theme: "dark" | "light" | "neon" | "gradient";
-  slides: Slide[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-function createDefaultSlide(layout: SlideLayout): Slide {
-  const id = nanoid();
-  const elements: SlideElement[] = [];
-
-  switch (layout) {
-    case "title":
-      elements.push(
-        { id: nanoid(), type: "title", content: "Titulo da Apresentacao" },
-        { id: nanoid(), type: "subtitle", content: "Subtitulo aqui" },
-      );
-      break;
-    case "content":
-      elements.push(
-        { id: nanoid(), type: "title", content: "Titulo do Slide" },
-        { id: nanoid(), type: "body", content: "Adicione seu conteudo aqui. Clique para editar." },
-      );
-      break;
-    case "two-column":
-      elements.push(
-        { id: nanoid(), type: "title", content: "Titulo" },
-        { id: nanoid(), type: "body", content: "Coluna esquerda" },
-        { id: nanoid(), type: "body", content: "Coluna direita" },
-      );
-      break;
-    case "image":
-      elements.push(
-        { id: nanoid(), type: "title", content: "Titulo" },
-        { id: nanoid(), type: "image", content: "" },
-      );
-      break;
-    case "quote":
-      elements.push(
-        { id: nanoid(), type: "quote", content: "Sua citacao aqui..." },
-        { id: nanoid(), type: "author", content: "— Autor" },
-      );
-      break;
-    case "blank":
-      break;
+  if (subtitle) {
+    elements.push({
+      id: createId(),
+      type: "text",
+      x: 120,
+      y: 260,
+      width: 720,
+      height: 48,
+      content: subtitle,
+      style: { fontSize: 20, fontWeight: "normal", color: "rgba(255,255,255,0.5)", textAlign: "center" },
+    });
   }
 
-  return { id, layout, elements, bg: "" };
+  return {
+    id: createId(),
+    elements,
+    background: "linear-gradient(135deg, oklch(0.15 0.02 260) 0%, oklch(0.10 0.01 200) 100%)",
+    layout: "title",
+  };
+}
+
+export function createContentSlide(title: string, bullets: string[]): Slide {
+  const elements: SlideElement[] = [
+    {
+      id: createId(),
+      type: "text",
+      x: 60,
+      y: 40,
+      width: 840,
+      height: 56,
+      content: title,
+      style: { fontSize: 32, fontWeight: "bold", color: "#ffffff", textAlign: "left" },
+    },
+    {
+      id: createId(),
+      type: "text",
+      x: 60,
+      y: 120,
+      width: 840,
+      height: 320,
+      content: bullets.map((b) => `• ${b}`).join("\n"),
+      style: { fontSize: 18, fontWeight: "normal", color: "rgba(255,255,255,0.7)", textAlign: "left" },
+    },
+  ];
+
+  return {
+    id: createId(),
+    elements,
+    background: "linear-gradient(135deg, oklch(0.12 0.015 240) 0%, oklch(0.09 0.01 210) 100%)",
+    layout: "content",
+  };
 }
 
 interface SlidesState {
   presentations: Presentation[];
   activePresentationId: string | null;
   activeSlideIndex: number;
+  creationMode: SlideCreationMode | null;
+  phase: "modes" | "input" | "editor";
 
-  createPresentation: (title: string) => string;
-  deletePresentation: (id: string) => void;
+  setCreationMode: (mode: SlideCreationMode | null) => void;
+  setPhase: (phase: SlidesState["phase"]) => void;
+  setActiveSlideIndex: (index: number) => void;
+
+  addPresentation: (title: string, slides: Slide[]) => string;
   setActivePresentation: (id: string | null) => void;
-  setActiveSlide: (index: number) => void;
+  removePresentation: (id: string) => void;
 
-  addSlide: (layout: SlideLayout) => void;
-  removeSlide: (index: number) => void;
-  moveSlide: (from: number, to: number) => void;
-  duplicateSlide: (index: number) => void;
+  addSlide: (slide: Slide) => void;
+  updateSlide: (slideId: string, updates: Partial<Slide>) => void;
+  removeSlide: (slideId: string) => void;
+  duplicateSlide: (slideId: string) => void;
 
-  updateElement: (slideIndex: number, elementId: string, content: string) => void;
-  updateSlideLayout: (slideIndex: number, layout: SlideLayout) => void;
-  updatePresentationTheme: (theme: Presentation["theme"]) => void;
-  updatePresentationTitle: (title: string) => void;
+  addElement: (slideId: string, element: SlideElement) => void;
+  updateElement: (slideId: string, elementId: string, updates: Partial<SlideElement>) => void;
+  removeElement: (slideId: string, elementId: string) => void;
+
+  getActivePresentation: () => Presentation | undefined;
 }
 
 export const useSlidesStore = create<SlidesState>()(
@@ -103,151 +121,166 @@ export const useSlidesStore = create<SlidesState>()(
         presentations: [],
         activePresentationId: null,
         activeSlideIndex: 0,
+        creationMode: null,
+        phase: "modes",
 
-        createPresentation: (title) => {
-          const id = nanoid();
+        setCreationMode: (mode) => set({ creationMode: mode }),
+        setPhase: (phase) => set({ phase }),
+        setActiveSlideIndex: (index) => set({ activeSlideIndex: index }),
+
+        addPresentation: (title, slides) => {
+          const id = createId();
           const now = new Date().toISOString();
           const presentation: Presentation = {
             id,
             title,
+            slides,
             theme: "dark",
-            slides: [createDefaultSlide("title")],
             createdAt: now,
             updatedAt: now,
           };
           set((s) => ({
-            presentations: [...s.presentations, presentation],
+            presentations: [presentation, ...s.presentations],
             activePresentationId: id,
             activeSlideIndex: 0,
           }));
           return id;
         },
 
-        deletePresentation: (id) =>
+        setActivePresentation: (id) => set({ activePresentationId: id, activeSlideIndex: 0 }),
+
+        removePresentation: (id) =>
           set((s) => ({
             presentations: s.presentations.filter((p) => p.id !== id),
             activePresentationId: s.activePresentationId === id ? null : s.activePresentationId,
-            activeSlideIndex: s.activePresentationId === id ? 0 : s.activeSlideIndex,
           })),
 
-        setActivePresentation: (id) => set({ activePresentationId: id, activeSlideIndex: 0 }),
-        setActiveSlide: (index) => set({ activeSlideIndex: index }),
-
-        addSlide: (layout) =>
+        addSlide: (slide) =>
           set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p) return s;
-            const newSlide = createDefaultSlide(layout);
-            const newSlides = [...p.slides];
-            newSlides.splice(s.activeSlideIndex + 1, 0, newSlide);
+            const pres = s.presentations.find((p) => p.id === s.activePresentationId);
+            if (!pres) return s;
             return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id ? { ...pr, slides: newSlides, updatedAt: new Date().toISOString() } : pr
+              presentations: s.presentations.map((p) =>
+                p.id === s.activePresentationId
+                  ? { ...p, slides: [...p.slides, slide], updatedAt: new Date().toISOString() }
+                  : p
               ),
-              activeSlideIndex: s.activeSlideIndex + 1,
             };
           }),
 
-        removeSlide: (index) =>
+        updateSlide: (slideId, updates) =>
+          set((s) => ({
+            presentations: s.presentations.map((p) =>
+              p.id === s.activePresentationId
+                ? {
+                    ...p,
+                    slides: p.slides.map((sl) =>
+                      sl.id === slideId ? { ...sl, ...updates } : sl
+                    ),
+                    updatedAt: new Date().toISOString(),
+                  }
+                : p
+            ),
+          })),
+
+        removeSlide: (slideId) =>
           set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p || p.slides.length <= 1) return s;
-            const newSlides = p.slides.filter((_, i) => i !== index);
+            const pres = s.presentations.find((p) => p.id === s.activePresentationId);
+            if (!pres) return s;
+            const newSlides = pres.slides.filter((sl) => sl.id !== slideId);
             return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id ? { ...pr, slides: newSlides, updatedAt: new Date().toISOString() } : pr
+              presentations: s.presentations.map((p) =>
+                p.id === s.activePresentationId
+                  ? { ...p, slides: newSlides, updatedAt: new Date().toISOString() }
+                  : p
               ),
-              activeSlideIndex: Math.min(s.activeSlideIndex, newSlides.length - 1),
+              activeSlideIndex: Math.min(s.activeSlideIndex, Math.max(0, newSlides.length - 1)),
             };
           }),
 
-        moveSlide: (from, to) =>
+        duplicateSlide: (slideId) =>
           set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p) return s;
-            const newSlides = [...p.slides];
-            const [moved] = newSlides.splice(from, 1);
-            newSlides.splice(to, 0, moved);
-            return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id ? { ...pr, slides: newSlides, updatedAt: new Date().toISOString() } : pr
-              ),
-              activeSlideIndex: to,
-            };
-          }),
-
-        duplicateSlide: (index) =>
-          set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p) return s;
-            const original = p.slides[index];
+            const pres = s.presentations.find((p) => p.id === s.activePresentationId);
+            if (!pres) return s;
+            const idx = pres.slides.findIndex((sl) => sl.id === slideId);
+            if (idx < 0) return s;
             const dup: Slide = {
-              ...original,
-              id: nanoid(),
-              elements: original.elements.map((e) => ({ ...e, id: nanoid() })),
+              ...pres.slides[idx],
+              id: createId(),
+              elements: pres.slides[idx].elements.map((el) => ({ ...el, id: createId() })),
             };
-            const newSlides = [...p.slides];
-            newSlides.splice(index + 1, 0, dup);
+            const newSlides = [...pres.slides];
+            newSlides.splice(idx + 1, 0, dup);
             return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id ? { ...pr, slides: newSlides, updatedAt: new Date().toISOString() } : pr
+              presentations: s.presentations.map((p) =>
+                p.id === s.activePresentationId
+                  ? { ...p, slides: newSlides, updatedAt: new Date().toISOString() }
+                  : p
               ),
-              activeSlideIndex: index + 1,
+              activeSlideIndex: idx + 1,
             };
           }),
 
-        updateElement: (slideIndex, elementId, content) =>
-          set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p) return s;
-            return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id
-                  ? {
-                      ...pr,
-                      updatedAt: new Date().toISOString(),
-                      slides: pr.slides.map((sl, i) =>
-                        i === slideIndex
-                          ? { ...sl, elements: sl.elements.map((el) => (el.id === elementId ? { ...el, content } : el)) }
-                          : sl
-                      ),
-                    }
-                  : pr
-              ),
-            };
-          }),
-
-        updateSlideLayout: (slideIndex, layout) =>
-          set((s) => {
-            const p = s.presentations.find((p) => p.id === s.activePresentationId);
-            if (!p) return s;
-            const newSlide = createDefaultSlide(layout);
-            return {
-              presentations: s.presentations.map((pr) =>
-                pr.id === p.id
-                  ? {
-                      ...pr,
-                      updatedAt: new Date().toISOString(),
-                      slides: pr.slides.map((sl, i) => (i === slideIndex ? { ...sl, ...newSlide, id: sl.id } : sl)),
-                    }
-                  : pr
-              ),
-            };
-          }),
-
-        updatePresentationTheme: (theme) =>
+        addElement: (slideId, element) =>
           set((s) => ({
             presentations: s.presentations.map((p) =>
-              p.id === s.activePresentationId ? { ...p, theme, updatedAt: new Date().toISOString() } : p
+              p.id === s.activePresentationId
+                ? {
+                    ...p,
+                    slides: p.slides.map((sl) =>
+                      sl.id === slideId
+                        ? { ...sl, elements: [...sl.elements, element] }
+                        : sl
+                    ),
+                    updatedAt: new Date().toISOString(),
+                  }
+                : p
             ),
           })),
 
-        updatePresentationTitle: (title) =>
+        updateElement: (slideId, elementId, updates) =>
           set((s) => ({
             presentations: s.presentations.map((p) =>
-              p.id === s.activePresentationId ? { ...p, title, updatedAt: new Date().toISOString() } : p
+              p.id === s.activePresentationId
+                ? {
+                    ...p,
+                    slides: p.slides.map((sl) =>
+                      sl.id === slideId
+                        ? {
+                            ...sl,
+                            elements: sl.elements.map((el) =>
+                              el.id === elementId ? { ...el, ...updates } : el
+                            ),
+                          }
+                        : sl
+                    ),
+                    updatedAt: new Date().toISOString(),
+                  }
+                : p
             ),
           })),
+
+        removeElement: (slideId, elementId) =>
+          set((s) => ({
+            presentations: s.presentations.map((p) =>
+              p.id === s.activePresentationId
+                ? {
+                    ...p,
+                    slides: p.slides.map((sl) =>
+                      sl.id === slideId
+                        ? { ...sl, elements: sl.elements.filter((el) => el.id !== elementId) }
+                        : sl
+                    ),
+                    updatedAt: new Date().toISOString(),
+                  }
+                : p
+            ),
+          })),
+
+        getActivePresentation: () => {
+          const s = get();
+          return s.presentations.find((p) => p.id === s.activePresentationId);
+        },
       }),
       {
         name: "origem-slides",

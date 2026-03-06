@@ -44,7 +44,7 @@ export default function AppsPage() {
 
         <AppCard
           title="Slides"
-          description="Crie apresentacoes profissionais com temas e layouts variados. Edite slides visualmente com titulos, conteudo, citacoes e mais."
+          description="Crie apresentacoes profissionais com IA. Modos manual, por prompt, basicos ou aprimoramento de conteudo existente."
           icon={Presentation}
           color="orange"
           href="/dashboard/apps/slides"

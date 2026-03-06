@@ -1,146 +1,800 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  Presentation,
+  ArrowLeft,
+  Copy,
+  Image,
+  PenTool,
   Plus,
+  Presentation,
+  Send,
+  Sparkles,
+  Square,
   Trash2,
-  Clock,
-  FileSliders,
+  Type,
+  Upload,
+  Zap,
 } from "lucide-react";
-import { useSlidesStore } from "@/stores/slides-store";
-import { cn } from "@/lib/utils";
+import {
+  useSlidesStore,
+  createBlankSlide,
+  createTitleSlide,
+  createContentSlide,
+} from "@/stores/slides-store";
+import type { SlideCreationMode, Slide, SlideElement } from "@/types/slides";
 
-const THEME_PREVIEW: Record<string, string> = {
-  dark: "bg-[#1a1a2e]",
-  light: "bg-white",
-  neon: "bg-[#0a0a1a]",
-  gradient: "bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e]",
-};
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+const MODES: {
+  id: SlideCreationMode;
+  icon: typeof PenTool;
+  title: string;
+  description: string;
+  color: string;
+  accent: string;
+  glow: string;
+}[] = [
+  {
+    id: "manual",
+    icon: PenTool,
+    title: "Manual",
+    description: "Crie seus slides do zero, um a um, com total controle.",
+    color: "text-neon-cyan",
+    accent: "border-neon-cyan/20 bg-neon-cyan/5 hover:border-neon-cyan/40 hover:bg-neon-cyan/10",
+    glow: "group-hover:shadow-[0_0_24px_rgba(0,210,210,0.12)]",
+  },
+  {
+    id: "prompt",
+    icon: Sparkles,
+    title: "Por Prompt",
+    description: "Descreva o que quer e a IA gera seus slides em tempo real.",
+    color: "text-neon-purple",
+    accent: "border-neon-purple/20 bg-neon-purple/5 hover:border-neon-purple/40 hover:bg-neon-purple/10",
+    glow: "group-hover:shadow-[0_0_24px_rgba(168,85,247,0.12)]",
+  },
+  {
+    id: "basics",
+    icon: Zap,
+    title: "Basicos",
+    description: "Informe titulo, topico e numero de slides. A IA faz o resto.",
+    color: "text-neon-green",
+    accent: "border-neon-green/20 bg-neon-green/5 hover:border-neon-green/40 hover:bg-neon-green/10",
+    glow: "group-hover:shadow-[0_0_24px_rgba(34,197,94,0.12)]",
+  },
+  {
+    id: "enhance",
+    icon: Upload,
+    title: "Aprimorar",
+    description: "Cole o conteudo de uma apresentacao existente e a IA melhora.",
+    color: "text-neon-orange",
+    accent: "border-neon-orange/20 bg-neon-orange/5 hover:border-neon-orange/40 hover:bg-neon-orange/10",
+    glow: "group-hover:shadow-[0_0_24px_rgba(255,160,0,0.12)]",
+  },
+];
 
-export default function SlidesPage() {
-  const router = useRouter();
-  const presentations = useSlidesStore((s) => s.presentations);
-  const createPresentation = useSlidesStore((s) => s.createPresentation);
-  const deletePresentation = useSlidesStore((s) => s.deletePresentation);
-  const setActivePresentation = useSlidesStore((s) => s.setActivePresentation);
+function createId() {
+  return `el-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Simulated AI Generation                                            */
+/* ------------------------------------------------------------------ */
+function generateSlidesFromPrompt(prompt: string): Slide[] {
+  const words = prompt.split(/\s+/);
+  const title = words.slice(0, 5).join(" ");
+  return [
+    createTitleSlide(title, "Gerado por IA"),
+    createContentSlide("Visao Geral", [
+      "Contexto e motivacao do tema",
+      "Objetivos principais",
+      "Publico-alvo e escopo",
+    ]),
+    createContentSlide("Desenvolvimento", [
+      "Ponto central da argumentacao",
+      "Dados e evidencias de suporte",
+      "Exemplos praticos e aplicacoes",
+    ]),
+    createContentSlide("Conclusao", [
+      "Resumo dos pontos-chave",
+      "Proximos passos recomendados",
+      "Chamada para acao",
+    ]),
+  ];
+}
+
+function generateSlidesFromBasics(
+  title: string,
+  topic: string,
+  numSlides: number
+): Slide[] {
+  const slides: Slide[] = [createTitleSlide(title, topic)];
+  const sections = [
+    { t: "Introducao", b: ["Contexto do tema", "Por que isso importa", "O que vamos cobrir"] },
+    { t: "Analise", b: ["Dados relevantes", "Tendencias observadas", "Impacto no cenario"] },
+    { t: "Estrategia", b: ["Abordagem recomendada", "Recursos necessarios", "Cronograma proposto"] },
+    { t: "Implementacao", b: ["Fases do projeto", "Responsaveis e entregas", "Metricas de sucesso"] },
+    { t: "Resultados", b: ["O que foi alcancado", "Licoes aprendidas", "Melhorias futuras"] },
+    { t: "Conclusao", b: ["Resumo executivo", "Proximos passos", "Agradecimentos"] },
+  ];
+
+  for (let i = 0; i < Math.min(numSlides - 1, sections.length); i++) {
+    slides.push(createContentSlide(sections[i].t, sections[i].b));
+  }
+
+  return slides;
+}
+
+function generateSlidesFromContent(content: string): Slide[] {
+  const lines = content.split("\n").filter((l) => l.trim());
+  const title = lines[0] ?? "Apresentacao Aprimorada";
+  const slides: Slide[] = [createTitleSlide(title, "Aprimorado por IA")];
+
+  for (let i = 1; i < lines.length; i += 3) {
+    const chunk = lines.slice(i, i + 3);
+    slides.push(
+      createContentSlide(
+        chunk[0] ?? `Secao ${Math.ceil(i / 3)}`,
+        chunk.slice(1).length > 0
+          ? chunk.slice(1)
+          : ["Conteudo aprimorado pela IA", "Estrutura otimizada"]
+      )
+    );
+  }
+
+  return slides;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mode Selection Phase                                               */
+/* ------------------------------------------------------------------ */
+function ModeSelection({
+  onSelect,
+}: {
+  onSelect: (mode: SlideCreationMode) => void;
+}) {
+  return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8 flex flex-col items-center gap-2"
+      >
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.04]">
+          <Presentation className="h-7 w-7 text-foreground/30" />
+        </div>
+        <h1 className="text-xl font-semibold text-foreground/80">
+          Criar Apresentacao
+        </h1>
+        <p className="text-sm text-foreground/35">
+          Escolha como deseja comecar
+        </p>
+      </motion.div>
+
+      <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+        {MODES.map((mode, i) => (
+          <motion.button
+            key={mode.id}
+            type="button"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08, type: "spring", damping: 25, stiffness: 300 }}
+            onClick={() => onSelect(mode.id)}
+            className={`group relative rounded-2xl border p-5 text-left transition-all ${mode.accent} ${mode.glow}`}
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.03) 100%)",
+              backdropFilter: "blur(20px)",
+            }}
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+            <div className="mb-3 flex items-center gap-2.5">
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-xl border border-current/20 bg-current/10 ${mode.color}`}
+                style={{ borderColor: "currentColor", backgroundColor: "transparent" }}
+              >
+                <mode.icon className={`h-4 w-4 ${mode.color}`} />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground/80">
+                {mode.title}
+              </h3>
+            </div>
+            <p className="text-xs leading-relaxed text-foreground/35">
+              {mode.description}
+            </p>
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Input Phase                                                        */
+/* ------------------------------------------------------------------ */
+function InputPhase({
+  mode,
+  onBack,
+  onGenerate,
+}: {
+  mode: SlideCreationMode;
+  onBack: () => void;
+  onGenerate: (slides: Slide[], title: string) => void;
+}) {
+  const [prompt, setPrompt] = useState("");
   const [title, setTitle] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [numSlides, setNumSlides] = useState(5);
+  const [content, setContent] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleCreate = () => {
-    const name = title.trim() || "Apresentacao sem titulo";
-    const id = createPresentation(name);
-    setTitle("");
-    setShowCreate(false);
-    router.push(`/dashboard/apps/slides/${id}`);
+  const modeMeta = MODES.find((m) => m.id === mode)!;
+
+  const handleGenerate = useCallback(() => {
+    setIsGenerating(true);
+
+    // Simulate AI delay
+    setTimeout(() => {
+      let slides: Slide[];
+      let presTitle: string;
+
+      if (mode === "prompt") {
+        slides = generateSlidesFromPrompt(prompt);
+        presTitle = prompt.split(/\s+/).slice(0, 4).join(" ");
+      } else if (mode === "basics") {
+        slides = generateSlidesFromBasics(title, topic, numSlides);
+        presTitle = title || "Sem titulo";
+      } else {
+        slides = generateSlidesFromContent(content);
+        presTitle = content.split("\n")[0]?.slice(0, 40) ?? "Aprimorada";
+      }
+
+      setIsGenerating(false);
+      onGenerate(slides, presTitle);
+    }, 1200);
+  }, [mode, prompt, title, topic, numSlides, content, onGenerate]);
+
+  return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-lg"
+      >
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-6 inline-flex items-center gap-1.5 text-xs text-foreground/35 transition-colors hover:text-foreground/60"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          Voltar
+        </button>
+
+        <div className="mb-6 flex items-center gap-2.5">
+          <modeMeta.icon className={`h-5 w-5 ${modeMeta.color}`} />
+          <h2 className="text-lg font-semibold text-foreground/80">
+            {modeMeta.title}
+          </h2>
+        </div>
+
+        <div
+          className="rounded-2xl border border-foreground/[0.08] p-5"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.03) 100%)",
+            backdropFilter: "blur(20px)",
+          }}
+        >
+          {mode === "prompt" && (
+            <div className="space-y-3">
+              <p className="text-xs text-foreground/40">
+                Descreva o que deseja apresentar. A IA vai criar slides
+                estruturados.
+              </p>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Ex: Uma apresentacao sobre o futuro da inteligencia artificial no Brasil, com dados de mercado, cases de sucesso e proximos passos para empresas..."
+                rows={5}
+                className="w-full resize-none rounded-xl border border-foreground/[0.06] bg-black/20 p-3 text-sm text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-purple/30"
+                autoFocus
+              />
+            </div>
+          )}
+
+          {mode === "basics" && (
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-[10px] uppercase tracking-wider text-foreground/30">
+                  Titulo
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ex: Estrategia de Growth 2026"
+                  className="w-full rounded-lg border border-foreground/[0.06] bg-black/20 px-3 py-2 text-sm text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-green/30"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[10px] uppercase tracking-wider text-foreground/30">
+                  Topico principal
+                </label>
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="Ex: Marketing digital e aquisicao de clientes"
+                  className="w-full rounded-lg border border-foreground/[0.06] bg-black/20 px-3 py-2 text-sm text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-green/30"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[10px] uppercase tracking-wider text-foreground/30">
+                  Numero de slides
+                </label>
+                <input
+                  type="number"
+                  value={numSlides}
+                  onChange={(e) =>
+                    setNumSlides(Math.max(2, Math.min(20, Number(e.target.value))))
+                  }
+                  min={2}
+                  max={20}
+                  className="w-24 rounded-lg border border-foreground/[0.06] bg-black/20 px-3 py-2 text-sm tabular-nums text-foreground/80 outline-none focus:border-neon-green/30"
+                />
+              </div>
+            </div>
+          )}
+
+          {mode === "enhance" && (
+            <div className="space-y-3">
+              <p className="text-xs text-foreground/40">
+                Cole o conteudo da sua apresentacao existente. A IA vai
+                reestruturar e aprimorar.
+              </p>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={"Slide 1: Titulo da apresentacao\nSlide 2: Introducao ao tema\n- Ponto 1\n- Ponto 2\nSlide 3: Desenvolvimento\n..."}
+                rows={8}
+                className="w-full resize-none rounded-xl border border-foreground/[0.06] bg-black/20 p-3 font-mono text-xs text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-orange/30"
+                autoFocus
+              />
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={
+              isGenerating ||
+              (mode === "prompt" && !prompt.trim()) ||
+              (mode === "basics" && !title.trim()) ||
+              (mode === "enhance" && !content.trim())
+            }
+            className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+              mode === "prompt"
+                ? "border-neon-purple/30 bg-neon-purple/10 text-neon-purple hover:bg-neon-purple/20"
+                : mode === "basics"
+                  ? "border-neon-green/30 bg-neon-green/10 text-neon-green hover:bg-neon-green/20"
+                  : "border-neon-orange/30 bg-neon-orange/10 text-neon-orange hover:bg-neon-orange/20"
+            }`}
+          >
+            {isGenerating ? (
+              <>
+                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                <Send className="h-3.5 w-3.5" />
+                {mode === "prompt"
+                  ? "Gerar Apresentacao"
+                  : mode === "basics"
+                    ? "Criar Slides"
+                    : "Aprimorar"}
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Slide Thumbnail                                                    */
+/* ------------------------------------------------------------------ */
+function SlideThumbnail({
+  slide,
+  index,
+  isActive,
+  onClick,
+}: {
+  slide: Slide;
+  index: number;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const titleEl = slide.elements.find(
+    (el) => el.type === "text" && (el.style.fontSize ?? 0) >= 28
+  );
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative w-full rounded-lg border p-1 transition-all ${
+        isActive
+          ? "border-neon-cyan/40 bg-neon-cyan/8"
+          : "border-foreground/[0.06] hover:border-foreground/[0.15]"
+      }`}
+    >
+      <div
+        className="flex aspect-video w-full items-center justify-center overflow-hidden rounded"
+        style={{ background: slide.background || "oklch(0.12 0.01 240)" }}
+      >
+        {titleEl ? (
+          <p className="px-1 text-center text-[7px] font-medium leading-tight text-white/70">
+            {titleEl.content.slice(0, 60)}
+          </p>
+        ) : (
+          <span className="text-[6px] text-white/20">Vazio</span>
+        )}
+      </div>
+      <p
+        className={`mt-0.5 text-center text-[8px] tabular-nums ${
+          isActive ? "text-neon-cyan" : "text-foreground/25"
+        }`}
+      >
+        {index + 1}
+      </p>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Slide Canvas                                                       */
+/* ------------------------------------------------------------------ */
+function SlideCanvas({ slide }: { slide: Slide }) {
+  return (
+    <div
+      className="relative aspect-video w-full overflow-hidden rounded-xl border border-foreground/[0.06]"
+      style={{ background: slide.background || "oklch(0.12 0.01 240)" }}
+    >
+      {slide.elements.map((el) => (
+        <div
+          key={el.id}
+          className="absolute"
+          style={{
+            left: `${(el.x / 960) * 100}%`,
+            top: `${(el.y / 540) * 100}%`,
+            width: `${(el.width / 960) * 100}%`,
+            height: `${(el.height / 540) * 100}%`,
+          }}
+        >
+          {el.type === "text" && (
+            <p
+              className="whitespace-pre-wrap"
+              style={{
+                fontSize: `${Math.max(8, (el.style.fontSize ?? 16) * 0.6)}px`,
+                fontWeight: el.style.fontWeight,
+                color: el.style.color ?? "#fff",
+                textAlign: el.style.textAlign,
+                lineHeight: 1.4,
+              }}
+            >
+              {el.content}
+            </p>
+          )}
+          {el.type === "shape" && (
+            <div
+              className="h-full w-full"
+              style={{
+                backgroundColor: el.style.backgroundColor ?? "rgba(255,255,255,0.1)",
+                borderRadius: el.style.borderRadius ?? 0,
+                opacity: el.style.opacity ?? 1,
+              }}
+            />
+          )}
+        </div>
+      ))}
+
+      {slide.elements.length === 0 && (
+        <div className="flex h-full items-center justify-center">
+          <p className="text-sm text-white/15">Slide vazio</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Slide Editor                                                       */
+/* ------------------------------------------------------------------ */
+function SlideEditor({ onBack }: { onBack: () => void }) {
+  const presentation = useSlidesStore((s) => s.getActivePresentation());
+  const activeSlideIndex = useSlidesStore((s) => s.activeSlideIndex);
+  const setActiveSlideIndex = useSlidesStore((s) => s.setActiveSlideIndex);
+  const addSlide = useSlidesStore((s) => s.addSlide);
+  const removeSlide = useSlidesStore((s) => s.removeSlide);
+  const duplicateSlide = useSlidesStore((s) => s.duplicateSlide);
+  const addElement = useSlidesStore((s) => s.addElement);
+
+  if (!presentation) return null;
+
+  const activeSlide = presentation.slides[activeSlideIndex];
+
+  const handleAddText = () => {
+    if (!activeSlide) return;
+    addElement(activeSlide.id, {
+      id: createId(),
+      type: "text",
+      x: 60,
+      y: 200,
+      width: 400,
+      height: 60,
+      content: "Novo texto",
+      style: { fontSize: 24, fontWeight: "normal", color: "#ffffff", textAlign: "left" },
+    });
   };
 
-  const handleOpen = (id: string) => {
-    setActivePresentation(id);
-    router.push(`/dashboard/apps/slides/${id}`);
+  const handleAddShape = () => {
+    if (!activeSlide) return;
+    addElement(activeSlide.id, {
+      id: createId(),
+      type: "shape",
+      x: 300,
+      y: 180,
+      width: 200,
+      height: 120,
+      content: "",
+      style: { backgroundColor: "rgba(0,210,210,0.15)", borderRadius: 12, opacity: 1 },
+    });
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-      {/* Header */}
-      <div className="mb-8 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-orange/20 bg-neon-orange/10">
-          <Presentation className="h-5 w-5 text-neon-orange" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Slides</h1>
-          <p className="mt-1 text-sm text-foreground/50">
-            Crie apresentacoes profissionais com temas e layouts variados
-          </p>
-        </div>
-      </div>
-
-      {/* Presentations grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {presentations.map((p) => (
-          <div
-            key={p.id}
-            className="group relative rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all hover:border-foreground/[0.15]"
-          >
-            <button
-              type="button"
-              onClick={() => deletePresentation(p.id)}
-              className="absolute right-3 top-3 z-10 rounded-md p-1 text-foreground/15 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
-              title="Remover apresentacao"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleOpen(p.id)}
-              className="flex w-full flex-col p-5 text-left"
-            >
-              {/* Preview */}
-              <div
-                className={cn(
-                  "mb-4 flex aspect-video w-full items-center justify-center rounded-lg border border-foreground/[0.06]",
-                  THEME_PREVIEW[p.theme]
-                )}
-              >
-                <FileSliders className="h-8 w-8 text-foreground/20" />
-              </div>
-
-              <h3 className="mb-1 text-sm font-semibold text-foreground/90 transition-colors group-hover:text-foreground">
-                {p.title}
-              </h3>
-              <div className="flex items-center gap-3 text-[10px] text-foreground/35">
-                <span>{p.slides.length} slide{p.slides.length !== 1 ? "s" : ""}</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-2.5 w-2.5" />
-                  {new Date(p.updatedAt).toLocaleDateString("pt-BR")}
-                </span>
-              </div>
-            </button>
-          </div>
-        ))}
-
-        {/* Create new */}
-        {showCreate ? (
-          <div className="flex flex-col gap-3 rounded-2xl border border-neon-orange/20 bg-card/70 p-5 backdrop-blur-xl">
-            <input
-              autoFocus
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-              placeholder="Nome da apresentacao..."
-              className="rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2 text-sm text-foreground outline-none placeholder:text-foreground/30 focus:border-neon-orange/30"
-            />
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleCreate}
-                className="flex-1 rounded-lg bg-neon-orange/15 py-1.5 text-xs font-medium text-neon-orange transition-colors hover:bg-neon-orange/25"
-              >
-                Criar
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowCreate(false); setTitle(""); }}
-                className="rounded-lg px-3 py-1.5 text-xs text-foreground/40 transition-colors hover:text-foreground/60"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        ) : (
+    <div className="flex h-[calc(100vh-80px)] flex-col">
+      {/* Top toolbar */}
+      <div className="flex items-center justify-between border-b border-foreground/[0.06] px-4 py-2">
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setShowCreate(true)}
-            className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-foreground/[0.12] py-12 text-foreground/30 transition-all hover:border-neon-orange/30 hover:text-neon-orange/60"
+            onClick={onBack}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
           >
-            <Plus className="h-8 w-8" />
-            <span className="text-sm">Nova Apresentacao</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
           </button>
-        )}
+          <div>
+            <p className="text-sm font-medium text-foreground/70">
+              {presentation.title}
+            </p>
+            <p className="text-[10px] text-foreground/25">
+              {presentation.slides.length} slides
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleAddText}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
+          >
+            <Type className="h-3 w-3" />
+            Texto
+          </button>
+          <button
+            type="button"
+            onClick={handleAddShape}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
+          >
+            <Square className="h-3 w-3" />
+            Forma
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
+          >
+            <Image className="h-3 w-3" />
+            Imagem
+          </button>
+          <div className="mx-1 h-4 w-px bg-foreground/[0.06]" />
+          {activeSlide && (
+            <>
+              <button
+                type="button"
+                onClick={() => duplicateSlide(activeSlide.id)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/25 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
+                title="Duplicar slide"
+              >
+                <Copy className="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (presentation.slides.length > 1) {
+                    removeSlide(activeSlide.id);
+                  }
+                }}
+                disabled={presentation.slides.length <= 1}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/25 transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30"
+                title="Remover slide"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Main layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left — thumbnails */}
+        <div className="w-28 shrink-0 space-y-1.5 overflow-y-auto border-r border-foreground/[0.06] p-2">
+          {presentation.slides.map((slide, i) => (
+            <motion.div
+              key={slide.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.2 }}
+            >
+              <SlideThumbnail
+                slide={slide}
+                index={i}
+                isActive={i === activeSlideIndex}
+                onClick={() => setActiveSlideIndex(i)}
+              />
+            </motion.div>
+          ))}
+          <button
+            type="button"
+            onClick={() => addSlide(createBlankSlide())}
+            className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-foreground/[0.08] py-2 text-[10px] text-foreground/20 transition-all hover:border-neon-cyan/30 hover:text-neon-cyan"
+          >
+            <Plus className="h-2.5 w-2.5" />
+            Novo
+          </button>
+        </div>
+
+        {/* Center — canvas */}
+        <div className="flex flex-1 items-center justify-center bg-black/20 p-8">
+          {activeSlide && (
+            <motion.div
+              key={activeSlide.id}
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-3xl"
+            >
+              <SlideCanvas slide={activeSlide} />
+            </motion.div>
+          )}
+        </div>
+
+        {/* Right — properties */}
+        <div className="w-56 shrink-0 space-y-3 overflow-y-auto border-l border-foreground/[0.06] p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-foreground/25">
+            Propriedades
+          </p>
+
+          {activeSlide && (
+            <>
+              <div>
+                <p className="mb-1 text-[10px] text-foreground/30">Layout</p>
+                <p className="rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-2 py-1.5 text-[11px] text-foreground/50">
+                  {activeSlide.layout}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 text-[10px] text-foreground/30">Elementos</p>
+                <p className="text-xs tabular-nums text-foreground/50">
+                  {activeSlide.elements.length}
+                </p>
+              </div>
+
+              {activeSlide.elements.length > 0 && (
+                <div className="space-y-1">
+                  <p className="mb-1 text-[10px] text-foreground/30">Lista</p>
+                  {activeSlide.elements.map((el) => (
+                    <div
+                      key={el.id}
+                      className="rounded-md border border-foreground/[0.04] bg-foreground/[0.02] px-2 py-1.5"
+                    >
+                      <p className="text-[10px] text-foreground/40">
+                        {el.type === "text" ? "Texto" : el.type === "shape" ? "Forma" : "Imagem"}
+                      </p>
+                      {el.type === "text" && (
+                        <p className="mt-0.5 truncate text-[9px] text-foreground/20">
+                          {el.content.slice(0, 30)}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main Page                                                          */
+/* ------------------------------------------------------------------ */
+export default function SlidesPage() {
+  const phase = useSlidesStore((s) => s.phase);
+  const creationMode = useSlidesStore((s) => s.creationMode);
+  const setCreationMode = useSlidesStore((s) => s.setCreationMode);
+  const setPhase = useSlidesStore((s) => s.setPhase);
+  const addPresentation = useSlidesStore((s) => s.addPresentation);
+
+  const handleModeSelect = (mode: SlideCreationMode) => {
+    setCreationMode(mode);
+    if (mode === "manual") {
+      addPresentation("Sem titulo", [createBlankSlide("title")]);
+      setPhase("editor");
+    } else {
+      setPhase("input");
+    }
+  };
+
+  const handleGenerate = (slides: Slide[], title: string) => {
+    addPresentation(title, slides);
+    setPhase("editor");
+  };
+
+  const handleBackToModes = () => {
+    setCreationMode(null);
+    setPhase("modes");
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      {phase === "modes" && (
+        <motion.div
+          key="modes"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ModeSelection onSelect={handleModeSelect} />
+        </motion.div>
+      )}
+
+      {phase === "input" && creationMode && (
+        <motion.div
+          key="input"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <InputPhase
+            mode={creationMode}
+            onBack={handleBackToModes}
+            onGenerate={handleGenerate}
+          />
+        </motion.div>
+      )}
+
+      {phase === "editor" && (
+        <motion.div
+          key="editor"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <SlideEditor onBack={handleBackToModes} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
