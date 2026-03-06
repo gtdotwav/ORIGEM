@@ -17,6 +17,7 @@ import { ArrowLeft, Plus, PanelRightOpen, PanelRightClose, Orbit } from "lucide-
 import { SpacesSidebar } from "@/components/spaces/spaces-sidebar";
 import GenerationCardNode from "@/components/spaces/generation-card-node";
 import { ControlPanel } from "@/components/spaces/control-panel";
+import { SpaceContextMenu, useSpaceContextMenuItems } from "@/components/spaces/space-context-menu";
 import { useSpacesStore } from "@/stores/spaces-store";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export default function SpaceCanvasPage() {
   const { spaceId } = useParams<{ spaceId: string }>();
   const router = useRouter();
   const [panelOpen, setPanelOpen] = useState(true);
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const spaces = useSpacesStore((s) => s.spaces);
   const setActiveSpace = useSpacesStore((s) => s.setActiveSpace);
@@ -80,9 +82,20 @@ export default function SpaceCanvasPage() {
     [addEdge]
   );
 
+  const contextMenuItems = useSpaceContextMenuItems(createCard, spaceId);
+
   const handlePaneClick = useCallback(() => {
     selectCard(null);
+    setContextMenuPos(null);
   }, [selectCard]);
+
+  const handlePaneContextMenu = useCallback(
+    (event: MouseEvent | React.MouseEvent) => {
+      event.preventDefault();
+      setContextMenuPos({ x: event.clientX, y: event.clientY });
+    },
+    []
+  );
 
   const handleAddCard = () => {
     if (!spaceId) return;
@@ -163,6 +176,7 @@ export default function SpaceCanvasPage() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onPaneClick={handlePaneClick}
+          onPaneContextMenu={handlePaneContextMenu}
           onMoveEnd={(_, viewport) => setViewport(viewport)}
           nodeTypes={NODE_TYPES}
           defaultEdgeOptions={EDGE_DEFAULTS}
@@ -231,6 +245,13 @@ export default function SpaceCanvasPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Right-click context menu */}
+      <SpaceContextMenu
+        items={contextMenuItems}
+        position={contextMenuPos}
+        onClose={() => setContextMenuPos(null)}
+      />
     </div>
   );
 }
