@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSpacesStore } from "@/stores/spaces-store";
 import type { GenerationNodeData, AspectRatio, GenerationModel } from "@/types/spaces";
-import { IMAGE_MODELS, ALL_MODELS } from "@/types/spaces";
+import { IMAGE_MODELS, ALL_MODELS, DEFAULT_GENERATION_SETTINGS } from "@/types/spaces";
 
 const STATUS_CONFIG = {
   idle: { label: "pronto", className: "text-white/20" },
@@ -151,7 +151,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
     updateCard(id, {
       prompt: promptText,
       settings: {
-        ...(card?.settings ?? {}),
+        ...(card?.settings ?? DEFAULT_GENERATION_SETTINGS),
         model: localModel,
         aspectRatio: localRatio,
         quantity: localQty,
