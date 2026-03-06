@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORIGEM — Motion Identity</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #08080F;
+    --bg-surface: #0F0F1A;
+    --accent1: #7B8CDE;
+    --accent2: #4ECDC4;
+    --accent3: #A78BFA;
+    --warm: #F59E0B;
+    --text-primary: #F0F0F5;
+    --text-secondary: #A0A0BC;
+    --text-muted: #7878A0;
+    --glass-line: #4A4A70;
+  }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas#bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+
+  .scene {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ====== GLASS ORB ====== */
+  .glass-orb-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: orbReveal 2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+
+  .glass-orb {
+    width: 100%;
+    height: 100%;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    background: radial-gradient(ellipse at 30% 30%,
+      rgba(123, 140, 222, 0.35) 0%,
+      rgba(167, 139, 250, 0.15) 40%,
+      rgba(78, 205, 196, 0.08) 70%,
+      transparent 100%);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(123, 140, 222, 0.2);
+    box-shadow:
+      0 0 80px rgba(123, 140, 222, 0.15),
+      0 0 160px rgba(167, 139, 250, 0.08),
+      inset 0 0 60px rgba(123, 140, 222, 0.1);
+    animation: orbMorph 8s ease-in-out infinite, orbFloat 6s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-orb::before {
+    content: '';
+    position: absolute;
+    top: 15%; left: 20%;
+    width: 35%;
+    height: 25%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(8px);
+    animation: specularShift 6s ease-in-out infinite;
+  }
+
+  .glass-orb::after {
+    content: '';
+    position: absolute;
+    bottom: 20%; right: 15%;
+    width: 50%;
+    height: 30%;
+    background: radial-gradient(ellipse, rgba(78, 205, 196, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(15px);
+    animation: specularShift 6s ease-in-out 3s infinite;
+  }
+
+  .orb-ring {
+    position: absolute;
+    top: -15px; left: -15px; right: -15px; bottom: -15px;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    border: 1px solid rgba(123, 140, 222, 0.1);
+    animation: orbMorph 8s ease-in-out 0.5s infinite, ringPulse 4s ease-in-out infinite;
+  }
+
+  .orb-ring-2 {
+    position: absolute;
+    top: -30px; left: -30px; right: -30px; bottom: -30px;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    border: 1px solid rgba(167, 139, 250, 0.06);
+    animation: orbMorph 8s ease-in-out 1s infinite, ringPulse 4s ease-in-out 2s infinite;
+  }
+
+  /* ====== LOGO TEXT ====== */
+  .logo-text {
+    font-size: 72px;
+    font-weight: 200;
+    letter-spacing: 24px;
+    text-transform: uppercase;
+    position: relative;
+    opacity: 0;
+    animation: textReveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent1) 50%, var(--text-primary) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textReveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards,
+               textShimmer 6s ease-in-out 3s infinite;
+  }
+
+  .tagline {
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 6px;
+    color: var(--text-muted);
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) 2s forwards;
+  }
+
+  .divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-line), transparent);
+    margin: 30px 0;
+    opacity: 0;
+    animation: dividerReveal 1.2s ease 1.8s forwards;
+  }
+
+  /* ====== FEATURE CARDS ====== */
+  .features {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+  }
+
+  .feature {
+    text-align: center;
+    padding: 20px 28px;
+    border-radius: 16px;
+    background: rgba(28, 28, 53, 0.4);
+    border: 1px solid rgba(74, 74, 112, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(123, 140, 222, 0.05), transparent);
+    transition: left 0.8s ease;
+  }
+
+  .feature:hover::before {
+    left: 100%;
+  }
+
+  .feature:hover {
+    border-color: rgba(123, 140, 222, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 40px rgba(123, 140, 222, 0.08);
+  }
+
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .feature-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .f1 .feature-icon { color: var(--accent1); }
+  .f1 .feature-label { color: var(--accent1); }
+  .f2 .feature-icon { color: var(--accent2); }
+  .f2 .feature-label { color: var(--accent2); }
+  .f3 .feature-icon { color: var(--accent3); }
+  .f3 .feature-label { color: var(--accent3); }
+
+  /* ====== FLOATING PARTICLES ====== */
+  .particle {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ====== CORNER MARKS ====== */
+  .corner-mark {
+    position: fixed;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    opacity: 0;
+    animation: fadeIn 1s ease 3.5s forwards;
+  }
+  .corner-tl { top: 30px; left: 40px; }
+  .corner-tr { top: 30px; right: 40px; }
+  .corner-bl { bottom: 30px; left: 40px; }
+  .corner-br { bottom: 30px; right: 40px; font-size: 8px; }
+
+  .version-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border: 1px solid var(--glass-line);
+    border-radius: 4px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-left: 8px;
+  }
+
+  /* ====== KEYFRAMES ====== */
+  @keyframes orbReveal {
+    from { opacity: 0; transform: scale(0.6) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes orbMorph {
+    0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+    25% { border-radius: 58% 42% 55% 45% / 56% 45% 55% 44%; }
+    50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+    75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes specularShift {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    50% { transform: translate(10px, -5px) scale(1.1); opacity: 1; }
+  }
+
+  @keyframes ringPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.03); }
+  }
+
+  @keyframes textReveal {
+    from { opacity: 0; transform: translateY(30px); letter-spacing: 40px; }
+    to { opacity: 1; transform: translateY(0); letter-spacing: 24px; }
+  }
+
+  @keyframes textShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes dividerReveal {
+    from { opacity: 0; width: 0; }
+    to { opacity: 1; width: 80px; }
+  }
+
+  @keyframes particleFloat {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+  }
+
+  /* ====== PHASE 2: SCROLL SCENES ====== */
+  .scroll-hint {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s ease 4s forwards;
+    z-index: 10;
+    cursor: pointer;
+  }
+
+  .scroll-hint span {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 20px;
+    background: linear-gradient(to bottom, var(--glass-line), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 0.8; transform: scaleY(1.3); }
+  }
+
+  /* ====== SCENE TRANSITIONS ====== */
+  .scene-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 2;
+  }
+
+  .scene-page {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .scene-page.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  /* ====== SCENE 2: VALUES ====== */
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .value-card {
+    padding: 32px 28px;
+    border-radius: 20px;
+    background: rgba(28, 28, 53, 0.35);
+    border: 1px solid rgba(74, 74, 112, 0.25);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .value-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .value-card:hover {
+    border-color: rgba(123, 140, 222, 0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+  }
+
+  .value-number {
+    font-size: 42px;
+    font-weight: 200;
+    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .value-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+  }
+
+  .value-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ====== SCENE 3: PALETTE ====== */
+  .palette-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 30px;
+  }
+
+  .color-chip {
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
+    position: relative;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+  }
+
+  .color-chip.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .color-chip:hover {
+    transform: scale(1.08);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .color-chip-label {
+    position: absolute;
+    bottom: -24px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 40px;
+    font-weight: 200;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+  }
+
+  /* ====== SCENE 4: CLOSING ====== */
+  .closing-text {
+    font-size: 52px;
+    font-weight: 200;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 700px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .closing-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .closing-text em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 300;
+  }
+
+  .closing-sub {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 30px;
+    opacity: 0;
+    transition: opacity 1s ease 0.5s;
+  }
+  .closing-sub.visible { opacity: 1; }
+
+  /* ====== NAV DOTS ====== */
+  .nav-dots {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 20;
+    opacity: 0;
+    animation: fadeIn 1s ease 4s forwards;
+  }
+
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--glass-line);
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+
+  .nav-dot.active {
+    background: var(--accent1);
+    box-shadow: 0 0 10px rgba(123, 140, 222, 0.5);
+    transform: scale(1.4);
+  }
+
+  .nav-dot:hover {
+    background: var(--accent1);
+    transform: scale(1.2);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- Navigation Dots -->
+<div class="nav-dots">
+  <div class="nav-dot active" data-scene="0"></div>
+  <div class="nav-dot" data-scene="1"></div>
+  <div class="nav-dot" data-scene="2"></div>
+  <div class="nav-dot" data-scene="3"></div>
+</div>
+
+<!-- Corner Marks -->
+<div class="corner-mark corner-tl">ORIGEM</div>
+<div class="corner-mark corner-tr">MOTION IDENTITY</div>
+<div class="corner-mark corner-bl">LIQUID GLASS <span class="version-badge">V1.0</span></div>
+<div class="corner-mark corner-br">CONFIDENCIAL · 2026</div>
+
+<div class="scene-container">
+
+  <!-- SCENE 0: HERO -->
+  <div class="scene-page active" id="scene-0">
+    <div class="glass-orb-container">
+      <div class="orb-ring-2"></div>
+      <div class="orb-ring"></div>
+      <div class="glass-orb"></div>
+    </div>
+    <div class="logo-text">ORIGEM</div>
+    <div class="divider"></div>
+    <div class="tagline">A NOVA SUPERFÍCIE</div>
+    <div class="features">
+      <div class="feature f1">
+        <span class="feature-icon">◇</span>
+        <span class="feature-label">LIQUID</span>
+      </div>
+      <div class="feature f2">
+        <span class="feature-icon">◈</span>
+        <span class="feature-label">GLASS</span>
+      </div>
+      <div class="feature f3">
+        <span class="feature-icon">◆</span>
+        <span class="feature-label">MOTION</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 1: VALUES -->
+  <div class="scene-page" id="scene-1">
+    <div class="section-label" style="color: var(--accent1);">VISUAL DNA</div>
+    <div class="section-title">Princípios Inegociáveis</div>
+    <div class="section-subtitle">A fundação de tudo que construímos</div>
+    <div class="values-grid">
+      <div class="value-card" style="transition-delay: 0.1s">
+        <div class="value-number">01</div>
+        <div class="value-title">Remoção</div>
+        <div class="value-desc">Cada elemento ganha o direito de existir. Se não pode ser mais simples, é removido.</div>
+      </div>
+      <div class="value-card" style="transition-delay: 0.2s">
+        <div class="value-number">02</div>
+        <div class="value-title">Integridade</div>
+        <div class="value-desc">Forma serve função absolutamente. Estética emerge da solução de problemas reais.</div>
+      </div>
+      <div class="value-card" style="transition-delay: 0.3s">
+        <div class="value-number">03</div>
+        <div class="value-title">Obsessão</div>
+        <div class="value-desc">Cada touchpoint reforça o mesmo sentimento. Consistência é a arma secreta.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 2: PALETTE -->
+  <div class="scene-page" id="scene-2">
+    <div class="section-label" style="color: var(--accent2);">SISTEMA DE CORES</div>
+    <div class="section-title">Paleta Liquid Glass</div>
+    <div class="section-subtitle">8 cores. Infinitas possibilidades.</div>
+    <div class="palette-row">
+      <div class="color-chip" style="background: #08080F; border: 1px solid #4A4A70; transition-delay: 0.05s"><span class="color-chip-label">Obsidian</span></div>
+      <div class="color-chip" style="background: #0F0F1A; border: 1px solid #4A4A70; transition-delay: 0.1s"><span class="color-chip-label">Surface</span></div>
+      <div class="color-chip" style="background: #1C1C35; border: 1px solid #4A4A70; transition-delay: 0.15s"><span class="color-chip-label">Glass</span></div>
+      <div class="color-chip" style="background: #7B8CDE; transition-delay: 0.2s"><span class="color-chip-label">Violet</span></div>
+      <div class="color-chip" style="background: #4ECDC4; transition-delay: 0.25s"><span class="color-chip-label">Mint</span></div>
+      <div class="color-chip" style="background: #A78BFA; transition-delay: 0.3s"><span class="color-chip-label">Amethyst</span></div>
+      <div class="color-chip" style="background: #F59E0B; transition-delay: 0.35s"><span class="color-chip-label">Gold</span></div>
+      <div class="color-chip" style="background: #F0F0F5; transition-delay: 0.4s"><span class="color-chip-label">Cloud</span></div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: CLOSING -->
+  <div class="scene-page" id="scene-3">
+    <div class="closing-text">
+      O padrão é a<br><em>excelência</em>.
+    </div>
+    <div class="closing-sub">Tudo abaixo disso não existe.</div>
+  </div>
+
+</div>
+
+<div class="scroll-hint" id="scrollHint">
+  <span>Scroll</span>
+  <div class="scroll-arrow"></div>
+</div>
+
+<script>
+// ====== BACKGROUND CANVAS ======
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let w, h;
+let particles = [];
+let mouse = { x: 0, y: 0 };
+let time = 0;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+window.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+// Ambient particles
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    size: Math.random() * 2 + 0.5,
+    speedX: (Math.random() - 0.5) * 0.3,
+    speedY: (Math.random() - 0.5) * 0.3,
+    opacity: Math.random() * 0.3 + 0.05,
+    color: ['123,140,222', '78,205,196', '167,139,250'][Math.floor(Math.random() * 3)]
+  });
+}
+
+function drawBg() {
+  time += 0.005;
+  ctx.fillStyle = '#08080F';
+  ctx.fillRect(0, 0, w, h);
+
+  // Ambient glow orbs
+  const orbs = [
+    { x: w * 0.3 + Math.sin(time * 0.7) * 80, y: h * 0.3 + Math.cos(time * 0.5) * 60, r: 300, color: '123,140,222', a: 0.06 },
+    { x: w * 0.7 + Math.cos(time * 0.6) * 70, y: h * 0.6 + Math.sin(time * 0.8) * 50, r: 250, color: '167,139,250', a: 0.04 },
+    { x: w * 0.5 + Math.sin(time) * 100, y: h * 0.8 + Math.cos(time * 0.4) * 40, r: 200, color: '78,205,196', a: 0.03 },
+  ];
+
+  // Mouse influence
+  const mx = mouse.x || w / 2;
+  const my = mouse.y || h / 2;
+  orbs.push({ x: mx, y: my, r: 200, color: '123,140,222', a: 0.03 });
+
+  orbs.forEach(o => {
+    const grad = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+    grad.addColorStop(0, `rgba(${o.color}, ${o.a})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+  });
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+    if (p.x < 0) p.x = w;
+    if (p.x > w) p.x = 0;
+    if (p.y < 0) p.y = h;
+    if (p.y > h) p.y = 0;
+
+    // Mouse repulsion
+    const dx = p.x - mx;
+    const dy = p.y - my;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 150) {
+      p.x += (dx / dist) * 0.8;
+      p.y += (dy / dist) * 0.8;
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${p.color}, ${p.opacity})`;
+    ctx.fill();
+  });
+
+  // Connect nearby particles
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(123, 140, 222, ${0.03 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ====== SCENE NAVIGATION ======
+let currentScene = 0;
+const totalScenes = 4;
+let isTransitioning = false;
+
+function goToScene(index) {
+  if (isTransitioning || index === currentScene || index < 0 || index >= totalScenes) return;
+  isTransitioning = true;
+
+  const oldScene = document.getElementById(`scene-${currentScene}`);
+  const newScene = document.getElementById(`scene-${index}`);
+
+  oldScene.style.opacity = '0';
+  oldScene.style.transform = index > currentScene ? 'translateY(-40px)' : 'translateY(40px)';
+
+  setTimeout(() => {
+    oldScene.classList.remove('active');
+    newScene.style.transform = index > currentScene ? 'translateY(40px)' : 'translateY(-40px)';
+    newScene.style.opacity = '0';
+    newScene.classList.add('active');
+
+    requestAnimationFrame(() => {
+      newScene.style.opacity = '1';
+      newScene.style.transform = 'translateY(0)';
+    });
+
+    currentScene = index;
+    updateNavDots();
+    animateSceneElements(index);
+
+    setTimeout(() => { isTransitioning = false; }, 800);
+  }, 500);
+}
+
+function updateNavDots() {
+  document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentScene);
+  });
+  document.getElementById('scrollHint').style.opacity = currentScene === totalScenes - 1 ? '0' : '1';
+}
+
+function animateSceneElements(sceneIndex) {
+  if (sceneIndex === 1) {
+    setTimeout(() => {
+      document.querySelectorAll('.value-card').forEach(c => c.classList.add('visible'));
+    }, 300);
+  }
+  if (sceneIndex === 2) {
+    setTimeout(() => {
+      document.querySelectorAll('.color-chip').forEach(c => c.classList.add('visible'));
+    }, 300);
+  }
+  if (sceneIndex === 3) {
+    setTimeout(() => {
+      document.querySelector('.closing-text').classList.add('visible');
+      document.querySelector('.closing-sub').classList.add('visible');
+    }, 300);
+  }
+}
+
+// Scroll / Wheel navigation
+let scrollAccum = 0;
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  scrollAccum += e.deltaY;
+  if (Math.abs(scrollAccum) > 60) {
+    goToScene(currentScene + (scrollAccum > 0 ? 1 : -1));
+    scrollAccum = 0;
+  }
+}, { passive: false });
+
+// Touch navigation
+let touchStartY = 0;
+window.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+window.addEventListener('touchend', e => {
+  const diff = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(diff) > 50) goToScene(currentScene + (diff > 0 ? 1 : -1));
+});
+
+// Keyboard navigation
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goToScene(currentScene + 1); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); goToScene(currentScene - 1); }
+});
+
+// Nav dot clicks
+document.querySelectorAll('.nav-dot').forEach(dot => {
+  dot.addEventListener('click', () => goToScene(parseInt(dot.dataset.scene)));
+});
+
+// Scroll hint click
+document.getElementById('scrollHint').addEventListener('click', () => goToScene(currentScene + 1));
+</script>
+</body>
+</html>

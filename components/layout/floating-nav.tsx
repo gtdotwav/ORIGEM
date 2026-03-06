@@ -162,12 +162,12 @@ const NAV_ENTRIES: NavEntry[] = [
 ];
 
 const COLOR_CLASSES: Record<NeonColor, { icon: string; activeBg: string; dot: string }> = {
-  cyan:   { icon: "text-neon-cyan",   activeBg: "bg-neon-cyan/8",   dot: "bg-neon-cyan" },
+  cyan: { icon: "text-neon-cyan", activeBg: "bg-neon-cyan/8", dot: "bg-neon-cyan" },
   purple: { icon: "text-neon-purple", activeBg: "bg-neon-purple/8", dot: "bg-neon-purple" },
-  green:  { icon: "text-neon-green",  activeBg: "bg-neon-green/8",  dot: "bg-neon-green" },
+  green: { icon: "text-neon-green", activeBg: "bg-neon-green/8", dot: "bg-neon-green" },
   orange: { icon: "text-neon-orange", activeBg: "bg-neon-orange/8", dot: "bg-neon-orange" },
-  pink:   { icon: "text-neon-pink",   activeBg: "bg-neon-pink/8",   dot: "bg-neon-pink" },
-  blue:   { icon: "text-neon-blue",   activeBg: "bg-neon-blue/8",   dot: "bg-neon-blue" },
+  pink: { icon: "text-neon-pink", activeBg: "bg-neon-pink/8", dot: "bg-neon-pink" },
+  blue: { icon: "text-neon-blue", activeBg: "bg-neon-blue/8", dot: "bg-neon-blue" },
 };
 
 interface QuickLink {
@@ -179,7 +179,7 @@ interface QuickLink {
 const QUICK_LINKS: QuickLink[] = [
   { label: "Início", href: "/dashboard", icon: LayoutDashboard },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
-  { label: "UX/UI", href: "/dashboard/design", icon: Palette },
+  { label: "UX/UI", href: "/dashboard/uxui", icon: Palette },
   { label: "Provedores", href: "/dashboard/settings/providers", icon: Key },
 ];
 

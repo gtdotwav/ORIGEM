@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Trash2, Drama, Rocket, Code2 } from "lucide-react";
+import { Sparkles, Trash2, Drama, Rocket, Code2, Presentation } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
 import { useCustomAppStore } from "@/stores/custom-app-store";
@@ -39,6 +39,15 @@ export default function AppsPage() {
           icon={Code2}
           color="green"
           href="/dashboard/apps/code"
+          badge="Novo"
+        />
+
+        <AppCard
+          title="Slides"
+          description="Crie apresentacoes profissionais com temas e layouts variados. Edite slides visualmente com titulos, conteudo, citacoes e mais."
+          icon={Presentation}
+          color="orange"
+          href="/dashboard/apps/slides"
           badge="Novo"
         />
 

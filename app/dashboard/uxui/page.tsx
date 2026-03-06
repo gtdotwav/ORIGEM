@@ -36,6 +36,7 @@ import {
   Heart,
   X,
   type LucideIcon,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,8 +101,8 @@ function PreviewGlassCards() {
                 color === "cyan"
                   ? "oklch(0.78 0.15 195)"
                   : color === "purple"
-                  ? "oklch(0.65 0.25 290)"
-                  : "oklch(0.78 0.2 145)",
+                    ? "oklch(0.65 0.25 290)"
+                    : "oklch(0.78 0.2 145)",
               opacity: 0.6,
             }}
           />
@@ -407,11 +408,10 @@ function PreviewPipelineStepper() {
       {stages.map((stage, i) => (
         <span
           key={stage}
-          className={`rounded-md border px-1.5 py-0.5 text-[8px] ${
-            i <= 3
-              ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-              : "border-foreground/[0.10] bg-foreground/[0.04] text-foreground/45"
-          }`}
+          className={`rounded-md border px-1.5 py-0.5 text-[8px] ${i <= 3
+            ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
+            : "border-foreground/[0.10] bg-foreground/[0.04] text-foreground/45"
+            }`}
         >
           {stage}
         </span>
@@ -1080,45 +1080,57 @@ function ComponentCard({
   onSelect,
 }: {
   entry: ComponentEntry;
-  onSelect: (entry: ComponentEntry) => void;
+  onSelect: (e: ComponentEntry) => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const categoryMeta = CATEGORIES.find((c) => c.value === entry.category);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
     void navigator.clipboard.writeText(entry.id);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setTimeout(() => setCopied(false), 2000);
   };
-
-  const categoryMeta = CATEGORIES.find((c) => c.value === entry.category);
 
   return (
     <div
       onClick={() => onSelect(entry)}
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all duration-200 hover:border-foreground/[0.16] hover:bg-card/80 hover:shadow-lg hover:shadow-black/20"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/40 backdrop-blur-xl transition-all duration-300 hover:border-neon-cyan/50 hover:bg-card/60 hover:shadow-[0_0_30px_-5px_oklch(0.78_0.15_195/0.2)]"
     >
+      {/* Hover inner glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-neon-cyan/50 to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-neon-cyan/20 to-transparent" />
+      </div>
+
       {/* Preview area */}
-      <div className="relative border-b border-foreground/[0.06] bg-black/30 p-5">
-        <div className="pointer-events-none">
+      <div className="relative flex min-h-[160px] items-center justify-center border-b border-foreground/[0.06] bg-black/40 p-5 overflow-hidden">
+        {/* Subtle background glow for the preview area */}
+        <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 via-transparent to-neon-purple/5 opacity-50 transition-opacity duration-500 group-hover:opacity-100" />
+
+        <div className="pointer-events-none relative z-10 transition-transform duration-500 ease-out group-hover:scale-[1.03]">
           <entry.preview />
         </div>
+
         {/* Hover overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/40 group-hover:opacity-100">
-          <span className="rounded-lg border border-foreground/20 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur-sm">
-            Ver componente
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/40 group-hover:opacity-100 backdrop-blur-[2px]">
+          <span className="flex items-center gap-2 rounded-full border border-neon-cyan/30 bg-black/50 px-4 py-2 text-xs font-medium text-neon-cyan shadow-[0_0_15px_-3px_oklch(0.78_0.15_195/0.4)] backdrop-blur-md">
+            <Eye className="h-3.5 w-3.5" />
+            Explorar
           </span>
         </div>
       </div>
 
       {/* Info area */}
-      <div className="p-3.5">
-        <div className="mb-1.5 flex items-start justify-between gap-2">
-          <h3 className="text-sm font-medium text-foreground/90">{entry.name}</h3>
+      <div className="relative z-10 p-4">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold text-foreground/90 transition-colors group-hover:text-neon-cyan">
+            {entry.name}
+          </h3>
           <button
             type="button"
             onClick={handleCopy}
-            className="shrink-0 rounded-md p-1 text-foreground/20 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
+            className="shrink-0 rounded-md p-1.5 text-foreground/30 transition-all hover:bg-foreground/[0.1] hover:text-neon-cyan"
             title="Copiar ID"
           >
             {copied ? (
@@ -1128,19 +1140,19 @@ function ComponentCard({
             )}
           </button>
         </div>
-        <p className="mb-2.5 text-[11px] leading-relaxed text-foreground/40">
+        <p className="mb-4 text-[11px] leading-relaxed text-foreground/50 line-clamp-2">
           {entry.description}
         </p>
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1 rounded-md border border-foreground/[0.08] bg-foreground/[0.03] px-1.5 py-0.5 text-[10px] text-foreground/35">
-            {categoryMeta && <categoryMeta.icon className="h-2.5 w-2.5" />}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/[0.08] bg-foreground/[0.03] px-2 py-1 text-[10px] font-medium text-foreground/50 transition-colors group-hover:border-neon-cyan/20 group-hover:bg-neon-cyan/5 group-hover:text-neon-cyan/80">
+            {categoryMeta && <categoryMeta.icon className="h-3 w-3" />}
             {categoryMeta?.label}
           </span>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {entry.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="rounded-md bg-foreground/[0.04] px-1.5 py-0.5 text-[9px] text-foreground/25"
+                className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-[9px] font-medium text-foreground/40 transition-colors group-hover:bg-foreground/[0.08]"
               >
                 {tag}
               </span>
@@ -1262,110 +1274,160 @@ export default function DesignBankingPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="mb-5 flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <Palette className="h-5 w-5 text-neon-purple" />
+    <div className="relative min-h-screen pb-16">
+      {/* Ambient background glows */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 opacity-20 blur-[120px]">
+          <div className="h-[400px] w-[800px] rounded-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-cyan mix-blend-screen" />
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-6 py-8 md:py-12">
+        {/* --- Hero Section --- */}
+        <div className="mb-12 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-neon-cyan/20 bg-neon-cyan/10 shadow-[0_0_40px_-10px_oklch(0.78_0.15_195/0.3)] backdrop-blur-xl">
+            <Palette className="h-8 w-8 text-neon-cyan" />
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">UX/UI Banking</h1>
-            <p className="mt-1 text-sm text-foreground/40">
-              {COMPONENTS.length} componentes React — templates e patterns ORIGEM
+          <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+            ORIGEM <GradientText variant="neon">UXUI SPACE</GradientText>
+          </h1>
+          <p className="mx-auto max-w-2xl text-base text-foreground/50 sm:text-lg">
+            Um ecossistema unificado de tokens, componentes e padrões de interação guiados por IA. O "Figma + Framer + v0" interno da ORIGEM.
+          </p>
+        </div>
+
+        {/* --- AI Intelligence Layer (Prompt) --- */}
+        <div className="mx-auto mb-16 max-w-3xl">
+          <div className="group relative rounded-2xl border border-neon-cyan/30 bg-black/40 p-2 shadow-[0_0_30px_-10px_oklch(0.78_0.15_195/0.15)] backdrop-blur-xl transition-all focus-within:border-neon-cyan focus-within:shadow-[0_0_40px_-5px_oklch(0.78_0.15_195/0.3)] hover:border-neon-cyan/50">
+            {/* Animated border glow */}
+            <div className="pointer-events-none absolute inset-[-1px] rounded-2xl bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/50 to-neon-purple/0 opacity-0 transition-opacity duration-500 group-focus-within:opacity-100" />
+
+            <div className="relative flex items-center gap-3 rounded-xl bg-black/50 px-4 py-3">
+              <Sparkles className="h-5 w-5 animate-pulse text-neon-cyan" />
+              <input
+                type="text"
+                placeholder="Gerar uma Landing Page SaaS com tema Liquid Glass..."
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
+              />
+              <button className="flex shrink-0 items-center justify-center rounded-lg bg-neon-cyan px-4 py-2 opacity-90 transition-all hover:bg-neon-cyan hover:opacity-100 hover:shadow-[0_0_15px_oklch(0.78_0.15_195/0.5)]">
+                <Wand2 className="h-4 w-4 text-black" />
+                <span className="ml-2 text-sm font-semibold text-black">Gerar UI</span>
+              </button>
+            </div>
+            {/* Quick Prompts */}
+            <div className="mt-3 flex flex-wrap justify-center gap-2 px-2 pb-1">
+              {[
+                "Dashboard Financeiro",
+                "Formulário Multistep Dark",
+                "Pricing Tier Glass",
+                "Tabela de Dados Complexa"
+              ].map((prompt) => (
+                <button
+                  key={prompt}
+                  className="rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1 text-[10px] text-foreground/40 transition-colors hover:border-neon-cyan/30 hover:bg-neon-cyan/10 hover:text-neon-cyan"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* --- Library Controls --- */}
+        <div className="mb-8 flex flex-col items-center justify-between gap-6 sm:flex-row sm:items-end">
+          {/* Categories */}
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            {CATEGORIES.map((cat) => {
+              const isActive = activeCategory === cat.value;
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.value)}
+                  className={`group relative inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all duration-300 ${isActive
+                    ? "border-neon-cyan bg-neon-cyan/15 text-neon-cyan shadow-[0_0_15px_-3px_oklch(0.78_0.15_195/0.4)] backdrop-blur-md"
+                    : "border-foreground/10 bg-card/30 text-foreground/50 hover:border-foreground/30 hover:bg-card/50 hover:text-foreground/80 backdrop-blur-sm"
+                    }`}
+                >
+                  <cat.icon className={`h-4 w-4 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110"}`} />
+                  {cat.label}
+                  <span
+                    className={`ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] transition-colors ${isActive
+                      ? "bg-neon-cyan text-black"
+                      : "bg-foreground/10 text-foreground/50 group-hover:bg-foreground/20"
+                      }`}
+                  >
+                    {counts[cat.value] ?? 0}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search */}
+          <div className="relative w-full max-w-sm shrink-0">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/30 transition-colors peer-focus:text-neon-cyan" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar nos 1000+ elementos..."
+              className="peer w-full rounded-full border border-foreground/[0.1] bg-card/40 py-2.5 pl-11 pr-4 text-sm text-foreground placeholder:text-foreground/30 outline-none backdrop-blur-xl transition-all focus:border-neon-cyan/50 focus:bg-card/60 focus:shadow-[0_0_20px_-5px_oklch(0.78_0.15_195/0.2)]"
+            />
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-xs text-foreground/30">
+            {filtered.length} componente{filtered.length !== 1 ? "s" : ""}
+            {activeCategory !== "all" &&
+              ` em ${CATEGORIES.find((c) => c.value === activeCategory)?.label}`}
+            {searchQuery.trim() && ` para "${searchQuery}"`}
+          </p>
+        </div>
+
+        {/* Grid */}
+        {filtered.length === 0 ? (
+          <div className="rounded-3xl border border-foreground/[0.05] bg-card/20 p-16 text-center backdrop-blur-xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-foreground/[0.03]">
+              <Search className="h-8 w-8 text-foreground/20" />
+            </div>
+            <p className="text-base font-medium text-foreground/70">Nenhum componente encontrado</p>
+            <p className="mt-2 text-sm text-foreground/40">
+              Tente outra busca ou solicite a IA para gerar este componente.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((entry) => (
+              <ComponentCard
+                key={entry.id}
+                entry={entry}
+                onSelect={setSelectedEntry}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-16 border-t border-foreground/[0.05] pt-8 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-neon-purple/20 bg-neon-purple/5 px-4 py-2">
+            <Sparkles className="h-3 w-3 text-neon-purple" />
+            <p className="text-xs font-medium text-neon-purple/80">
+              ORIGEM UX/UI SPACE v1.0 — 1000+ AI-Ready Components
             </p>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-4 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/20" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar componentes..."
-            className="w-full rounded-xl border border-foreground/[0.08] bg-card/70 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-foreground/25 outline-none backdrop-blur-xl transition-colors focus:border-foreground/[0.16]"
+        {/* Detail modal */}
+        {selectedEntry && (
+          <DetailModal
+            entry={selectedEntry}
+            onClose={() => setSelectedEntry(null)}
           />
-        </div>
-
-        {/* Category pills */}
-        <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map((cat) => {
-            const isActive = activeCategory === cat.value;
-            return (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setActiveCategory(cat.value)}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-                  isActive
-                    ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan"
-                    : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/45 hover:border-foreground/[0.16] hover:text-foreground/65"
-                }`}
-              >
-                <cat.icon className="h-3.5 w-3.5" />
-                {cat.label}
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                    isActive
-                      ? "bg-neon-cyan/20 text-neon-cyan"
-                      : "bg-foreground/[0.06] text-foreground/30"
-                  }`}
-                >
-                  {counts[cat.value] ?? 0}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        )}
       </div>
-
-      {/* Results count */}
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs text-foreground/30">
-          {filtered.length} componente{filtered.length !== 1 ? "s" : ""}
-          {activeCategory !== "all" &&
-            ` em ${CATEGORIES.find((c) => c.value === activeCategory)?.label}`}
-          {searchQuery.trim() && ` para "${searchQuery}"`}
-        </p>
-      </div>
-
-      {/* Grid */}
-      {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-8 text-center backdrop-blur-xl">
-          <Search className="mx-auto mb-3 h-8 w-8 text-foreground/15" />
-          <p className="text-sm text-foreground/50">Nenhum componente encontrado</p>
-          <p className="mt-1 text-xs text-foreground/25">
-            Tente outra busca ou categoria
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((entry) => (
-            <ComponentCard
-              key={entry.id}
-              entry={entry}
-              onSelect={setSelectedEntry}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="mt-10 text-center">
-        <p className="text-[10px] text-foreground/15">
-          ORIGEM UX/UI Banking v0.2.0 — Psychosemantic AI Engine
-        </p>
-      </div>
-
-      {/* Detail modal */}
-      {selectedEntry && (
-        <DetailModal
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-        />
-      )}
     </div>
   );
 }

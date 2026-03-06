@@ -225,7 +225,7 @@ const START_PATHS: StartPath[] = [
     title: "UX/UI",
     subtitle: "Criacao visual",
     description: "Ferramentas de UX/UI assistidas por IA. Gere layouts, paletas, tipografia e componentes visuais automaticamente.",
-    route: "/dashboard/design",
+    route: "/dashboard/uxui",
     ctaLabel: "Explorar UX/UI",
   },
   {
