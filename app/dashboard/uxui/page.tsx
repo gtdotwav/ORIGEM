@@ -1276,20 +1276,20 @@ export default function DesignBankingPage() {
   return (
     <div className="relative min-h-screen pb-16">
       {/* Ambient background glows */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] overflow-hidden">
         {/* Advanced Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_100%_at_50%_0%,#000_60%,transparent_100%)] opacity-30" />
 
         {/* Intense core glow */}
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
-          <div className="h-[300px] w-[700px] rounded-full bg-neon-cyan/25 blur-[100px] mix-blend-screen" />
-          <div className="absolute left-1/2 top-1/2 h-[150px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-purple/40 blur-[80px] mix-blend-screen" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/3">
+          <div className="h-[400px] w-[900px] rounded-full bg-neon-cyan/20 blur-[120px] mix-blend-screen" />
+          <div className="absolute left-1/2 top-1/2 h-[200px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-purple/30 blur-[100px] mix-blend-screen" />
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-12 md:py-20 lg:py-24">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 pt-16 pb-8 md:pt-24 md:pb-12 lg:pt-32">
         {/* --- Hero Section --- */}
-        <div className="mb-16 flex flex-col items-center text-center">
+        <div className="mb-12 flex flex-col items-center text-center">
           <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-neon-cyan shadow-[0_0_20px_-5px_oklch(0.78_0.15_195/0.3)] backdrop-blur-xl transition-all hover:scale-105">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon-cyan opacity-80"></span>
@@ -1298,7 +1298,7 @@ export default function DesignBankingPage() {
             Design System AI-Powered v1.0
           </div>
 
-          <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl drop-shadow-sm">
             <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">ORIGEM</span>{" "}
             <GradientText variant="neon">UXUI SPACE</GradientText>
           </h1>

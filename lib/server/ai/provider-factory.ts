@@ -81,7 +81,8 @@ export async function getLanguageModel(
       })(modelId);
 
     case "google":
-      throw new Error("google_provider_requires_sdk_install");
+      const { createGoogleGenerativeAI } = require("@ai-sdk/google");
+      return createGoogleGenerativeAI({ apiKey })(modelId);
 
     case "baseten":
       return createOpenAI({
