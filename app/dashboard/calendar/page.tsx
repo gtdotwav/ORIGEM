@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import {
@@ -128,6 +128,9 @@ export default function CalendarFullPage() {
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteScope, setInviteScope] = useState<"day" | "month" | "full">("day");
+  const [inviteSent, setInviteSent] = useState(false);
   const [assignee, setAssignee] = useState("");
 
   // Drag state for kanban
@@ -285,12 +288,28 @@ export default function CalendarFullPage() {
     setPromptText(""); setParsedPreview([]); setAddMode(null);
   };
 
+  const inviteLink = useMemo(() => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://origemai.com";
+    if (inviteScope === "day") return `${origin}/invite/calendar/${selectedDateKey}`;
+    if (inviteScope === "month") return `${origin}/invite/calendar/${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
+    return `${origin}/invite/calendar/full`;
+  }, [selectedDateKey, currentYear, currentMonth, inviteScope]);
+
   const handleCopyInvite = useCallback(() => {
-    const link = `${typeof window !== "undefined" ? window.location.origin : ""}/invite/calendar/${selectedDateKey}`;
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(inviteLink);
     setInviteCopied(true);
     setTimeout(() => setInviteCopied(false), 2000);
-  }, [selectedDateKey]);
+  }, [inviteLink]);
+
+  const handleSendInvite = useCallback(() => {
+    if (!inviteEmail.trim()) return;
+    // Simulate sending invite
+    setInviteSent(true);
+    setTimeout(() => {
+      setInviteSent(false);
+      setInviteEmail("");
+    }, 2500);
+  }, [inviteEmail]);
 
   // Kanban drag handlers
   const handleDragStart = (ev: CalendarEvent & { _dateKey: string }) => {
@@ -1084,80 +1103,160 @@ export default function CalendarFullPage() {
               onClick={() => setShowInviteModal(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-foreground/[0.12] bg-background p-6 shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-foreground/[0.12] bg-background shadow-2xl"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neon-purple/10">
-                    <UserPlus className="h-4 w-4 text-neon-purple" />
+              {/* Modal header */}
+              <div className="flex items-center justify-between border-b border-foreground/[0.06] px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neon-purple/10">
+                    <UserPlus className="h-4.5 w-4.5 text-neon-purple" />
                   </div>
-                  <h2 className="text-[14px] font-bold text-foreground/85">Convidar para o calendario</h2>
+                  <div>
+                    <h2 className="text-[14px] font-bold text-foreground/90">Convidar para o calendario</h2>
+                    <p className="text-[11px] text-foreground/35">Compartilhe com parceiros ou agentes</p>
+                  </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowInviteModal(false)}
+                  onClick={() => { setShowInviteModal(false); setInviteEmail(""); setInviteSent(false); }}
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/60"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <p className="mt-3 text-[12px] leading-relaxed text-foreground/45">
-                Compartilhe este link para que parceiros ou agentes possam visualizar e colaborar no seu calendario.
-              </p>
+              <div className="px-6 py-5 space-y-5">
+                {/* Scope selector */}
+                <div>
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
+                    Escopo do convite
+                  </p>
+                  <div className="flex gap-2">
+                    {([
+                      { value: "day" as const, label: "Este dia", desc: selectedDate.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }) },
+                      { value: "month" as const, label: "Este mes", desc: `${MONTHS[currentMonth].slice(0, 3)} ${currentYear}` },
+                      { value: "full" as const, label: "Completo", desc: "Todo o calendario" },
+                    ]).map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setInviteScope(opt.value)}
+                        className={cn(
+                          "flex flex-1 flex-col items-center gap-1 rounded-xl border px-3 py-2.5 transition-all",
+                          inviteScope === opt.value
+                            ? "border-neon-purple/30 bg-neon-purple/[0.06] shadow-sm"
+                            : "border-foreground/[0.06] bg-foreground/[0.02] hover:border-foreground/[0.12]"
+                        )}
+                      >
+                        <span className={cn(
+                          "text-[11px] font-semibold",
+                          inviteScope === opt.value ? "text-neon-purple" : "text-foreground/55"
+                        )}>
+                          {opt.label}
+                        </span>
+                        <span className="text-[9px] text-foreground/25">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-foreground/[0.1] bg-foreground/[0.02] px-3.5 py-3">
-                <Link2 className="h-4 w-4 shrink-0 text-foreground/25" />
-                <span className="flex-1 truncate font-mono text-[11px] text-foreground/50">
-                  {typeof window !== "undefined" ? window.location.origin : "https://origemai.com"}/invite/calendar/{selectedDateKey}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyInvite}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all",
-                    inviteCopied
-                      ? "bg-neon-green/15 text-neon-green"
-                      : "bg-foreground/[0.06] text-foreground/45 hover:text-foreground/65"
-                  )}
-                >
-                  {inviteCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {inviteCopied ? "Copiado!" : "Copiar"}
-                </button>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-foreground/35">
-                  Atribuir a agente ou parceiro
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {AGENTS.map((agent) => (
+                {/* Link */}
+                <div>
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
+                    Link de convite
+                  </p>
+                  <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] px-3.5 py-2.5">
+                    <Link2 className="h-4 w-4 shrink-0 text-foreground/20" />
+                    <span className="flex-1 truncate font-mono text-[11px] text-foreground/45">
+                      {inviteLink}
+                    </span>
                     <button
-                      key={agent.id}
                       type="button"
-                      className="flex items-center gap-2.5 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] px-3 py-2.5 text-left transition-all hover:border-neon-purple/25 hover:bg-neon-purple/[0.05]"
+                      onClick={handleCopyInvite}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all",
+                        inviteCopied
+                          ? "bg-neon-green/15 text-neon-green"
+                          : "bg-foreground/[0.06] text-foreground/45 hover:bg-foreground/[0.10] hover:text-foreground/65"
+                      )}
                     >
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-neon-purple/10">
-                        <Bot className="h-3 w-3 text-neon-purple" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold text-foreground/70">{agent.name}</p>
-                        <p className="text-[9px] text-foreground/25">{agent.role}</p>
-                      </div>
+                      {inviteCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      {inviteCopied ? "Copiado!" : "Copiar"}
                     </button>
-                  ))}
+                  </div>
+                </div>
+
+                {/* Email invite */}
+                <div>
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
+                    Enviar por email
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="email@parceiro.com"
+                      className="flex-1 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] px-3.5 py-2.5 text-[12px] text-foreground/70 placeholder:text-foreground/20 outline-none transition-colors focus:border-neon-purple/30"
+                      onKeyDown={(e) => { if (e.key === "Enter") handleSendInvite(); }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendInvite}
+                      disabled={!inviteEmail.trim() || inviteSent}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[11px] font-semibold transition-all disabled:opacity-40",
+                        inviteSent
+                          ? "border border-neon-green/30 bg-neon-green/10 text-neon-green"
+                          : "border border-neon-purple/25 bg-neon-purple/10 text-neon-purple hover:bg-neon-purple/20"
+                      )}
+                    >
+                      {inviteSent ? (
+                        <><Check className="h-3.5 w-3.5" /> Enviado!</>
+                      ) : (
+                        <><Send className="h-3.5 w-3.5" /> Enviar</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick assign to agents */}
+                <div>
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
+                    Atribuir a agente
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {AGENTS.map((agent) => (
+                      <button
+                        key={agent.id}
+                        type="button"
+                        className="flex items-center gap-2 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] px-2.5 py-2 text-left transition-all hover:border-neon-purple/25 hover:bg-neon-purple/[0.05]"
+                      >
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-neon-purple/10">
+                          <Bot className="h-2.5 w-2.5 text-neon-purple" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-[10px] font-semibold text-foreground/65">{agent.name}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-5 flex justify-end">
+              {/* Modal footer */}
+              <div className="flex items-center justify-between border-t border-foreground/[0.06] px-6 py-3.5">
+                <p className="text-[10px] text-foreground/20">
+                  {sortedEvents.length} evento{sortedEvents.length !== 1 ? "s" : ""} no dia selecionado
+                </p>
                 <button
                   type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="rounded-lg border border-foreground/[0.1] px-4 py-2 text-[11px] font-semibold text-foreground/50 transition-all hover:bg-foreground/[0.04] hover:text-foreground/70"
+                  onClick={() => { setShowInviteModal(false); setInviteEmail(""); setInviteSent(false); }}
+                  className="rounded-lg border border-foreground/[0.08] px-4 py-1.5 text-[11px] font-semibold text-foreground/45 transition-all hover:bg-foreground/[0.04] hover:text-foreground/65"
                 >
                   Fechar
                 </button>
