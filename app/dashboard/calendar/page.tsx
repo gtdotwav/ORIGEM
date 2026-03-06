@@ -915,7 +915,7 @@ export default function CalendarFullPage() {
                 >
                   <div className="mt-4 space-y-2.5 rounded-xl border border-neon-green/20 bg-neon-green/[0.04] p-3.5">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5 text-neon-green/70" />
+                      <Blocks className="h-3.5 w-3.5 text-neon-green/70" />
                       <span className="text-[11px] font-bold uppercase tracking-wider text-neon-green/70">
                         Prompt de Horarios
                       </span>
