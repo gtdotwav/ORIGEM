@@ -10,6 +10,7 @@ import {
   ImageIcon,
   Trash2,
   Pencil,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -47,7 +48,8 @@ export default function SpacesHubPage() {
     setEditingId(null);
   };
 
-  const handleDelete = (spaceId: string) => {
+  const handleDelete = (spaceId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     deleteSpace(spaceId);
     toast.success("Space excluido");
   };
@@ -60,13 +62,17 @@ export default function SpacesHubPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-2.5 mb-1">
-          <Orbit className="h-5 w-5 text-foreground/40" />
-          <h1 className="text-xl font-semibold text-foreground">Spaces</h1>
+        <div className="flex items-center gap-3 mb-1.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-foreground/[0.06] bg-foreground/[0.03]">
+            <Orbit className="h-4 w-4 text-foreground/40" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Spaces</h1>
+            <p className="text-[11px] text-foreground/35">
+              Canvas infinito para criacao de imagens e videos com IA
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-foreground/35 pl-[30px]">
-          Canvas infinito para criacao de imagens e videos com IA
-        </p>
       </motion.div>
 
       {/* Create hero */}
@@ -76,15 +82,20 @@ export default function SpacesHubPage() {
         transition={{ delay: 0.05 }}
         type="button"
         onClick={handleCreate}
-        className="group mb-8 flex w-full items-center justify-center rounded-xl border border-dashed border-foreground/[0.06] py-12 transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.02]"
+        className="group mb-8 flex w-full items-center justify-center rounded-2xl border border-dashed border-foreground/[0.06] py-14 transition-all hover:border-neon-cyan/20 hover:bg-neon-cyan/[0.02]"
       >
-        <div className="flex flex-col items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] transition-all group-hover:bg-foreground/[0.06]">
-            <Plus className="h-4 w-4 text-foreground/25 transition-colors group-hover:text-foreground/50" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03] transition-all group-hover:border-neon-cyan/20 group-hover:bg-neon-cyan/[0.04]">
+            <Plus className="h-5 w-5 text-foreground/25 transition-colors group-hover:text-neon-cyan/60" />
           </div>
-          <p className="text-xs text-foreground/35 group-hover:text-foreground/55">
-            Criar novo Space
-          </p>
+          <div className="text-center">
+            <p className="text-xs font-medium text-foreground/40 group-hover:text-foreground/60">
+              Criar novo Space
+            </p>
+            <p className="mt-0.5 text-[10px] text-foreground/20">
+              Canvas infinito com geracao de imagens
+            </p>
+          </div>
         </div>
       </motion.button>
 
@@ -95,16 +106,16 @@ export default function SpacesHubPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-[10px] font-medium uppercase tracking-widest text-foreground/25">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/25">
               Seus Spaces
             </span>
-            <span className="text-[10px] text-foreground/15">
+            <span className="text-[10px] tabular-nums text-foreground/15">
               {spaces.length}
             </span>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[...spaces]
               .sort((a, b) => b.updatedAt - a.updatedAt)
               .map((space, i) => {
@@ -122,15 +133,12 @@ export default function SpacesHubPage() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 * i }}
-                    className="group overflow-hidden rounded-xl border border-foreground/[0.06] bg-card/50 transition-all hover:border-foreground/[0.10]"
+                    className="group cursor-pointer overflow-hidden rounded-2xl border border-foreground/[0.06] bg-card/50 transition-all hover:border-foreground/[0.12] hover:shadow-xl"
+                    onClick={() =>
+                      router.push(`/dashboard/spaces/${space.id}`)
+                    }
                   >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(`/dashboard/spaces/${space.id}`)
-                      }
-                      className="flex h-28 w-full items-center justify-center bg-foreground/[0.02] transition-colors hover:bg-foreground/[0.04]"
-                    >
+                    <div className="relative flex h-32 items-center justify-center bg-foreground/[0.02] transition-colors group-hover:bg-foreground/[0.04]">
                       {previewImages.length > 0 ? (
                         <div className="grid h-full w-full grid-cols-2 gap-px">
                           {previewImages.map((url, j) => (
@@ -143,11 +151,14 @@ export default function SpacesHubPage() {
                           ))}
                         </div>
                       ) : (
-                        <ImageIcon className="h-5 w-5 text-foreground/8" />
+                        <div className="flex flex-col items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-foreground/8" />
+                          <span className="text-[9px] text-foreground/15">Vazio</span>
+                        </div>
                       )}
-                    </button>
+                    </div>
 
-                    <div className="px-3 py-2.5">
+                    <div className="px-3.5 py-3">
                       <div className="flex items-center justify-between">
                         {editingId === space.id ? (
                           <input
@@ -159,43 +170,45 @@ export default function SpacesHubPage() {
                               if (e.key === "Enter") handleRename(space.id);
                               if (e.key === "Escape") setEditingId(null);
                             }}
+                            onClick={(e) => e.stopPropagation()}
                             autoFocus
-                            className="flex-1 rounded bg-transparent text-xs font-medium text-foreground outline-none ring-1 ring-neon-cyan/30 px-1"
+                            className="flex-1 rounded-md bg-transparent text-xs font-medium text-foreground outline-none ring-1 ring-neon-cyan/30 px-1"
                           />
                         ) : (
-                          <h3 className="truncate text-xs font-medium text-foreground/75">
+                          <h3 className="truncate text-[13px] font-medium text-foreground/75">
                             {space.name}
                           </h3>
                         )}
 
-                        <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 ml-2">
+                        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 ml-2">
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditingId(space.id);
                               setEditName(space.name);
                             }}
-                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/20 hover:text-foreground/50"
+                            className="flex h-6 w-6 items-center justify-center rounded-lg text-foreground/20 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
                           >
-                            <Pencil className="h-2.5 w-2.5" />
+                            <Pencil className="h-3 w-3" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDelete(space.id)}
-                            className="flex h-5 w-5 items-center justify-center rounded text-foreground/20 hover:text-red-400"
+                            onClick={(e) => handleDelete(space.id, e)}
+                            className="flex h-6 w-6 items-center justify-center rounded-lg text-foreground/20 transition-colors hover:bg-red-500/10 hover:text-red-400"
                           >
-                            <Trash2 className="h-2.5 w-2.5" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="mt-1.5 flex items-center gap-2 text-[9px] text-foreground/20">
+                      <div className="mt-2 flex items-center gap-3 text-[10px] text-foreground/20">
                         <span className="flex items-center gap-1">
-                          <ImageIcon className="h-2.5 w-2.5" />
-                          {spaceCards.length}
+                          <ImageIcon className="h-3 w-3" />
+                          {spaceCards.length} cards
                         </span>
                         <span className="ml-auto flex items-center gap-1">
-                          <Clock className="h-2.5 w-2.5" />
+                          <Clock className="h-3 w-3" />
                           {formatTime(space.updatedAt)}
                         </span>
                       </div>
@@ -208,7 +221,8 @@ export default function SpacesHubPage() {
       )}
 
       {spaces.length === 0 && (
-        <div className="text-center py-8">
+        <div className="text-center py-12">
+          <Orbit className="mx-auto h-8 w-8 text-foreground/10 mb-3" />
           <p className="text-xs text-foreground/25">
             Nenhum space criado ainda
           </p>

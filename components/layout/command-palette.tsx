@@ -23,7 +23,6 @@ import {
   FolderKanban,
   Users,
   GitBranch,
-  Orbit,
   Settings,
   Key,
   Gauge,
@@ -36,12 +35,13 @@ import {
   Workflow,
   Rss,
   Users2,
+  Code2,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Spaces", href: "/dashboard/spaces", icon: Orbit },
-  { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
+  { label: "Code", href: "/dashboard/code", icon: Code2 },
+{ label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
   { label: "Feed", href: "/dashboard/feed", icon: Rss },
   { label: "Conexões", href: "/dashboard/connections", icon: Users2 },
   { label: "Apps", href: "/dashboard/apps", icon: Sparkles },

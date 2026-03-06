@@ -7,7 +7,7 @@ import {
   ExternalLink,
   Plug,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -149,105 +149,139 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
     });
   };
 
-  if (!open) return null;
-
   const connectedCount = connectedIds.size;
 
   return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-
-      <motion.div
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-foreground/[0.06] bg-card/98 backdrop-blur-2xl"
-      >
-        {/* Header */}
-        <div className="flex h-10 items-center justify-between border-b border-foreground/[0.05] px-3">
-          <div className="flex items-center gap-1.5">
-            <Plug className="h-3.5 w-3.5 text-foreground/30" />
-            <span className="text-[11px] font-medium tracking-wide text-foreground/50">
-              CONECTORES
-            </span>
-            {connectedCount > 0 && (
-              <span className="ml-1 rounded bg-neon-green/15 px-1 py-px text-[9px] tabular-nums text-neon-green/60">
-                {connectedCount}
-              </span>
-            )}
-          </div>
-          <button
-            type="button"
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Overlay — transparent, click to close */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-40"
             onClick={onClose}
-            className="rounded p-0.5 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, x: -16, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -16, scale: 0.98 }}
+            transition={{ type: "spring", damping: 28, stiffness: 340 }}
+            className="fixed left-12 top-1/2 z-50 -translate-y-1/2"
+            onClick={(e) => e.stopPropagation()}
           >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
-        </div>
+            {/* Outer glow */}
+            <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
-        {/* Connectors list */}
-        <div className="flex-1 overflow-y-auto py-1">
-          <div className="space-y-px px-1">
-            {CONNECTORS.map((connector) => {
-              const isConnected = connectedIds.has(connector.id);
-              return (
-                <button
-                  key={connector.id}
-                  type="button"
-                  onClick={() => toggleConnector(connector.id)}
-                  className={cn(
-                    "group flex w-full items-center gap-2 rounded-md px-2 py-2 text-left transition-colors",
-                    isConnected
-                      ? "bg-foreground/[0.04] text-foreground/70"
-                      : "text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/55"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
-                      isConnected
-                        ? "bg-foreground/[0.08]"
-                        : "bg-foreground/[0.03] group-hover:bg-foreground/[0.05]"
-                    )}
-                  >
-                    <span className={cn(isConnected ? connector.color : "text-foreground/20")}>
-                      {connector.icon}
+            <div
+              className="relative max-h-[88vh] w-72 overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
+                backdropFilter: "blur(40px) saturate(1.8)",
+              }}
+            >
+              {/* Top highlight */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Plug className="h-3.5 w-3.5 text-foreground/30" />
+                  <span className="text-[11px] font-semibold tracking-wide text-foreground/55">
+                    CONECTORES
+                  </span>
+                  {connectedCount > 0 && (
+                    <span className="rounded-md bg-neon-green/15 px-1.5 py-0.5 text-[9px] tabular-nums font-medium text-neon-green/60">
+                      {connectedCount}
                     </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[11px] leading-tight">
-                      {connector.name}
-                    </p>
-                    <p className="truncate text-[9px] text-foreground/20">
-                      {connector.description}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    {isConnected && (
-                      <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
-                    )}
-                    <ExternalLink
-                      className={cn(
-                        "h-3 w-3 transition-opacity",
-                        isConnected
-                          ? "text-foreground/15 opacity-0 group-hover:opacity-100"
-                          : "text-foreground/10 opacity-0 group-hover:opacity-60"
-                      )}
-                    />
-                  </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-lg p-1 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
-              );
-            })}
-          </div>
-        </div>
+              </div>
 
-        {/* Footer */}
-        <div className="border-t border-foreground/[0.05] px-3 py-2">
-          <p className="text-[9px] text-foreground/15">
-            Conectores simulados — integracao real em breve
-          </p>
-        </div>
-      </motion.div>
-    </>
+              {/* Divider */}
+              <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+              {/* Connectors list */}
+              <div className="max-h-[70vh] overflow-y-auto py-2">
+                <div className="space-y-0.5 px-2">
+                  {CONNECTORS.map((connector) => {
+                    const isConnected = connectedIds.has(connector.id);
+                    return (
+                      <button
+                        key={connector.id}
+                        type="button"
+                        onClick={() => toggleConnector(connector.id)}
+                        className={cn(
+                          "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-all",
+                          isConnected
+                            ? "bg-foreground/[0.05] text-foreground/70"
+                            : "text-foreground/40 hover:bg-foreground/[0.03] hover:text-foreground/55"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
+                            isConnected
+                              ? "bg-foreground/[0.08]"
+                              : "bg-foreground/[0.03] group-hover:bg-foreground/[0.06]"
+                          )}
+                        >
+                          <span className={cn(isConnected ? connector.color : "text-foreground/20")}>
+                            {connector.icon}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[12px] font-medium leading-tight">
+                            {connector.name}
+                          </p>
+                          <p className="truncate text-[10px] text-foreground/20">
+                            {connector.description}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          {isConnected && (
+                            <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
+                          )}
+                          <ExternalLink
+                            className={cn(
+                              "h-3 w-3 transition-opacity",
+                              isConnected
+                                ? "text-foreground/15 opacity-0 group-hover:opacity-100"
+                                : "text-foreground/10 opacity-0 group-hover:opacity-60"
+                            )}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom highlight */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+              {/* Footer */}
+              <div className="px-4 py-2.5">
+                <div className="mx-auto h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mb-2" />
+                <p className="text-[9px] text-foreground/18 text-center">
+                  Conectores simulados — integracao real em breve
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

@@ -29,6 +29,7 @@ import {
   Users2,
   Monitor,
   Moon,
+  Code2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -135,6 +136,13 @@ const NAV_ENTRIES: NavEntry[] = [
     description: "Rede de contatos e colaboradores",
     href: "/dashboard/connections",
     icon: Users2,
+    color: "cyan",
+  },
+  {
+    label: "Code",
+    description: "Editor de código com IA",
+    href: "/dashboard/code",
+    icon: Code2,
     color: "cyan",
   },
   {

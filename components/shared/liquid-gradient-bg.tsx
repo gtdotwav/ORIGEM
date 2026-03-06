@@ -373,21 +373,11 @@ export function LiquidGradientBackground() {
     };
   }, [reducedMotion, isDark]);
 
-  // Light mode — soft ambient gradient (no shader)
+  // Plain mode (light theme) — solid dark gray, no animation, no patterns
   if (!isDark) {
     return (
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: [
-              "radial-gradient(ellipse 80% 60% at 30% 20%, rgba(0,0,0,0.03), transparent)",
-              "radial-gradient(ellipse 70% 50% at 70% 60%, rgba(0,0,0,0.02), transparent)",
-              "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(0,0,0,0.015), transparent)",
-              "linear-gradient(180deg, #f8f8fa 0%, #eeeef2 100%)",
-            ].join(", "),
-          }}
-        />
+        <div className="absolute inset-0 bg-[#1a1a1e]" />
       </div>
     );
   }

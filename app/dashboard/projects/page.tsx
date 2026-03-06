@@ -46,6 +46,7 @@ import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 import type { Project } from "@/types/project";
 import type { DecompositionResult } from "@/types/decomposition";
 import type { Message } from "@/types/session";
+import type { AgentInstance } from "@/types/agent";
 
 function formatExecutionStrategy(strategy: string | undefined) {
   if (strategy === "consensus") return "consenso";
@@ -195,7 +196,7 @@ function AgentContributions({
   agents,
   sessionId,
 }: {
-  agents: ReturnType<typeof useAgentStore>["agents"];
+  agents: AgentInstance[];
   sessionId: string;
 }) {
   const sessionAgents = useMemo(
