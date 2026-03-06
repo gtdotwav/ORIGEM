@@ -161,7 +161,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[55]"
             onClick={onClose}
           />
 
@@ -170,7 +170,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -16, scale: 0.98 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed left-12 top-1/2 z-50 -translate-y-1/2"
+            className="fixed left-12 top-1/2 z-[60] -translate-y-1/2"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Outer glow */}

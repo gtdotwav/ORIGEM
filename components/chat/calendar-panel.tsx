@@ -252,14 +252,14 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
     <AnimatePresence>
       {open && (
         <>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-40" onClick={onClose} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-[55]" onClick={onClose} />
 
           <motion.div
             initial={{ opacity: 0, x: -16, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -16, scale: 0.98 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed left-12 top-1/2 z-50 -translate-y-1/2"
+            className="fixed left-12 top-1/2 z-[60] -translate-y-1/2"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
