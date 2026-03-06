@@ -177,7 +177,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative max-h-[88vh] w-72 overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              className="relative max-h-[88vh] w-96 overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
               style={{
                 background:
                   "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
@@ -203,7 +203,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg p-1 text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50"
+                  className="flex h-6 w-6 items-center justify-center rounded-lg border border-transparent text-foreground/25 transition-all hover:border-red-500/15 hover:bg-red-500/10 hover:text-red-400"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
