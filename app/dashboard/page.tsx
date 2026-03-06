@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Send, Loader2, ChevronDown, Sparkles as SparklesIcon } from "lucide-react";
+import { ImageIcon, Settings, Send, Loader2, ChevronDown, Blocks as SparklesIcon } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";

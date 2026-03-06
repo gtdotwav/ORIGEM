@@ -10,7 +10,7 @@ import {
   Brain,
   CheckCircle2,
   Loader2,
-  Sparkles,
+  Blocks,
 } from "lucide-react";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
@@ -108,12 +108,12 @@ function AgentsPageContent() {
     () =>
       targetSessionId
         ? agents
-            .filter((agent) => agent.sessionId === targetSessionId)
-            .sort((a, b) => {
-              const left = Number(a.config?.priority ?? Number.MAX_SAFE_INTEGER);
-              const right = Number(b.config?.priority ?? Number.MAX_SAFE_INTEGER);
-              return left - right;
-            })
+          .filter((agent) => agent.sessionId === targetSessionId)
+          .sort((a, b) => {
+            const left = Number(a.config?.priority ?? Number.MAX_SAFE_INTEGER);
+            const right = Number(b.config?.priority ?? Number.MAX_SAFE_INTEGER);
+            return left - right;
+          })
         : [],
     [agents, targetSessionId]
   );
@@ -308,9 +308,9 @@ function AgentsPageContent() {
                       ? 100
                       : 0
                     : Math.round(
-                        assignedTasks.reduce((sum, task) => sum + task.progress, 0) /
-                          assignedTasks.length
-                      );
+                      assignedTasks.reduce((sum, task) => sum + task.progress, 0) /
+                      assignedTasks.length
+                    );
                 const latestOutput = agent.outputs[agent.outputs.length - 1];
 
                 return (
@@ -396,7 +396,7 @@ function AgentsPageContent() {
 
           <div className="mt-4 rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
             <div className="inline-flex items-center gap-1.5 text-sm text-neon-cyan">
-              <Sparkles className="h-4 w-4" />
+              <Blocks className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
             <p className="mt-1 text-xs text-foreground/70">

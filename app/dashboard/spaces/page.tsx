@@ -10,7 +10,7 @@ import {
   ImageIcon,
   Trash2,
   Pencil,
-  Sparkles,
+  Blocks,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -152,7 +152,7 @@ export default function SpacesHubPage() {
                         </div>
                       ) : (
                         <div className="flex flex-col items-center gap-2">
-                          <Sparkles className="h-5 w-5 text-foreground/8" />
+                          <Blocks className="h-5 w-5 text-foreground/8" />
                           <span className="text-[9px] text-foreground/15">Vazio</span>
                         </div>
                       )}

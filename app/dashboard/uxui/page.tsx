@@ -9,7 +9,7 @@ import {
   Tags,
   BarChart3,
   TextCursorInput,
-  Sparkles,
+  Blocks,
   Navigation,
   Bot,
   Loader2,
@@ -82,7 +82,7 @@ const CATEGORIES: Array<{ value: Category; label: string; icon: LucideIcon }> = 
   { value: "badges", label: "Badges", icon: Tags },
   { value: "navigation", label: "Navigation", icon: Navigation },
   { value: "feedback", label: "Feedback", icon: Zap },
-  { value: "effects", label: "Effects", icon: Sparkles },
+  { value: "effects", label: "Effects", icon: Blocks },
   { value: "data", label: "Data Display", icon: BarChart3 },
   { value: "layout", label: "Layout", icon: LayoutList },
 ];
@@ -179,7 +179,7 @@ function PreviewRecommendation() {
   return (
     <div className="rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
       <div className="mb-1 inline-flex items-center gap-1 text-[10px] text-neon-cyan">
-        <Sparkles className="h-3 w-3" />
+        <Blocks className="h-3 w-3" />
         Proxima etapa recomendada
       </div>
       <p className="mb-2 text-[9px] text-foreground/60">
@@ -1303,7 +1303,7 @@ export default function DesignBankingPage() {
             <div className="pointer-events-none absolute inset-[-1px] rounded-2xl bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/50 to-neon-purple/0 opacity-0 transition-opacity duration-500 group-focus-within:opacity-100" />
 
             <div className="relative flex items-center gap-3 rounded-xl bg-black/50 px-4 py-3">
-              <Sparkles className="h-5 w-5 animate-pulse text-neon-cyan" />
+              <Blocks className="h-5 w-5 animate-pulse text-neon-cyan" />
               <input
                 type="text"
                 placeholder="Gerar uma Landing Page SaaS com tema Liquid Glass..."
@@ -1413,7 +1413,7 @@ export default function DesignBankingPage() {
         {/* Footer */}
         <div className="mt-16 border-t border-foreground/[0.05] pt-8 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-neon-purple/20 bg-neon-purple/5 px-4 py-2">
-            <Sparkles className="h-3 w-3 text-neon-purple" />
+            <Blocks className="h-3 w-3 text-neon-purple" />
             <p className="text-xs font-medium text-neon-purple/80">
               ORIGEM UX/UI SPACE v1.0 — 1000+ AI-Ready Components
             </p>

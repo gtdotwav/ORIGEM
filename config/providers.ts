@@ -46,7 +46,7 @@ export const PROVIDER_CATALOG: ProviderMeta[] = [
   {
     name: "openai",
     displayName: "OpenAI",
-    icon: "Sparkles",
+    icon: "Blocks",
     color: "#10A37F",
     website: "https://platform.openai.com",
     models: [

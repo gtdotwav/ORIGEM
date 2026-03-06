@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import {
   Zap,
   MessageSquare,
-  Sparkles,
+  Blocks,
   Flame,
   ChevronDown,
   Check,
@@ -21,7 +21,7 @@ import type { ProviderName } from "@/types/provider";
 const TIER_ICONS: Record<TokenTier, React.ComponentType<{ className?: string }>> = {
   short: Zap,
   medium: MessageSquare,
-  max: Sparkles,
+  max: Blocks,
   ultra: Flame,
 };
 
@@ -118,7 +118,7 @@ export function LLMSelector({ className }: { className?: string }) {
       >
         {hasManualSelection ? (
           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-foreground/[0.06]">
-            <Sparkles className="h-3 w-3 text-foreground/40" />
+            <Blocks className="h-3 w-3 text-foreground/40" />
           </div>
         ) : (
           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-neon-cyan/10">

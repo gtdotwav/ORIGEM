@@ -27,7 +27,7 @@ export const TOKEN_TIERS: Record<TokenTier, TokenTierConfig> = {
     description: "Resposta completa (~4096 tokens)",
     maxTokens: 4096,
     preferredCostTiers: ["medium", "high"],
-    icon: "Sparkles",
+    icon: "Blocks",
     color: "neon-purple",
   },
   ultra: {

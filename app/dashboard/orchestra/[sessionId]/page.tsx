@@ -12,7 +12,7 @@ import {
   Loader2,
   Orbit,
   Play,
-  Sparkles,
+  Blocks,
   Users,
 } from "lucide-react";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
@@ -372,7 +372,7 @@ function OrchestraPage() {
 
               <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4">
                 <div className="mb-2 inline-flex items-center gap-1.5 text-sm text-foreground/80">
-                  <Sparkles className="h-4 w-4 text-amber-200" />
+                  <Blocks className="h-4 w-4 text-amber-200" />
                   Direcoes coletadas
                 </div>
                 {contextDirections.length === 0 ? (

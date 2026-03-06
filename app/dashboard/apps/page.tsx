@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Trash2, Drama, Rocket, Code2, Presentation } from "lucide-react";
+import { Blocks, Trash2, Drama, Rocket, Code2, Presentation } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
 import { useCustomAppStore } from "@/stores/custom-app-store";
@@ -20,7 +20,7 @@ export default function AppsPage() {
       {/* Header */}
       <div className="mb-8 flex items-start gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-          <Sparkles className="h-5 w-5 text-neon-cyan" />
+          <Blocks className="h-5 w-5 text-neon-cyan" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Apps</h1>

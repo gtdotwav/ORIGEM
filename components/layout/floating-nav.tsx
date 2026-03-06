@@ -18,7 +18,7 @@ import {
   Users,
   GitBranch,
   Workflow,
-  Sparkles,
+  Blocks,
   Settings,
   Palette,
   Key,
@@ -149,7 +149,7 @@ const NAV_ENTRIES: NavEntry[] = [
     label: "Apps",
     description: "Experiências especializadas com IA",
     href: "/dashboard/apps",
-    icon: Sparkles,
+    icon: Blocks,
     color: "pink",
   },
   {

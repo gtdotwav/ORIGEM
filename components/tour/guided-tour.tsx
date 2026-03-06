@@ -6,7 +6,7 @@ import {
   ArrowRight,
   ArrowLeft,
   X,
-  Sparkles,
+  Blocks,
   Rocket,
   MessageSquare,
   ImageIcon,
@@ -675,11 +675,11 @@ export function GuidedTour() {
               style={
                 isSpotlight && targetRect
                   ? getCardPosition(
-                      targetRect,
-                      spotlightStep!.position,
-                      360,
-                      240
-                    )
+                    targetRect,
+                    spotlightStep!.position,
+                    360,
+                    240
+                  )
                   : undefined
               }
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -750,7 +750,7 @@ export function GuidedTour() {
 
                 {/* Step icon — unique per step */}
                 {isSpotlight && (() => {
-                  const StepIcon = step.icon ?? Sparkles;
+                  const StepIcon = step.icon ?? Blocks;
                   const iconColor = step.iconColor ?? "text-neon-cyan";
                   const iconBg = step.iconBg ?? "bg-neon-cyan/10 border-neon-cyan/20";
                   return (

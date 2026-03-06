@@ -11,7 +11,7 @@ import {
   BookOpen,
   Bot,
   Star,
-  Sparkles,
+  Blocks,
   Rocket,
 } from "lucide-react";
 
@@ -122,7 +122,7 @@ export default function KidsPage() {
       {/* Header */}
       <div className="mb-8 flex items-start gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-neon-green/25 bg-neon-green/10">
-          <Sparkles className="h-5 w-5 text-neon-green" />
+          <Blocks className="h-5 w-5 text-neon-green" />
         </div>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">ORIGEM Kids</h1>

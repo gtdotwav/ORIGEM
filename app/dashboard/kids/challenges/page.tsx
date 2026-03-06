@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   Star,
   Trophy,
-  Sparkles,
+  Blocks,
   Paintbrush,
   Calculator,
   Lightbulb,
@@ -83,7 +83,7 @@ export default function KidsChallengesPage() {
       {/* Today's challenge — featured */}
       <div className="mb-8 overflow-hidden rounded-2xl border border-neon-blue/25 bg-gradient-to-r from-neon-blue/10 via-neon-purple/5 to-neon-cyan/10 p-6 backdrop-blur-xl">
         <div className="mb-2 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-neon-blue" />
+          <Blocks className="h-4 w-4 text-neon-blue" />
           <span className="text-xs font-semibold uppercase tracking-wide text-neon-blue">
             Desafio de Hoje
           </span>
@@ -135,11 +135,10 @@ export default function KidsChallengesPage() {
             className="flex items-center gap-3 rounded-xl border border-foreground/[0.06] bg-card/70 px-4 py-3 backdrop-blur-xl"
           >
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                challenge.completed
-                  ? "border border-neon-green/25 bg-neon-green/10"
-                  : "border border-foreground/[0.08] bg-foreground/[0.04]"
-              }`}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg ${challenge.completed
+                ? "border border-neon-green/25 bg-neon-green/10"
+                : "border border-foreground/[0.08] bg-foreground/[0.04]"
+                }`}
             >
               {challenge.completed ? (
                 <Check className="h-3.5 w-3.5 text-neon-green" />
@@ -157,20 +156,18 @@ export default function KidsChallengesPage() {
               {[...Array(challenge.reward)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-3 w-3 ${
-                    challenge.completed
-                      ? "fill-amber-400 text-amber-400"
-                      : "text-foreground/15"
-                  }`}
+                  className={`h-3 w-3 ${challenge.completed
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-foreground/15"
+                    }`}
                 />
               ))}
             </div>
             <span
-              className={`rounded-md border px-2 py-0.5 text-[10px] font-medium ${
-                challenge.completed
-                  ? "border-neon-green/25 bg-neon-green/10 text-neon-green"
-                  : "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/35"
-              }`}
+              className={`rounded-md border px-2 py-0.5 text-[10px] font-medium ${challenge.completed
+                ? "border-neon-green/25 bg-neon-green/10 text-neon-green"
+                : "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/35"
+                }`}
             >
               {challenge.completed ? "Completo" : "Novo"}
             </span>

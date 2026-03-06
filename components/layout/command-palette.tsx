@@ -29,7 +29,7 @@ import {
   Layers,
   MessageSquare,
   Plus,
-  Sparkles,
+  Blocks,
   Filter,
   Baby,
   Workflow,
@@ -41,10 +41,10 @@ import {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Code", href: "/dashboard/code", icon: Code2 },
-{ label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
+  { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
   { label: "Feed", href: "/dashboard/feed", icon: Rss },
   { label: "Conexões", href: "/dashboard/connections", icon: Users2 },
-  { label: "Apps", href: "/dashboard/apps", icon: Sparkles },
+  { label: "Apps", href: "/dashboard/apps", icon: Blocks },
   { label: "Celebridade IA", href: "/dashboard/apps/celebrity-chat", icon: MessageSquare },
   { label: "ORIGEM Kids", href: "/dashboard/kids", icon: Baby },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
@@ -67,7 +67,7 @@ const actionItems = [
   {
     label: "Configurar provedores",
     href: "/dashboard/settings/providers",
-    icon: Sparkles,
+    icon: Blocks,
   },
 ];
 

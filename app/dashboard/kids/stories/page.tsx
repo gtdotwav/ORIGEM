@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Clock, Headphones, Sparkles, MousePointerClick } from "lucide-react";
+import { ArrowLeft, BookOpen, Clock, Headphones, Blocks, MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const FILTERS = [
@@ -19,7 +19,7 @@ type StoryFormat = "narrada" | "interativa" | "animada";
 const FORMAT_META: Record<StoryFormat, { icon: typeof BookOpen; label: string; color: string }> = {
   narrada: { icon: Headphones, label: "Narrada", color: "text-neon-cyan border-neon-cyan/25 bg-neon-cyan/10" },
   interativa: { icon: MousePointerClick, label: "Interativa", color: "text-neon-purple border-neon-purple/25 bg-neon-purple/10" },
-  animada: { icon: Sparkles, label: "Animada", color: "text-neon-pink border-neon-pink/25 bg-neon-pink/10" },
+  animada: { icon: Blocks, label: "Animada", color: "text-neon-pink border-neon-pink/25 bg-neon-pink/10" },
 };
 
 const STORIES = [

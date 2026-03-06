@@ -14,7 +14,7 @@ import {
   Trash2,
   Check,
   Clock,
-  Sparkles,
+  Blocks,
   Send,
   Maximize2,
 } from "lucide-react";
@@ -340,7 +340,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                           onClick={() => setAddMode("prompt")}
                           className="flex w-full items-center gap-1.5 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] px-2.5 py-2 text-left text-[10px] text-foreground/35 transition-all hover:border-neon-green/30 hover:text-neon-green/70"
                         >
-                          <Sparkles className="h-3 w-3 shrink-0 text-neon-green/50" />
+                          <Blocks className="h-3 w-3 shrink-0 text-neon-green/50" />
                           <span>Descreva sua agenda com horarios...</span>
                         </button>
 
@@ -364,7 +364,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                           <div className="mt-3 space-y-2 rounded-lg border border-neon-green/15 bg-neon-green/[0.03] p-2.5">
                             <div className="flex items-center gap-1.5">
-                              <Sparkles className="h-3 w-3 text-neon-green/60" />
+                              <Blocks className="h-3 w-3 text-neon-green/60" />
                               <span className="text-[10px] font-semibold uppercase tracking-wider text-neon-green/60">Prompt de Horarios</span>
                             </div>
                             <textarea

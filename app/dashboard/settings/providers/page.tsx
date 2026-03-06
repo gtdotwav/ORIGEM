@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   Brain,
-  Sparkles,
+  Blocks,
   Gem,
   Zap,
   Flame,
@@ -35,7 +35,7 @@ import type { ProviderName } from "@/types/provider";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Brain,
-  Sparkles,
+  Sparkles: Blocks,
   Gem,
   Zap,
   Flame,
@@ -278,15 +278,14 @@ export default function ProvidersPage() {
                   </div>
                 </div>
                 <div
-                  className={`h-2 w-2 rounded-full ${
-                    state.status === "success"
-                      ? "bg-green-400 shadow-[0_0_6px_oklch(0.78_0.2_145/0.4)]"
-                      : state.status === "error"
-                        ? "bg-red-400"
-                        : state.status === "testing"
-                          ? "bg-yellow-400 animate-pulse"
-                          : "bg-foreground/10"
-                  }`}
+                  className={`h-2 w-2 rounded-full ${state.status === "success"
+                    ? "bg-green-400 shadow-[0_0_6px_oklch(0.78_0.2_145/0.4)]"
+                    : state.status === "error"
+                      ? "bg-red-400"
+                      : state.status === "testing"
+                        ? "bg-yellow-400 animate-pulse"
+                        : "bg-foreground/10"
+                    }`}
                 />
               </div>
 
@@ -426,9 +425,8 @@ export default function ProvidersPage() {
                 {state.isDirty
                   ? "Alteracoes pendentes. Clique em Salvar Key."
                   : state.saveStatus === "saved"
-                    ? `Configuracao protegida no backend${
-                        state.savedKeyHint ? ` (${state.savedKeyHint})` : "."
-                      }`
+                    ? `Configuracao protegida no backend${state.savedKeyHint ? ` (${state.savedKeyHint})` : "."
+                    }`
                     : "Chave salva apenas apos confirmar no botao."}
               </p>
             </div>

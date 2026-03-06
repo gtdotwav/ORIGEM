@@ -8,7 +8,7 @@ import {
   ArrowRight,
   Layers,
   Loader2,
-  Sparkles,
+  Blocks,
   Users,
   Vote,
 } from "lucide-react";
@@ -49,7 +49,7 @@ const STRATEGY_META: Record<
   sequential: {
     label: "Sequencial",
     className: "text-purple-200 border-purple-300/30 bg-purple-300/10",
-    Icon: Sparkles,
+    Icon: Blocks,
     description: "Passa output de um agente para o seguinte.",
   },
   consensus: {
@@ -160,8 +160,8 @@ function GroupsPageContent() {
       strategyFromContext === "consensus"
         ? "consensus"
         : strategyFromContext === "parallel"
-        ? "parallel"
-        : "sequential";
+          ? "parallel"
+          : "sequential";
 
     return [
       {
@@ -374,7 +374,7 @@ function GroupsPageContent() {
 
           <div className="mt-4 rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
             <div className="inline-flex items-center gap-1.5 text-sm text-neon-cyan">
-              <Sparkles className="h-4 w-4" />
+              <Blocks className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
             <p className="mt-1 text-xs text-foreground/70">

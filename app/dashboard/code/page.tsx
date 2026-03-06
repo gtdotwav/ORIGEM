@@ -16,7 +16,7 @@ import {
   Circle,
   Send,
   Eye,
-  Sparkles,
+  Blocks,
   Upload,
   Bot,
   User,
@@ -629,7 +629,7 @@ export default function CodeIDEPage() {
                       : "text-white/25 hover:text-white/45"
                   )}
                 >
-                  <Sparkles className="h-3 w-3" />
+                  <Blocks className="h-3 w-3" />
                   Chat IA
                 </button>
                 <button

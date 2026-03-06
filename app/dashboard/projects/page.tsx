@@ -15,7 +15,7 @@ import {
   Plus,
   Rocket,
   Send,
-  Sparkles,
+  Blocks,
   Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -175,11 +175,10 @@ function ContextTabs({
           <Link
             key={ctx.id}
             href={`/dashboard/projects?sessionId=${encodeURIComponent(sessionId)}&contextId=${encodeURIComponent(ctx.id)}`}
-            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs transition-all ${
-              active
-                ? "bg-neon-cyan/15 font-medium text-neon-cyan"
-                : "text-foreground/40 hover:bg-foreground/[0.04] hover:text-foreground/60"
-            }`}
+            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs transition-all ${active
+              ? "bg-neon-cyan/15 font-medium text-neon-cyan"
+              : "text-foreground/40 hover:bg-foreground/[0.04] hover:text-foreground/60"
+              }`}
           >
             Contexto {i + 1}
           </Link>
@@ -226,13 +225,12 @@ function AgentContributions({
                   <p className="text-[11px] text-foreground/40">{agent.role}</p>
                 </div>
                 <span
-                  className={`rounded-md border px-2 py-0.5 text-[10px] ${
-                    agent.status === "done"
-                      ? "border-green-300/30 bg-green-300/10 text-green-200"
-                      : agent.status === "working" || agent.status === "thinking"
-                        ? "border-amber-300/30 bg-amber-300/10 text-amber-200"
-                        : "border-foreground/[0.15] bg-foreground/[0.06] text-foreground/55"
-                  }`}
+                  className={`rounded-md border px-2 py-0.5 text-[10px] ${agent.status === "done"
+                    ? "border-green-300/30 bg-green-300/10 text-green-200"
+                    : agent.status === "working" || agent.status === "thinking"
+                      ? "border-amber-300/30 bg-amber-300/10 text-amber-200"
+                      : "border-foreground/[0.15] bg-foreground/[0.06] text-foreground/55"
+                    }`}
                 >
                   {agent.status}
                 </span>
@@ -434,7 +432,7 @@ function ProjectsPageContent() {
 
     setContextInstruction("");
     toast.success("Direcao registrada no projeto.");
-    void persistSessionSnapshot(targetSessionId).catch(() => {});
+    void persistSessionSnapshot(targetSessionId).catch(() => { });
   };
 
   const hasSessionContent =
@@ -783,7 +781,7 @@ function ProjectsPageContent() {
           {/* Next step */}
           <div className="rounded-xl border border-neon-cyan/25 bg-neon-cyan/10 p-3">
             <div className="inline-flex items-center gap-1.5 text-sm text-neon-cyan">
-              <Sparkles className="h-4 w-4" />
+              <Blocks className="h-4 w-4" />
               Proxima etapa recomendada
             </div>
             <p className="mt-1 text-xs text-foreground/70">

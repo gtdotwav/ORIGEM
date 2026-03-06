@@ -15,7 +15,7 @@ import {
   Loader2,
   Orbit,
   Send,
-  Sparkles,
+  Blocks,
   Users,
 } from "lucide-react";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
@@ -232,7 +232,7 @@ export default function DashboardControlPage() {
 
         <div className="rounded-xl border border-foreground/[0.08] bg-black/30 p-3">
           <div className="mb-2 inline-flex items-center gap-2 text-sm text-foreground/70">
-            <Sparkles className="h-4 w-4 text-neon-cyan" />
+            <Blocks className="h-4 w-4 text-neon-cyan" />
             Iniciar nova sessão controlada
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -323,7 +323,7 @@ export default function DashboardControlPage() {
 
           {latestSessions.length === 0 ? (
             <CosmicEmptyState
-              icon={Sparkles}
+              icon={Blocks}
               title="Nenhuma sessao ativa"
               description="Crie uma nova sessao no dashboard para iniciar a orquestracao."
               neonColor="cyan"
@@ -331,86 +331,85 @@ export default function DashboardControlPage() {
             />
           ) : (
             <>
-            <div className="space-y-2.5">
-              {latestSessions.slice(sessionPage * PAGE_SIZE, (sessionPage + 1) * PAGE_SIZE).map((session) => {
-                const sessionMessages = messages.filter(
-                  (message) => message.sessionId === session.id
-                );
-                const runtime = runtimes[session.id];
-                const sessionProgress = runtime?.overallProgress ?? 0;
-                const running = Boolean(runtime?.isRunning);
+              <div className="space-y-2.5">
+                {latestSessions.slice(sessionPage * PAGE_SIZE, (sessionPage + 1) * PAGE_SIZE).map((session) => {
+                  const sessionMessages = messages.filter(
+                    (message) => message.sessionId === session.id
+                  );
+                  const runtime = runtimes[session.id];
+                  const sessionProgress = runtime?.overallProgress ?? 0;
+                  const running = Boolean(runtime?.isRunning);
 
-                return (
-                  <div
-                    key={session.id}
-                    className="rounded-xl border border-foreground/[0.08] bg-black/25 p-3"
-                  >
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium text-foreground/85">{session.title}</p>
-                        <p className="text-[11px] text-foreground/40">
-                          Atualizada em {formatSessionTime(session.updatedAt)}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] ${
-                          running
+                  return (
+                    <div
+                      key={session.id}
+                      className="rounded-xl border border-foreground/[0.08] bg-black/25 p-3"
+                    >
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-foreground/85">{session.title}</p>
+                          <p className="text-[11px] text-foreground/40">
+                            Atualizada em {formatSessionTime(session.updatedAt)}
+                          </p>
+                        </div>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] ${running
                             ? "border border-amber-300/30 bg-amber-300/10 text-amber-200"
                             : "border border-foreground/[0.10] bg-foreground/[0.05] text-foreground/55"
-                        }`}
-                      >
-                        {running ? "Em execucao" : "Aguardando"}
-                      </span>
-                    </div>
+                            }`}
+                        >
+                          {running ? "Em execucao" : "Aguardando"}
+                        </span>
+                      </div>
 
-                    <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
-                      <div
-                        className="h-full rounded-full bg-neon-cyan/70 transition-all"
-                        style={{ width: `${sessionProgress}%` }}
-                      />
-                    </div>
+                      <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
+                        <div
+                          className="h-full rounded-full bg-neon-cyan/70 transition-all"
+                          style={{ width: `${sessionProgress}%` }}
+                        />
+                      </div>
 
-                    <div className="mb-3 flex flex-wrap items-center gap-2 text-[10px] text-foreground/45">
-                      <span>{sessionMessages.length} mensagens</span>
-                      <span>•</span>
-                      <span>{runtime?.tasks.length ?? 0} tarefas</span>
-                      <span>•</span>
-                      <span>{runtime?.notes.length ?? 0} notas</span>
-                    </div>
+                      <div className="mb-3 flex flex-wrap items-center gap-2 text-[10px] text-foreground/45">
+                        <span>{sessionMessages.length} mensagens</span>
+                        <span>•</span>
+                        <span>{runtime?.tasks.length ?? 0} tarefas</span>
+                        <span>•</span>
+                        <span>{runtime?.notes.length ?? 0} notas</span>
+                      </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/dashboard/chat/${session.id}`}
-                        className="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-2.5 py-1 text-[11px] font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
-                      >
-                        Chat
-                      </Link>
-                      <Link
-                        href={`/dashboard/contexts?sessionId=${encodeURIComponent(session.id)}`}
-                        className="rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/45 hover:bg-cyan-300/20"
-                      >
-                        Contextos
-                      </Link>
-                      <Link
-                        href={`/dashboard/orchestra/${session.id}`}
-                        className="rounded-lg border border-fuchsia-300/25 bg-fuchsia-300/10 px-2.5 py-1 text-[11px] text-fuchsia-200 transition-all hover:border-fuchsia-300/45 hover:bg-fuchsia-300/20"
-                      >
-                        Orquestra
-                      </Link>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/dashboard/chat/${session.id}`}
+                          className="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-2.5 py-1 text-[11px] font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
+                        >
+                          Chat
+                        </Link>
+                        <Link
+                          href={`/dashboard/contexts?sessionId=${encodeURIComponent(session.id)}`}
+                          className="rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/45 hover:bg-cyan-300/20"
+                        >
+                          Contextos
+                        </Link>
+                        <Link
+                          href={`/dashboard/orchestra/${session.id}`}
+                          className="rounded-lg border border-fuchsia-300/25 bg-fuchsia-300/10 px-2.5 py-1 text-[11px] text-fuchsia-200 transition-all hover:border-fuchsia-300/45 hover:bg-fuchsia-300/20"
+                        >
+                          Orquestra
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            {totalPages > 1 && (
-              <div className="mt-3 flex items-center justify-between text-xs text-foreground/35">
-                <button type="button" disabled={sessionPage === 0} onClick={() => setSessionPage(p => p - 1)}
-                  className="transition-colors hover:text-foreground/60 disabled:opacity-30">Anterior</button>
-                <span>{sessionPage + 1} / {totalPages}</span>
-                <button type="button" disabled={sessionPage >= totalPages - 1} onClick={() => setSessionPage(p => p + 1)}
-                  className="transition-colors hover:text-foreground/60 disabled:opacity-30">Proxima</button>
+                  );
+                })}
               </div>
-            )}
+              {totalPages > 1 && (
+                <div className="mt-3 flex items-center justify-between text-xs text-foreground/35">
+                  <button type="button" disabled={sessionPage === 0} onClick={() => setSessionPage(p => p - 1)}
+                    className="transition-colors hover:text-foreground/60 disabled:opacity-30">Anterior</button>
+                  <span>{sessionPage + 1} / {totalPages}</span>
+                  <button type="button" disabled={sessionPage >= totalPages - 1} onClick={() => setSessionPage(p => p + 1)}
+                    className="transition-colors hover:text-foreground/60 disabled:opacity-30">Proxima</button>
+                </div>
+              )}
             </>
           )}
         </section>

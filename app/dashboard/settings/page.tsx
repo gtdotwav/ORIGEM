@@ -9,7 +9,7 @@ import {
   Palette,
   Settings,
   SlidersHorizontal,
-  Sparkles,
+  Blocks,
   Plug,
   Check,
   Circle,
@@ -281,7 +281,7 @@ export default function SettingsPage() {
       {/* About */}
       <div className="mt-6 rounded-2xl border border-foreground/[0.08] bg-card/70 p-5 backdrop-blur-xl">
         <div className="mb-3 inline-flex items-center gap-2 text-sm text-foreground/80">
-          <Sparkles className="h-4 w-4 text-neon-cyan" />
+          <Blocks className="h-4 w-4 text-neon-cyan" />
           Sobre ORIGEM
         </div>
         <p className="text-xs leading-relaxed text-foreground/45">

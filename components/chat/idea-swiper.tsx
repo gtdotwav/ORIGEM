@@ -5,7 +5,7 @@ import {
   Brain,
   Bot,
   Workflow,
-  Sparkles,
+  Blocks,
   Target,
   Layers,
   Lightbulb,
@@ -33,7 +33,7 @@ interface Idea {
 const IDEAS: Idea[] = [
   {
     id: 1,
-    icon: Brain,
+    icon: Blocks,
     title: "Decompor conceito complexo",
     prompt:
       "Decomponha o conceito de [tema] em seus componentes fundamentais, mapeando relações semânticas, dependências e hierarquias conceituais.",

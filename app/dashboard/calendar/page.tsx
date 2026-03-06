@@ -18,7 +18,7 @@ import {
   Trash2,
   Check,
   Clock,
-  Sparkles,
+  Blocks,
   Send,
   Link2,
   Copy,
@@ -887,7 +887,7 @@ export default function CalendarFullPage() {
                   onClick={() => setAddMode("prompt")}
                   className="flex w-full items-center gap-2 rounded-xl border border-neon-green/15 bg-neon-green/[0.04] px-3 py-2.5 text-left text-[11px] font-medium text-foreground/40 transition-all hover:border-neon-green/30 hover:text-neon-green/80 hover:shadow-sm"
                 >
-                  <Sparkles className="h-4 w-4 shrink-0 text-neon-green/50" />
+                  <Blocks className="h-4 w-4 shrink-0 text-neon-green/50" />
                   <span>Descreva sua agenda com horarios...</span>
                 </button>
                 <div className="flex gap-2">

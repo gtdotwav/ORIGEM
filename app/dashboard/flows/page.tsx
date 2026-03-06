@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   GitBranch,
   Loader2,
-  Sparkles,
+  Blocks,
 } from "lucide-react";
 import { PipelineSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
@@ -316,9 +316,8 @@ function FlowsPageContent() {
                       <div className={`h-0.5 w-6 shrink-0 transition-colors ${reached ? "bg-neon-cyan/50" : "bg-foreground/[0.08]"}`} />
                     )}
                     <div className={`flex flex-col items-center gap-1 shrink-0 transition-transform ${isCurrent ? "scale-110" : ""}`}>
-                      <div className={`h-3 w-3 rounded-full border-2 transition-colors ${
-                        reached ? "border-neon-cyan bg-neon-cyan/30" : "border-foreground/20 bg-transparent"
-                      } ${isCurrent ? "ring-2 ring-neon-cyan/20" : ""}`} />
+                      <div className={`h-3 w-3 rounded-full border-2 transition-colors ${reached ? "border-neon-cyan bg-neon-cyan/30" : "border-foreground/20 bg-transparent"
+                        } ${isCurrent ? "ring-2 ring-neon-cyan/20" : ""}`} />
                       <span className={`text-[9px] whitespace-nowrap ${reached ? "text-neon-cyan" : "text-foreground/35"}`}>
                         {STAGE_LABELS[stage]}
                       </span>
