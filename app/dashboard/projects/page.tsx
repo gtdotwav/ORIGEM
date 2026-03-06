@@ -85,7 +85,7 @@ function SessionBrowser({
 }: {
   sessions: ReturnType<typeof useWorkspaceFilteredSessions>;
   decompositions: Record<string, DecompositionResult>;
-  messages: ReturnType<typeof useSessionStore>["messages"];
+  messages: import("@/types/session").Message[];
 }) {
   const sorted = useMemo(
     () =>
