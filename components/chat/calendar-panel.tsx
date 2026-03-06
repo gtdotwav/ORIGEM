@@ -16,7 +16,9 @@ import {
   Clock,
   Sparkles,
   Send,
+  Maximize2,
 } from "lucide-react";
+import Link from "next/link";
 import {
   useCalendarStore,
   toDateKey,
@@ -206,9 +208,14 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   <CalendarIcon className="h-3.5 w-3.5 text-foreground/40" />
                   <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40">Calendario</span>
                 </div>
-                <button type="button" onClick={onClose} className="flex h-5 w-5 items-center justify-center rounded-md text-foreground/20 transition-colors hover:bg-foreground/[0.08] hover:text-foreground/50">
-                  <X className="h-3 w-3" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <Link href="/dashboard/calendar" onClick={onClose} className="flex h-5 w-5 items-center justify-center rounded-md text-foreground/20 transition-colors hover:bg-foreground/[0.08] hover:text-foreground/50" title="Calendario completo">
+                    <Maximize2 className="h-3 w-3" />
+                  </Link>
+                  <button type="button" onClick={onClose} className="flex h-5 w-5 items-center justify-center rounded-md text-foreground/20 transition-colors hover:bg-foreground/[0.08] hover:text-foreground/50">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
 
               {/* Month nav */}
