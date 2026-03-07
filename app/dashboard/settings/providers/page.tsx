@@ -194,31 +194,31 @@ export default function ProvidersPage() {
 
   const testConnection = async (name: ProviderName) => {
     const apiKey = states[name].apiKey.trim();
-    const hasSavedKey = Boolean(states[name].savedKeyHint);
     updateState(name, { status: "testing" });
 
     try {
-      const response = await fetch("/api/settings/providers", {
-        method: "GET",
-        cache: "no-store",
+      const response = await fetch("/api/settings/providers/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: name,
+          ...(apiKey ? { apiKey } : {}),
+        }),
       });
 
-      if (!response.ok) {
-        updateState(name, { status: "error" });
-        toast.error("Nao foi possivel verificar o provider.");
-        return;
-      }
-
-      const data = (await response.json()) as ProviderListResponse;
-      const saved = data.providers.find((p) => p.provider === name);
-      const keyExists = apiKey.length > 10 || hasSavedKey || saved?.hasApiKey;
-
-      if (keyExists) {
+      if (response.ok) {
         updateState(name, { status: "success" });
-        toast.success(`${name} — chave verificada!`);
+        toast.success(`${name} — conexao verificada!`);
       } else {
+        const data = await response.json().catch(() => null);
         updateState(name, { status: "error" });
-        toast.error("Nenhuma API key configurada. Insira e salve antes de testar.");
+        if (data?.reason === "invalid_key") {
+          toast.error("API key invalida ou sem permissao.");
+        } else if (data?.error === "no_api_key") {
+          toast.error("Nenhuma API key configurada. Insira e salve antes de testar.");
+        } else {
+          toast.error("Falha na conexao com o provider.");
+        }
       }
     } catch {
       updateState(name, { status: "error" });
@@ -416,7 +416,7 @@ export default function ProvidersPage() {
                     : state.status === "success"
                       ? "Conectado"
                       : state.status === "error"
-                        ? "Falhou — Tentar"
+                        ? "Falhou"
                         : "Testar Conexao"}
                 </Button>
               </div>

@@ -241,9 +241,9 @@ export function FloatingNav() {
   }, [active?.parentLabel, navOpen]);
 
   return (
-    <div className="relative z-50 w-full px-4 pt-6 md:px-6">
+    <div className="pointer-events-none relative z-50 w-full px-4 pt-6 md:px-6">
       {isAuthenticated && (
-        <div className="absolute right-4 top-6 flex items-center gap-2 md:right-6">
+        <div className="pointer-events-auto absolute right-4 top-6 flex items-center gap-2 md:right-6">
           <Link
             href="/pricing"
             className="inline-flex items-center gap-1.5 rounded-full border border-foreground/20 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur-md transition-all hover:bg-foreground/15 hover:text-foreground"
@@ -285,7 +285,7 @@ export function FloatingNav() {
       )}
 
       <div className="flex w-full justify-center">
-        <div ref={navRef} className="relative flex flex-col items-center gap-2">
+        <div ref={navRef} className="pointer-events-auto relative flex flex-col items-center gap-2">
           {/* Trigger — logo image */}
           <button
             data-tour="nav-logo"

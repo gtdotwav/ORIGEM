@@ -10,14 +10,38 @@ import type { ProviderName } from "@/types/provider";
 import { encrypt, decrypt } from "@/lib/server/crypto";
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), ".data", "origem-backend.json");
+const BLOB_KEY = "origem-backend.json";
 
 function parseBackendPath() {
   const fromEnv = process.env.ORIGEM_BACKEND_PATH;
   return fromEnv && fromEnv.trim().length > 0 ? fromEnv.trim() : DEFAULT_DB_PATH;
 }
 
+function useBlob(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+async function blobRead(): Promise<BackendDatabaseShape | null> {
+  const { list } = await import("@vercel/blob");
+  const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
+  if (blobs.length === 0) return null;
+
+  const response = await fetch(blobs[0].url);
+  if (!response.ok) return null;
+
+  return (await response.json()) as BackendDatabaseShape;
+}
+
+async function blobWrite(db: BackendDatabaseShape): Promise<void> {
+  const { put } = await import("@vercel/blob");
+  await put(BLOB_KEY, JSON.stringify(db), {
+    access: "public",
+    addRandomSuffix: false,
+  });
 }
 
 class SnapshotStore {
@@ -34,13 +58,23 @@ class SnapshotStore {
     this.loaded = true;
 
     try {
-      const content = await fs.readFile(this.dbPath, "utf-8");
-      const parsed = JSON.parse(content) as BackendDatabaseShape;
-      if (parsed && typeof parsed === "object" && parsed.records) {
-        this.db = {
-          records: parsed.records ?? {},
-          providers: parsed.providers ?? {},
-        };
+      if (useBlob()) {
+        const data = await blobRead();
+        if (data && typeof data === "object" && data.records) {
+          this.db = {
+            records: data.records ?? {},
+            providers: data.providers ?? {},
+          };
+        }
+      } else {
+        const content = await fs.readFile(this.dbPath, "utf-8");
+        const parsed = JSON.parse(content) as BackendDatabaseShape;
+        if (parsed && typeof parsed === "object" && parsed.records) {
+          this.db = {
+            records: parsed.records ?? {},
+            providers: parsed.providers ?? {},
+          };
+        }
       }
     } catch {
       this.db = { records: {}, providers: {} };
@@ -49,8 +83,12 @@ class SnapshotStore {
 
   private queueWrite() {
     this.writeChain = this.writeChain.then(async () => {
-      await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
-      await fs.writeFile(this.dbPath, JSON.stringify(this.db, null, 2), "utf-8");
+      if (useBlob()) {
+        await blobWrite(this.db);
+      } else {
+        await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
+        await fs.writeFile(this.dbPath, JSON.stringify(this.db, null, 2), "utf-8");
+      }
     });
 
     return this.writeChain;
