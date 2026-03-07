@@ -70,7 +70,7 @@ export default function DashboardLayout({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          className="relative z-10 flex-1"
+          className="relative flex-1"
         >
           {children}
         </motion.div>
