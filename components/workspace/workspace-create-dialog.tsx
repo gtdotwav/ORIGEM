@@ -82,7 +82,7 @@ export function WorkspaceCreateDialog({
         icon,
       });
     } else {
-      const now = new Date();
+      const now = new Date().toISOString();
       addWorkspace({
         id: createId("ws"),
         name: name.trim(),

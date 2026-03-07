@@ -85,7 +85,7 @@ export function ProjectCreateDialog({
         icon,
       });
     } else {
-      const now = new Date();
+      const now = new Date().toISOString();
       addProject({
         id: createId("proj"),
         name: name.trim(),

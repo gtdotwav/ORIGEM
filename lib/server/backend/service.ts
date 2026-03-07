@@ -10,20 +10,20 @@ import type {
   SessionSnapshotRecord,
 } from "@/lib/server/backend/types";
 
-function parseDateInput(value: unknown): Date {
+function parseDateInput(value: unknown): string {
   if (value instanceof Date) {
-    return value;
+    return value.toISOString();
   }
 
   if (typeof value === "number") {
-    return new Date(value);
+    return new Date(value).toISOString();
   }
 
   if (typeof value === "string") {
-    return new Date(value);
+    return value;
   }
 
-  return new Date();
+  return new Date().toISOString();
 }
 
 function normalizeSnapshot(snapshot: SessionSnapshotInput): SessionSnapshot {

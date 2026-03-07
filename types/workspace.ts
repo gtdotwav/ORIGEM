@@ -23,6 +23,6 @@ export interface Workspace {
   color: WorkspaceColor;
   icon: WorkspaceIcon;
   status: "active" | "archived";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

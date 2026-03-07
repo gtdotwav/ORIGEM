@@ -34,7 +34,7 @@ export interface ContextDirection {
   text: string;
   contextId: string | null;
   routeTargets: RouteTargetKey[];
-  createdAt: Date;
+  createdAt: string;
 }
 
 function isRouteTargetKey(value: string): value is RouteTargetKey {
@@ -166,7 +166,7 @@ export function getContextDirections(
       contextId:
         message.decompositionId ?? getMetadataDecompositionId(message.metadata),
       routeTargets: readRouteTargets(message.metadata),
-      createdAt: new Date(message.createdAt),
+      createdAt: message.createdAt,
     }))
     .sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

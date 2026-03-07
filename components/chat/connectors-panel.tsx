@@ -127,8 +127,12 @@ interface ConnectorsPanelProps {
 export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
   const [connectedIds, setConnectedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
-    const saved = localStorage.getItem("origem-connected-integrations");
-    return saved ? new Set(JSON.parse(saved) as string[]) : new Set();
+    try {
+      const saved = localStorage.getItem("origem-connected-integrations");
+      return saved ? new Set(JSON.parse(saved) as string[]) : new Set();
+    } catch {
+      return new Set();
+    }
   });
 
   const toggleConnector = (id: string) => {

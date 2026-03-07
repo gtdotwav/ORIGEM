@@ -63,7 +63,7 @@ interface ProviderSummaryResponse {
   }>;
 }
 
-function formatSessionTime(value: Date) {
+function formatSessionTime(value: string | Date) {
   return new Date(value).toLocaleString("pt-BR", {
     day: "2-digit",
     month: "2-digit",

@@ -31,16 +31,20 @@ export async function ensureSessionRecord(
   }
 }
 
-function reviveDate(value: unknown): Date {
+function reviveDate(value: unknown): string {
   if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "string") {
     return value;
   }
 
-  if (typeof value === "number" || typeof value === "string") {
-    return new Date(value);
+  if (typeof value === "number") {
+    return new Date(value).toISOString();
   }
 
-  return new Date();
+  return new Date().toISOString();
 }
 
 function normalizeRuntime(sessionId: string, runtime?: SessionRuntime): SessionRuntime {

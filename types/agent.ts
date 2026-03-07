@@ -39,8 +39,8 @@ export interface AgentInstance {
   canvasNodeId?: string;
   config?: Record<string, unknown>;
   outputs: AgentOutput[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AgentOutput {
@@ -52,7 +52,7 @@ export interface AgentOutput {
   metadata?: Record<string, unknown>;
   canvasNodeId?: string;
   parentOutputId?: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface AgentGroup {
@@ -62,5 +62,5 @@ export interface AgentGroup {
   strategy: "parallel" | "sequential" | "consensus";
   agentIds: string[];
   canvasNodeId?: string;
-  createdAt: Date;
+  createdAt: string;
 }

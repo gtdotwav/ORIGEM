@@ -12,7 +12,7 @@ import { WORKSPACE_ICONS, WORKSPACE_COLORS } from "@/components/workspace/worksp
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types/project";
 
-function formatRelativeTime(date: Date | null) {
+function formatRelativeTime(date: string | Date | null) {
   if (!date) return "Sem atividade";
   const now = Date.now();
   const diff = now - new Date(date).getTime();

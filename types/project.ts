@@ -8,6 +8,6 @@ export interface Project {
   icon: WorkspaceIcon;
   workspaceId: string;
   status: "active" | "archived";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

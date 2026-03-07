@@ -29,7 +29,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         updateWorkspace: (id, updates) =>
           set((s) => ({
             workspaces: s.workspaces.map((w) =>
-              w.id === id ? { ...w, ...updates, updatedAt: new Date() } : w
+              w.id === id ? { ...w, ...updates, updatedAt: new Date().toISOString() } : w
             ),
           })),
 
@@ -57,7 +57,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           set((s) => ({
             workspaces: s.workspaces.map((w) =>
               w.id === id
-                ? { ...w, status: "archived" as const, updatedAt: new Date() }
+                ? { ...w, status: "archived" as const, updatedAt: new Date().toISOString() }
                 : w
             ),
             activeWorkspaceId:

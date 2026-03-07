@@ -145,7 +145,7 @@ export function LLMSelector({ className }: { className?: string }) {
       {open && dropdownPos && createPortal(
         <div
           ref={dropdownRef}
-          style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
+          style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 100 }}
           className="w-[280px] rounded-xl border border-foreground/[0.08] bg-card/95 shadow-2xl backdrop-blur-xl">
           {/* Tiers */}
           <div className="border-b border-foreground/[0.06] p-2.5">

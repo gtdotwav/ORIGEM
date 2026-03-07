@@ -17,12 +17,16 @@ interface SessionListResponse {
   }>;
 }
 
-function reviveDate(value: string | number | undefined, fallback: number): Date {
+function reviveDate(value: string | number | undefined, fallback: number): string {
   if (value === undefined) {
-    return new Date(fallback);
+    return new Date(fallback).toISOString();
   }
 
-  return new Date(value);
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return new Date(value).toISOString();
 }
 
 export function BackendSessionBootstrap() {

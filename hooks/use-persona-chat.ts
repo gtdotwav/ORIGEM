@@ -37,8 +37,8 @@ export function usePersonaChat() {
         id: sessionId,
         personaId,
         messages: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
       return sessionId;
     },

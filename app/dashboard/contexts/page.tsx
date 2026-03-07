@@ -121,7 +121,7 @@ function formatIntent(intent: Intent) {
   return intent.replace(/_/g, " ");
 }
 
-function formatMessageTime(date: Date) {
+function formatMessageTime(date: string | Date) {
   return new Date(date).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",

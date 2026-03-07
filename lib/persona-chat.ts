@@ -19,7 +19,7 @@ export function createPersonaMessage(
     role,
     content,
     mode,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 }
 

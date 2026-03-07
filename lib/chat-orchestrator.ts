@@ -206,7 +206,7 @@ export function createSession(
   prompt: string,
   workspaceId?: string
 ): Session {
-  const now = new Date();
+  const now = new Date().toISOString();
   return {
     id: sessionId,
     title: toSessionTitle(prompt),
@@ -232,7 +232,7 @@ export function createMessage(
     role,
     content,
     metadata,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -420,7 +420,7 @@ function ensureAgentsForSession(
       name: `${intent} workflow`,
       strategy: "sequential",
       agentIds: existingAgents.map((agent) => agent.id),
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
     agentStore.addGroup(fallbackGroup);
@@ -431,7 +431,7 @@ function ensureAgentsForSession(
     };
   }
 
-  const now = new Date();
+  const now = new Date().toISOString();
   const strategy =
     intent === "analyze" || intent === "compare" ? "consensus" : "pipeline";
 
@@ -665,7 +665,7 @@ function createAgentOutput(
       language,
       taskId: task.id,
     },
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -925,7 +925,7 @@ export async function runChatOrchestration(
     if (currentAgent) {
       agentStore.updateAgent(currentAgent.id, {
         status: "working",
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       });
     }
 
@@ -994,7 +994,7 @@ export async function runChatOrchestration(
       agentStore.addOutput(currentAgent.id, output);
       agentStore.updateAgent(currentAgent.id, {
         status: "done",
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       });
 
       pipelineStore.addEvent({
@@ -1097,7 +1097,7 @@ export async function runChatOrchestration(
 
   sessionStore.addMessage(assistantMessage);
   sessionStore.updateSession(sessionId, {
-    updatedAt: new Date(),
+    updatedAt: new Date().toISOString(),
   });
 
   pipelineStore.addEvent({
@@ -1206,6 +1206,6 @@ export async function runSimpleChat(
   }
 
   sessionStore.addMessage(createMessage(sessionId, "assistant", response, metadata));
-  sessionStore.updateSession(sessionId, { updatedAt: new Date() });
+  sessionStore.updateSession(sessionId, { updatedAt: new Date().toISOString() });
   runtimeStore.setRunning(sessionId, false);
 }

@@ -42,11 +42,9 @@ export async function PUT(request: Request) {
       },
     });
   } catch (error) {
+    console.error("[providers] Invalid payload:", error);
     return NextResponse.json(
-      {
-        error: "invalid_payload",
-        details: error instanceof Error ? error.message : "unknown",
-      },
+      { error: "invalid_payload" },
       { status: 400 }
     );
   }

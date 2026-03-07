@@ -26,7 +26,7 @@ export const useProjectStore = create<ProjectState>()(
         updateProject: (id, updates) =>
           set((s) => ({
             projects: s.projects.map((p) =>
-              p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
+              p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
             ),
           })),
 
@@ -46,7 +46,7 @@ export const useProjectStore = create<ProjectState>()(
           set((s) => ({
             projects: s.projects.map((p) =>
               p.id === id
-                ? { ...p, status: "archived" as const, updatedAt: new Date() }
+                ? { ...p, status: "archived" as const, updatedAt: new Date().toISOString() }
                 : p
             ),
           })),

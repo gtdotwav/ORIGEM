@@ -18,13 +18,13 @@ export interface PersonaChatMessage {
   role: "user" | "persona" | "system";
   content: string;
   mode: ChatMode;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface PersonaChatSession {
   id: string;
   personaId: string;
   messages: PersonaChatMessage[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

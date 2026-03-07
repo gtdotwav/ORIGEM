@@ -146,10 +146,9 @@ export async function POST(request: Request) {
         : undefined,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "unknown_error";
+    console.error("[completions] LLM call failed:", error);
     return NextResponse.json(
-      { error: "llm_call_failed", details: message },
+      { error: "llm_call_failed" },
       { status: 500 }
     );
   }

@@ -98,7 +98,7 @@ function getImageAttachment(
   return attachment as ImageAttachmentMetadata;
 }
 
-function formatMessageTime(date: Date) {
+function formatMessageTime(date: string | Date) {
   return new Date(date).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
@@ -248,7 +248,7 @@ export default function ChatPage() {
       addSession(createSession(sessionId, text));
     } else {
       updateSession(sessionId, {
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
         title:
           currentSession.title.startsWith("Sessao ")
             ? toSessionTitle(text)

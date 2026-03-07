@@ -17,7 +17,7 @@ export interface ProviderConfig {
   isActive: boolean;
   defaultModel: string;
   config?: Record<string, unknown>;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface ModelInfo {

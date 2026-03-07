@@ -56,7 +56,7 @@ function formatExecutionStrategy(strategy: string | undefined) {
   return "nao definido";
 }
 
-function formatSessionTime(value: Date) {
+function formatSessionTime(value: string | Date) {
   return new Date(value).toLocaleString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -65,7 +65,7 @@ function formatSessionTime(value: Date) {
   });
 }
 
-function relativeTime(date: Date) {
+function relativeTime(date: string | Date) {
   const now = Date.now();
   const diff = now - new Date(date).getTime();
   const mins = Math.floor(diff / 60000);

@@ -34,7 +34,7 @@ export const usePersonaStore = create<PersonaState>()(
           set((s) => ({
             chatSessions: s.chatSessions.map((cs) =>
               cs.id === sessionId
-                ? { ...cs, messages: [...cs.messages, message], updatedAt: new Date() }
+                ? { ...cs, messages: [...cs.messages, message], updatedAt: new Date().toISOString() }
                 : cs
             ),
           })),
@@ -46,7 +46,7 @@ export const usePersonaStore = create<PersonaState>()(
           set((s) => ({
             chatSessions: s.chatSessions.map((cs) =>
               cs.id === sessionId
-                ? { ...cs, messages: [], updatedAt: new Date() }
+                ? { ...cs, messages: [], updatedAt: new Date().toISOString() }
                 : cs
             ),
           })),

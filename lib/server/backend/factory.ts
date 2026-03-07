@@ -14,7 +14,7 @@ function toSessionTitle(prompt: string) {
 }
 
 export function createBackendSession(sessionId: string, title: string): Session {
-  const now = new Date();
+  const now = new Date().toISOString();
 
   return {
     id: sessionId,

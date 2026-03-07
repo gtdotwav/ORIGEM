@@ -5,8 +5,8 @@ export interface Session {
   workspaceId?: string;
   projectId?: string;
   metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Message {
@@ -17,5 +17,5 @@ export interface Message {
   agentId?: string;
   decompositionId?: string;
   metadata?: Record<string, unknown>;
-  createdAt: Date;
+  createdAt: string;
 }
