@@ -10,10 +10,12 @@ import {
   GitCommit,
   GitPullRequest,
   Loader2,
+  LogIn,
   Plug,
   RefreshCw,
   Rocket,
 } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -257,7 +259,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                       </button>
 
                       <AnimatePresence>
-                        {expandedSection === "github" && github?.connected && (
+                        {expandedSection === "github" && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
@@ -266,60 +268,78 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                             className="overflow-hidden"
                           >
                             <div className="px-2 pb-2 pt-1">
-                              {/* Recent activity */}
-                              {github.activity && github.activity.length > 0 && (
-                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
-                                    Atividade recente
-                                  </p>
-                                  <div className="space-y-1">
-                                    {github.activity.slice(0, 6).map((event, i) => {
-                                      const Icon = EVENT_ICONS[event.type] ?? GitCommit;
-                                      return (
-                                        <div key={i} className="flex items-start gap-1.5">
-                                          <Icon className="mt-0.5 h-3 w-3 shrink-0 text-foreground/20" />
-                                          <div className="min-w-0 flex-1">
-                                            <p className="truncate text-[10px] text-foreground/50">
-                                              {event.title}
-                                            </p>
-                                            <p className="text-[9px] text-foreground/20">
-                                              {event.repo.split("/").pop()} · {timeAgo(event.created_at)}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
+                              {github?.connected ? (
+                                <>
+                                  {/* Recent activity */}
+                                  {github.activity && github.activity.length > 0 && (
+                                    <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                                      <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                        Atividade recente
+                                      </p>
+                                      <div className="space-y-1">
+                                        {github.activity.slice(0, 6).map((event, i) => {
+                                          const Icon = EVENT_ICONS[event.type] ?? GitCommit;
+                                          return (
+                                            <div key={i} className="flex items-start gap-1.5">
+                                              <Icon className="mt-0.5 h-3 w-3 shrink-0 text-foreground/20" />
+                                              <div className="min-w-0 flex-1">
+                                                <p className="truncate text-[10px] text-foreground/50">
+                                                  {event.title}
+                                                </p>
+                                                <p className="text-[9px] text-foreground/20">
+                                                  {event.repo.split("/").pop()} · {timeAgo(event.created_at)}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
 
-                              {/* Top repos */}
-                              {github.repos && github.repos.length > 0 && (
-                                <div className="mt-1.5 rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
-                                    Repositorios
+                                  {/* Top repos */}
+                                  {github.repos && github.repos.length > 0 && (
+                                    <div className="mt-1.5 rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                                      <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                        Repositorios
+                                      </p>
+                                      <div className="space-y-1">
+                                        {github.repos.slice(0, 5).map((repo) => (
+                                          <a
+                                            key={repo.full_name}
+                                            href={repo.html_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1.5 rounded-md px-1 py-0.5 transition-colors hover:bg-foreground/[0.04]"
+                                          >
+                                            <span className="truncate text-[10px] text-foreground/50">
+                                              {repo.name}
+                                            </span>
+                                            {repo.language && (
+                                              <span className="shrink-0 text-[8px] text-foreground/20">
+                                                {repo.language}
+                                              </span>
+                                            )}
+                                            <ExternalLink className="ml-auto h-2.5 w-2.5 shrink-0 text-foreground/10" />
+                                          </a>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                                  <p className="mb-2 text-[10px] text-foreground/35">
+                                    Reconecte via GitHub para autorizar acesso a repos e atividade.
                                   </p>
-                                  <div className="space-y-1">
-                                    {github.repos.slice(0, 5).map((repo) => (
-                                      <a
-                                        key={repo.full_name}
-                                        href={repo.html_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 rounded-md px-1 py-0.5 transition-colors hover:bg-foreground/[0.04]"
-                                      >
-                                        <span className="truncate text-[10px] text-foreground/50">
-                                          {repo.name}
-                                        </span>
-                                        {repo.language && (
-                                          <span className="shrink-0 text-[8px] text-foreground/20">
-                                            {repo.language}
-                                          </span>
-                                        )}
-                                        <ExternalLink className="ml-auto h-2.5 w-2.5 shrink-0 text-foreground/10" />
-                                      </a>
-                                    ))}
-                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => void signIn("github")}
+                                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-foreground/[0.12] bg-foreground/[0.06] px-3 py-2 text-[11px] font-medium text-foreground/70 transition-all hover:bg-foreground/[0.10] hover:text-foreground/90"
+                                  >
+                                    <LogIn className="h-3.5 w-3.5" />
+                                    Conectar GitHub
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -370,7 +390,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                       </button>
 
                       <AnimatePresence>
-                        {expandedSection === "vercel" && vercel?.connected && (
+                        {expandedSection === "vercel" && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
@@ -379,35 +399,43 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                             className="overflow-hidden"
                           >
                             <div className="px-2 pb-2 pt-1">
-                              {vercel.deployments && vercel.deployments.length > 0 && (
-                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
-                                    Deployments recentes
-                                  </p>
-                                  <div className="space-y-1.5">
-                                    {vercel.deployments.slice(0, 5).map((d) => (
-                                      <div key={d.id} className="flex items-start gap-2">
-                                        <div className={cn(
-                                          "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                                          STATE_COLORS[d.state] ?? "bg-foreground/20"
-                                        )} />
-                                        <div className="min-w-0 flex-1">
-                                          <p className="truncate text-[10px] text-foreground/50">
-                                            {d.commitMessage || d.id}
-                                          </p>
-                                          <div className="flex items-center gap-1.5">
-                                            <span className="text-[9px] text-foreground/20">
-                                              {d.target}
-                                            </span>
-                                            <span className="text-[9px] text-foreground/15">
-                                              {timeAgo(d.createdAt)}
-                                            </span>
+                              {vercel?.connected ? (
+                                vercel.deployments && vercel.deployments.length > 0 && (
+                                  <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                                    <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                      Deployments recentes
+                                    </p>
+                                    <div className="space-y-1.5">
+                                      {vercel.deployments.slice(0, 5).map((d) => (
+                                        <div key={d.id} className="flex items-start gap-2">
+                                          <div className={cn(
+                                            "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                                            STATE_COLORS[d.state] ?? "bg-foreground/20"
+                                          )} />
+                                          <div className="min-w-0 flex-1">
+                                            <p className="truncate text-[10px] text-foreground/50">
+                                              {d.commitMessage || d.id}
+                                            </p>
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-[9px] text-foreground/20">
+                                                {d.target}
+                                              </span>
+                                              <span className="text-[9px] text-foreground/15">
+                                                {timeAgo(d.createdAt)}
+                                              </span>
+                                            </div>
                                           </div>
+                                          <Rocket className="mt-0.5 h-3 w-3 shrink-0 text-foreground/10" />
                                         </div>
-                                        <Rocket className="mt-0.5 h-3 w-3 shrink-0 text-foreground/10" />
-                                      </div>
-                                    ))}
+                                      ))}
+                                    </div>
                                   </div>
+                                )
+                              ) : (
+                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                                  <p className="text-[10px] text-foreground/35">
+                                    Configure <code className="rounded bg-foreground/[0.08] px-1 py-0.5 text-[9px] text-foreground/50">VERCEL_API_TOKEN</code> nas variaveis de ambiente do Vercel para conectar.
+                                  </p>
                                 </div>
                               )}
                             </div>
