@@ -265,7 +265,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative max-h-[88vh] w-96 overflow-y-auto overflow-x-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              className="relative flex max-h-[88vh] w-96 flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
                 backdropFilter: "blur(40px) saturate(1.8)",
@@ -274,8 +274,8 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 pb-2 pt-4">
+              {/* Header — always visible, never scrolls */}
+              <div className="flex shrink-0 items-center justify-between px-4 pb-2 pt-4">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-3.5 w-3.5 text-foreground/40" />
                   <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground/40">Calendario</span>
@@ -289,6 +289,9 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   </button>
                 </div>
               </div>
+
+              {/* Scrollable content area */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden">
 
               {/* Month nav */}
               <div className="flex items-center justify-between px-4 pb-3 pt-1">
@@ -595,6 +598,8 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   </div>
                 </>
               )}
+
+              </div>{/* end scrollable content */}
 
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
             </div>
