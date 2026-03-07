@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, History, Orbit, Plug } from "lucide-react";
+import { Calendar, History, Mail, Orbit, Plug } from "lucide-react";
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ConnectorsPanel } from "@/components/chat/connectors-panel";
 import { CalendarPanel } from "@/components/chat/calendar-panel";
+import { EmailPanel } from "@/components/chat/email-panel";
 
 interface LeftToolbarProps {
   currentSessionId?: string;
@@ -16,17 +17,20 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   const closeAll = () => {
     setHistoryOpen(false);
     setConnectorsOpen(false);
     setCalendarOpen(false);
+    setEmailOpen(false);
   };
 
-  const toggle = (panel: "history" | "connectors" | "calendar") => {
+  const toggle = (panel: "history" | "connectors" | "calendar" | "email") => {
     setHistoryOpen(panel === "history" ? (v) => !v : false);
     setConnectorsOpen(panel === "connectors" ? (v) => !v : false);
     setCalendarOpen(panel === "calendar" ? (v) => !v : false);
+    setEmailOpen(panel === "email" ? (v) => !v : false);
   };
 
   return (
@@ -59,6 +63,14 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
         >
           <Calendar className="h-3.5 w-3.5" />
         </button>
+        <button
+          type="button"
+          onClick={() => toggle("email")}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
+          title="E-mail"
+        >
+          <Mail className="h-3.5 w-3.5" />
+        </button>
         <div className="my-0.5 h-px w-5 self-center bg-foreground/[0.06]" />
         <button
           type="button"
@@ -88,6 +100,11 @@ export function LeftToolbar({ currentSessionId }: LeftToolbarProps) {
       <CalendarPanel
         open={calendarOpen}
         onClose={() => setCalendarOpen(false)}
+      />
+
+      <EmailPanel
+        open={emailOpen}
+        onClose={() => setEmailOpen(false)}
       />
     </>
   );
