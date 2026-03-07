@@ -129,6 +129,20 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const setCardStatus = useSpacesStore((s) => s.setCardStatus);
   const card = useSpacesStore((s) => s.cards.find((c) => c.id === id));
 
+  // Pull text from connected text nodes via edges
+  const connectedText = useSpacesStore((s) => {
+    const incomingEdges = s.edges.filter((e) => e.target === id);
+    const texts: string[] = [];
+    for (const edge of incomingEdges) {
+      const srcNode = s.nodes.find((n) => n.id === edge.source);
+      if (srcNode && (srcNode.data as Record<string, unknown>).type === "text") {
+        const txt = (srcNode.data as Record<string, unknown>).text as string;
+        if (txt?.trim()) texts.push(txt.trim());
+      }
+    }
+    return texts.join("\n");
+  });
+
   const [promptText, setPromptText] = useState(card?.prompt ?? "");
   const [localModel, setLocalModel] = useState<GenerationModel>(
     card?.settings.model ?? "nano-banana-pro"
@@ -139,6 +153,9 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const [localQty, setLocalQty] = useState(card?.settings.quantity ?? 4);
   const [refImage, setRefImage] = useState<string | null>(null);
 
+  // Effective prompt: local text takes priority, fallback to connected text nodes
+  const effectivePrompt = promptText.trim() || connectedText;
+
   const isGenerating =
     nodeData.status === "generating" || nodeData.status === "queued";
   const hasImages = card && card.imageUrls.length > 0;
@@ -147,9 +164,9 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
 
   const handleGenerate = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!promptText.trim() || isGenerating) return;
+    if (!effectivePrompt || isGenerating) return;
     updateCard(id, {
-      prompt: promptText,
+      prompt: effectivePrompt,
       settings: {
         ...(card?.settings ?? DEFAULT_GENERATION_SETTINGS),
         model: localModel,
@@ -282,7 +299,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           <textarea
             value={promptText}
             onChange={(e) => setPromptText(e.target.value)}
-            placeholder="Descreva a imagem..."
+            placeholder={connectedText || "Descreva a imagem..."}
             rows={2}
             className="w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.14]"
           />
@@ -376,7 +393,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={!promptText.trim() || isGenerating}
+            disabled={!effectivePrompt || isGenerating}
             className={cn(
               "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[11px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-20",
               "border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/18"
