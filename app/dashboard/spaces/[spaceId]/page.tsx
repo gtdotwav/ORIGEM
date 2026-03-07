@@ -110,8 +110,11 @@ export default function SpaceCanvasPage() {
   const spaceNodes = useMemo(
     () =>
       nodes.filter((n) => {
+        // Generation cards are tracked in the cards array
         const card = cards.find((c) => c.id === n.id);
-        return card?.spaceId === spaceId;
+        if (card) return card.spaceId === spaceId;
+        // Text nodes store spaceId in their data
+        return (n.data as Record<string, unknown>).spaceId === spaceId;
       }),
     [nodes, cards, spaceId]
   );

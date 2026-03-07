@@ -283,7 +283,7 @@ export const useSpacesStore = create<SpacesState>()(
           id,
           type: "text",
           position: position ?? { x: 250 + Math.random() * 200, y: 150 + Math.random() * 200 },
-          data: { type: "text", text: "" },
+          data: { type: "text", text: "", spaceId },
         };
         set((s) => ({ nodes: [...s.nodes, node] }));
         return id;
