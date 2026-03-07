@@ -10,9 +10,25 @@ export const authEnabled =
 
 const nextAuth = authEnabled
   ? NextAuth({
-      providers: [GitHub],
+      providers: [
+        GitHub({ authorization: { params: { scope: "read:user user:email repo" } } }),
+      ],
       pages: { signIn: "/login" },
       callbacks: {
+        async jwt({ token, account }) {
+          if (account?.access_token) {
+            token.accessToken = account.access_token;
+            token.githubUsername = account.providerAccountId;
+          }
+          return token;
+        },
+        async session({ session, token }) {
+          (session as unknown as Record<string, unknown>).accessToken =
+            token.accessToken;
+          (session as unknown as Record<string, unknown>).githubUsername =
+            token.githubUsername;
+          return session;
+        },
         authorized({ auth: session, request: { nextUrl } }) {
           const isLoggedIn = !!session?.user;
           const isProtected =
