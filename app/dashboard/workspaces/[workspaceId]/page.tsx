@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useSessionStore } from "@/stores/session-store";
 import { useProjectStore } from "@/stores/project-store";
-import { useAgentStore } from "@/stores/agent-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useWorkspaceStats } from "@/hooks/use-workspace-stats";
 import {
@@ -78,10 +77,18 @@ function DetailContent() {
   const archiveProject = useProjectStore((s) => s.archiveProject);
   const removeProject = useProjectStore((s) => s.removeProject);
 
+  const [hydrated, setHydrated] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [editProjectTarget, setEditProjectTarget] = useState<Project | null>(null);
+
+  useEffect(() => {
+    // Wait for Zustand persist to rehydrate from localStorage
+    const unsub = useWorkspaceStore.persist.onFinishHydration(() => setHydrated(true));
+    if (useWorkspaceStore.persist.hasHydrated()) setHydrated(true);
+    return unsub;
+  }, []);
 
   const activeProjects = useMemo(
     () => wsProjects.filter((p) => p.status === "active"),
@@ -132,6 +139,8 @@ function DetailContent() {
   };
 
   if (!workspace) {
+    // Still loading from localStorage — show skeleton instead of "not found"
+    if (!hydrated) return <DetailFallback />;
     return (
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
         <CosmicEmptyState
