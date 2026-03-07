@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { Slide, Presentation } from "@/stores/slides-store";
+import type { Slide, Presentation } from "@/types/slides";
 
 const THEME_BG: Record<Presentation["theme"], string> = {
   dark: "bg-[#1a1a2e]",

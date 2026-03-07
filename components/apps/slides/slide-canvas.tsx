@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import type { Slide, SlideElement, Presentation } from "@/stores/slides-store";
+import type { Slide, SlideElement, Presentation } from "@/types/slides";
 
-const THEME_STYLES: Record<Presentation["theme"], Record<SlideElement["type"], string> & { bg: string }> = {
+const THEME_STYLES: Record<Presentation["theme"], Record<string, string>> = {
   dark: {
     bg: "bg-[#1a1a2e]",
     title: "text-white text-3xl font-bold",

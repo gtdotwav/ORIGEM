@@ -111,6 +111,11 @@ interface SlidesState {
   updateElement: (slideId: string, elementId: string, updates: Partial<SlideElement>) => void;
   removeElement: (slideId: string, elementId: string) => void;
 
+  setActiveSlide: (index: number) => void;
+  moveSlide: (fromIndex: number, toIndex: number) => void;
+  updatePresentationTheme: (theme: Presentation["theme"]) => void;
+  updatePresentationTitle: (title: string) => void;
+
   getActivePresentation: () => Presentation | undefined;
 }
 
@@ -273,6 +278,43 @@ export const useSlidesStore = create<SlidesState>()(
                     ),
                     updatedAt: new Date().toISOString(),
                   }
+                : p
+            ),
+          })),
+
+        setActiveSlide: (index) => set({ activeSlideIndex: index }),
+
+        moveSlide: (fromIndex, toIndex) =>
+          set((s) => {
+            const pres = s.presentations.find((p) => p.id === s.activePresentationId);
+            if (!pres) return s;
+            const slides = [...pres.slides];
+            const [moved] = slides.splice(fromIndex, 1);
+            slides.splice(toIndex, 0, moved);
+            return {
+              presentations: s.presentations.map((p) =>
+                p.id === s.activePresentationId
+                  ? { ...p, slides, updatedAt: new Date().toISOString() }
+                  : p
+              ),
+              activeSlideIndex: toIndex,
+            };
+          }),
+
+        updatePresentationTheme: (theme) =>
+          set((s) => ({
+            presentations: s.presentations.map((p) =>
+              p.id === s.activePresentationId
+                ? { ...p, theme, updatedAt: new Date().toISOString() }
+                : p
+            ),
+          })),
+
+        updatePresentationTitle: (title) =>
+          set((s) => ({
+            presentations: s.presentations.map((p) =>
+              p.id === s.activePresentationId
+                ? { ...p, title, updatedAt: new Date().toISOString() }
                 : p
             ),
           })),

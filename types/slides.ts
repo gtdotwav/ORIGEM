@@ -1,8 +1,8 @@
 export type SlideCreationMode = "manual" | "prompt" | "basics" | "enhance";
 
-export type SlideElementType = "text" | "image" | "shape";
+export type SlideElementType = "text" | "image" | "shape" | "title" | "subtitle" | "body" | "quote" | "author";
 
-export type SlideLayout = "title" | "content" | "two-column" | "blank" | "image-full";
+export type SlideLayout = "title" | "content" | "two-column" | "blank" | "image-full" | "image" | "quote";
 
 export interface SlideElementStyle {
   fontSize?: number;
@@ -37,7 +37,7 @@ export interface Presentation {
   id: string;
   title: string;
   slides: Slide[];
-  theme: "dark" | "light" | "gradient";
+  theme: "dark" | "light" | "gradient" | "neon";
   createdAt: string;
   updatedAt: string;
 }

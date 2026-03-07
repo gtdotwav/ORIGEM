@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useSlidesStore } from "@/stores/slides-store";
-import type { SlideLayout, Presentation as PresentationType } from "@/stores/slides-store";
+import { useSlidesStore, createBlankSlide } from "@/stores/slides-store";
+import type { SlideLayout, Presentation as PresentationType } from "@/types/slides";
 import { SlideThumbnail } from "./slide-thumbnail";
 import { SlideCanvas } from "./slide-canvas";
 import { useState } from "react";
@@ -161,7 +161,7 @@ export function SlideEditor() {
                     <button
                       key={l.value}
                       type="button"
-                      onClick={() => { addSlide(l.value); setShowLayoutPicker(false); }}
+                      onClick={() => { addSlide(createBlankSlide(l.value)); setShowLayoutPicker(false); }}
                       className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-foreground/60 transition-colors hover:bg-foreground/[0.05] hover:text-foreground/80"
                     >
                       <l.icon className="h-3.5 w-3.5 text-foreground/30" />
@@ -181,7 +181,9 @@ export function SlideEditor() {
               slide={currentSlide}
               theme={presentation.theme}
               slideIndex={activeSlideIndex}
-              onUpdateElement={updateElement}
+              onUpdateElement={(_slideIndex, elementId, content) =>
+                updateElement(currentSlide.id, elementId, { content })
+              }
             />
           </div>
 
@@ -211,7 +213,7 @@ export function SlideEditor() {
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => duplicateSlide(activeSlideIndex)}
+                onClick={() => duplicateSlide(currentSlide.id)}
                 className="rounded-md p-1.5 text-foreground/30 transition-colors hover:bg-foreground/[0.05] hover:text-foreground/60"
                 title="Duplicar slide"
               >
@@ -219,7 +221,7 @@ export function SlideEditor() {
               </button>
               <button
                 type="button"
-                onClick={() => removeSlide(activeSlideIndex)}
+                onClick={() => removeSlide(currentSlide.id)}
                 disabled={presentation.slides.length <= 1}
                 className="rounded-md p-1.5 text-foreground/30 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30"
                 title="Remover slide"
