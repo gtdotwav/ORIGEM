@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import type { ProviderName } from "@/types/provider";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 
@@ -81,7 +82,6 @@ export async function getLanguageModel(
       })(modelId);
 
     case "google":
-      const { createGoogleGenerativeAI } = require("@ai-sdk/google");
       return createGoogleGenerativeAI({ apiKey })(modelId);
 
     case "baseten":

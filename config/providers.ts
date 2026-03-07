@@ -114,6 +114,17 @@ export const PROVIDER_CATALOG: ProviderMeta[] = [
         costTier: "low",
         bestFor: ["fast-response", "long-context"],
       },
+      {
+        id: "gemini-3-flash-preview",
+        name: "Gemini 3 Flash",
+        provider: "google",
+        contextWindow: 1000000,
+        supportsTools: true,
+        supportsVision: true,
+        supportsStreaming: true,
+        costTier: "low",
+        bestFor: ["fast-response", "multimodal", "code"],
+      },
     ],
   },
   {

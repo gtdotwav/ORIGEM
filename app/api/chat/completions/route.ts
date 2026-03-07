@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         { provider: "baseten", env: "BASETEN_API_KEY" },
         { provider: "openai", env: "OPENAI_API_KEY" },
         { provider: "anthropic", env: "ANTHROPIC_API_KEY" },
+        { provider: "google", env: "GOOGLE_API_KEY" },
         { provider: "groq", env: "GROQ_API_KEY" },
       ];
       for (const { provider: p, env } of ENV_PROVIDERS) {
