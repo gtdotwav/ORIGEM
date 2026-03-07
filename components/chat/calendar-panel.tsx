@@ -317,7 +317,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                   const hasEvents = eventDateKeys.has(toDateKey(cell.date));
                   return (
                     <div
-                      key={i}
+                      key={toDateKey(cell.date)}
                       role="button"
                       tabIndex={0}
                       onMouseDown={(e) => { e.preventDefault(); handleDayMouseDown(cell.date); }}

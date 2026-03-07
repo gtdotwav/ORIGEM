@@ -10,7 +10,7 @@ import {
   Plus,
   Presentation,
   Send,
-  Sparkles,
+  Blocks,
   Square,
   Trash2,
   Type,
@@ -48,7 +48,7 @@ const MODES: {
   },
   {
     id: "prompt",
-    icon: Sparkles,
+    icon: Blocks,
     title: "Por Prompt",
     description: "Descreva o que quer e a IA gera seus slides em tempo real.",
     color: "text-neon-purple",

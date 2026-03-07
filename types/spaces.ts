@@ -128,14 +128,14 @@ export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
   negativePrompt: "",
 };
 
-export interface ModelInfo {
+export interface GenerationModelInfo {
   id: GenerationModel;
   label: string;
   provider: string;
   type: GenerationType;
 }
 
-export const IMAGE_MODELS: ModelInfo[] = [
+export const IMAGE_MODELS: GenerationModelInfo[] = [
   { id: "nano-banana-pro", label: "Nano Banana Pro", provider: "Banana", type: "image" },
   { id: "google-imagen-4", label: "Imagen 4", provider: "Google", type: "image" },
   { id: "gpt-image", label: "GPT Image", provider: "OpenAI", type: "image" },
@@ -149,7 +149,7 @@ export const IMAGE_MODELS: ModelInfo[] = [
   { id: "origem-native", label: "ORIGEM Native", provider: "ORIGEM", type: "image" },
 ];
 
-export const VIDEO_MODELS: ModelInfo[] = [
+export const VIDEO_MODELS: GenerationModelInfo[] = [
   { id: "google-veo-2", label: "Veo 2", provider: "Google", type: "video" },
   { id: "sora", label: "Sora", provider: "OpenAI", type: "video" },
   { id: "runway-gen3", label: "Gen-3 Alpha", provider: "Runway", type: "video" },
@@ -158,4 +158,4 @@ export const VIDEO_MODELS: ModelInfo[] = [
   { id: "minimax-video", label: "Video-01", provider: "MiniMax", type: "video" },
 ];
 
-export const ALL_MODELS: ModelInfo[] = [...IMAGE_MODELS, ...VIDEO_MODELS];
+export const ALL_MODELS: GenerationModelInfo[] = [...IMAGE_MODELS, ...VIDEO_MODELS];
