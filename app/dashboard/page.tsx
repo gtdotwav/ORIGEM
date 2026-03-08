@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Settings, Send, Loader2, ChevronDown, Blocks as SparklesIcon } from "lucide-react";
+import {
+  ImageIcon,
+  Settings,
+  Send,
+  Loader2,
+  Blocks as SparklesIcon,
+  Paperclip,
+  Mic,
+  ArrowUp,
+  MessageCircle,
+  Workflow,
+} from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -47,7 +58,7 @@ export default function DashboardPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const addSession = useSessionStore((s) => s.addSession);
@@ -60,11 +71,22 @@ export default function DashboardPage() {
   const chatMode = usePersonaStore((s) => s.chatMode);
   const isEcosystem = chatMode === "ecosystem";
   const [ideasOpen, setIdeasOpen] = useState(false);
-  const [toolsExpanded, setToolsExpanded] = useState(false);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    textareaRef.current?.focus();
   }, []);
+
+  // Auto-resize textarea
+  const adjustTextarea = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, []);
+
+  useEffect(() => {
+    adjustTextarea();
+  }, [input, adjustTextarea]);
 
   const startSessionFromHome = async (
     options?: { prompt?: string; metadata?: Record<string, unknown> }
@@ -163,6 +185,8 @@ export default function DashboardPage() {
     }
   };
 
+  const hasInput = input.trim().length > 0;
+
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
 
@@ -175,176 +199,210 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative z-10 flex w-full max-w-[640px] flex-col items-center"
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex w-full max-w-[680px] flex-col items-center"
       >
-        <div className="pointer-events-none absolute -inset-10 rounded-[40px] border border-neon-cyan/8 bg-neon-cyan/4 blur-2xl" />
-        <div className="w-full rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 shadow-2xl backdrop-blur-xl">
-          {/* Greeting */}
-          <div className="mb-1 flex items-center gap-2">
-            <Image src="/logo.png" alt="ORIGEM" width={20} height={20} className="pointer-events-none" />
-            <span className="text-sm text-foreground/70">Bem-vindo ao ORIGEM</span>
-          </div>
+        {/* Ambient glow */}
+        <div className="pointer-events-none absolute -inset-16 rounded-[60px] bg-neon-cyan/[0.03] blur-3xl" />
 
-          <h1 className="mb-5 text-2xl font-semibold text-foreground">
-            Como posso ajudar hoje?
-          </h1>
-
-          {/* Workspace indicator */}
-          {activeWsName && (
-            <div className="mb-2 flex items-center gap-2 text-xs text-neon-cyan/60">
-              <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan/50" />
-              Criando em: {activeWsName}
+        <div className="w-full overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/80 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4">
+            <div className="mb-1.5 flex items-center gap-2">
+              <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-60" />
+              <span className="text-[12px] font-medium tracking-wide text-foreground/40">
+                Bem-vindo ao ORIGEM
+              </span>
             </div>
-          )}
 
-          {/* Main input row */}
-          <div data-tour="chat-input" className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.04] p-2.5">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Pergunte qualquer coisa..."
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  void startSessionFromHome();
-                }
-              }}
-            />
-            <button
-              data-tour="tools-chevron"
-              type="button"
-              onClick={() => setToolsExpanded(!toolsExpanded)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
-            >
-              <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", toolsExpanded && "rotate-180")} />
-            </button>
-            <button
-              type="button"
-              onClick={() => void startSessionFromHome()}
-              disabled={!input.trim() || sending || uploadingImage}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/50 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send className="h-3.5 w-3.5" />
-              {sending || uploadingImage ? "..." : "Enviar"}
-            </button>
+            <h1 className="text-[22px] font-semibold leading-tight text-foreground/90">
+              Como posso ajudar hoje?
+            </h1>
+
+            {/* Workspace indicator */}
+            {activeWsName && (
+              <div className="mt-2 flex items-center gap-2 text-[11px] text-neon-cyan/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan/50" />
+                Criando em: {activeWsName}
+              </div>
+            )}
           </div>
 
-          {/* Expanded tools panel */}
+          {/* Input area */}
+          <div className="px-4 pb-3">
+            <div
+              data-tour="chat-input"
+              className={cn(
+                "relative rounded-xl border transition-all duration-200",
+                hasInput || ideasOpen
+                  ? "border-foreground/[0.14] bg-foreground/[0.04] shadow-lg shadow-black/20"
+                  : "border-foreground/[0.08] bg-foreground/[0.025] hover:border-foreground/[0.12]"
+              )}
+            >
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Descreva o que precisa — uma ideia, uma tarefa, uma pergunta..."
+                rows={1}
+                className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[14px] leading-relaxed text-foreground placeholder:text-foreground/25 outline-none"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void startSessionFromHome();
+                  }
+                }}
+              />
+
+              {/* Bottom toolbar inside input */}
+              <div className="flex items-center gap-1 px-2.5 pb-2.5">
+                {/* Left tools */}
+                <button
+                  type="button"
+                  onClick={openImagePicker}
+                  disabled={sending || uploadingImage}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50 disabled:opacity-30"
+                  title="Anexar imagem"
+                >
+                  <Paperclip className="h-3.5 w-3.5" />
+                </button>
+                <AIVoiceInput
+                  onStop={(dur) => {
+                    if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
+                  }}
+                />
+                <CriticPanel />
+                <button
+                  type="button"
+                  onClick={() => setIdeasOpen((v) => !v)}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                    ideasOpen
+                      ? "bg-neon-purple/10 text-neon-purple"
+                      : "text-foreground/25 hover:bg-foreground/[0.06] hover:text-foreground/50"
+                  )}
+                  title="Gerar ideias"
+                >
+                  <SparklesIcon className="h-3.5 w-3.5" />
+                </button>
+
+                <div className="flex-1" />
+
+                {/* Hint */}
+                {!hasInput && (
+                  <span className="mr-2 hidden text-[10px] text-foreground/15 sm:inline">
+                    Enter para enviar
+                  </span>
+                )}
+
+                {/* Send button */}
+                <button
+                  type="button"
+                  onClick={() => void startSessionFromHome()}
+                  disabled={!hasInput || sending || uploadingImage}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
+                    hasInput && !sending
+                      ? "bg-neon-cyan text-black shadow-md shadow-neon-cyan/25 hover:bg-neon-cyan/90 hover:shadow-lg hover:shadow-neon-cyan/30 active:scale-95"
+                      : "bg-foreground/[0.06] text-foreground/20"
+                  )}
+                >
+                  {sending || uploadingImage ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <ArrowUp className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Upload indicator */}
           <AnimatePresence>
-            {toolsExpanded && (
+            {uploadingImage && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="overflow-hidden"
+                className="overflow-hidden px-4"
               >
-                <div className="mt-2 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
-                  {/* Row 1 — Model + Mode */}
-                  <div className="flex items-center gap-2">
-                    <LLMSelector className="flex-1" />
-                    <ChatModeToggle />
-                  </div>
-
-                  {/* Row 2 — Tools */}
-                  <div className="mt-2 flex items-center gap-1 border-t border-foreground/[0.04] pt-2">
-                    <AIVoiceInput
-                      onStop={(dur) => {
-                        if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={openImagePicker}
-                      disabled={sending || uploadingImage}
-                      className="rounded-lg p-2 text-foreground/25 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/50 disabled:opacity-40"
-                      title="Enviar imagem"
-                    >
-                      <ImageIcon className="h-3.5 w-3.5" />
-                    </button>
-                    <CriticPanel />
-                    <button
-                      type="button"
-                      onClick={() => setIdeasOpen((v) => !v)}
-                      className={cn(
-                        "rounded-lg p-2 transition-colors",
-                        ideasOpen
-                          ? "text-neon-purple"
-                          : "text-foreground/25 hover:bg-foreground/[0.04] hover:text-foreground/50"
-                      )}
-                      title="Gerar ideias"
-                    >
-                      <SparklesIcon className="h-3.5 w-3.5" />
-                    </button>
-                    <div className="flex-1" />
-                    <button
-                      type="button"
-                      onClick={() => router.push("/dashboard/settings/providers")}
-                      className="rounded-lg p-2 text-foreground/20 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/40"
-                      title="Configuracoes"
-                    >
-                      <Settings className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                <div className="mb-3 flex items-center gap-3 rounded-xl border border-neon-cyan/20 bg-neon-cyan/5 px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
+                  <span className="text-xs text-neon-cyan">Processando imagem...</span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Mode indicator */}
-          <div className="mt-1.5 flex items-center justify-between px-1">
-            <span className="text-[10px] text-foreground/20">
-              {isEcosystem ? "agent \u221E" : "chat direto"}
-            </span>
-          </div>
-
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(event) => {
-              void handleImageSelected(event);
-            }}
-          />
-
-          {/* Upload indicator */}
-          {uploadingImage && (
-            <div className="mb-3 flex items-center gap-3 rounded-xl border border-neon-cyan/20 bg-neon-cyan/5 px-3 py-2">
-              <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-              <span className="text-xs text-neon-cyan">Processando imagem...</span>
-            </div>
-          )}
-
           {/* Idea swiper */}
           <AnimatePresence>
             {ideasOpen && (
-              <IdeaSwiper
-                onSelectIdea={(prompt) => {
-                  setInput(prompt);
-                  setIdeasOpen(false);
-                  inputRef.current?.focus();
-                }}
-                onStartChat={(prompt) => {
-                  setIdeasOpen(false);
-                  void startSessionFromHome({ prompt });
-                }}
-                onClose={() => setIdeasOpen(false)}
-              />
+              <div className="px-4 pb-3">
+                <IdeaSwiper
+                  onSelectIdea={(prompt) => {
+                    setInput(prompt);
+                    setIdeasOpen(false);
+                    textareaRef.current?.focus();
+                  }}
+                  onStartChat={(prompt) => {
+                    setIdeasOpen(false);
+                    void startSessionFromHome({ prompt });
+                  }}
+                  onClose={() => setIdeasOpen(false)}
+                />
+              </div>
             )}
           </AnimatePresence>
 
+          {/* Footer bar */}
+          <div className="flex items-center justify-between border-t border-foreground/[0.04] px-4 py-2.5">
+            {/* Mode indicator */}
+            <div className="flex items-center gap-1.5">
+              {isEcosystem ? (
+                <Workflow className="h-3 w-3 text-neon-purple/60" />
+              ) : (
+                <MessageCircle className="h-3 w-3 text-neon-cyan/50" />
+              )}
+              <span className={cn(
+                "text-[11px] font-medium",
+                isEcosystem ? "text-neon-purple/50" : "text-foreground/30"
+              )}>
+                {isEcosystem ? "Ecossistema" : "Chat direto"}
+              </span>
+            </div>
+
+            {/* Right side tools */}
+            <div className="flex items-center gap-1">
+              <LLMSelector className="" />
+              <ChatModeToggle />
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/settings/providers")}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/20 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/40"
+                title="Configuracoes"
+              >
+                <Settings className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
         </div>
       </motion.div>
+
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => {
+          void handleImageSelected(event);
+        }}
+      />
 
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">
         <div className="text-center">
-          <p className="text-[10px] text-foreground/15">ORIGEM — Psychosemantic AI Engine</p>
+          <p className="text-[10px] text-foreground/12">ORIGEM — Intelligence OS</p>
         </div>
       </div>
     </div>
