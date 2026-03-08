@@ -33,33 +33,30 @@ export const useFeedStore = create<FeedState>()(
           set({ items: generateSeedFeedItems() });
         },
 
-        toggleLike: (feedItemId) => {
-          const existing = get().interactions.find(
-            (i) => i.feedItemId === feedItemId && i.type === "like"
-          );
-          if (existing) {
-            set({
-              interactions: get().interactions.filter((i) => i.id !== existing.id),
-            });
-          } else {
-            set({
-              interactions: [
-                ...get().interactions,
-                {
-                  id: nanoid(),
-                  feedItemId,
-                  type: "like",
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-            });
-          }
-        },
+        toggleLike: (feedItemId) =>
+          set((s) => {
+            const existing = s.interactions.find(
+              (i) => i.feedItemId === feedItemId && i.type === "like"
+            );
+            return {
+              interactions: existing
+                ? s.interactions.filter((i) => i.id !== existing.id)
+                : [
+                    ...s.interactions,
+                    {
+                      id: nanoid(),
+                      feedItemId,
+                      type: "like",
+                      createdAt: new Date().toISOString(),
+                    },
+                  ],
+            };
+          }),
 
-        addRepost: (feedItemId) => {
-          set({
+        addRepost: (feedItemId) =>
+          set((s) => ({
             interactions: [
-              ...get().interactions,
+              ...s.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -67,13 +64,12 @@ export const useFeedStore = create<FeedState>()(
                 createdAt: new Date().toISOString(),
               },
             ],
-          });
-        },
+          })),
 
-        addToContext: (feedItemId, contextRef) => {
-          set({
+        addToContext: (feedItemId, contextRef) =>
+          set((s) => ({
             interactions: [
-              ...get().interactions,
+              ...s.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -82,13 +78,12 @@ export const useFeedStore = create<FeedState>()(
                 createdAt: new Date().toISOString(),
               },
             ],
-          });
-        },
+          })),
 
-        shareWith: (feedItemId, connectionId) => {
-          set({
+        shareWith: (feedItemId, connectionId) =>
+          set((s) => ({
             interactions: [
-              ...get().interactions,
+              ...s.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -97,8 +92,7 @@ export const useFeedStore = create<FeedState>()(
                 createdAt: new Date().toISOString(),
               },
             ],
-          });
-        },
+          })),
 
         setSearchQuery: (query) => set({ searchQuery: query }),
         setActiveFilter: (filter) => set({ activeFilter: filter }),

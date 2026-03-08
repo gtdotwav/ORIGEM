@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
 const VERCEL_API = "https://api.vercel.com";
-const PROJECT_ID = "prj_HR7CZFYhL4PT0d6OqDavvmwFJE9d";
-const TEAM_ID = "team_VOkkkrDp99qLGVZYQpi9jXtV";
+const PROJECT_ID = process.env.VERCEL_PROJECT_ID ?? "";
+const TEAM_ID = process.env.VERCEL_TEAM_ID ?? "";
 
 export async function GET() {
   const token = process.env.VERCEL_API_TOKEN;
 
-  if (!token) {
+  if (!token || !PROJECT_ID || !TEAM_ID) {
     return NextResponse.json({ connected: false, reason: "no_token" });
   }
 

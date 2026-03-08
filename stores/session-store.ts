@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { Session, Message } from "@/types/session";
+import { useRuntimeStore } from "@/stores/runtime-store";
 
 interface SessionState {
   sessions: Session[];
@@ -49,13 +50,15 @@ export const useSessionStore = create<SessionState>()(
               sess.id === id ? { ...sess, ...updates } : sess
             ),
           })),
-        removeSession: (id) =>
+        removeSession: (id) => {
           set((s) => ({
             sessions: s.sessions.filter((sess) => sess.id !== id),
             messages: s.messages.filter((message) => message.sessionId !== id),
             currentSessionId:
               s.currentSessionId === id ? null : s.currentSessionId,
-          })),
+          }));
+          useRuntimeStore.getState().removeSession(id);
+        },
         setLoading: (loading) => set({ isLoading: loading }),
       }),
       {

@@ -157,8 +157,10 @@ export default function ChatPage() {
   );
 
   const latestAssistantMessageId = useMemo(() => {
-    const reversed = [...sessionMessages].reverse();
-    return reversed.find((message) => message.role === "assistant")?.id ?? null;
+    for (let i = sessionMessages.length - 1; i >= 0; i--) {
+      if (sessionMessages[i].role === "assistant") return sessionMessages[i].id;
+    }
+    return null;
   }, [sessionMessages]);
 
   useEffect(() => {
@@ -226,7 +228,7 @@ export default function ChatPage() {
 
     const timer = setInterval(() => {
       persistSnapshotQuietly();
-    }, 900);
+    }, 5_000);
 
     return () => clearInterval(timer);
   }, [sessionId, runtime?.isRunning]);
@@ -269,8 +271,9 @@ export default function ChatPage() {
         await runSimpleChat(sessionId, text);
       }
       persistSnapshotQuietly();
-    } catch {
-      toast.error("Erro ao processar mensagem.");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "";
+      toast.error(detail ? `Erro: ${detail}` : "Erro ao processar mensagem.");
     } finally {
       setIsSending(false);
     }
@@ -386,8 +389,10 @@ export default function ChatPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              void navigator.clipboard.writeText(message.content);
-                              toast.success("Copiado!");
+                              navigator.clipboard.writeText(message.content).then(
+                                () => toast.success("Copiado!"),
+                                () => toast.error("Falha ao copiar")
+                              );
                             }}
                             className="absolute right-2 top-2 rounded-md p-1 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100"
                           >

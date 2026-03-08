@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Activity,
   ArrowLeft,
@@ -121,6 +122,7 @@ export default function DashboardControlPage() {
         setProviderTotalCount(data.providers.length);
       } catch (error) {
         console.error("Failed to load providers summary", error);
+        toast.error("Falha ao carregar resumo de provedores.");
       }
     };
 

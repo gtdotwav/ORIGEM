@@ -41,6 +41,9 @@ export const useDecompositionStore = create<DecompositionState>()(
           decompositions: state.decompositions,
           activeDecompositionId: state.activeDecompositionId,
         }),
+        onRehydrateStorage: () => (state) => {
+          if (state) state.isDecomposing = false;
+        },
       }
     ),
     { name: "decomposition-store" }

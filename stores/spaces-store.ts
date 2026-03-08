@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import {
   applyNodeChanges,
   applyEdgeChanges,
@@ -97,6 +97,7 @@ const EMPTY_PROMPT_BLOCKS: PromptBlock = {
 
 export const useSpacesStore = create<SpacesState>()(
   devtools(
+    persist(
     (set, get) => ({
       spaces: [],
       cards: [],
@@ -346,6 +347,15 @@ export const useSpacesStore = create<SpacesState>()(
           stylePresets: s.stylePresets.filter((p) => p.id !== presetId),
         })),
     }),
+    {
+      name: "origem-spaces",
+      partialize: (state) => ({
+        spaces: state.spaces,
+        cards: state.cards,
+        stylePresets: state.stylePresets,
+      }),
+    }
+    ),
     { name: "spaces-store" }
   )
 );

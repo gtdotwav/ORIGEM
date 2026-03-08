@@ -144,6 +144,7 @@ export default function ProvidersPage() {
         });
       } catch (error) {
         console.error("Failed to load provider settings", error);
+        toast.error("Falha ao carregar configuracoes de provedores.");
       }
     };
 

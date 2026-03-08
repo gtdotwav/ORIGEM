@@ -44,6 +44,7 @@ export const useAgentStore = create<AgentState>()(
         removeAgent: (id) =>
           set((s) => ({
             agents: s.agents.filter((a) => a.id !== id),
+            activeAgentId: s.activeAgentId === id ? null : s.activeAgentId,
           })),
         addOutput: (agentId, output) =>
           set((s) => ({
@@ -72,6 +73,7 @@ export const useAgentStore = create<AgentState>()(
         partialize: (state) => ({
           agents: state.agents,
           groups: state.groups,
+          activeAgentId: state.activeAgentId,
         }),
       }
     ),

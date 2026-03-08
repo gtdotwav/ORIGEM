@@ -80,9 +80,11 @@ export default function SettingsPage() {
   const [runtimeLanguage, setRuntimeLanguage] = useState("pt-BR");
 
   useEffect(() => {
-    setReducedMotion(localStorage.getItem("origem-reduced-motion") === "true");
-    setLanguage(localStorage.getItem("origem-language") ?? "pt-BR");
-    setRuntimeLanguage(localStorage.getItem("origem-default-runtime-language") ?? "pt-BR");
+    try {
+      setReducedMotion(localStorage.getItem("origem-reduced-motion") === "true");
+      setLanguage(localStorage.getItem("origem-language") ?? "pt-BR");
+      setRuntimeLanguage(localStorage.getItem("origem-default-runtime-language") ?? "pt-BR");
+    } catch { /* localStorage unavailable */ }
   }, []);
 
   const handleMotionToggle = (checked: boolean) => {

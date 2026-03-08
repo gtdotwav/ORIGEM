@@ -3,6 +3,7 @@ import { devtools, persist } from "zustand/middleware";
 import type { Workspace } from "@/types/workspace";
 import { useSessionStore } from "@/stores/session-store";
 import { useProjectStore } from "@/stores/project-store";
+import { useSpacesStore } from "@/stores/spaces-store";
 
 interface WorkspaceState {
   workspaces: Workspace[];
@@ -49,6 +50,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           for (const project of projects) {
             if (project.workspaceId === id) {
               removeProject(project.id);
+            }
+          }
+          const { spaces, deleteSpace } = useSpacesStore.getState();
+          for (const space of spaces) {
+            if (space.workspaceId === id) {
+              deleteSpace(space.id);
             }
           }
         },

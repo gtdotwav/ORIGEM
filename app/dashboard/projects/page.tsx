@@ -623,7 +623,7 @@ function ProjectsPageContent() {
           <ContextTabs
             contexts={contexts}
             selectedId={selectedContext?.id ?? null}
-            sessionId={targetSessionId!}
+            sessionId={targetSessionId ?? ""}
           />
 
           {/* Metrics row */}
@@ -699,7 +699,7 @@ function ProjectsPageContent() {
               </section>
 
               {/* Agent contributions */}
-              <AgentContributions agents={agents} sessionId={targetSessionId!} />
+              <AgentContributions agents={agents} sessionId={targetSessionId ?? ""} />
             </div>
 
             {/* Right column: Domains, Directions, Instruction */}
@@ -789,7 +789,7 @@ function ProjectsPageContent() {
             </p>
             <div className="mt-2 flex items-center gap-2">
               <Link
-                href={getJourneyStepHref("groups", targetSessionId!, selectedContext?.id)}
+                href={getJourneyStepHref("groups", targetSessionId ?? "", selectedContext?.id)}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
               >
                 Abrir Grupos

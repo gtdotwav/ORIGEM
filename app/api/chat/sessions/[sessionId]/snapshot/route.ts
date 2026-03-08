@@ -21,7 +21,17 @@ export async function GET(_: Request, { params }: Params) {
   return NextResponse.json(record);
 }
 
+const MAX_SNAPSHOT_BYTES = 10 * 1024 * 1024; // 10MB
+
 export async function PUT(request: Request, { params }: Params) {
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_SNAPSHOT_BYTES) {
+    return NextResponse.json(
+      { error: "payload_too_large", maxBytes: MAX_SNAPSHOT_BYTES },
+      { status: 413 }
+    );
+  }
+
   const { sessionId } = await params;
   const body = await request.json().catch(() => null);
 

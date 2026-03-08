@@ -45,6 +45,7 @@ interface RuntimeState {
   setOverallProgress: (sessionId: string, progress: number) => void;
   setRunning: (sessionId: string, running: boolean) => void;
   completeRun: (sessionId: string) => void;
+  removeSession: (sessionId: string) => void;
   getSession: (sessionId: string) => SessionRuntime | undefined;
 }
 
@@ -398,6 +399,12 @@ export const useRuntimeStore = create<RuntimeState>()(
             },
           };
         }),
+
+        removeSession: (sessionId) =>
+          set((state) => {
+            const { [sessionId]: _, ...rest } = state.sessions;
+            return { sessions: rest };
+          }),
 
         getSession: (sessionId) => get().sessions[sessionId],
       }),

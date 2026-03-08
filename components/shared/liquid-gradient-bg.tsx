@@ -241,6 +241,8 @@ class GradientScene {
   animationId: number | null = null;
   container: HTMLElement;
   resizeHandler: (() => void) | null = null;
+  mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+  touchMoveHandler: ((e: TouchEvent) => void) | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -291,11 +293,13 @@ class GradientScene {
     const onMove = (x: number, y: number) => {
       this.touchTexture.addTouch({ x: x / c.clientWidth, y: 1 - y / c.clientHeight });
     };
-    c.addEventListener("mousemove", (e) => onMove(e.offsetX, e.offsetY));
-    c.addEventListener("touchmove", (e) => {
+    this.mouseMoveHandler = (e: MouseEvent) => onMove(e.offsetX, e.offsetY);
+    this.touchMoveHandler = (e: TouchEvent) => {
       const rect = c.getBoundingClientRect();
       onMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-    });
+    };
+    c.addEventListener("mousemove", this.mouseMoveHandler);
+    c.addEventListener("touchmove", this.touchMoveHandler);
 
     this.resizeHandler = () => {
       this.camera.aspect = c.clientWidth / c.clientHeight;
@@ -324,6 +328,8 @@ class GradientScene {
   cleanup() {
     if (this.animationId) cancelAnimationFrame(this.animationId);
     if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
+    if (this.mouseMoveHandler) this.container.removeEventListener("mousemove", this.mouseMoveHandler);
+    if (this.touchMoveHandler) this.container.removeEventListener("touchmove", this.touchMoveHandler);
     this.renderer.dispose();
     if (this.container && this.renderer.domElement && this.container.contains(this.renderer.domElement)) {
       this.container.removeChild(this.renderer.domElement);

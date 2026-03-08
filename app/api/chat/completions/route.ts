@@ -46,7 +46,36 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages, provider, model, tier, maxTokens, systemPrompt } = body as {
+  const VALID_ROLES = new Set(["user", "assistant", "system"]);
+  const MAX_CONTENT_LENGTH = 32_000;
+  const MAX_SYSTEM_PROMPT_LENGTH = 8_000;
+  const MAX_MESSAGES = 200;
+
+  const rawMessages = body.messages as Array<{ role: string; content: string }>;
+
+  if (rawMessages.length > MAX_MESSAGES) {
+    return NextResponse.json(
+      { error: "too_many_messages", max: MAX_MESSAGES },
+      { status: 400 }
+    );
+  }
+
+  for (const msg of rawMessages) {
+    if (!VALID_ROLES.has(msg.role) || typeof msg.content !== "string") {
+      return NextResponse.json(
+        { error: "invalid_message", details: "each message needs valid role and string content" },
+        { status: 400 }
+      );
+    }
+    if (msg.content.length > MAX_CONTENT_LENGTH) {
+      return NextResponse.json(
+        { error: "message_too_long", maxLength: MAX_CONTENT_LENGTH },
+        { status: 400 }
+      );
+    }
+  }
+
+  const { provider, model, tier, maxTokens, systemPrompt } = body as {
     messages: Array<{ role: string; content: string }>;
     provider?: string;
     model?: string;
@@ -54,6 +83,21 @@ export async function POST(request: Request) {
     maxTokens?: number;
     systemPrompt?: string;
   };
+  const messages = rawMessages;
+
+  if (systemPrompt && (typeof systemPrompt !== "string" || systemPrompt.length > MAX_SYSTEM_PROMPT_LENGTH)) {
+    return NextResponse.json(
+      { error: "invalid_system_prompt", maxLength: MAX_SYSTEM_PROMPT_LENGTH },
+      { status: 400 }
+    );
+  }
+
+  if (maxTokens !== undefined && (typeof maxTokens !== "number" || maxTokens < 1 || maxTokens > 16_384)) {
+    return NextResponse.json(
+      { error: "invalid_max_tokens", range: [1, 16384] },
+      { status: 400 }
+    );
+  }
 
   let resolvedProvider: ProviderName;
   let resolvedModel: string;
