@@ -108,7 +108,7 @@ const AgentSchema = z.object({
   groupId: optStr,
   canvasNodeId: optStr,
   config: optRecord,
-  outputs: z.array(AgentOutputSchema),
+  outputs: z.array(AgentOutputSchema).max(50),
   createdAt: DateValueSchema,
   updatedAt: DateValueSchema,
 });

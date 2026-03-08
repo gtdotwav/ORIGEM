@@ -1134,7 +1134,8 @@ function generateSimpleResponse(_prompt: string): string {
 
 export async function runSimpleChat(
   sessionId: string,
-  prompt: string
+  prompt: string,
+  options?: { onStreamChunk?: (content: string) => void }
 ): Promise<void> {
   const sessionStore = useSessionStore.getState();
   const runtimeStore = useRuntimeStore.getState();
@@ -1146,11 +1147,9 @@ export async function runSimpleChat(
   let metadata: Record<string, unknown> | undefined;
 
   try {
-    // Try real LLM call
     const { useChatSettingsStore } = await import("@/stores/chat-settings-store");
     const { selectedTier, getActiveCritics } = useChatSettingsStore.getState();
 
-    // Build conversation history for context
     const history = sessionStore.messages
       .filter((m) => m.sessionId === sessionId)
       .sort(
@@ -1167,19 +1166,35 @@ export async function runSimpleChat(
     const hasManualSelection = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
 
     const { ORIGEM_SYSTEM_PROMPT } = await import("@/config/origem-prompt");
-    const { callChatCompletion } = await import("@/lib/chat-api");
-    const result = await callChatCompletion({
-      messages: history,
-      ...(hasManualSelection
-        ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
-        : { tier: selectedTier }),
-      systemPrompt: ORIGEM_SYSTEM_PROMPT,
-    });
 
-    response = result.content;
-
-    // Run critic pipeline if critics are active
     const activeCritics = getActiveCritics();
+    const useStreaming = options?.onStreamChunk && activeCritics.length === 0;
+
+    if (useStreaming) {
+      const { callChatStream } = await import("@/lib/chat-api");
+      const streamResult = await callChatStream(
+        {
+          messages: history,
+          ...(hasManualSelection
+            ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+            : { tier: selectedTier }),
+          systemPrompt: ORIGEM_SYSTEM_PROMPT,
+        },
+        options.onStreamChunk!
+      );
+      response = streamResult.content;
+    } else {
+      const { callChatCompletion } = await import("@/lib/chat-api");
+      const result = await callChatCompletion({
+        messages: history,
+        ...(hasManualSelection
+          ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+          : { tier: selectedTier }),
+        systemPrompt: ORIGEM_SYSTEM_PROMPT,
+      });
+      response = result.content;
+    }
+
     if (activeCritics.length > 0) {
       try {
         const { runCriticPipeline } = await import("@/lib/chat-api");

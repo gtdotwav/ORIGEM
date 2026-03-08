@@ -111,6 +111,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
+  const [streamingContent, setStreamingContent] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const hydratedSessionIdRef = useRef<string | null>(null);
@@ -238,7 +239,7 @@ export default function ChatPage() {
       behavior: "smooth",
       block: "end",
     });
-  }, [sessionMessages.length, isSending, stage, runtime?.overallProgress]);
+  }, [sessionMessages.length, isSending, stage, runtime?.overallProgress, streamingContent]);
 
   const sendMessage = async () => {
     const text = input.trim();
@@ -268,10 +269,15 @@ export default function ChatPage() {
           language: selectedLanguage,
         });
       } else {
-        await runSimpleChat(sessionId, text);
+        setStreamingContent("");
+        await runSimpleChat(sessionId, text, {
+          onStreamChunk: (content) => setStreamingContent(content),
+        });
+        setStreamingContent(null);
       }
       persistSnapshotQuietly();
     } catch (error) {
+      setStreamingContent(null);
       const detail = error instanceof Error ? error.message : "";
       toast.error(detail ? `Erro: ${detail}` : "Erro ao processar mensagem.");
     } finally {
@@ -467,7 +473,16 @@ export default function ChatPage() {
                   );
                 })}
 
-                {isSending && (
+                {isSending && streamingContent !== null && streamingContent.length > 0 && (
+                  <div className="flex w-full animate-message-in justify-start">
+                    <div className="group relative max-w-[88%] rounded-2xl border border-foreground/[0.09] bg-black/35 px-4 py-3 text-foreground/85">
+                      <MarkdownRenderer content={streamingContent} />
+                      <span className="mt-2 inline-block h-4 w-1 animate-pulse bg-neon-cyan/70" />
+                    </div>
+                  </div>
+                )}
+
+                {isSending && streamingContent === null && (
                   <div className="flex justify-start">
                     <div className="max-w-[88%] rounded-2xl border border-foreground/[0.09] bg-black/35 px-4 py-3">
                       <div className="inline-flex items-center gap-2 text-xs text-foreground/65">

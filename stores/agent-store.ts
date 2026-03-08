@@ -6,6 +6,8 @@ import type {
   AgentGroup,
 } from "@/types/agent";
 
+const MAX_OUTPUTS_PER_AGENT = 50;
+
 interface AgentState {
   agents: AgentInstance[];
   groups: AgentGroup[];
@@ -48,11 +50,17 @@ export const useAgentStore = create<AgentState>()(
           })),
         addOutput: (agentId, output) =>
           set((s) => ({
-            agents: s.agents.map((a) =>
-              a.id === agentId
-                ? { ...a, outputs: [...a.outputs, output] }
-                : a
-            ),
+            agents: s.agents.map((a) => {
+              if (a.id !== agentId) return a;
+              const updated = [...a.outputs, output];
+              return {
+                ...a,
+                outputs:
+                  updated.length > MAX_OUTPUTS_PER_AGENT
+                    ? updated.slice(-MAX_OUTPUTS_PER_AGENT)
+                    : updated,
+              };
+            }),
           })),
         setGroups: (groups) => set({ groups }),
         addGroup: (group) =>
