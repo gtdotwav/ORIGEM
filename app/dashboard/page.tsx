@@ -228,17 +228,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Input area */}
-          <div className="px-4 pb-3">
-            <div
-              data-tour="chat-input"
-              className={cn(
-                "relative rounded-xl border transition-all duration-200",
-                hasInput || ideasOpen
-                  ? "border-foreground/[0.14] bg-foreground/[0.04] shadow-lg shadow-black/20"
-                  : "border-foreground/[0.08] bg-foreground/[0.025] hover:border-foreground/[0.12]"
-              )}
-            >
+          {/* Input area — borderless */}
+          <div className="px-4 pb-3" data-tour="chat-input">
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
@@ -246,7 +237,7 @@ export default function DashboardPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Descreva o que precisa — uma ideia, uma tarefa, uma pergunta..."
                 rows={1}
-                className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[14px] leading-relaxed text-foreground placeholder:text-foreground/25 outline-none"
+                className="block w-full resize-none bg-transparent px-2 pt-1 pb-3 text-[14px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/20 outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -255,8 +246,8 @@ export default function DashboardPage() {
                 }}
               />
 
-              {/* Bottom toolbar inside input */}
-              <div className="flex items-center gap-1 px-2.5 pb-2.5">
+              {/* Bottom toolbar */}
+              <div className="flex items-center gap-1 border-t border-foreground/[0.04] px-1 pt-2 pb-1">
                 {/* Left tools */}
                 <button
                   type="button"
@@ -315,7 +306,6 @@ export default function DashboardPage() {
                   )}
                 </button>
               </div>
-            </div>
           </div>
 
           {/* Upload indicator */}
