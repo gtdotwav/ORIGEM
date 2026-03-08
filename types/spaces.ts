@@ -76,6 +76,7 @@ export interface Space {
   id: string;
   name: string;
   description: string;
+  workspaceId?: string;
   cardIds: string[];
   createdAt: number;
   updatedAt: number;

@@ -95,6 +95,6 @@ export const useCanvasStore = create<CanvasState>()(
         viewport: get().viewport,
       }),
     }),
-    { name: "canvas-store" }
+    { name: "flow-canvas-store" }
   )
 );

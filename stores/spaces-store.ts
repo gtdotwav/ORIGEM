@@ -48,7 +48,7 @@ interface SpacesState {
   activePromptBlocks: PromptBlock;
 
   /* Space CRUD */
-  createSpace: (name: string, description?: string) => string;
+  createSpace: (name: string, description?: string, workspaceId?: string) => string;
   deleteSpace: (spaceId: string) => void;
   renameSpace: (spaceId: string, name: string) => void;
   setActiveSpace: (spaceId: string | null) => void;
@@ -111,13 +111,14 @@ export const useSpacesStore = create<SpacesState>()(
 
       /* ---- Space CRUD ---- */
 
-      createSpace: (name, description = "") => {
+      createSpace: (name, description = "", workspaceId) => {
         const id = uid("space");
         const now = Date.now();
         const space: Space = {
           id,
           name,
           description,
+          workspaceId,
           cardIds: [],
           createdAt: now,
           updatedAt: now,
