@@ -100,19 +100,15 @@ function toSerializableSnapshot(sessionId: string): SessionSnapshot | null {
     decompositionIds.add(decompositionState.activeDecompositionId);
   }
 
-  const scopedDecompositions =
-    decompositionIds.size > 0
-      ? Array.from(decompositionIds).reduce<Record<string, (typeof decompositionState.decompositions)[string]>>(
-          (acc, decompositionId) => {
-            const result = decompositionState.decompositions[decompositionId];
-            if (result) {
-              acc[decompositionId] = result;
-            }
-            return acc;
-          },
-          {}
-        )
-      : decompositionState.decompositions;
+  const scopedDecompositions = Array.from(decompositionIds).reduce<
+    Record<string, (typeof decompositionState.decompositions)[string]>
+  >((acc, decompositionId) => {
+    const result = decompositionState.decompositions[decompositionId];
+    if (result) {
+      acc[decompositionId] = result;
+    }
+    return acc;
+  }, {});
 
   return {
     session,

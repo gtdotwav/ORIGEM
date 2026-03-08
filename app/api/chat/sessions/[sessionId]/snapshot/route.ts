@@ -75,12 +75,13 @@ export async function PUT(request: Request, { params }: Params) {
         { status: 400 }
       );
     }
+
+    // Storage errors (e.g. read-only FS, blob failures) → 500
+    const message = error instanceof Error ? error.message : "unknown";
+    console.error("[snapshot] Storage error:", message);
     return NextResponse.json(
-      {
-        error: "invalid_snapshot",
-        details: error instanceof Error ? error.message : "unknown",
-      },
-      { status: 400 }
+      { error: "storage_error", details: message },
+      { status: 500 }
     );
   }
 }
