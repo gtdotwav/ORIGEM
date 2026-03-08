@@ -205,7 +205,7 @@ export default function DashboardPage() {
         {/* Ambient glow */}
         <div className="pointer-events-none absolute -inset-16 rounded-[60px] bg-neon-cyan/[0.03] blur-3xl" />
 
-        <div className="w-full overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/80 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+        <div className="w-full overflow-hidden rounded-2xl border border-foreground/[0.05] bg-card/70 shadow-2xl shadow-black/50 backdrop-blur-2xl">
           {/* Header */}
           <div className="px-6 pt-6 pb-4">
             <div className="mb-1.5 flex items-center gap-2">
@@ -228,16 +228,15 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Input area — borderless */}
-          <div className="px-4 pb-3" data-tour="chat-input">
-              {/* Textarea */}
+          {/* Input area — fully borderless */}
+          <div className="px-6 pb-2" data-tour="chat-input">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Descreva o que precisa — uma ideia, uma tarefa, uma pergunta..."
+                placeholder="Descreva o que precisa..."
                 rows={1}
-                className="block w-full resize-none bg-transparent px-2 pt-1 pb-3 text-[14px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/20 outline-none"
+                className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/18 outline-none ring-0"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -246,8 +245,8 @@ export default function DashboardPage() {
                 }}
               />
 
-              {/* Bottom toolbar */}
-              <div className="flex items-center gap-1 border-t border-foreground/[0.04] px-1 pt-2 pb-1">
+              {/* Toolbar */}
+              <div className="flex items-center gap-1">
                 {/* Left tools */}
                 <button
                   type="button"
@@ -346,7 +345,7 @@ export default function DashboardPage() {
           </AnimatePresence>
 
           {/* Footer bar */}
-          <div className="flex items-center justify-between border-t border-foreground/[0.04] px-4 py-2.5">
+          <div className="flex items-center justify-between px-6 py-2.5">
             {/* Mode indicator */}
             <div className="flex items-center gap-1.5">
               {isEcosystem ? (
