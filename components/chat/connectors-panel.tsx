@@ -72,13 +72,12 @@ interface Connector {
   description: string;
   icon: React.ReactNode;
   color: string;
-  live: boolean;
 }
 
 const FUTURE_CONNECTORS: Connector[] = [
-  { id: "supabase", name: "Supabase", description: "Database, Auth, Storage", icon: <SupabaseIcon />, color: "text-emerald-400", live: false },
-  { id: "stripe", name: "Stripe", description: "Pagamentos, Subscricoes", icon: <StripeIcon />, color: "text-violet-400", live: false },
-  { id: "figma", name: "Figma", description: "Design, Prototipos", icon: <FigmaIcon />, color: "text-pink-400", live: false },
+  { id: "supabase", name: "Supabase", description: "Database, Auth, Storage", icon: <SupabaseIcon />, color: "text-emerald-400" },
+  { id: "stripe", name: "Stripe", description: "Pagamentos, Subscricoes", icon: <StripeIcon />, color: "text-violet-400" },
+  { id: "figma", name: "Figma", description: "Design, Prototipos", icon: <FigmaIcon />, color: "text-pink-400" },
 ];
 
 // ── Helpers ──
@@ -102,7 +101,7 @@ const STATE_COLORS: Record<string, string> = {
   READY: "bg-neon-green shadow-[0_0_4px_rgba(0,200,0,0.4)]",
   BUILDING: "bg-yellow-400 animate-pulse",
   ERROR: "bg-red-400",
-  CANCELED: "bg-foreground/20",
+  CANCELED: "bg-foreground/30",
 };
 
 // ── Component ──
@@ -160,24 +159,24 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative flex max-h-[88vh] w-96 flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              className="relative flex max-h-[88vh] w-96 flex-col overflow-hidden rounded-2xl border border-foreground/[0.15] shadow-2xl shadow-black/50"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
+                  "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)",
                 backdropFilter: "blur(40px) saturate(1.8)",
               }}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
               {/* Header */}
               <div className="flex shrink-0 items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <Plug className="h-3.5 w-3.5 text-foreground/30" />
-                  <span className="text-[11px] font-semibold tracking-wide text-foreground/55">
+                  <Plug className="h-3.5 w-3.5 text-neon-cyan/60" />
+                  <span className="text-[11px] font-semibold tracking-wide text-foreground/80">
                     CONECTORES
                   </span>
                   {connectedCount > 0 && (
-                    <span className="rounded-md bg-neon-green/15 px-1.5 py-0.5 text-[9px] tabular-nums font-medium text-neon-green/60">
+                    <span className="rounded-md bg-neon-green/20 px-1.5 py-0.5 text-[9px] tabular-nums font-semibold text-neon-green">
                       {connectedCount}
                     </span>
                   )}
@@ -187,28 +186,28 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                     type="button"
                     onClick={() => void fetchAll()}
                     disabled={loading}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-transparent text-foreground/25 transition-all hover:border-foreground/[0.08] hover:bg-foreground/[0.06] hover:text-neon-cyan/70 disabled:opacity-30"
+                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-transparent text-foreground/40 transition-all hover:border-foreground/[0.10] hover:bg-foreground/[0.08] hover:text-neon-cyan disabled:opacity-30"
                   >
                     <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
                   </button>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-transparent text-foreground/25 transition-all hover:border-red-500/15 hover:bg-red-500/10 hover:text-red-400"
+                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-transparent text-foreground/40 transition-all hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-400"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
 
-              <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+              <div className="mx-3 h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto py-2">
                 {loading ? (
                   <div className="flex flex-col items-center py-8">
-                    <Loader2 className="h-5 w-5 animate-spin text-foreground/20" />
-                    <p className="mt-2 text-[10px] text-foreground/25">Verificando conexoes...</p>
+                    <Loader2 className="h-5 w-5 animate-spin text-neon-cyan/40" />
+                    <p className="mt-2 text-[11px] text-foreground/45">Verificando conexoes...</p>
                   </div>
                 ) : (
                   <div className="space-y-0.5 px-2">
@@ -220,39 +219,39 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                         className={cn(
                           "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-all",
                           github?.connected
-                            ? "bg-foreground/[0.05] text-foreground/70"
-                            : "text-foreground/40 hover:bg-foreground/[0.03]"
+                            ? "bg-foreground/[0.06] text-foreground/90 hover:bg-foreground/[0.08]"
+                            : "text-foreground/60 hover:bg-foreground/[0.04]"
                         )}
                       >
                         <div className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
-                          github?.connected ? "bg-foreground/[0.08]" : "bg-foreground/[0.03]"
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                          github?.connected ? "bg-foreground/[0.10]" : "bg-foreground/[0.05]"
                         )}>
-                          <span className={github?.connected ? "text-foreground" : "text-foreground/20"}>
+                          <span className={github?.connected ? "text-foreground/90" : "text-foreground/40"}>
                             <GitHubIcon />
                           </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[12px] font-medium leading-tight">
+                          <p className="truncate text-[13px] font-semibold leading-tight text-foreground/90">
                             GitHub
                             {github?.user && (
-                              <span className="ml-1.5 text-[10px] font-normal text-foreground/30">
+                              <span className="ml-1.5 text-[10px] font-normal text-foreground/45">
                                 @{github.user.login}
                               </span>
                             )}
                           </p>
-                          <p className="truncate text-[10px] text-foreground/20">
+                          <p className="truncate text-[11px] text-foreground/40">
                             {github?.connected
-                              ? `${github.repos?.length ?? 0} repos`
+                              ? `${github.repos?.length ?? 0} repos sincronizados`
                               : "Conectar via GitHub OAuth"}
                           </p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-2">
                           {github?.connected && (
-                            <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
+                            <Circle className="h-2 w-2 fill-neon-green text-neon-green" />
                           )}
                           <ChevronRight className={cn(
-                            "h-3 w-3 text-foreground/15 transition-transform",
+                            "h-3.5 w-3.5 text-foreground/30 transition-transform",
                             expandedSection === "github" && "rotate-90"
                           )} />
                         </div>
@@ -272,21 +271,21 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                                 <>
                                   {/* Recent activity */}
                                   {github.activity && github.activity.length > 0 && (
-                                    <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                      <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                    <div className="rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] p-2.5">
+                                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45">
                                         Atividade recente
                                       </p>
-                                      <div className="space-y-1">
+                                      <div className="space-y-1.5">
                                         {github.activity.slice(0, 6).map((event, i) => {
                                           const Icon = EVENT_ICONS[event.type] ?? GitCommit;
                                           return (
-                                            <div key={i} className="flex items-start gap-1.5">
-                                              <Icon className="mt-0.5 h-3 w-3 shrink-0 text-foreground/20" />
+                                            <div key={i} className="flex items-start gap-2">
+                                              <Icon className="mt-0.5 h-3 w-3 shrink-0 text-neon-cyan/50" />
                                               <div className="min-w-0 flex-1">
-                                                <p className="truncate text-[10px] text-foreground/50">
+                                                <p className="truncate text-[11px] text-foreground/70">
                                                   {event.title}
                                                 </p>
-                                                <p className="text-[9px] text-foreground/20">
+                                                <p className="text-[10px] text-foreground/35">
                                                   {event.repo.split("/").pop()} · {timeAgo(event.created_at)}
                                                 </p>
                                               </div>
@@ -299,8 +298,8 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
 
                                   {/* Top repos */}
                                   {github.repos && github.repos.length > 0 && (
-                                    <div className="mt-1.5 rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                      <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                    <div className="mt-1.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] p-2.5">
+                                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45">
                                         Repositorios
                                       </p>
                                       <div className="space-y-1">
@@ -310,17 +309,17 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                                             href={repo.html_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 rounded-md px-1 py-0.5 transition-colors hover:bg-foreground/[0.04]"
+                                            className="flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-foreground/[0.06]"
                                           >
-                                            <span className="truncate text-[10px] text-foreground/50">
+                                            <span className="truncate text-[11px] font-medium text-foreground/65">
                                               {repo.name}
                                             </span>
                                             {repo.language && (
-                                              <span className="shrink-0 text-[8px] text-foreground/20">
+                                              <span className="shrink-0 rounded bg-foreground/[0.06] px-1 py-0.5 text-[9px] text-foreground/40">
                                                 {repo.language}
                                               </span>
                                             )}
-                                            <ExternalLink className="ml-auto h-2.5 w-2.5 shrink-0 text-foreground/10" />
+                                            <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-foreground/25" />
                                           </a>
                                         ))}
                                       </div>
@@ -328,16 +327,16 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                                   )}
                                 </>
                               ) : (
-                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
-                                  <p className="mb-2 text-[10px] text-foreground/35">
+                                <div className="rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] p-3">
+                                  <p className="mb-3 text-[11px] leading-relaxed text-foreground/55">
                                     Reconecte via GitHub para autorizar acesso a repos e atividade.
                                   </p>
                                   <button
                                     type="button"
                                     onClick={() => void signIn("github")}
-                                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-foreground/[0.12] bg-foreground/[0.06] px-3 py-2 text-[11px] font-medium text-foreground/70 transition-all hover:bg-foreground/[0.10] hover:text-foreground/90"
+                                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-2.5 text-[12px] font-semibold text-neon-cyan transition-all hover:bg-neon-cyan/20 hover:text-neon-cyan"
                                   >
-                                    <LogIn className="h-3.5 w-3.5" />
+                                    <LogIn className="h-4 w-4" />
                                     Conectar GitHub
                                   </button>
                                 </div>
@@ -356,34 +355,34 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                         className={cn(
                           "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-all",
                           vercel?.connected
-                            ? "bg-foreground/[0.05] text-foreground/70"
-                            : "text-foreground/40 hover:bg-foreground/[0.03]"
+                            ? "bg-foreground/[0.06] text-foreground/90 hover:bg-foreground/[0.08]"
+                            : "text-foreground/60 hover:bg-foreground/[0.04]"
                         )}
                       >
                         <div className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
-                          vercel?.connected ? "bg-foreground/[0.08]" : "bg-foreground/[0.03]"
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                          vercel?.connected ? "bg-foreground/[0.10]" : "bg-foreground/[0.05]"
                         )}>
-                          <span className={vercel?.connected ? "text-foreground" : "text-foreground/20"}>
+                          <span className={vercel?.connected ? "text-foreground/90" : "text-foreground/40"}>
                             <VercelIcon />
                           </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[12px] font-medium leading-tight">
+                          <p className="truncate text-[13px] font-semibold leading-tight text-foreground/90">
                             Vercel
                           </p>
-                          <p className="truncate text-[10px] text-foreground/20">
+                          <p className="truncate text-[11px] text-foreground/40">
                             {vercel?.connected
                               ? vercel.project?.domains?.join(", ") ?? "Conectado"
                               : "VERCEL_API_TOKEN nao configurado"}
                           </p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-2">
                           {vercel?.connected && (
-                            <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
+                            <Circle className="h-2 w-2 fill-neon-green text-neon-green" />
                           )}
                           <ChevronRight className={cn(
-                            "h-3 w-3 text-foreground/15 transition-transform",
+                            "h-3.5 w-3.5 text-foreground/30 transition-transform",
                             expandedSection === "vercel" && "rotate-90"
                           )} />
                         </div>
@@ -401,40 +400,40 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                             <div className="px-2 pb-2 pt-1">
                               {vercel?.connected ? (
                                 vercel.deployments && vercel.deployments.length > 0 && (
-                                  <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2">
-                                    <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/25">
+                                  <div className="rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] p-2.5">
+                                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45">
                                       Deployments recentes
                                     </p>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-2">
                                       {vercel.deployments.slice(0, 5).map((d) => (
                                         <div key={d.id} className="flex items-start gap-2">
                                           <div className={cn(
-                                            "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                                            STATE_COLORS[d.state] ?? "bg-foreground/20"
+                                            "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                                            STATE_COLORS[d.state] ?? "bg-foreground/30"
                                           )} />
                                           <div className="min-w-0 flex-1">
-                                            <p className="truncate text-[10px] text-foreground/50">
+                                            <p className="truncate text-[11px] text-foreground/70">
                                               {d.commitMessage || d.id}
                                             </p>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className="text-[9px] text-foreground/20">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-[10px] font-medium text-foreground/35">
                                                 {d.target}
                                               </span>
-                                              <span className="text-[9px] text-foreground/15">
+                                              <span className="text-[10px] text-foreground/25">
                                                 {timeAgo(d.createdAt)}
                                               </span>
                                             </div>
                                           </div>
-                                          <Rocket className="mt-0.5 h-3 w-3 shrink-0 text-foreground/10" />
+                                          <Rocket className="mt-0.5 h-3 w-3 shrink-0 text-foreground/20" />
                                         </div>
                                       ))}
                                     </div>
                                   </div>
                                 )
                               ) : (
-                                <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
-                                  <p className="text-[10px] text-foreground/35">
-                                    Configure <code className="rounded bg-foreground/[0.08] px-1 py-0.5 text-[9px] text-foreground/50">VERCEL_API_TOKEN</code> nas variaveis de ambiente do Vercel para conectar.
+                                <div className="rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] p-3">
+                                  <p className="text-[11px] leading-relaxed text-foreground/55">
+                                    Configure <code className="rounded bg-foreground/[0.10] px-1.5 py-0.5 text-[10px] font-medium text-foreground/70">VERCEL_API_TOKEN</code> nas variaveis de ambiente do Vercel para conectar.
                                   </p>
                                 </div>
                               )}
@@ -445,9 +444,9 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                     </div>
 
                     {/* ── Divider ── */}
-                    <div className="mx-2 my-1.5 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                    <div className="mx-2 my-2 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
-                    <p className="px-3 py-1 text-[9px] font-semibold uppercase tracking-wider text-foreground/20">
+                    <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/35">
                       Em breve
                     </p>
 
@@ -455,20 +454,20 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                     {FUTURE_CONNECTORS.map((connector) => (
                       <div
                         key={connector.id}
-                        className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left text-foreground/25"
+                        className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left"
                       >
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.03]">
-                          <span className="text-foreground/15">{connector.icon}</span>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                          <span className={cn("opacity-40", connector.color)}>{connector.icon}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[12px] font-medium leading-tight text-foreground/30">
+                          <p className="truncate text-[13px] font-medium leading-tight text-foreground/50">
                             {connector.name}
                           </p>
-                          <p className="truncate text-[10px] text-foreground/15">
+                          <p className="truncate text-[11px] text-foreground/30">
                             {connector.description}
                           </p>
                         </div>
-                        <span className="shrink-0 rounded-md border border-foreground/[0.06] px-1.5 py-0.5 text-[8px] text-foreground/20">
+                        <span className="shrink-0 rounded-md border border-foreground/[0.10] bg-foreground/[0.04] px-2 py-0.5 text-[9px] font-medium text-foreground/35">
                           Soon
                         </span>
                       </div>
@@ -477,7 +476,7 @@ export function ConnectorsPanel({ open, onClose }: ConnectorsPanelProps) {
                 )}
               </div>
 
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
             </div>
           </motion.div>
         </>
