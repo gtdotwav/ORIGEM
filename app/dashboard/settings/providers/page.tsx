@@ -314,7 +314,7 @@ export default function ProvidersPage() {
                         ? `Key salva no backend (${state.savedKeyHint})`
                         : "sk-..."
                     }
-                    className="pr-10 font-mono text-xs bg-black/20 border-foreground/[0.06] text-foreground placeholder:text-foreground/20"
+                    className="pr-10 font-mono text-xs bg-foreground/[0.03] border-foreground/[0.06] text-foreground placeholder:text-foreground/40"
                   />
                   <button
                     type="button"
@@ -349,7 +349,7 @@ export default function ProvidersPage() {
                     })
                   }
                 >
-                  <SelectTrigger className="text-xs bg-black/20 border-foreground/[0.06] text-foreground">
+                  <SelectTrigger className="text-xs bg-foreground/[0.03] border-foreground/[0.06] text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -146,7 +146,7 @@ function WorkspacesContent() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-blue/20 bg-neon-blue/10">
               <Layers className="h-3 w-3 text-neon-blue" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/50">
               Workspaces
             </p>
           </div>
@@ -164,7 +164,7 @@ function WorkspacesContent() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-purple/20 bg-neon-purple/10">
               <FolderKanban className="h-3 w-3 text-neon-purple" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/50">
               Projetos
             </p>
           </div>
@@ -175,7 +175,7 @@ function WorkspacesContent() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-cyan/20 bg-neon-cyan/10">
               <MessageSquare className="h-3 w-3 text-neon-cyan" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/50">
               Sessoes
             </p>
           </div>
@@ -189,7 +189,7 @@ function WorkspacesContent() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-green/20 bg-neon-green/10">
               <Filter className="h-3 w-3 text-neon-green" />
             </div>
-            <p className="text-[10px] uppercase tracking-wide text-foreground/35">
+            <p className="text-[10px] uppercase tracking-wide text-foreground/50">
               Filtro ativo
             </p>
           </div>

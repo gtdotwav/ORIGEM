@@ -298,7 +298,7 @@ export default function ChatPage() {
         <div className="relative rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 shadow-2xl backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-foreground/30">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-foreground/45">
                 Sessao de Chat
               </p>
               <h1 className="text-lg font-semibold text-foreground/90">
@@ -307,7 +307,7 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="rounded-full border border-foreground/[0.09] bg-foreground/[0.04] px-3 py-1 text-xs text-foreground/70">
+              <span className="rounded-full border border-foreground/[0.12] bg-foreground/[0.06] px-3 py-1 text-xs text-foreground/70">
                 Etapa: {STAGE_LABELS[stage] ?? stage}
               </span>
               <Link
@@ -336,7 +336,7 @@ export default function ChatPage() {
             {sessionMessages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
                 <Blocks className="h-5 w-5 text-neon-cyan/80" />
-                <p className="text-sm text-foreground/55">
+                <p className="text-sm text-foreground/60">
                   Envie sua primeira mensagem para disparar delegacao de contexto, projeto, agentes e grupos.
                 </p>
               </div>
@@ -400,7 +400,8 @@ export default function ChatPage() {
                                 () => toast.error("Falha ao copiar")
                               );
                             }}
-                            className="absolute right-2 top-2 rounded-md p-1 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100"
+                            aria-label="Copiar mensagem"
+                            className="absolute right-2 top-2 rounded-md p-1 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100 focus-visible:opacity-100"
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </button>
@@ -540,7 +541,7 @@ export default function ChatPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Digite sua mensagem..."
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none"
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/40 outline-none"
               />
               {toolsExpanded && <CriticPanel />}
               <button
@@ -562,8 +563,8 @@ export default function ChatPage() {
 
             {/* Mode indicator */}
             <div className="mt-1.5 px-1">
-              <span className="text-[10px] text-foreground/25">
-                {chatMode === "ecosystem" ? "agent ∞" : "chat direto"}
+              <span className="text-[10px] text-foreground/40">
+                {chatMode === "ecosystem" ? "Ecossistema" : "Chat direto"}
               </span>
             </div>
           </form>

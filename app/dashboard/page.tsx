@@ -209,8 +209,8 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="px-6 pt-6 pb-4">
             <div className="mb-1.5 flex items-center gap-2">
-              <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-60" />
-              <span className="text-[12px] font-medium tracking-wide text-foreground/40">
+              <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-80" />
+              <span className="text-[12px] font-medium tracking-wide text-foreground/55">
                 Bem-vindo ao ORIGEM
               </span>
             </div>
@@ -236,7 +236,7 @@ export default function DashboardPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Descreva o que precisa..."
                 rows={1}
-                className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/18 outline-none ring-0"
+                className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/40 outline-none ring-0"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -253,6 +253,7 @@ export default function DashboardPage() {
                   onClick={openImagePicker}
                   disabled={sending || uploadingImage}
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/25 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/50 disabled:opacity-30"
+                  aria-label="Anexar imagem"
                   title="Anexar imagem"
                 >
                   <Paperclip className="h-3.5 w-3.5" />
@@ -272,6 +273,7 @@ export default function DashboardPage() {
                       ? "bg-neon-purple/10 text-neon-purple"
                       : "text-foreground/25 hover:bg-foreground/[0.06] hover:text-foreground/50"
                   )}
+                  aria-label="Gerar ideias"
                   title="Gerar ideias"
                 >
                   <SparklesIcon className="h-3.5 w-3.5" />
@@ -281,7 +283,7 @@ export default function DashboardPage() {
 
                 {/* Hint */}
                 {!hasInput && (
-                  <span className="mr-2 hidden text-[10px] text-foreground/15 sm:inline">
+                  <span className="mr-2 hidden text-[10px] text-foreground/35 sm:inline">
                     Enter para enviar
                   </span>
                 )}
@@ -355,7 +357,7 @@ export default function DashboardPage() {
               )}
               <span className={cn(
                 "text-[11px] font-medium",
-                isEcosystem ? "text-neon-purple/50" : "text-foreground/30"
+                isEcosystem ? "text-neon-purple/70" : "text-foreground/45"
               )}>
                 {isEcosystem ? "Ecossistema" : "Chat direto"}
               </span>
@@ -369,6 +371,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push("/dashboard/settings/providers")}
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/20 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/40"
+                aria-label="Configuracoes"
                 title="Configuracoes"
               >
                 <Settings className="h-3 w-3" />
@@ -382,6 +385,7 @@ export default function DashboardPage() {
         ref={imageInputRef}
         type="file"
         accept="image/*"
+        aria-label="Selecionar imagem"
         className="hidden"
         onChange={(event) => {
           void handleImageSelected(event);
@@ -391,7 +395,7 @@ export default function DashboardPage() {
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">
         <div className="text-center">
-          <p className="text-[10px] text-foreground/12">ORIGEM — Intelligence OS</p>
+          <p className="text-[10px] text-foreground/30">ORIGEM — Intelligence OS</p>
         </div>
       </div>
     </div>

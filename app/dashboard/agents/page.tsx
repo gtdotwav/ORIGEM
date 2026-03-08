@@ -183,7 +183,7 @@ function AgentsPageContent() {
               Direcao herdada do contexto e delegacao real por funcao.
             </p>
             {targetSession ? (
-              <p className="mt-1 text-xs text-foreground/35">
+              <p className="mt-1 text-xs text-foreground/50">
                 Sessao: {targetSession.title} · atualizada em{" "}
                 {formatDateTime(targetSession.updatedAt)}
               </p>
@@ -223,19 +223,19 @@ function AgentsPageContent() {
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Agentes</p>
+          <p className="text-[11px] uppercase tracking-wide text-foreground/50">Agentes</p>
           <p className="mt-1 text-xl font-semibold text-foreground">{sessionAgents.length}</p>
           <p className="text-xs text-foreground/45">{activeAgentCount} em execucao</p>
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Funcoes delegadas</p>
+          <p className="text-[11px] uppercase tracking-wide text-foreground/50">Funcoes delegadas</p>
           <p className="mt-1 text-xl font-semibold text-foreground">
             {new Set(runtimeTasks.map((task) => task.functionKey)).size}
           </p>
           <p className="text-xs text-foreground/45">{runtimeTasks.length} tarefas mapeadas</p>
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
-          <p className="text-[11px] uppercase tracking-wide text-foreground/35">Direcoes de contexto</p>
+          <p className="text-[11px] uppercase tracking-wide text-foreground/50">Direcoes de contexto</p>
           <p className="mt-1 text-xl font-semibold text-foreground">{contextDirections.length}</p>
           <p className="text-xs text-foreground/45">
             {selectedContext ? `contexto ${selectedContext.id.slice(0, 8)}` : "geral"}

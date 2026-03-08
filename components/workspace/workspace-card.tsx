@@ -197,7 +197,8 @@ export function WorkspaceCard({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="rounded-lg p-1.5 text-foreground/30 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60 group-hover:opacity-100"
+                className="rounded-lg p-1.5 text-foreground/30 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60 group-hover:opacity-100 focus-visible:opacity-100"
+                aria-label="Opcoes do workspace"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </button>
@@ -270,7 +271,7 @@ export function WorkspaceCard({
           </div>
           <Link
             href={`/dashboard/workspaces/${workspace.id}`}
-            className="inline-flex items-center gap-0.5 text-[10px] text-foreground/25 opacity-0 transition-all group-hover:text-foreground/50 group-hover:opacity-100"
+            className="inline-flex items-center gap-0.5 text-[10px] text-foreground/25 opacity-0 transition-all group-hover:text-foreground/50 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:text-foreground/50"
           >
             Abrir
             <ArrowUpRight className="h-3 w-3" />

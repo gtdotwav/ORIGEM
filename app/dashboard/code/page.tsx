@@ -506,7 +506,7 @@ export default function CodeIDEPage() {
                             e.stopPropagation();
                             handleCloseTab(tab.name);
                           }}
-                          className="ml-0.5 flex h-4 w-4 items-center justify-center rounded text-white/15 opacity-0 transition-all hover:bg-white/[0.08] hover:text-white/50 group-hover:opacity-100"
+                          className="ml-0.5 flex h-4 w-4 items-center justify-center rounded text-white/30 opacity-0 transition-all hover:bg-white/[0.08] hover:text-white/50 group-hover:opacity-100"
                         >
                           &times;
                         </span>
@@ -549,7 +549,7 @@ export default function CodeIDEPage() {
                       {lines.map((line, i) => (
                         <tr key={i} className="group hover:bg-white/[0.015]">
                           <td
-                            className="select-none pr-4 text-right align-top font-mono text-[11px] leading-5 text-white/15 group-hover:text-white/25"
+                            className="select-none pr-4 text-right align-top font-mono text-[11px] leading-5 text-white/30 group-hover:text-white/25"
                             style={{ width: 44 }}
                           >
                             {i + 1}
@@ -599,7 +599,7 @@ export default function CodeIDEPage() {
                 <p className="text-sm font-medium text-white/25">
                   ORIGEM Code
                 </p>
-                <p className="mt-1 text-[11px] text-white/15">
+                <p className="mt-1 text-[11px] text-white/30">
                   Selecione um arquivo no explorer para comecar
                 </p>
               </div>
