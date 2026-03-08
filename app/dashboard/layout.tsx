@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { FloatingNav } from "@/components/layout/floating-nav";
@@ -63,18 +62,10 @@ export default function DashboardLayout({
         </div>
       )}
 
-      {/* Page content with fade transition */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="relative flex-1"
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      {/* Page content */}
+      <div className="relative flex-1">
+        {children}
+      </div>
     </main>
   );
 }
