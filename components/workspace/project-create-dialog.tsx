@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils";
 import { createId } from "@/lib/chat-orchestrator";
 import { useProjectStore } from "@/stores/project-store";
 import { WORKSPACE_ICONS, WORKSPACE_COLORS } from "@/components/workspace/workspace-card";
-import type { Project } from "@/types/project";
+import { X } from "lucide-react";
+import type { Project, ProjectPriority } from "@/types/project";
 import type { WorkspaceColor, WorkspaceIcon } from "@/types/workspace";
 
 const COLOR_OPTIONS: WorkspaceColor[] = [
@@ -39,6 +40,13 @@ const ICON_OPTIONS: WorkspaceIcon[] = [
   "layers",
 ];
 
+const PRIORITY_OPTIONS: { value: ProjectPriority; label: string; color: string }[] = [
+  { value: "low", label: "Baixa", color: "text-foreground/40 border-foreground/[0.08] bg-foreground/[0.03]" },
+  { value: "medium", label: "Media", color: "text-neon-cyan border-neon-cyan/25 bg-neon-cyan/8" },
+  { value: "high", label: "Alta", color: "text-neon-orange border-neon-orange/25 bg-neon-orange/8" },
+  { value: "critical", label: "Critica", color: "text-red-400 border-red-400/25 bg-red-400/8" },
+];
+
 interface ProjectCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -59,6 +67,10 @@ export function ProjectCreateDialog({
   const [description, setDescription] = useState("");
   const [color, setColor] = useState<WorkspaceColor>("cyan");
   const [icon, setIcon] = useState<WorkspaceIcon>("folder");
+  const [priority, setPriority] = useState<ProjectPriority>("medium");
+  const [deadline, setDeadline] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (editProject) {
@@ -66,13 +78,28 @@ export function ProjectCreateDialog({
       setDescription(editProject.description);
       setColor(editProject.color);
       setIcon(editProject.icon);
+      setPriority(editProject.priority ?? "medium");
+      setDeadline(editProject.deadline ?? "");
+      setTags(editProject.tags ?? []);
     } else {
       setName("");
       setDescription("");
       setColor("cyan");
       setIcon("folder");
+      setPriority("medium");
+      setDeadline("");
+      setTags([]);
     }
+    setTagInput("");
   }, [editProject, open]);
+
+  const handleAddTag = () => {
+    const tag = tagInput.trim().toLowerCase();
+    if (tag && !tags.includes(tag)) {
+      setTags((prev) => [...prev, tag]);
+    }
+    setTagInput("");
+  };
 
   const handleSubmit = () => {
     if (!name.trim()) return;
@@ -83,6 +110,9 @@ export function ProjectCreateDialog({
         description: description.trim(),
         color,
         icon,
+        priority,
+        deadline: deadline || null,
+        tags,
       });
     } else {
       const now = new Date().toISOString();
@@ -94,6 +124,11 @@ export function ProjectCreateDialog({
         icon,
         workspaceId,
         status: "active",
+        priority,
+        tags,
+        deadline: deadline || null,
+        goals: [],
+        notes: [],
         createdAt: now,
         updatedAt: now,
       });
@@ -104,7 +139,7 @@ export function ProjectCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="border-foreground/[0.08] backdrop-blur-xl sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {editProject ? "Editar projeto" : "Novo projeto"}
@@ -146,55 +181,145 @@ export function ProjectCreateDialog({
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-foreground/50">
-              Cor
-            </label>
-            <div className="flex gap-2">
-              {COLOR_OPTIONS.map((c) => {
-                const colors = WORKSPACE_COLORS[c];
-                return (
+          {/* Priority + Deadline row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">
+                Prioridade
+              </label>
+              <div className="flex gap-1">
+                {PRIORITY_OPTIONS.map((opt) => (
                   <button
-                    key={c}
+                    key={opt.value}
                     type="button"
-                    onClick={() => setColor(c)}
+                    onClick={() => setPriority(opt.value)}
                     className={cn(
-                      "h-7 w-7 rounded-full border-2 transition-all",
-                      colors.bg,
-                      color === c
-                        ? `${colors.border} scale-110 ring-2 ring-white/20`
-                        : "border-transparent opacity-60 hover:opacity-100"
+                      "flex-1 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all",
+                      priority === opt.value
+                        ? opt.color
+                        : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/30 hover:text-foreground/50"
                     )}
-                  />
-                );
-              })}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">
+                Prazo
+              </label>
+              <Input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="border-foreground/[0.08] bg-foreground/[0.04] text-xs text-foreground/70"
+              />
             </div>
           </div>
 
+          {/* Tags */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-foreground/50">
-              Icone
+              Tags
             </label>
-            <div className="grid grid-cols-4 gap-2">
-              {ICON_OPTIONS.map((i) => {
-                const LucideIcon = WORKSPACE_ICONS[i];
-                const colors = WORKSPACE_COLORS[color];
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setIcon(i)}
-                    className={cn(
-                      "flex h-9 items-center justify-center rounded-lg border transition-all",
-                      icon === i
-                        ? `${colors.border} ${colors.bg} ${colors.text}`
-                        : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/40 hover:border-foreground/[0.12] hover:text-foreground/60"
-                    )}
+            <div className="flex items-center gap-2">
+              <Input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                placeholder="Adicionar tag..."
+                className="border-foreground/[0.08] bg-foreground/[0.04] text-xs text-foreground/90 placeholder:text-foreground/25"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAddTag}
+                disabled={!tagInput.trim()}
+                className="shrink-0 text-xs text-neon-cyan"
+              >
+                +
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-md border border-foreground/[0.08] bg-foreground/[0.04] px-2 py-0.5 text-[10px] text-foreground/60"
                   >
-                    <LucideIcon className="h-4 w-4" />
-                  </button>
-                );
-              })}
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
+                      className="text-foreground/30 hover:text-foreground/60"
+                    >
+                      <X className="h-2.5 w-2.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Color + Icon */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">
+                Cor
+              </label>
+              <div className="flex gap-2">
+                {COLOR_OPTIONS.map((c) => {
+                  const colors = WORKSPACE_COLORS[c];
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      className={cn(
+                        "h-7 w-7 rounded-full border-2 transition-all",
+                        colors.bg,
+                        color === c
+                          ? `${colors.border} scale-110 ring-2 ring-white/20`
+                          : "border-transparent opacity-60 hover:opacity-100"
+                      )}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-foreground/50">
+                Icone
+              </label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {ICON_OPTIONS.map((i) => {
+                  const LucideIcon = WORKSPACE_ICONS[i];
+                  const colors = WORKSPACE_COLORS[color];
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setIcon(i)}
+                      className={cn(
+                        "flex h-8 items-center justify-center rounded-lg border transition-all",
+                        icon === i
+                          ? `${colors.border} ${colors.bg} ${colors.text}`
+                          : "border-foreground/[0.06] bg-foreground/[0.02] text-foreground/40 hover:border-foreground/[0.12] hover:text-foreground/60"
+                      )}
+                    >
+                      <LucideIcon className="h-3.5 w-3.5" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -23,6 +23,8 @@ export interface Workspace {
   color: WorkspaceColor;
   icon: WorkspaceIcon;
   status: "active" | "archived";
+  /** MCP connector IDs installed in this Workspace */
+  mcpConnectorIds?: string[];
   createdAt: string;
   updatedAt: string;
 }

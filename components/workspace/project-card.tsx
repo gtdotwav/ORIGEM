@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreHorizontal, Pencil, Archive, Trash2, ArrowUpRight } from "lucide-react";
+import { MoreHorizontal, Pencil, Archive, Trash2, ArrowUpRight, Tag, Calendar } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,13 @@ import {
 import { WORKSPACE_ICONS, WORKSPACE_COLORS } from "@/components/workspace/workspace-card";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types/project";
+
+const PRIORITY_DOT: Record<string, string> = {
+  low: "bg-foreground/20",
+  medium: "bg-neon-cyan",
+  high: "bg-neon-orange",
+  critical: "bg-red-400",
+};
 
 function formatRelativeTime(date: string | Date | null) {
   if (!date) return "Sem atividade";
@@ -44,6 +51,9 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const colors = WORKSPACE_COLORS[project.color];
   const Icon = WORKSPACE_ICONS[project.icon];
+  const goalsTotal = (project.goals ?? []).length;
+  const goalsDone = (project.goals ?? []).filter((g) => g.done).length;
+  const goalsProgress = goalsTotal > 0 ? Math.round((goalsDone / goalsTotal) * 100) : 0;
 
   return (
     <div
@@ -63,7 +73,7 @@ export function ProjectCard({
       />
 
       <div className="p-3.5">
-        <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="mb-2 flex items-start justify-between gap-2">
           <Link
             href={`/dashboard/workspaces/${project.workspaceId}/projects/${project.id}`}
             className="flex items-center gap-2.5"
@@ -127,9 +137,47 @@ export function ProjectCard({
           </DropdownMenu>
         </div>
 
+        {/* Goals progress */}
+        {goalsTotal > 0 && (
+          <div className="mb-2">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-[10px] text-foreground/25">{goalsDone}/{goalsTotal} objetivos</span>
+              <span className="text-[10px] text-foreground/25">{goalsProgress}%</span>
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
+              <div
+                className="h-full rounded-full bg-neon-green/60 transition-all"
+                style={{ width: `${goalsProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {(project.tags ?? []).length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1">
+            {(project.tags ?? []).slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-0.5 rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-1 py-0.5 text-[9px] text-foreground/30"
+              >
+                <Tag className="h-2 w-2" />
+                {tag}
+              </span>
+            ))}
+            {(project.tags ?? []).length > 3 && (
+              <span className="text-[9px] text-foreground/20">+{(project.tags ?? []).length - 3}</span>
+            )}
+          </div>
+        )}
+
         {/* Stats + footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <span className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              PRIORITY_DOT[project.priority ?? "medium"]
+            )} />
             <span className="rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-1.5 py-0.5 text-[10px] text-foreground/40">
               {sessionCount} {sessionCount === 1 ? "sessao" : "sessoes"}
             </span>

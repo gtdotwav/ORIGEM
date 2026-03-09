@@ -13,6 +13,8 @@ import {
   Plus,
   Archive,
   Activity,
+  Plug,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -20,6 +22,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { useProjectStore } from "@/stores/project-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useWorkspaceStats } from "@/hooks/use-workspace-stats";
+import { createId, createSession } from "@/lib/chat-orchestrator";
 import {
   WORKSPACE_ICONS,
   WORKSPACE_COLORS,
@@ -69,6 +72,7 @@ function DetailContent() {
   const archiveWorkspace = useWorkspaceStore((s) => s.archiveWorkspace);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const sessions = useSessionStore((s) => s.sessions);
+  const addSession = useSessionStore((s) => s.addSession);
   const messages = useSessionStore((s) => s.messages);
   const runtimes = useRuntimeStore((s) => s.sessions);
   const stats = useWorkspaceStats(workspaceId);
@@ -84,7 +88,6 @@ function DetailContent() {
   const [editProjectTarget, setEditProjectTarget] = useState<Project | null>(null);
 
   useEffect(() => {
-    // Wait for Zustand persist to rehydrate from localStorage
     const unsub = useWorkspaceStore.persist.onFinishHydration(() => setHydrated(true));
     if (useWorkspaceStore.persist.hasHydrated()) setHydrated(true);
     return unsub;
@@ -92,6 +95,11 @@ function DetailContent() {
 
   const activeProjects = useMemo(
     () => wsProjects.filter((p) => p.status === "active"),
+    [wsProjects]
+  );
+
+  const archivedProjects = useMemo(
+    () => wsProjects.filter((p) => p.status === "archived"),
     [wsProjects]
   );
 
@@ -123,6 +131,14 @@ function DetailContent() {
     }, new Date(0));
   };
 
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    for (const p of wsProjects) {
+      for (const tag of p.tags ?? []) tags.add(tag);
+    }
+    return Array.from(tags);
+  }, [wsProjects]);
+
   const handleEditProject = (project: Project) => {
     setEditProjectTarget(project);
     setProjectDialogOpen(true);
@@ -138,8 +154,14 @@ function DetailContent() {
     toast.success("Projeto excluido");
   };
 
+  const handleNewSession = () => {
+    const sessionId = createId("session");
+    const session = createSession(sessionId, `Nova sessao — ${workspace?.name ?? ""}`, workspaceId);
+    addSession(session);
+    router.push(`/dashboard/chat/${sessionId}`);
+  };
+
   if (!workspace) {
-    // Still loading from localStorage — show skeleton instead of "not found"
     if (!hydrated) return <DetailFallback />;
     return (
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
@@ -196,6 +218,19 @@ function DetailContent() {
                   {workspace.description}
                 </p>
               )}
+              {allTags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {allTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-0.5 rounded-md border border-foreground/[0.06] bg-foreground/[0.03] px-1.5 py-0.5 text-[9px] text-foreground/35"
+                    >
+                      <Tag className="h-2 w-2" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -244,6 +279,9 @@ function DetailContent() {
             <p className="text-[10px] uppercase tracking-wide text-foreground/35">Projetos</p>
           </div>
           <p className="text-2xl font-bold text-foreground">{activeProjects.length}</p>
+          {archivedProjects.length > 0 && (
+            <p className="mt-0.5 text-[10px] text-foreground/20">+{archivedProjects.length} arquivados</p>
+          )}
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
@@ -256,8 +294,8 @@ function DetailContent() {
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
           <div className="mb-2 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-purple/20 bg-neon-purple/10">
-              <MessageSquare className="h-3 w-3 text-neon-purple" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-md border border-foreground/[0.08] bg-foreground/[0.04]">
+              <MessageSquare className="h-3 w-3 text-foreground/40" />
             </div>
             <p className="text-[10px] uppercase tracking-wide text-foreground/35">Mensagens</p>
           </div>
@@ -470,19 +508,20 @@ function DetailContent() {
               </button>
               <button
                 type="button"
+                onClick={handleNewSession}
+                className="flex w-full items-center gap-2 rounded-lg border border-neon-cyan/20 bg-neon-cyan/5 px-3 py-2.5 text-left text-xs text-neon-cyan transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Nova sessao
+              </button>
+              <button
+                type="button"
                 onClick={() => setAssignDialogOpen(true)}
                 className="flex w-full items-center gap-2 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2.5 text-left text-xs text-foreground/55 transition-all hover:border-foreground/[0.15] hover:text-foreground/75"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Adicionar sessoes
               </button>
-              <Link
-                href="/dashboard"
-                className="flex w-full items-center gap-2 rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2.5 text-left text-xs text-foreground/55 transition-all hover:border-foreground/[0.15] hover:text-foreground/75"
-              >
-                <MessageSquare className="h-3.5 w-3.5" />
-                Nova sessao
-              </Link>
               {workspace.status === "active" && (
                 <button
                   type="button"
@@ -499,6 +538,27 @@ function DetailContent() {
               )}
             </div>
           </div>
+
+          {/* MCP Connectors */}
+          {(workspace.mcpConnectorIds ?? []).length > 0 && (
+            <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
+              <div className="mb-3 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+                <Plug className="h-3 w-3" />
+                MCP Connectors
+              </div>
+              <div className="space-y-1.5">
+                {(workspace.mcpConnectorIds ?? []).map((connId) => (
+                  <div
+                    key={connId}
+                    className="flex items-center gap-2 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2.5 py-2"
+                  >
+                    <div className="h-1.5 w-1.5 rounded-full bg-neon-green" />
+                    <span className="text-xs text-foreground/60">{connId}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {stats.lastActivity && (
             <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
