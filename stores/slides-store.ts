@@ -87,6 +87,196 @@ export function createContentSlide(title: string, bullets: string[]): Slide {
   };
 }
 
+export function createTwoColumnSlide(title: string, left: string[], right: string[]): Slide {
+  return {
+    id: createId(),
+    elements: [
+      {
+        id: createId(),
+        type: "text",
+        x: 60,
+        y: 36,
+        width: 840,
+        height: 50,
+        content: title,
+        style: { fontSize: 30, fontWeight: "bold", color: "#ffffff", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 60,
+        y: 110,
+        width: 400,
+        height: 340,
+        content: left.map((b) => `• ${b}`).join("\n"),
+        style: { fontSize: 16, fontWeight: "normal", color: "rgba(255,255,255,0.7)", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 500,
+        y: 110,
+        width: 400,
+        height: 340,
+        content: right.map((b) => `• ${b}`).join("\n"),
+        style: { fontSize: 16, fontWeight: "normal", color: "rgba(255,255,255,0.7)", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "shape",
+        x: 480,
+        y: 110,
+        width: 2,
+        height: 320,
+        content: "",
+        style: { backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 1 },
+      },
+    ],
+    background: "linear-gradient(135deg, oklch(0.13 0.012 200) 0%, oklch(0.09 0.008 230) 100%)",
+    layout: "two-column",
+  };
+}
+
+export function createQuoteSlide(quote: string, author: string): Slide {
+  return {
+    id: createId(),
+    elements: [
+      {
+        id: createId(),
+        type: "shape",
+        x: 100,
+        y: 80,
+        width: 760,
+        height: 300,
+        content: "",
+        style: { backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 24 },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 80,
+        y: 100,
+        width: 60,
+        height: 60,
+        content: "\u201C",
+        style: { fontSize: 64, fontWeight: "bold", color: "rgba(0,210,210,0.4)", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 140,
+        y: 140,
+        width: 680,
+        height: 160,
+        content: quote,
+        style: { fontSize: 22, fontWeight: "normal", color: "rgba(255,255,255,0.85)", textAlign: "center" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 140,
+        y: 320,
+        width: 680,
+        height: 40,
+        content: `— ${author}`,
+        style: { fontSize: 14, fontWeight: "normal", color: "rgba(255,255,255,0.35)", textAlign: "center" },
+      },
+    ],
+    background: "linear-gradient(135deg, oklch(0.10 0.02 260) 0%, oklch(0.08 0.015 200) 100%)",
+    layout: "quote",
+  };
+}
+
+export function createSectionSlide(title: string, subtitle: string): Slide {
+  return {
+    id: createId(),
+    elements: [
+      {
+        id: createId(),
+        type: "shape",
+        x: 0,
+        y: 230,
+        width: 960,
+        height: 3,
+        content: "",
+        style: { backgroundColor: "rgba(0,210,210,0.15)", borderRadius: 0 },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 80,
+        y: 180,
+        width: 800,
+        height: 60,
+        content: title,
+        style: { fontSize: 38, fontWeight: "bold", color: "#ffffff", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 80,
+        y: 250,
+        width: 800,
+        height: 40,
+        content: subtitle,
+        style: { fontSize: 16, fontWeight: "normal", color: "rgba(255,255,255,0.4)", textAlign: "left" },
+      },
+    ],
+    background: "linear-gradient(135deg, oklch(0.11 0.018 250) 0%, oklch(0.08 0.01 220) 100%)",
+    layout: "title",
+  };
+}
+
+export function createImageSlide(title: string, description: string): Slide {
+  return {
+    id: createId(),
+    elements: [
+      {
+        id: createId(),
+        type: "shape",
+        x: 40,
+        y: 40,
+        width: 500,
+        height: 460,
+        content: "",
+        style: { backgroundColor: "rgba(255,255,255,0.04)", borderRadius: 16 },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 70,
+        y: 230,
+        width: 440,
+        height: 40,
+        content: "[Imagem]",
+        style: { fontSize: 14, fontWeight: "normal", color: "rgba(255,255,255,0.15)", textAlign: "center" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 580,
+        y: 60,
+        width: 340,
+        height: 60,
+        content: title,
+        style: { fontSize: 28, fontWeight: "bold", color: "#ffffff", textAlign: "left" },
+      },
+      {
+        id: createId(),
+        type: "text",
+        x: 580,
+        y: 140,
+        width: 340,
+        height: 280,
+        content: description,
+        style: { fontSize: 15, fontWeight: "normal", color: "rgba(255,255,255,0.6)", textAlign: "left" },
+      },
+    ],
+    background: "linear-gradient(135deg, oklch(0.11 0.01 210) 0%, oklch(0.08 0.008 240) 100%)",
+    layout: "image",
+  };
+}
+
 interface SlidesState {
   presentations: Presentation[];
   activePresentationId: string | null;

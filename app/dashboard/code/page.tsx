@@ -17,206 +17,17 @@ import {
   Send,
   Eye,
   Blocks,
-  Upload,
   Bot,
   User,
   Loader2,
-  ExternalLink,
   RotateCcw,
   Terminal,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { FileTree, type FileNode } from "@/components/ui/file-tree";
-
-/* ─── Demo project structure ─── */
-const DEMO_FILES: FileNode[] = [
-  {
-    name: "app",
-    type: "folder",
-    children: [
-      {
-        name: "layout.tsx",
-        type: "file",
-        extension: "tsx",
-        content: `import type React from "react"
-import type { Metadata } from "next"
-import { ThemeProvider } from "@/components/theme-provider"
-import "./globals.css"
-
-export const metadata: Metadata = {
-  title: "ORIGEM — Psychosemantic AI Engine",
-  description: "Decompose language into atomic meaning.",
-}
-
-export default function RootLayout({
-  children,
-}: { children: React.ReactNode }) {
-  return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  )
-}`,
-      },
-      {
-        name: "page.tsx",
-        type: "file",
-        extension: "tsx",
-        content: `"use client"
-
-export default function HomePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold">ORIGEM</h1>
-      <p className="mt-4 text-lg text-white/60">
-        Psychosemantic AI Engine
-      </p>
-      <button className="mt-8 rounded-xl bg-white/10 px-6 py-3 text-sm font-medium backdrop-blur-xl transition hover:bg-white/20">
-        Comecar
-      </button>
-    </main>
-  )
-}`,
-      },
-      {
-        name: "globals.css",
-        type: "file",
-        extension: "css",
-        content: `@import "tailwindcss";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.12 0 0);
-}
-
-.dark {
-  --background: oklch(0.06 0 0);
-  --foreground: oklch(0.95 0 0);
-}`,
-      },
-    ],
-  },
-  {
-    name: "components",
-    type: "folder",
-    children: [
-      {
-        name: "ui",
-        type: "folder",
-        children: [
-          {
-            name: "button.tsx",
-            type: "file",
-            extension: "tsx",
-            content: `import { cn } from "@/lib/utils"
-import { Slot } from "@radix-ui/react-slot"
-import { forwardRef } from "react"
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost"
-  size?: "default" | "sm" | "lg"
-  asChild?: boolean
-}
-
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", asChild, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn("inline-flex items-center justify-center rounded-md", className)}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Button.displayName = "Button"
-
-export { Button }`,
-          },
-          {
-            name: "card.tsx",
-            type: "file",
-            extension: "tsx",
-            content: `import { cn } from "@/lib/utils"
-
-export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("rounded-xl border bg-card text-card-foreground", className)}
-      {...props}
-    />
-  )
-}`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "lib",
-    type: "folder",
-    children: [
-      {
-        name: "utils.ts",
-        type: "file",
-        extension: "ts",
-        content: `import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}`,
-      },
-    ],
-  },
-  {
-    name: "package.json",
-    type: "file",
-    extension: "json",
-    content: `{
-  "name": "origem",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "next": "16.1.6",
-    "react": "19.2.0",
-    "zustand": "5.0.11",
-    "three": "0.175.0"
-  }
-}`,
-  },
-  {
-    name: "tsconfig.json",
-    type: "file",
-    extension: "json",
-    content: `{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "paths": { "@/*": ["./*"] },
-    "strict": true
-  }
-}`,
-  },
-];
 
 /* ─── Chat message type ─── */
 interface ChatMessage {
@@ -226,58 +37,100 @@ interface ChatMessage {
   timestamp: number;
 }
 
-/* ─── Build preview HTML from a file ─── */
-function buildPreviewHtml(file: FileNode | null): string {
-  const isTsx = file?.extension === "tsx";
-  const isCss = file?.extension === "css";
-  const isJson = file?.extension === "json";
-
-  let bodyContent = "";
-  if (isTsx && file?.content) {
-    // Extract JSX return content — simple heuristic
-    const returnMatch = file.content.match(/return\s*\(\s*([\s\S]*?)\s*\)\s*\}?\s*$/m);
-    if (returnMatch) {
-      bodyContent = returnMatch[1]
-        .replace(/className=/g, "class=")
-        .replace(/\{[^}]*\}/g, "");
+/* ─── Parse code blocks from AI response ─── */
+function parseCodeBlocks(text: string): { filename: string; content: string }[] {
+  const blocks: { filename: string; content: string }[] = [];
+  // Match ```filename\n...``` or ```lang:filename\n...```
+  const regex = /```(?:(\w+):)?([^\n`]+)?\n([\s\S]*?)```/g;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const lang = match[1] ?? "";
+    const filename = (match[2] ?? "").trim();
+    const code = match[3] ?? "";
+    if (filename && code.trim()) {
+      blocks.push({ filename, content: code.trim() });
+    } else if (code.trim() && lang) {
+      // Infer filename from language
+      const ext = lang === "typescript" || lang === "tsx" ? "tsx" : lang === "javascript" || lang === "jsx" ? "jsx" : lang === "css" ? "css" : lang === "html" ? "html" : lang;
+      blocks.push({ filename: `code.${ext}`, content: code.trim() });
     }
-  } else if (isCss && file?.content) {
-    bodyContent = `<pre style="color:#888;font-size:12px;padding:20px;font-family:monospace;white-space:pre-wrap">${file.content.replace(/</g, "&lt;")}</pre>`;
-  } else if (isJson && file?.content) {
-    bodyContent = `<pre style="color:#888;font-size:12px;padding:20px;font-family:monospace;white-space:pre-wrap">${file.content.replace(/</g, "&lt;")}</pre>`;
-  } else if (file?.content) {
-    bodyContent = `<pre style="color:#888;font-size:12px;padding:20px;font-family:monospace;white-space:pre-wrap">${file.content.replace(/</g, "&lt;")}</pre>`;
   }
-
-  return `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Preview</title>
-<script src="https://cdn.tailwindcss.com"><\/script>
-<style>
-  body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #000; color: #fff; }
-</style>
-</head>
-<body class="dark bg-black text-white">
-${bodyContent || '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:#444;font-size:13px">Selecione um arquivo para preview</div>'}
-</body>
-</html>`;
+  return blocks;
 }
 
-/* ─── Syntax highlight class by token type (minimal) ─── */
+/* ─── Build file tree from flat file list ─── */
+function buildFileTree(files: Map<string, string>): FileNode[] {
+  const root: FileNode[] = [];
+  const dirs = new Map<string, FileNode>();
+
+  for (const [path, content] of files) {
+    const parts = path.split("/");
+    const filename = parts.pop()!;
+    const ext = filename.split(".").pop() ?? "";
+
+    let parent = root;
+    let currentPath = "";
+
+    for (const dir of parts) {
+      currentPath += (currentPath ? "/" : "") + dir;
+      if (!dirs.has(currentPath)) {
+        const dirNode: FileNode = { name: dir, type: "folder", children: [] };
+        parent.push(dirNode);
+        dirs.set(currentPath, dirNode);
+      }
+      parent = dirs.get(currentPath)!.children!;
+    }
+
+    parent.push({
+      name: filename,
+      type: "file",
+      extension: ext,
+      content,
+    });
+  }
+
+  return root;
+}
+
+/* ─── Build preview HTML from files ─── */
+function buildPreviewHtml(files: Map<string, string>, currentFile: FileNode | null): string {
+  // Check if we have an HTML file
+  const htmlFile = files.get("index.html") ?? files.get("page.html");
+  const cssFile = files.get("styles.css") ?? files.get("style.css") ?? files.get("globals.css") ?? "";
+
+  if (htmlFile) {
+    // Inject CSS if separate
+    if (cssFile) {
+      return htmlFile.replace("</head>", `<style>${cssFile}</style></head>`);
+    }
+    return htmlFile;
+  }
+
+  // For TSX/JSX files, show code as preview
+  const content = currentFile?.content ?? "";
+  const ext = currentFile?.extension ?? "";
+  const isTsx = ext === "tsx" || ext === "jsx";
+
+  if (isTsx) {
+    const returnMatch = content.match(/return\s*\(\s*([\s\S]*?)\s*\)\s*\}?\s*$/m);
+    const bodyContent = returnMatch
+      ? returnMatch[1].replace(/className=/g, "class=").replace(/\{[^}]*\}/g, "")
+      : "";
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><script src="https://cdn.tailwindcss.com"><\/script><style>body{margin:0;font-family:system-ui;background:#000;color:#fff}</style></head><body class="dark bg-black text-white">${bodyContent || '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:#444">Preview</div>'}</body></html>`;
+  }
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><style>body{margin:0;background:#000;color:#888;font-family:monospace;padding:20px;font-size:12px;white-space:pre-wrap}</style></head><body>${content.replace(/</g, "&lt;") || "Selecione um arquivo para preview"}</body></html>`;
+}
+
+/* ─── Ext color helper ─── */
 function getExtColor(ext?: string): string {
   switch (ext) {
-    case "tsx":
-    case "ts":
-      return "text-neon-cyan/70";
-    case "css":
-      return "text-neon-purple/70";
-    case "json":
-      return "text-neon-orange/70";
-    default:
-      return "text-white/40";
+    case "tsx": case "ts": return "text-neon-cyan/70";
+    case "jsx": case "js": return "text-yellow-400/70";
+    case "css": return "text-neon-purple/70";
+    case "html": return "text-orange-400/70";
+    case "json": return "text-neon-orange/70";
+    default: return "text-white/40";
   }
 }
 
@@ -286,6 +139,7 @@ type RightTab = "chat" | "preview";
 
 export default function CodeIDEPage() {
   const router = useRouter();
+  const [files, setFiles] = useState<Map<string, string>>(new Map());
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
   const [openTabs, setOpenTabs] = useState<FileNode[]>([]);
   const [copied, setCopied] = useState(false);
@@ -298,8 +152,7 @@ export default function CodeIDEPage() {
     {
       id: "welcome",
       role: "assistant",
-      content:
-        "Ola! Sou seu assistente de codigo. Posso ajudar a criar, editar e entender seu projeto. O que deseja fazer?",
+      content: "Ola! Descreva o que deseja criar e vou gerar os arquivos do projeto. Por exemplo:\n\n• \"Crie uma landing page moderna com hero, features e footer\"\n• \"Crie um dashboard com sidebar e cards de metricas\"\n• \"Crie um formulario de contato com validacao\"",
       timestamp: Date.now(),
     },
   ]);
@@ -307,34 +160,30 @@ export default function CodeIDEPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [previewKey, setPreviewKey] = useState(0);
 
+  const fileTree = useMemo(() => buildFileTree(files), [files]);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  const handleFileSelect = useCallback(
-    (node: FileNode) => {
-      setSelectedFile(node);
-      setCopied(false);
-      setOpenTabs((tabs) => {
-        if (tabs.some((t) => t.name === node.name)) return tabs;
-        return [...tabs, node];
-      });
-    },
-    []
-  );
+  const handleFileSelect = useCallback((node: FileNode) => {
+    setSelectedFile(node);
+    setCopied(false);
+    setOpenTabs((tabs) => {
+      if (tabs.some((t) => t.name === node.name && t.content === node.content)) return tabs;
+      return [...tabs, node];
+    });
+  }, []);
 
-  const handleCloseTab = useCallback(
-    (tabName: string) => {
-      setOpenTabs((tabs) => {
-        const next = tabs.filter((t) => t.name !== tabName);
-        if (selectedFile?.name === tabName) {
-          setSelectedFile(next.length > 0 ? next[next.length - 1] : null);
-        }
-        return next;
-      });
-    },
-    [selectedFile]
-  );
+  const handleCloseTab = useCallback((tabName: string) => {
+    setOpenTabs((tabs) => {
+      const next = tabs.filter((t) => t.name !== tabName);
+      if (selectedFile?.name === tabName) {
+        setSelectedFile(next.length > 0 ? next[next.length - 1] : null);
+      }
+      return next;
+    });
+  }, [selectedFile]);
 
   const handleCopy = useCallback(async () => {
     if (!selectedFile?.content) return;
@@ -343,7 +192,29 @@ export default function CodeIDEPage() {
     setTimeout(() => setCopied(false), 2000);
   }, [selectedFile]);
 
-  const handleSendChat = useCallback(() => {
+  /** Update files from AI-generated code blocks */
+  const updateFilesFromBlocks = useCallback((blocks: { filename: string; content: string }[]) => {
+    if (blocks.length === 0) return;
+    setFiles((prev) => {
+      const next = new Map(prev);
+      for (const b of blocks) {
+        next.set(b.filename, b.content);
+      }
+      return next;
+    });
+    // Open first new file
+    const first = blocks[0];
+    const ext = first.filename.split(".").pop() ?? "";
+    const node: FileNode = { name: first.filename.split("/").pop()!, type: "file", extension: ext, content: first.content };
+    setSelectedFile(node);
+    setOpenTabs((tabs) => {
+      const filtered = tabs.filter((t) => t.name !== node.name);
+      return [...filtered, node];
+    });
+    setPreviewKey((k) => k + 1);
+  }, []);
+
+  const handleSendChat = useCallback(async () => {
     if (!chatInput.trim() || isSending) return;
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
@@ -352,31 +223,304 @@ export default function CodeIDEPage() {
       timestamp: Date.now(),
     };
     setChatMessages((prev) => [...prev, userMsg]);
+    const input = chatInput.trim();
     setChatInput("");
     setIsSending(true);
 
-    setTimeout(() => {
+    try {
+      // Build context: current files
+      const fileContext = files.size > 0
+        ? `\n\nArquivos atuais do projeto:\n${[...files.entries()].map(([name, content]) => `--- ${name} ---\n${content}`).join("\n\n")}`
+        : "";
+
+      const res = await fetch("/api/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: `Voce e um desenvolvedor web expert. O usuario pede para criar ou modificar codigo.
+
+REGRAS IMPORTANTES:
+1. SEMPRE coloque o codigo em blocos com o nome do arquivo: \`\`\`nome-do-arquivo.ext
+2. Use HTML, CSS, e JavaScript vanilla por padrao (mais facil de pre-visualizar)
+3. Crie arquivos completos e funcionais, nao snippets parciais
+4. Para projetos web, SEMPRE crie um index.html como arquivo principal
+5. Se usar CSS, crie um arquivo styles.css separado
+6. Se usar JS, crie um arquivo script.js separado
+7. O HTML deve ser completo (<!DOCTYPE html>, <head>, <body>)
+8. Use design moderno, escuro, com boa tipografia
+9. Explique brevemente o que criou ANTES dos blocos de codigo
+10. Se o usuario pedir modificacao, reescreva o arquivo inteiro com as mudancas${fileContext}`,
+            },
+            ...chatMessages.filter((m) => m.id !== "welcome").map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+            })),
+            { role: "user", content: input },
+          ],
+        }),
+      });
+
+      if (!res.ok) throw new Error("API error");
+
+      const json = await res.json();
+      const aiText = json.choices?.[0]?.message?.content ?? json.content ?? "Desculpe, nao consegui gerar o codigo. Verifique se um provedor de IA esta configurado em Configuracoes > Provedores.";
+
       const aiMsg: ChatMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: getSimulatedResponse(userMsg.content, selectedFile),
+        content: aiText,
         timestamp: Date.now(),
       };
       setChatMessages((prev) => [...prev, aiMsg]);
-      setIsSending(false);
-    }, 1200);
-  }, [chatInput, isSending, selectedFile]);
+
+      // Extract code blocks and create files
+      const blocks = parseCodeBlocks(aiText);
+      updateFilesFromBlocks(blocks);
+    } catch {
+      // Fallback for when no provider is configured
+      const fallbackMsg: ChatMessage = {
+        id: `a-${Date.now()}`,
+        role: "assistant",
+        content: "Nao foi possivel conectar ao provedor de IA. Configure um provedor em **Configuracoes > Provedores** para gerar codigo.\n\nEnquanto isso, posso criar um projeto base para voce com arquivos estaticos.",
+        timestamp: Date.now(),
+      };
+      setChatMessages((prev) => [...prev, fallbackMsg]);
+
+      // Generate a basic project as fallback
+      if (files.size === 0 && input.toLowerCase().includes("cri")) {
+        const topic = input.replace(/^(crie?|faca|gere|monte)\s+(uma?\s+)?/i, "").trim() || "projeto";
+        updateFilesFromBlocks([
+          {
+            filename: "index.html",
+            content: `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${topic}</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">${topic}</div>
+      <div class="nav-links">
+        <a href="#hero">Inicio</a>
+        <a href="#features">Recursos</a>
+        <a href="#contact">Contato</a>
+      </div>
+    </nav>
+  </header>
+
+  <section id="hero" class="hero">
+    <h1>${topic}</h1>
+    <p>Sua solucao completa para o futuro digital.</p>
+    <button class="cta-btn">Comecar agora</button>
+  </section>
+
+  <section id="features" class="features">
+    <h2>Recursos</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Rapido</h3>
+        <p>Performance otimizada para a melhor experiencia.</p>
+      </div>
+      <div class="card">
+        <h3>Seguro</h3>
+        <p>Protecao de dados com criptografia avancada.</p>
+      </div>
+      <div class="card">
+        <h3>Moderno</h3>
+        <p>Interface intuitiva e design contemporaneo.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <p>&copy; 2026 ${topic}. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="script.js"><\/script>
+</body>
+</html>`,
+          },
+          {
+            filename: "styles.css",
+            content: `* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 3rem;
+  background: rgba(10, 10, 10, 0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #40e0d0;
+}
+
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: #40e0d0; }
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  background: radial-gradient(ellipse at center, rgba(64, 224, 208, 0.05) 0%, transparent 70%);
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, #40e0d0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+.cta-btn {
+  padding: 0.8rem 2rem;
+  background: rgba(64, 224, 208, 0.1);
+  border: 1px solid rgba(64, 224, 208, 0.3);
+  color: #40e0d0;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.cta-btn:hover {
+  background: rgba(64, 224, 208, 0.2);
+  border-color: rgba(64, 224, 208, 0.6);
+}
+
+.features {
+  padding: 6rem 3rem;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 2rem;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s;
+}
+.card:hover {
+  border-color: rgba(64, 224, 208, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+.card h3 { color: #40e0d0; margin-bottom: 0.5rem; }
+.card p { color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; }
+
+footer {
+  padding: 3rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+}`,
+          },
+          {
+            filename: "script.js",
+            content: `// Smooth scroll for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
+  });
+});
+
+// CTA button interaction
+document.querySelector('.cta-btn')?.addEventListener('click', () => {
+  alert('Bem-vindo! Obrigado por seu interesse.');
+});
+
+console.log('Projeto inicializado com sucesso!');`,
+          },
+        ]);
+      }
+    }
+
+    setIsSending(false);
+  }, [chatInput, isSending, chatMessages, files, updateFilesFromBlocks]);
+
+  // When files change, refresh the file tree and update open tabs
+  useEffect(() => {
+    if (selectedFile && files.has(selectedFile.name)) {
+      const content = files.get(selectedFile.name)!;
+      if (content !== selectedFile.content) {
+        const updated = { ...selectedFile, content };
+        setSelectedFile(updated);
+        setOpenTabs((tabs) =>
+          tabs.map((t) => (t.name === selectedFile.name ? updated : t))
+        );
+      }
+    }
+  }, [files, selectedFile]);
 
   const lines = selectedFile?.content?.split("\n") ?? [];
   const previewHtml = useMemo(
-    () => buildPreviewHtml(selectedFile),
-    [selectedFile]
+    () => buildPreviewHtml(files, selectedFile),
+    [files, selectedFile]
   );
 
-  // Refresh preview when file changes
   useEffect(() => {
     setPreviewKey((k) => k + 1);
-  }, [selectedFile]);
+  }, [selectedFile, files]);
+
+  const hasFiles = files.size > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[oklch(0.08_0_0)]">
@@ -396,12 +540,14 @@ export default function CodeIDEPage() {
           <span className="text-[11px] font-semibold tracking-wide text-white/45">
             ORIGEM Code
           </span>
-          <div className="flex items-center gap-1.5 rounded-full border border-neon-green/20 bg-neon-green/[0.08] px-2 py-0.5">
-            <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
-            <span className="text-[9px] font-medium text-neon-green/80">
-              Live
-            </span>
-          </div>
+          {hasFiles && (
+            <div className="flex items-center gap-1.5 rounded-full border border-neon-green/20 bg-neon-green/[0.08] px-2 py-0.5">
+              <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
+              <span className="text-[9px] font-medium text-neon-green/80">
+                {files.size} {files.size === 1 ? "arquivo" : "arquivos"}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -411,11 +557,7 @@ export default function CodeIDEPage() {
             className="flex h-7 w-7 items-center justify-center rounded-lg text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
             title="Explorador"
           >
-            {sidebarOpen ? (
-              <PanelLeftClose className="h-3.5 w-3.5" />
-            ) : (
-              <PanelLeftOpen className="h-3.5 w-3.5" />
-            )}
+            {sidebarOpen ? <PanelLeftClose className="h-3.5 w-3.5" /> : <PanelLeftOpen className="h-3.5 w-3.5" />}
           </button>
           <button
             type="button"
@@ -423,11 +565,7 @@ export default function CodeIDEPage() {
             className="flex h-7 w-7 items-center justify-center rounded-lg text-white/25 transition-colors hover:bg-white/[0.06] hover:text-white/50"
             title="Chat & Preview"
           >
-            {rightPanelOpen ? (
-              <PanelRightClose className="h-3.5 w-3.5" />
-            ) : (
-              <PanelRightOpen className="h-3.5 w-3.5" />
-            )}
+            {rightPanelOpen ? <PanelRightClose className="h-3.5 w-3.5" /> : <PanelRightOpen className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>
@@ -448,21 +586,23 @@ export default function CodeIDEPage() {
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25">
                   Explorer
                 </span>
-                <button
-                  type="button"
-                  className="ml-auto flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
-                  title="Upload"
-                >
-                  <Upload className="h-3 w-3" />
-                </button>
               </div>
               <div className="h-[calc(100%-2rem)] w-[240px] overflow-y-auto">
-                <FileTree
-                  data={DEMO_FILES}
-                  onFileSelect={handleFileSelect}
-                  selectedFile={selectedFile?.name ?? null}
-                  className="rounded-none border-0 bg-transparent"
-                />
+                {hasFiles ? (
+                  <FileTree
+                    data={fileTree}
+                    onFileSelect={handleFileSelect}
+                    selectedFile={selectedFile?.name ?? null}
+                    className="rounded-none border-0 bg-transparent"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 px-4 py-12">
+                    <Plus className="h-5 w-5 text-white/10" />
+                    <p className="text-center text-[10px] text-white/20">
+                      Use o chat para gerar os arquivos do projeto
+                    </p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -481,10 +621,7 @@ export default function CodeIDEPage() {
                       <button
                         key={tab.name}
                         type="button"
-                        onClick={() => {
-                          setSelectedFile(tab);
-                          setCopied(false);
-                        }}
+                        onClick={() => { setSelectedFile(tab); setCopied(false); }}
                         className={cn(
                           "group flex h-full items-center gap-2 border-r border-white/[0.03] px-3 text-[11px] transition-colors",
                           isActive
@@ -492,20 +629,10 @@ export default function CodeIDEPage() {
                             : "text-white/30 hover:bg-white/[0.02] hover:text-white/50"
                         )}
                       >
-                        <FileCode
-                          className={cn(
-                            "h-3 w-3",
-                            isActive
-                              ? getExtColor(tab.extension)
-                              : "text-white/20"
-                          )}
-                        />
+                        <FileCode className={cn("h-3 w-3", isActive ? getExtColor(tab.extension) : "text-white/20")} />
                         {tab.name}
                         <span
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCloseTab(tab.name);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.name); }}
                           className="ml-0.5 flex h-4 w-4 items-center justify-center rounded text-white/30 opacity-0 transition-all hover:bg-white/[0.08] hover:text-white/50 group-hover:opacity-100"
                         >
                           &times;
@@ -518,10 +645,7 @@ export default function CodeIDEPage() {
                   <button
                     type="button"
                     onClick={() => setWordWrap((v) => !v)}
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06]",
-                      wordWrap && "text-neon-cyan/60"
-                    )}
+                    className={cn("flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06]", wordWrap && "text-neon-cyan/60")}
                     title="Word wrap"
                   >
                     <WrapText className="h-3 w-3" />
@@ -532,11 +656,7 @@ export default function CodeIDEPage() {
                     className="flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
                     title="Copiar"
                   >
-                    {copied ? (
-                      <Check className="h-3 w-3 text-neon-green" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
+                    {copied ? <Check className="h-3 w-3 text-neon-green" /> : <Copy className="h-3 w-3" />}
                   </button>
                 </div>
               </div>
@@ -548,20 +668,10 @@ export default function CodeIDEPage() {
                     <tbody>
                       {lines.map((line, i) => (
                         <tr key={i} className="group hover:bg-white/[0.015]">
-                          <td
-                            className="select-none pr-4 text-right align-top font-mono text-[11px] leading-5 text-white/30 group-hover:text-white/25"
-                            style={{ width: 44 }}
-                          >
+                          <td className="select-none pr-4 text-right align-top font-mono text-[11px] leading-5 text-white/30 group-hover:text-white/25" style={{ width: 44 }}>
                             {i + 1}
                           </td>
-                          <td
-                            className={cn(
-                              "font-mono text-[12px] leading-5 text-white/75",
-                              wordWrap
-                                ? "whitespace-pre-wrap break-all"
-                                : "whitespace-pre"
-                            )}
-                          >
+                          <td className={cn("font-mono text-[12px] leading-5 text-white/75", wordWrap ? "whitespace-pre-wrap break-all" : "whitespace-pre")}>
                             {line || "\u00A0"}
                           </td>
                         </tr>
@@ -580,12 +690,7 @@ export default function CodeIDEPage() {
                   </span>
                   <span className="text-[10px] text-white/12">UTF-8</span>
                 </div>
-                <span
-                  className={cn(
-                    "font-mono text-[10px] font-semibold",
-                    getExtColor(selectedFile.extension)
-                  )}
-                >
+                <span className={cn("font-mono text-[10px] font-semibold", getExtColor(selectedFile.extension))}>
                   {selectedFile.extension?.toUpperCase() ?? "TXT"}
                 </span>
               </div>
@@ -593,14 +698,16 @@ export default function CodeIDEPage() {
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-                <Code2 className="h-7 w-7 text-white/8" />
+                <Sparkles className="h-7 w-7 text-neon-cyan/20" />
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-white/25">
                   ORIGEM Code
                 </p>
-                <p className="mt-1 text-[11px] text-white/30">
-                  Selecione um arquivo no explorer para comecar
+                <p className="mt-1 max-w-xs text-[11px] text-white/30">
+                  {hasFiles
+                    ? "Selecione um arquivo no explorer para comecar"
+                    : "Use o chat para descrever o que deseja criar. A IA vai gerar os arquivos do projeto automaticamente."}
                 </p>
               </div>
             </div>
@@ -612,7 +719,7 @@ export default function CodeIDEPage() {
           {rightPanelOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 360, opacity: 1 }}
+              animate={{ width: 380, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-shrink-0 flex-col overflow-hidden border-l border-white/[0.05] bg-[oklch(0.065_0_0)]"
@@ -624,9 +731,7 @@ export default function CodeIDEPage() {
                   onClick={() => setRightTab("chat")}
                   className={cn(
                     "flex h-full flex-1 items-center justify-center gap-1.5 text-[11px] font-medium transition-colors",
-                    rightTab === "chat"
-                      ? "border-b-2 border-neon-cyan/40 text-white/70"
-                      : "text-white/25 hover:text-white/45"
+                    rightTab === "chat" ? "border-b-2 border-neon-cyan/40 text-white/70" : "text-white/25 hover:text-white/45"
                   )}
                 >
                   <Blocks className="h-3 w-3" />
@@ -637,9 +742,7 @@ export default function CodeIDEPage() {
                   onClick={() => setRightTab("preview")}
                   className={cn(
                     "flex h-full flex-1 items-center justify-center gap-1.5 text-[11px] font-medium transition-colors",
-                    rightTab === "preview"
-                      ? "border-b-2 border-neon-green/40 text-white/70"
-                      : "text-white/25 hover:text-white/45"
+                    rightTab === "preview" ? "border-b-2 border-neon-green/40 text-white/70" : "text-white/25 hover:text-white/45"
                   )}
                 >
                   <Eye className="h-3 w-3" />
@@ -650,39 +753,16 @@ export default function CodeIDEPage() {
               {/* Chat tab */}
               {rightTab === "chat" && (
                 <div className="flex flex-1 flex-col overflow-hidden">
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                  <div className="flex-1 space-y-3 overflow-y-auto p-3">
                     {chatMessages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex gap-2",
-                          msg.role === "user" && "flex-row-reverse"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg",
-                            msg.role === "assistant"
-                              ? "bg-neon-cyan/10"
-                              : "bg-white/[0.06]"
-                          )}
-                        >
-                          {msg.role === "assistant" ? (
-                            <Bot className="h-3 w-3 text-neon-cyan/70" />
-                          ) : (
-                            <User className="h-3 w-3 text-white/40" />
-                          )}
+                      <div key={msg.id} className={cn("flex gap-2", msg.role === "user" && "flex-row-reverse")}>
+                        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg", msg.role === "assistant" ? "bg-neon-cyan/10" : "bg-white/[0.06]")}>
+                          {msg.role === "assistant" ? <Bot className="h-3 w-3 text-neon-cyan/70" /> : <User className="h-3 w-3 text-white/40" />}
                         </div>
-                        <div
-                          className={cn(
-                            "max-w-[85%] rounded-xl px-3 py-2",
-                            msg.role === "assistant"
-                              ? "bg-white/[0.04] text-white/65"
-                              : "bg-neon-cyan/[0.08] text-white/75"
-                          )}
-                        >
-                          <p className="text-[12px] leading-relaxed">
-                            {msg.content}
+                        <div className={cn("max-w-[85%] rounded-xl px-3 py-2", msg.role === "assistant" ? "bg-white/[0.04] text-white/65" : "bg-neon-cyan/[0.08] text-white/75")}>
+                          <p className="whitespace-pre-wrap text-[12px] leading-relaxed">
+                            {/* Strip code blocks from display for cleaner chat */}
+                            {msg.role === "assistant" ? msg.content.replace(/```[\s\S]*?```/g, "\n[Codigo gerado — veja no editor]\n").trim() : msg.content}
                           </p>
                         </div>
                       </div>
@@ -693,9 +773,7 @@ export default function CodeIDEPage() {
                           <Loader2 className="h-3 w-3 animate-spin text-neon-cyan/70" />
                         </div>
                         <div className="rounded-xl bg-white/[0.04] px-3 py-2">
-                          <p className="text-[12px] text-white/30">
-                            Pensando...
-                          </p>
+                          <p className="text-[12px] text-white/30">Gerando codigo...</p>
                         </div>
                       </div>
                     )}
@@ -714,7 +792,7 @@ export default function CodeIDEPage() {
                             handleSendChat();
                           }
                         }}
-                        placeholder="Peca uma mudanca no codigo..."
+                        placeholder={hasFiles ? "Peca uma mudanca no codigo..." : "Descreva o que deseja criar..."}
                         className="flex-1 bg-transparent text-[12px] text-white/70 placeholder:text-white/18 outline-none"
                       />
                       <button
@@ -726,9 +804,6 @@ export default function CodeIDEPage() {
                         <Send className="h-3 w-3" />
                       </button>
                     </div>
-                    <p className="mt-1.5 text-center text-[9px] text-white/12">
-                      IA pode editar arquivos em tempo real
-                    </p>
                   </div>
                 </div>
               )}
@@ -740,28 +815,17 @@ export default function CodeIDEPage() {
                     <div className="flex items-center gap-1.5">
                       <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
                       <span className="text-[10px] text-white/30">
-                        {selectedFile
-                          ? selectedFile.name
-                          : "localhost:3000"}
+                        {selectedFile ? selectedFile.name : "localhost:3000"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewKey((k) => k + 1)}
-                        className="flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
-                        title="Recarregar"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                      </button>
-                      <button
-                        type="button"
-                        className="flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
-                        title="Abrir em nova aba"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewKey((k) => k + 1)}
+                      className="flex h-5 w-5 items-center justify-center rounded text-white/20 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+                      title="Recarregar"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                    </button>
                   </div>
                   <div className="flex-1 bg-black">
                     <iframe
@@ -780,24 +844,4 @@ export default function CodeIDEPage() {
       </div>
     </div>
   );
-}
-
-/* ─── Simulated AI responses ─── */
-function getSimulatedResponse(input: string, file: FileNode | null): string {
-  const lower = input.toLowerCase();
-  if (lower.includes("cor") || lower.includes("color") || lower.includes("tema"))
-    return "Posso alterar as cores do projeto. Quais cores deseja? Posso modificar o globals.css e os componentes que usam essas cores.";
-  if (lower.includes("botao") || lower.includes("button"))
-    return "Vou melhorar o componente Button. Posso adicionar variantes (primary, secondary, ghost), animacoes de hover e estados de loading. Quer que eu faca isso?";
-  if (lower.includes("page") || lower.includes("pagina") || lower.includes("home"))
-    return `Posso editar o page.tsx${file ? ` (voce esta vendo ${file.name})` : ""}. O que deseja mudar na pagina principal?`;
-  if (lower.includes("preview") || lower.includes("ver"))
-    return "Clique na aba 'Preview' para ver o resultado em tempo real. Cada alteracao que eu fizer vai atualizar automaticamente.";
-  if (lower.includes("criar") || lower.includes("novo") || lower.includes("adicionar"))
-    return "Claro! Posso criar novos componentes, paginas ou utilitarios. Descreva o que precisa e eu gero o codigo.";
-  if (lower.includes("explicar") || lower.includes("como funciona"))
-    return file
-      ? `O arquivo ${file.name} ${file.extension === "tsx" ? "e um componente React com TypeScript" : file.extension === "css" ? "define os estilos globais do projeto" : "faz parte da configuracao do projeto"}. Quer que eu explique alguma parte especifica?`
-      : "Selecione um arquivo na arvore e posso explicar qualquer parte do codigo.";
-  return "Entendi! Posso ajudar com isso. Descreva com mais detalhes o que deseja e vou gerar ou modificar o codigo necessario.";
 }

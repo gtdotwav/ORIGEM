@@ -22,6 +22,10 @@ import {
   createBlankSlide,
   createTitleSlide,
   createContentSlide,
+  createTwoColumnSlide,
+  createQuoteSlide,
+  createSectionSlide,
+  createImageSlide,
 } from "@/stores/slides-store";
 import type { SlideCreationMode, Slide, SlideElement } from "@/types/slides";
 
@@ -80,48 +84,164 @@ function createId() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Simulated AI Generation                                            */
+/*  Smart Slide Generation                                             */
 /* ------------------------------------------------------------------ */
-function generateSlidesFromPrompt(prompt: string): Slide[] {
-  const words = prompt.split(/\s+/);
-  const title = words.slice(0, 5).join(" ");
-  return [
-    createTitleSlide(title, "Gerado por IA"),
-    createContentSlide("Visao Geral", [
-      "Contexto e motivacao do tema",
-      "Objetivos principais",
-      "Publico-alvo e escopo",
-    ]),
-    createContentSlide("Desenvolvimento", [
-      "Ponto central da argumentacao",
-      "Dados e evidencias de suporte",
-      "Exemplos praticos e aplicacoes",
-    ]),
-    createContentSlide("Conclusao", [
-      "Resumo dos pontos-chave",
-      "Proximos passos recomendados",
-      "Chamada para acao",
-    ]),
-  ];
+
+/** Split text into meaningful sentences/phrases */
+function extractTopics(text: string): string[] {
+  return text
+    .split(/[.!?\n;]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 3);
 }
 
-function generateSlidesFromBasics(
-  title: string,
-  topic: string,
-  numSlides: number
-): Slide[] {
+/** Pick a key phrase from text (first N words, up to a natural break) */
+function extractTitle(text: string, maxWords = 8): string {
+  const clean = text.replace(/^(crie|faca|gere|monte|cria|elabore|apresentacao|slides?|sobre)\s+/gi, "").trim();
+  const words = clean.split(/\s+/);
+  if (words.length <= maxWords) return capitalize(clean);
+  // Find a natural break
+  const sub = words.slice(0, maxWords).join(" ");
+  return capitalize(sub);
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+const LAYOUT_CYCLE: Array<"content" | "two-column" | "image" | "quote" | "content"> = [
+  "content", "two-column", "content", "quote", "image",
+];
+
+function generateSlidesFromPrompt(prompt: string): Slide[] {
+  const topics = extractTopics(prompt);
+  const mainTitle = extractTitle(prompt);
+  const slides: Slide[] = [createTitleSlide(mainTitle, "Apresentacao gerada por IA")];
+
+  // If very short prompt, expand into sections
+  if (topics.length <= 1) {
+    slides.push(createContentSlide("Contexto", [
+      `Introducao ao tema: ${mainTitle}`,
+      "Cenario atual e relevancia",
+      "Objetivo desta apresentacao",
+    ]));
+    slides.push(createTwoColumnSlide("Analise", [
+      "Pontos fortes identificados",
+      "Oportunidades de melhoria",
+      "Dados de suporte",
+    ], [
+      "Desafios encontrados",
+      "Riscos potenciais",
+      "Mitigacoes propostas",
+    ]));
+    slides.push(createQuoteSlide(
+      `${mainTitle} representa uma oportunidade transformadora para quem souber aproveitar.`,
+      "Insight estrategico"
+    ));
+    slides.push(createContentSlide("Plano de Acao", [
+      "Fase 1: Pesquisa e planejamento",
+      "Fase 2: Implementacao e testes",
+      "Fase 3: Lancamento e iteracao",
+    ]));
+    slides.push(createSectionSlide("Conclusao", "Proximos passos e chamada para acao"));
+    return slides;
+  }
+
+  // Rich prompt — distribute topics across varied layouts
+  for (let i = 0; i < topics.length; i++) {
+    const layout = LAYOUT_CYCLE[i % LAYOUT_CYCLE.length];
+    const topic = topics[i];
+    const nextTopic = topics[i + 1];
+
+    if (layout === "two-column" && nextTopic) {
+      slides.push(createTwoColumnSlide(
+        extractTitle(topic, 5),
+        [capitalize(topic), "Analise detalhada", "Impacto esperado"],
+        [capitalize(nextTopic), "Comparacao pratica", "Resultados projetados"]
+      ));
+      i++; // consume next topic
+    } else if (layout === "quote") {
+      slides.push(createQuoteSlide(capitalize(topic), mainTitle));
+    } else if (layout === "image") {
+      slides.push(createImageSlide(
+        extractTitle(topic, 5),
+        capitalize(topic) + ".\n\nEste ponto merece destaque visual para comunicar o impacto de forma clara e memoravel."
+      ));
+    } else {
+      // Content slide — try to create 3 bullets from the topic
+      const words = topic.split(/\s+/);
+      const mid = Math.ceil(words.length / 3);
+      const bullets = words.length > 8
+        ? [
+            capitalize(words.slice(0, mid).join(" ")),
+            capitalize(words.slice(mid, mid * 2).join(" ")),
+            capitalize(words.slice(mid * 2).join(" ")),
+          ]
+        : [capitalize(topic), "Detalhamento e contexto", "Aplicacao pratica"];
+      slides.push(createContentSlide(extractTitle(topic, 5), bullets));
+    }
+  }
+
+  // Always end with a conclusion
+  slides.push(createSectionSlide("Conclusao", "Resumo e proximos passos"));
+  return slides;
+}
+
+function generateSlidesFromBasics(title: string, topic: string, numSlides: number): Slide[] {
   const slides: Slide[] = [createTitleSlide(title, topic)];
-  const sections = [
-    { t: "Introducao", b: ["Contexto do tema", "Por que isso importa", "O que vamos cobrir"] },
-    { t: "Analise", b: ["Dados relevantes", "Tendencias observadas", "Impacto no cenario"] },
-    { t: "Estrategia", b: ["Abordagem recomendada", "Recursos necessarios", "Cronograma proposto"] },
-    { t: "Implementacao", b: ["Fases do projeto", "Responsaveis e entregas", "Metricas de sucesso"] },
-    { t: "Resultados", b: ["O que foi alcancado", "Licoes aprendidas", "Melhorias futuras"] },
-    { t: "Conclusao", b: ["Resumo executivo", "Proximos passos", "Agradecimentos"] },
+  const remaining = numSlides - 1;
+
+  const sections: Array<{ make: () => Slide }> = [
+    { make: () => createContentSlide("Introducao", [
+      `Contexto sobre ${topic}`,
+      "Por que este tema e relevante agora",
+      "Objetivos e escopo da apresentacao",
+    ])},
+    { make: () => createTwoColumnSlide("Panorama Atual", [
+      "Cenario do mercado",
+      "Tendencias emergentes",
+      `Dados sobre ${topic}`,
+    ], [
+      "Desafios identificados",
+      "Oportunidades reais",
+      "Benchmark competitivo",
+    ])},
+    { make: () => createContentSlide("Estrategia", [
+      "Abordagem recomendada",
+      "Recursos e investimento necessarios",
+      "Cronograma de execucao",
+    ])},
+    { make: () => createQuoteSlide(
+      `Investir em ${topic} hoje e garantir competitividade amanha.`,
+      title
+    )},
+    { make: () => createImageSlide("Implementacao", [
+      `Fases do projeto de ${topic}:`,
+      "",
+      "1. Planejamento e pesquisa",
+      "2. Prototipacao e validacao",
+      "3. Desenvolvimento e testes",
+      "4. Lancamento e monitoramento",
+    ].join("\n"))},
+    { make: () => createTwoColumnSlide("Resultados Esperados", [
+      "Metricas de sucesso",
+      "KPIs principais",
+      "ROI projetado",
+    ], [
+      "Impacto no negocio",
+      "Beneficios indiretos",
+      "Valor a longo prazo",
+    ])},
+    { make: () => createContentSlide("Proximos Passos", [
+      "Acoes imediatas recomendadas",
+      "Responsaveis e prazos",
+      "Pontos de revisao e ajuste",
+    ])},
+    { make: () => createSectionSlide("Conclusao", `${title} — Resumo executivo e agradecimentos`)},
   ];
 
-  for (let i = 0; i < Math.min(numSlides - 1, sections.length); i++) {
-    slides.push(createContentSlide(sections[i].t, sections[i].b));
+  for (let i = 0; i < Math.min(remaining, sections.length); i++) {
+    slides.push(sections[i].make());
   }
 
   return slides;
@@ -129,22 +249,129 @@ function generateSlidesFromBasics(
 
 function generateSlidesFromContent(content: string): Slide[] {
   const lines = content.split("\n").filter((l) => l.trim());
-  const title = lines[0] ?? "Apresentacao Aprimorada";
-  const slides: Slide[] = [createTitleSlide(title, "Aprimorado por IA")];
+  if (lines.length === 0) return [createTitleSlide("Apresentacao", "Gerada por IA")];
 
-  for (let i = 1; i < lines.length; i += 3) {
-    const chunk = lines.slice(i, i + 3);
-    slides.push(
-      createContentSlide(
-        chunk[0] ?? `Secao ${Math.ceil(i / 3)}`,
-        chunk.slice(1).length > 0
-          ? chunk.slice(1)
-          : ["Conteudo aprimorado pela IA", "Estrutura otimizada"]
-      )
-    );
+  const title = lines[0].replace(/^(slide\s*\d+\s*[:.-]?\s*)/i, "").trim();
+  const slides: Slide[] = [createTitleSlide(title || "Apresentacao Aprimorada", "Conteudo reestruturado por IA")];
+
+  let currentTitle = "";
+  let currentBullets: string[] = [];
+  let slideCount = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const isTitle = /^(slide\s*\d+|#{1,3}\s|[A-Z][^.!?]*$)/.test(line) && line.length < 60;
+    const isBullet = /^[-•*]\s/.test(line);
+
+    if (isTitle) {
+      // Flush previous
+      if (currentTitle && currentBullets.length > 0) {
+        const layout = LAYOUT_CYCLE[slideCount % LAYOUT_CYCLE.length];
+        if (layout === "two-column" && currentBullets.length >= 4) {
+          const mid = Math.ceil(currentBullets.length / 2);
+          slides.push(createTwoColumnSlide(currentTitle, currentBullets.slice(0, mid), currentBullets.slice(mid)));
+        } else if (layout === "quote" && currentBullets.length >= 1) {
+          slides.push(createQuoteSlide(currentBullets[0], currentTitle));
+        } else {
+          slides.push(createContentSlide(currentTitle, currentBullets));
+        }
+        slideCount++;
+      }
+      currentTitle = line.replace(/^(slide\s*\d+\s*[:.-]?\s*|#{1,3}\s*)/i, "").trim();
+      currentBullets = [];
+    } else {
+      currentBullets.push(isBullet ? line.replace(/^[-•*]\s+/, "") : line);
+    }
+  }
+
+  // Flush last section
+  if (currentTitle && currentBullets.length > 0) {
+    slides.push(createContentSlide(currentTitle, currentBullets));
+  } else if (currentBullets.length > 0) {
+    slides.push(createContentSlide("Conteudo", currentBullets));
   }
 
   return slides;
+}
+
+/* ------------------------------------------------------------------ */
+/*  AI-Powered Generation (calls /api/chat/completions if available)   */
+/* ------------------------------------------------------------------ */
+interface AISlideData {
+  layout: string;
+  title?: string;
+  subtitle?: string;
+  bullets?: string[];
+  left?: string[];
+  right?: string[];
+  quote?: string;
+  author?: string;
+  description?: string;
+}
+
+function aiDataToSlides(data: AISlideData[]): Slide[] {
+  return data.map((s) => {
+    switch (s.layout) {
+      case "title":
+        return createTitleSlide(s.title ?? "Sem titulo", s.subtitle);
+      case "two-column":
+        return createTwoColumnSlide(s.title ?? "", s.left ?? [], s.right ?? []);
+      case "quote":
+        return createQuoteSlide(s.quote ?? "", s.author ?? "");
+      case "image":
+        return createImageSlide(s.title ?? "", s.description ?? "");
+      case "section":
+        return createSectionSlide(s.title ?? "", s.subtitle ?? "");
+      default:
+        return createContentSlide(s.title ?? "", s.bullets ?? []);
+    }
+  });
+}
+
+async function generateWithAI(prompt: string): Promise<Slide[] | null> {
+  try {
+    const res = await fetch("/api/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: `Voce e um designer de apresentacoes profissional. Gere slides em JSON.
+Cada slide deve ter um "layout" e campos relevantes. Layouts disponiveis:
+- "title": { layout, title, subtitle }
+- "content": { layout, title, bullets: string[] }
+- "two-column": { layout, title, left: string[], right: string[] }
+- "quote": { layout, quote, author }
+- "image": { layout, title, description }
+- "section": { layout, title, subtitle }
+
+Regras:
+- Comece com um slide "title"
+- Varie os layouts (nao use so "content")
+- Use pelo menos um "two-column" e um "quote"
+- Termine com "section" de conclusao
+- Gere entre 5-10 slides
+- Conteudo em portugues
+- Responda SOMENTE com o array JSON, sem markdown, sem explicacao.`,
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const json = await res.json();
+    const text = json.choices?.[0]?.message?.content ?? json.content ?? "";
+    // Extract JSON array from response
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) return null;
+    const parsed = JSON.parse(match[0]) as AISlideData[];
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    return aiDataToSlides(parsed);
+  } catch {
+    return null;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -232,28 +459,29 @@ function InputPhase({
 
   const modeMeta = MODES.find((m) => m.id === mode)!;
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
 
-    // Simulate AI delay
-    setTimeout(() => {
-      let slides: Slide[];
-      let presTitle: string;
+    let slides: Slide[] | null = null;
+    let presTitle: string;
 
-      if (mode === "prompt") {
-        slides = generateSlidesFromPrompt(prompt);
-        presTitle = prompt.split(/\s+/).slice(0, 4).join(" ");
-      } else if (mode === "basics") {
-        slides = generateSlidesFromBasics(title, topic, numSlides);
-        presTitle = title || "Sem titulo";
-      } else {
-        slides = generateSlidesFromContent(content);
-        presTitle = content.split("\n")[0]?.slice(0, 40) ?? "Aprimorada";
-      }
+    if (mode === "prompt") {
+      presTitle = extractTitle(prompt);
+      // Try AI generation first, fallback to client-side
+      slides = await generateWithAI(prompt);
+      if (!slides) slides = generateSlidesFromPrompt(prompt);
+    } else if (mode === "basics") {
+      presTitle = title || "Sem titulo";
+      slides = await generateWithAI(`Crie uma apresentacao com titulo "${title}" sobre o topico "${topic}" com ${numSlides} slides.`);
+      if (!slides) slides = generateSlidesFromBasics(title, topic, numSlides);
+    } else {
+      presTitle = content.split("\n")[0]?.slice(0, 40) ?? "Aprimorada";
+      slides = await generateWithAI(`Reestruture e aprimore este conteudo de apresentacao em slides profissionais:\n\n${content}`);
+      if (!slides) slides = generateSlidesFromContent(content);
+    }
 
-      setIsGenerating(false);
-      onGenerate(slides, presTitle);
-    }, 1200);
+    setIsGenerating(false);
+    onGenerate(slides, presTitle);
   }, [mode, prompt, title, topic, numSlides, content, onGenerate]);
 
   return (
