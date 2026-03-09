@@ -21,7 +21,11 @@ export const metadata: Metadata = {
   description:
     "Decompose language into atomic meaning. Orchestrate AI agents on an infinite canvas.",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
   },
 }
 
