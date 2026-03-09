@@ -78,6 +78,8 @@ export interface Space {
   description: string;
   workspaceId?: string;
   cardIds: string[];
+  /** MCP connector IDs installed in this Space */
+  mcpConnectorIds?: string[];
   createdAt: number;
   updatedAt: number;
 }

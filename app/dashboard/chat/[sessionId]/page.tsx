@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
-  ChevronDown,
   Copy,
   Loader2,
   Send,
@@ -110,7 +109,6 @@ export default function ChatPage() {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [toolsExpanded, setToolsExpanded] = useState(false);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -519,23 +517,19 @@ export default function ChatPage() {
               void sendMessage();
             }}
           >
-            {/* Expanded tools row */}
-            {toolsExpanded && (
-              <div className="mb-2 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <LLMSelector />
-                <ChatModeToggle />
-              </div>
-            )}
+            {/* Tools row — always visible */}
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <LLMSelector />
+              <ChatModeToggle />
+            </div>
 
             {/* Main input row */}
             <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2.5">
-              {toolsExpanded && (
-                <AIVoiceInput
-                  onStop={(dur) => {
-                    if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
-                  }}
-                />
-              )}
+              <AIVoiceInput
+                onStop={(dur) => {
+                  if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
+                }}
+              />
               <input
                 type="text"
                 value={input}
@@ -543,14 +537,7 @@ export default function ChatPage() {
                 placeholder="Digite sua mensagem..."
                 className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/40 outline-none"
               />
-              {toolsExpanded && <CriticPanel />}
-              <button
-                type="button"
-                onClick={() => setToolsExpanded(!toolsExpanded)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50"
-              >
-                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", toolsExpanded && "rotate-180")} />
-              </button>
+              <CriticPanel />
               <button
                 type="submit"
                 disabled={!input.trim() || isSending}

@@ -5,6 +5,7 @@ import { getSnapshotStore } from "@/lib/server/backend/store";
 import { selectModelForTier } from "@/config/token-tiers";
 import { checkRateLimit, getClientIp } from "@/lib/server/rate-limit";
 import { ORIGEM_TOOLS } from "@/config/origem-tools";
+import { executeWithTools } from "@/lib/mcp/tool-executor";
 import type { ProviderName } from "@/types/provider";
 import type { TokenTier } from "@/types/chat";
 
@@ -157,7 +158,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const languageModel = await getLanguageModel(resolvedProvider, resolvedModel);
+    // Extract optional MCP context (spaceId, sessionId, agentId)
+    const spaceId = body.spaceId as string | undefined;
+    const sessionId = body.sessionId as string | undefined;
+    const agentId = body.agentId as string | undefined;
 
     const allMessages = [
       ...(systemPrompt
@@ -168,6 +172,31 @@ export async function POST(request: Request) {
         content: m.content,
       })),
     ];
+
+    // Use MCP-aware tool executor if spaceId is provided (Space has MCP connectors)
+    // Otherwise fall back to standard generateText
+    if (spaceId) {
+      const result = await executeWithTools({
+        provider: resolvedProvider,
+        model: resolvedModel,
+        messages: allMessages,
+        maxOutputTokens: resolvedMaxTokens,
+        spaceId,
+        sessionId,
+        agentId,
+      });
+
+      return NextResponse.json({
+        content: result.content,
+        provider: result.provider,
+        model: result.model,
+        toolCallsExecuted: result.toolCallsExecuted.length > 0 ? result.toolCallsExecuted : undefined,
+        usage: result.usage,
+      });
+    }
+
+    // Standard path — no MCP tools
+    const languageModel = await getLanguageModel(resolvedProvider, resolvedModel);
 
     const result = await generateText({
       model: languageModel,
