@@ -3,19 +3,25 @@ import type { NextRequest } from "next/server";
 
 /**
  * Auth middleware — only active when AUTH_SECRET is set.
- * Without it, all routes pass through (dev / unconfigured deploys).
+ * Checks for session cookie and redirects to /login directly.
  */
 export async function middleware(request: NextRequest) {
   if (!process.env.AUTH_SECRET) {
     return NextResponse.next();
   }
 
-  // Dynamically import so NextAuth doesn't crash when env vars are missing
-  const { auth } = await import("@/lib/auth");
-  if (!auth) return NextResponse.next();
+  // Check for NextAuth session token (standard + secure cookie names)
+  const hasSession =
+    request.cookies.has("authjs.session-token") ||
+    request.cookies.has("__Secure-authjs.session-token");
 
-  // @ts-expect-error — auth is a middleware handler when configured
-  return auth(request);
+  if (!hasSession) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {

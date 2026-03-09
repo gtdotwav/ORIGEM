@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { handlers, authEnabled } from "@/lib/auth";
 
 // When auth is not configured, return empty session so SessionProvider doesn't crash
@@ -6,5 +7,15 @@ function emptySessionHandler() {
   return NextResponse.json({});
 }
 
-export const GET = authEnabled ? handlers.GET : emptySessionHandler;
-export const POST = authEnabled ? handlers.POST : emptySessionHandler;
+// Wrap handlers to ensure they're always callable
+async function GET(req: NextRequest) {
+  if (!authEnabled) return emptySessionHandler();
+  return handlers.GET(req);
+}
+
+async function POST(req: NextRequest) {
+  if (!authEnabled) return emptySessionHandler();
+  return handlers.POST(req);
+}
+
+export { GET, POST };

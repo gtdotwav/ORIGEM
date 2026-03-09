@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BrainCircuit, ChevronLeft, Lock, Shield } from "lucide-react";
+import { BrainCircuit, ChevronLeft, Shield } from "lucide-react";
 import { Particles } from "@/components/ui/particles";
 import { signIn, authEnabled, enabledProviders } from "@/lib/auth";
 
@@ -35,10 +35,18 @@ function GitHubIcon({ className }: { className?: string }) {
   );
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   if (!authEnabled) {
     redirect("/dashboard");
   }
+
+  const params = await searchParams;
+  // Only allow relative paths to prevent open redirect
+  const callbackUrl = params.callbackUrl?.startsWith("/") ? params.callbackUrl : "/dashboard";
 
   return (
     <div className="relative min-h-screen w-full bg-background">
@@ -95,7 +103,7 @@ export default function LoginPage() {
                 <form
                   action={async () => {
                     "use server";
-                    await signIn("google", { redirectTo: "/dashboard" });
+                    await signIn("google", { redirectTo: callbackUrl });
                   }}
                 >
                   <button
@@ -112,7 +120,7 @@ export default function LoginPage() {
                 <form
                   action={async () => {
                     "use server";
-                    await signIn("github", { redirectTo: "/dashboard" });
+                    await signIn("github", { redirectTo: callbackUrl });
                   }}
                 >
                   <button
