@@ -11,9 +11,9 @@ interface GradientTextProps {
 
 const gradients = {
   primary:
-    "from-neon-cyan via-neon-purple to-neon-pink",
-  neon: "from-neon-green via-neon-cyan to-neon-blue",
-  warm: "from-neon-orange via-neon-pink to-neon-purple",
+    "from-foreground/80 via-foreground/50 to-foreground/30",
+  neon: "from-neon-cyan via-foreground/60 to-neon-green",
+  warm: "from-neon-orange via-foreground/50 to-neon-cyan",
 };
 
 export function GradientText({

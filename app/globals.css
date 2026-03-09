@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ======================================================
-   ORIGEM — Cosmic Dark Theme
+   ORIGEM — Monochrome Dark Theme
    Psychosemantic AI Engine
    ====================================================== */
 
@@ -30,13 +30,13 @@
   --input: oklch(0.22 0 0);
   --ring: oklch(0.70 0 0);
 
-  /* Accent palette — vibrant neon */
-  --neon-cyan: oklch(0.75 0.14 195);
-  --neon-purple: oklch(0.62 0.16 300);
-  --neon-green: oklch(0.72 0.16 150);
-  --neon-orange: oklch(0.70 0.14 60);
-  --neon-pink: oklch(0.62 0.16 350);
-  --neon-blue: oklch(0.58 0.14 260);
+  /* Accent palette — muted, sophisticated */
+  --neon-cyan: oklch(0.72 0.035 195);
+  --neon-purple: oklch(0.58 0.008 300);
+  --neon-green: oklch(0.68 0.04 150);
+  --neon-orange: oklch(0.66 0.035 60);
+  --neon-pink: oklch(0.56 0.008 30);
+  --neon-blue: oklch(0.54 0.008 240);
   --neon-white: oklch(0.88 0 0);
 
   /* Glass surfaces */
@@ -136,12 +136,12 @@
   --input: oklch(0.18 0 0);
   --ring: oklch(0.85 0 0);
 
-  --neon-cyan: oklch(0.82 0.12 195);
-  --neon-purple: oklch(0.70 0.14 300);
-  --neon-green: oklch(0.78 0.14 150);
-  --neon-orange: oklch(0.75 0.12 60);
-  --neon-pink: oklch(0.68 0.14 350);
-  --neon-blue: oklch(0.65 0.12 260);
+  --neon-cyan: oklch(0.78 0.04 195);
+  --neon-purple: oklch(0.65 0.008 300);
+  --neon-green: oklch(0.74 0.04 150);
+  --neon-orange: oklch(0.70 0.035 60);
+  --neon-pink: oklch(0.63 0.008 30);
+  --neon-blue: oklch(0.60 0.008 240);
   --neon-white: oklch(0.95 0 0);
 
   --glass-bg: oklch(0.10 0 0 / 0.6);
@@ -343,40 +343,40 @@
   box-shadow: var(--glass-inner-highlight), inset 0 0 24px oklch(1 0 0 / 0.03);
 }
 
-/* Neon glow effects */
+/* Subtle glow effects */
 .glow-cyan {
-  box-shadow: 0 0 20px oklch(0.82 0.12 195 / 0.25),
-    0 0 60px oklch(0.82 0.12 195 / 0.08);
+  box-shadow: 0 0 20px oklch(0.78 0.04 195 / 0.15),
+    0 0 60px oklch(0.78 0.04 195 / 0.05);
 }
 .glow-purple {
-  box-shadow: 0 0 20px oklch(0.70 0.14 300 / 0.25),
-    0 0 60px oklch(0.70 0.14 300 / 0.08);
+  box-shadow: 0 0 20px oklch(0.65 0.008 300 / 0.12),
+    0 0 60px oklch(0.65 0.008 300 / 0.04);
 }
 .glow-green {
-  box-shadow: 0 0 20px oklch(0.78 0.14 150 / 0.25),
-    0 0 60px oklch(0.78 0.14 150 / 0.08);
+  box-shadow: 0 0 20px oklch(0.74 0.04 150 / 0.15),
+    0 0 60px oklch(0.74 0.04 150 / 0.05);
 }
 .glow-orange {
-  box-shadow: 0 0 20px oklch(0.75 0.12 60 / 0.25),
-    0 0 60px oklch(0.75 0.12 60 / 0.08);
+  box-shadow: 0 0 20px oklch(0.70 0.035 60 / 0.15),
+    0 0 60px oklch(0.70 0.035 60 / 0.05);
 }
 .glow-pink {
-  box-shadow: 0 0 20px oklch(0.68 0.14 350 / 0.25),
-    0 0 60px oklch(0.68 0.14 350 / 0.08);
+  box-shadow: 0 0 20px oklch(0.63 0.008 30 / 0.12),
+    0 0 60px oklch(0.63 0.008 30 / 0.04);
 }
 .glow-blue {
-  box-shadow: 0 0 20px oklch(0.65 0.12 260 / 0.25),
-    0 0 60px oklch(0.65 0.12 260 / 0.08);
+  box-shadow: 0 0 20px oklch(0.60 0.008 240 / 0.12),
+    0 0 60px oklch(0.60 0.008 240 / 0.04);
 }
 
-/* Neon text glow */
+/* Subtle text glow */
 .text-glow-cyan {
-  text-shadow: 0 0 10px oklch(0.82 0.12 195 / 0.4),
-    0 0 30px oklch(0.82 0.12 195 / 0.15);
+  text-shadow: 0 0 10px oklch(0.78 0.04 195 / 0.25),
+    0 0 30px oklch(0.78 0.04 195 / 0.08);
 }
 .text-glow-purple {
-  text-shadow: 0 0 10px oklch(0.70 0.14 300 / 0.4),
-    0 0 30px oklch(0.70 0.14 300 / 0.15);
+  text-shadow: 0 0 10px oklch(0.65 0.008 300 / 0.15),
+    0 0 30px oklch(0.65 0.008 300 / 0.06);
 }
 
 /* Animated gradient border */
@@ -572,8 +572,8 @@
     box-shadow var(--duration-normal) var(--ease-smooth);
 }
 .hover-glow-purple:hover {
-  border-color: oklch(0.70 0.14 300 / 0.40);
-  box-shadow: 0 0 16px oklch(0.70 0.14 300 / 0.15), 0 0 0 1px oklch(0.70 0.14 300 / 0.08);
+  border-color: oklch(0.65 0.008 300 / 0.30);
+  box-shadow: 0 0 16px oklch(0.65 0.008 300 / 0.08), 0 0 0 1px oklch(0.65 0.008 300 / 0.05);
 }
 
 .hover-glow-green {
@@ -582,8 +582,8 @@
     box-shadow var(--duration-normal) var(--ease-smooth);
 }
 .hover-glow-green:hover {
-  border-color: oklch(0.78 0.14 150 / 0.40);
-  box-shadow: 0 0 16px oklch(0.78 0.14 150 / 0.15), 0 0 0 1px oklch(0.78 0.14 150 / 0.08);
+  border-color: oklch(0.74 0.04 150 / 0.30);
+  box-shadow: 0 0 16px oklch(0.74 0.04 150 / 0.08), 0 0 0 1px oklch(0.74 0.04 150 / 0.05);
 }
 
 .hover-glow-orange {
@@ -592,8 +592,8 @@
     box-shadow var(--duration-normal) var(--ease-smooth);
 }
 .hover-glow-orange:hover {
-  border-color: oklch(0.75 0.12 60 / 0.40);
-  box-shadow: 0 0 16px oklch(0.75 0.12 60 / 0.15), 0 0 0 1px oklch(0.75 0.12 60 / 0.08);
+  border-color: oklch(0.70 0.035 60 / 0.30);
+  box-shadow: 0 0 16px oklch(0.70 0.035 60 / 0.08), 0 0 0 1px oklch(0.70 0.035 60 / 0.05);
 }
 
 /* ======================================================
@@ -755,19 +755,19 @@
   cursor: not-allowed;
 }
 
-/* Neon button hover glow + elevation */
+/* Subtle button hover glow + elevation */
 .neon-btn-cyan:hover:not(:disabled) {
   box-shadow:
-    0 0 20px oklch(0.82 0.12 195 / 0.25),
-    0 0 60px oklch(0.82 0.12 195 / 0.08),
-    inset 0 1px 0 oklch(0.82 0.12 195 / 0.12);
+    0 0 20px oklch(0.78 0.04 195 / 0.15),
+    0 0 60px oklch(0.78 0.04 195 / 0.05),
+    inset 0 1px 0 oklch(0.78 0.04 195 / 0.08);
   transform: translateY(-1px);
 }
 .neon-btn-purple:hover:not(:disabled) {
   box-shadow:
-    0 0 20px oklch(0.70 0.14 300 / 0.25),
-    0 0 60px oklch(0.70 0.14 300 / 0.08),
-    inset 0 1px 0 oklch(0.70 0.14 300 / 0.12);
+    0 0 20px oklch(0.65 0.008 300 / 0.12),
+    0 0 60px oklch(0.65 0.008 300 / 0.04),
+    inset 0 1px 0 oklch(0.65 0.008 300 / 0.06);
   transform: translateY(-1px);
 }
 
@@ -900,29 +900,29 @@
    Badge Neon Utilities
    ====================================================== */
 .badge-neon-cyan {
-  background: oklch(0.82 0.12 195 / 0.10);
+  background: oklch(0.78 0.04 195 / 0.08);
   color: var(--neon-cyan);
-  border: 1px solid oklch(0.82 0.12 195 / 0.25);
+  border: 1px solid oklch(0.78 0.04 195 / 0.18);
 }
 .badge-neon-purple {
-  background: oklch(0.70 0.14 300 / 0.10);
+  background: oklch(0.65 0.008 300 / 0.06);
   color: var(--neon-purple);
-  border: 1px solid oklch(0.70 0.14 300 / 0.25);
+  border: 1px solid oklch(0.65 0.008 300 / 0.15);
 }
 .badge-neon-green {
-  background: oklch(0.78 0.14 150 / 0.10);
+  background: oklch(0.74 0.04 150 / 0.08);
   color: var(--neon-green);
-  border: 1px solid oklch(0.78 0.14 150 / 0.25);
+  border: 1px solid oklch(0.74 0.04 150 / 0.18);
 }
 .badge-neon-orange {
-  background: oklch(0.75 0.12 60 / 0.10);
+  background: oklch(0.70 0.035 60 / 0.08);
   color: var(--neon-orange);
-  border: 1px solid oklch(0.75 0.12 60 / 0.25);
+  border: 1px solid oklch(0.70 0.035 60 / 0.18);
 }
 .badge-neon-pink {
-  background: oklch(0.68 0.14 350 / 0.10);
+  background: oklch(0.63 0.008 30 / 0.06);
   color: var(--neon-pink);
-  border: 1px solid oklch(0.68 0.14 350 / 0.25);
+  border: 1px solid oklch(0.63 0.008 30 / 0.15);
 }
 
 /* ======================================================
