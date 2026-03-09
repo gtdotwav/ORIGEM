@@ -5,14 +5,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Bot,
   Brain,
+  Code2,
   FolderKanban,
   GitBranch,
   Loader2,
+  MessageSquare,
   Orbit,
   Play,
+  Presentation,
   Blocks,
+  Rocket,
   Users,
 } from "lucide-react";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
@@ -507,6 +512,103 @@ function OrchestraPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* ── Continue Development Section ── */}
+          <div className="mt-4 rounded-2xl border border-neon-cyan/15 bg-gradient-to-br from-neon-cyan/[0.04] to-transparent p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Rocket className="h-4.5 w-4.5 text-neon-cyan" />
+              <h2 className="text-sm font-semibold text-foreground/80">
+                Proximos Passos
+              </h2>
+              <span className="rounded-full border border-neon-cyan/20 bg-neon-cyan/10 px-2 py-0.5 text-[9px] font-medium text-neon-cyan">
+                Continuar desenvolvimento
+              </span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Continue in Chat */}
+              <Link
+                href={`/dashboard/chat/${sessionId}`}
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-neon-cyan/30 hover:bg-neon-cyan/[0.04]"
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-neon-cyan/20 bg-neon-cyan/10 transition-all group-hover:scale-105">
+                  <MessageSquare className="h-5 w-5 text-neon-cyan" />
+                </div>
+                <p className="text-sm font-medium text-foreground/80">
+                  Continuar no Chat
+                </p>
+                <p className="mt-1 text-[11px] text-foreground/35">
+                  Refine a ideia com mais instrucoes e feedback direto.
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-neon-cyan/70 opacity-0 transition-all group-hover:opacity-100">
+                  Abrir <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+
+              {/* Open Code Editor */}
+              <Link
+                href="/dashboard/code"
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-green-400/30 hover:bg-green-400/[0.04]"
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-green-400/20 bg-green-400/10 transition-all group-hover:scale-105">
+                  <Code2 className="h-5 w-5 text-green-400" />
+                </div>
+                <p className="text-sm font-medium text-foreground/80">
+                  Abrir Code Editor
+                </p>
+                <p className="mt-1 text-[11px] text-foreground/35">
+                  Gere codigo com IA — paginas, componentes, APIs.
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-green-400/70 opacity-0 transition-all group-hover:opacity-100">
+                  Abrir <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+
+              {/* Create Slides */}
+              <Link
+                href="/dashboard/apps/slides"
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-neon-purple/30 hover:bg-neon-purple/[0.04]"
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-neon-purple/20 bg-neon-purple/10 transition-all group-hover:scale-105">
+                  <Presentation className="h-5 w-5 text-neon-purple" />
+                </div>
+                <p className="text-sm font-medium text-foreground/80">
+                  Criar Apresentacao
+                </p>
+                <p className="mt-1 text-[11px] text-foreground/35">
+                  Transforme os resultados em slides profissionais.
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-neon-purple/70 opacity-0 transition-all group-hover:opacity-100">
+                  Abrir <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+
+              {/* Run Orchestra Again */}
+              <button
+                type="button"
+                onClick={() => void runOrchestraNow()}
+                disabled={isRunningOrchestra}
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 text-left transition-all hover:border-neon-orange/30 hover:bg-neon-orange/[0.04] disabled:opacity-50"
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-neon-orange/20 bg-neon-orange/10 transition-all group-hover:scale-105">
+                  {isRunningOrchestra ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-neon-orange" />
+                  ) : (
+                    <Play className="h-5 w-5 text-neon-orange" />
+                  )}
+                </div>
+                <p className="text-sm font-medium text-foreground/80">
+                  Refinar Orquestra
+                </p>
+                <p className="mt-1 text-[11px] text-foreground/35">
+                  Execute novamente com direcoes atualizadas.
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-neon-orange/70 opacity-0 transition-all group-hover:opacity-100">
+                  {isRunningOrchestra ? "Executando..." : "Executar"} <ArrowRight className="h-3 w-3" />
+                </div>
+              </button>
+            </div>
           </div>
         </>
       )}
