@@ -81,7 +81,14 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "space_generation_failed",
-        reason: message,
+        reason:
+          message === "no_google_api_key"
+            ? "Conecte uma Google API key em Providers para gerar imagens."
+            : message === "reference_images_require_nano_banana"
+            ? "Imagens de referencia exigem um modelo Nano Banana."
+            : message === "unsupported_aspect_ratio_for_imagen"
+            ? "Esse aspect ratio nao esta disponivel para Imagen."
+            : message,
       },
       { status, headers: rateHeaders }
     );

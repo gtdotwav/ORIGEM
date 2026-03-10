@@ -14,7 +14,11 @@ function deriveKey(secret: string): Buffer {
 }
 
 function getSecret(): string {
-  return process.env.ORIGEM_ENCRYPT_SECRET?.trim() ?? "";
+  return (
+    process.env.ORIGEM_ENCRYPT_SECRET?.trim() ??
+    process.env.AUTH_SECRET?.trim() ??
+    ""
+  );
 }
 
 export function hasEncryptionSecret(): boolean {

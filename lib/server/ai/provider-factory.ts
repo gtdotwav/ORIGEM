@@ -5,27 +5,37 @@ import type { ProviderName } from "@/types/provider";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 
 /** Env var fallback map — checked when no key in store */
-export const ENV_KEY_MAP: Partial<Record<ProviderName, string>> = {
-  openai: "OPENAI_API_KEY",
-  anthropic: "ANTHROPIC_API_KEY",
-  google: "GOOGLE_API_KEY",
-  groq: "GROQ_API_KEY",
-  fireworks: "FIREWORKS_API_KEY",
-  together: "TOGETHER_API_KEY",
-  mistral: "MISTRAL_API_KEY",
-  perplexity: "PERPLEXITY_API_KEY",
-  cohere: "COHERE_API_KEY",
-  baseten: "BASETEN_API_KEY",
+export const ENV_KEY_MAP: Partial<Record<ProviderName, string[]>> = {
+  openai: ["OPENAI_API_KEY"],
+  anthropic: ["ANTHROPIC_API_KEY"],
+  google: ["GOOGLE_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY", "GEMINI_API_KEY"],
+  groq: ["GROQ_API_KEY"],
+  fireworks: ["FIREWORKS_API_KEY"],
+  together: ["TOGETHER_API_KEY"],
+  mistral: ["MISTRAL_API_KEY"],
+  perplexity: ["PERPLEXITY_API_KEY"],
+  cohere: ["COHERE_API_KEY"],
+  baseten: ["BASETEN_API_KEY"],
 };
+
+export function getProviderEnvApiKey(provider: ProviderName) {
+  const envKeys = ENV_KEY_MAP[provider] ?? [];
+
+  for (const envKey of envKeys) {
+    const value = process.env[envKey]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
 
 export async function getProviderApiKey(provider: ProviderName) {
   const store = getSnapshotStore();
   const record = await store.getProviderRecord(provider);
 
-  return (
-    record?.apiKey ||
-    (ENV_KEY_MAP[provider] ? process.env[ENV_KEY_MAP[provider]!] : undefined)
-  );
+  return record?.apiKey || getProviderEnvApiKey(provider);
 }
 
 export async function listConfiguredProviders(): Promise<ProviderName[]> {
@@ -39,10 +49,10 @@ export async function listConfiguredProviders(): Promise<ProviderName[]> {
     }
   }
 
-  for (const [provider, envKey] of Object.entries(ENV_KEY_MAP) as Array<
-    [ProviderName, string]
+  for (const [provider] of Object.entries(ENV_KEY_MAP) as Array<
+    [ProviderName, string[]]
   >) {
-    if (process.env[envKey]) {
+    if (getProviderEnvApiKey(provider)) {
       configured.add(provider);
     }
   }

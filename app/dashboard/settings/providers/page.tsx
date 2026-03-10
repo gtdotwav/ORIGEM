@@ -49,6 +49,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 interface ProviderCardState {
   apiKey: string;
   savedKeyHint: string | null;
+  keySource: "stored" | "env" | "none";
   selectedModel: string;
   showKey: boolean;
   status: "idle" | "testing" | "success" | "error";
@@ -62,6 +63,7 @@ interface ProviderRecord {
   keyHint: string | null;
   selectedModel: string;
   updatedAt: number;
+  source: "stored" | "env" | "none";
 }
 
 interface ProviderListResponse {
@@ -77,6 +79,7 @@ export default function ProvidersPage() {
       initial[provider.name] = {
         apiKey: "",
         savedKeyHint: null,
+        keySource: "none",
         selectedModel: provider.models[0]?.id ?? "",
         showKey: false,
         status: "idle",
@@ -131,6 +134,7 @@ export default function ProvidersPage() {
               ...next[provider.name],
               apiKey: "",
               savedKeyHint: saved.hasApiKey ? saved.keyHint : null,
+              keySource: saved.source,
               selectedModel:
                 saved.selectedModel ||
                 provider.models[0]?.id ||
@@ -173,6 +177,12 @@ export default function ProvidersPage() {
 
       if (!response.ok) {
         updateState(name, { saveStatus: "error" });
+        const data = await response.json().catch(() => null);
+        if (data?.error === "storage_unavailable") {
+          toast.error("O cofre de providers nao esta pronto no servidor.");
+        } else {
+          toast.error("Falha ao salvar provider.");
+        }
         return;
       }
 
@@ -183,6 +193,7 @@ export default function ProvidersPage() {
           const tail = currentApiKey.slice(-4);
           return tail ? `••••${tail}` : states[name].savedKeyHint;
         })(),
+        keySource: "stored",
         isDirty: false,
         saveStatus: "saved",
       });
@@ -311,7 +322,9 @@ export default function ProvidersPage() {
                     }}
                     placeholder={
                       state.savedKeyHint
-                        ? `Key salva no backend (${state.savedKeyHint})`
+                        ? state.keySource === "env"
+                          ? `Key ativa via ambiente (${state.savedKeyHint})`
+                          : `Key salva no backend (${state.savedKeyHint})`
                         : "sk-..."
                     }
                     className="pr-10 font-mono text-xs bg-foreground/[0.03] border-foreground/[0.06] text-foreground placeholder:text-foreground/40"
@@ -332,6 +345,21 @@ export default function ProvidersPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="mb-3 flex items-center justify-between text-[10px] text-foreground/35">
+                <span>
+                  {state.keySource === "env"
+                    ? "Origem da key: ambiente"
+                    : state.keySource === "stored"
+                    ? "Origem da key: backend"
+                    : "Origem da key: nao configurada"}
+                </span>
+                {state.savedKeyHint ? (
+                  <span className="rounded-full border border-foreground/[0.08] bg-foreground/[0.03] px-2 py-0.5 font-mono text-[9px] text-foreground/45">
+                    {state.savedKeyHint}
+                  </span>
+                ) : null}
               </div>
 
               {/* Model Selector */}
@@ -426,8 +454,10 @@ export default function ProvidersPage() {
                 {state.isDirty
                   ? "Alteracoes pendentes. Clique em Salvar Key."
                   : state.saveStatus === "saved"
-                    ? `Configuracao protegida no backend${state.savedKeyHint ? ` (${state.savedKeyHint})` : "."
-                    }`
+                    ? state.keySource === "env"
+                      ? "Configuracao ativa por variavel de ambiente. Salve aqui se quiser copiar para o cofre do app."
+                      : `Configuracao protegida no backend${state.savedKeyHint ? ` (${state.savedKeyHint})` : "."
+                        }`
                     : "Chave salva apenas apos confirmar no botao."}
               </p>
             </div>

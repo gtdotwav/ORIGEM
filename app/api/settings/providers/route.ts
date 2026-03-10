@@ -5,6 +5,8 @@ import {
 } from "@/lib/server/backend/provider-service";
 import { requireApiSession } from "@/lib/server/api-auth";
 import { ApiRouteError, readJsonBody, toErrorResponse } from "@/lib/server/request";
+import { PROVIDER_CATALOG } from "@/config/providers";
+import { getProviderEnvApiKey } from "@/lib/server/ai/provider-factory";
 
 function toHint(apiKey: string) {
   const tail = apiKey.slice(-4);
@@ -21,16 +23,24 @@ export async function GET() {
   }
 
   try {
-    const providers = await listProviderRecords();
+    const records = await listProviderRecords();
+    const recordsByProvider = new Map(records.map((record) => [record.provider, record]));
 
     return NextResponse.json({
-      providers: providers.map((provider) => ({
-        provider: provider.provider,
-        selectedModel: provider.selectedModel,
-        hasApiKey: provider.apiKey.length > 0,
-        keyHint: toHint(provider.apiKey),
-        updatedAt: provider.updatedAt,
-      })),
+      providers: PROVIDER_CATALOG.map((meta) => {
+        const stored = recordsByProvider.get(meta.name);
+        const envApiKey = stored ? null : getProviderEnvApiKey(meta.name);
+        const apiKey = stored?.apiKey ?? envApiKey ?? "";
+
+        return {
+          provider: meta.name,
+          selectedModel: stored?.selectedModel ?? meta.models[0]?.id ?? "",
+          hasApiKey: apiKey.length > 0,
+          keyHint: toHint(apiKey),
+          updatedAt: stored?.updatedAt ?? 0,
+          source: stored ? "stored" : envApiKey ? "env" : "none",
+        };
+      }),
     });
   } catch (error) {
     console.error("[providers] Failed to load providers:", error);

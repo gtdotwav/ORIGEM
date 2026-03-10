@@ -1,6 +1,7 @@
 import { generateImage } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { getSnapshotStore } from "@/lib/server/backend/store";
+import { getProviderApiKey } from "@/lib/server/ai/provider-factory";
 import type { AspectRatio, Resolution } from "@/types/spaces";
 
 type SpaceImagePrompt = Parameters<typeof generateImage>[0]["prompt"];
@@ -64,11 +65,7 @@ async function resolveGoogleApiKey(): Promise<string> {
     console.warn("[spaces] Failed to load saved Google API key:", error);
   }
 
-  return (
-    process.env.GOOGLE_API_KEY?.trim() ||
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim() ||
-    ""
-  );
+  return (await getProviderApiKey("google"))?.trim() ?? "";
 }
 
 async function persistImage(

@@ -10,6 +10,9 @@ import {
   type OnConnect,
   type Connection,
   BackgroundVariant,
+  ConnectionLineType,
+  MarkerType,
+  PanOnScrollMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,6 +20,7 @@ import { ArrowLeft, Plus, PanelRightOpen, PanelRightClose, Orbit } from "lucide-
 import { SpacesSidebar } from "@/components/spaces/spaces-sidebar";
 import GenerationCardNode from "@/components/spaces/generation-card-node";
 import TextNode from "@/components/spaces/text-node";
+import SpaceConnectionEdge from "@/components/spaces/space-connection-edge";
 import { ControlPanel } from "@/components/spaces/control-panel";
 import { SpaceContextMenu, useSpaceContextMenuItems } from "@/components/spaces/space-context-menu";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -26,9 +30,21 @@ const NODE_TYPES = {
   text: TextNode,
 };
 
+const EDGE_TYPES = {
+  flow: SpaceConnectionEdge,
+  variation: SpaceConnectionEdge,
+  upscale: SpaceConnectionEdge,
+};
+
 const EDGE_DEFAULTS = {
-  style: { stroke: "rgba(255,255,255,0.12)", strokeWidth: 1.35 },
+  style: { stroke: "rgba(255,255,255,0.24)", strokeWidth: 2.2 },
   animated: false,
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    color: "rgba(255,255,255,0.24)",
+    width: 18,
+    height: 18,
+  },
 };
 
 export default function SpaceCanvasPage() {
@@ -50,6 +66,7 @@ export default function SpaceCanvasPage() {
   const addTextNode = useSpacesStore((s) => s.addTextNode);
   const selectedCardId = useSpacesStore((s) => s.selectedCardId);
   const selectCard = useSpacesStore((s) => s.selectCard);
+  const viewport = useSpacesStore((s) => s.viewport);
 
   const space = useMemo(
     () => spaces.find((s) => s.id === spaceId),
@@ -60,10 +77,12 @@ export default function SpaceCanvasPage() {
     if (!spaceId) return;
     const existing = spaces.find((s) => s.id === spaceId);
     if (!existing) {
-      createSpace("Space sem titulo");
+      const createdId = createSpace("Space sem titulo");
+      router.replace(`/dashboard/spaces/${createdId}`);
+      return;
     }
     setActiveSpace(spaceId);
-  }, [spaceId, spaces, setActiveSpace, createSpace]);
+  }, [spaceId, spaces, setActiveSpace, createSpace, router]);
 
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
@@ -96,7 +115,7 @@ export default function SpaceCanvasPage() {
 
   const handleAddCard = () => {
     if (!spaceId) return;
-    createCard(spaceId, "", { x: 300, y: 200 });
+    createCard(spaceId, "");
   };
 
   const cards = useSpacesStore((s) => s.cards);
@@ -144,6 +163,14 @@ export default function SpaceCanvasPage() {
                 {space?.name ?? "Space"}
               </span>
             </div>
+            <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 backdrop-blur-xl lg:flex">
+              <span className="text-[10px] uppercase tracking-[0.22em] text-white/24">
+                Gestos
+              </span>
+              <span className="text-[11px] text-white/46">
+                Pinça para zoom • dois dedos para navegar
+              </span>
+            </div>
           </div>
 
           <div className="pointer-events-auto flex items-center gap-2">
@@ -185,20 +212,37 @@ export default function SpaceCanvasPage() {
           onConnect={onConnect}
           onPaneClick={handlePaneClick}
           onPaneContextMenu={handlePaneContextMenu}
+          onInit={(instance) => {
+            void instance.setViewport(viewport, { duration: 0 });
+          }}
           onMoveEnd={(_, viewport) => setViewport(viewport)}
           nodeTypes={NODE_TYPES}
+          edgeTypes={EDGE_TYPES}
           defaultEdgeOptions={EDGE_DEFAULTS}
-          fitView
+          defaultViewport={viewport}
           minZoom={0.1}
           maxZoom={3}
+          panOnScroll
+          panOnScrollMode={PanOnScrollMode.Free}
+          panOnDrag
+          zoomOnScroll={false}
+          zoomOnPinch
+          selectionOnDrag={false}
+          connectionLineType={ConnectionLineType.SmoothStep}
+          connectionLineStyle={{
+            stroke: "rgba(255,255,255,0.34)",
+            strokeWidth: 2.4,
+          }}
+          onlyRenderVisibleElements
+          elevateEdgesOnSelect
           className="!bg-[oklch(0.08_0_0)]"
           proOptions={{ hideAttribution: true }}
         >
           <Background
             variant={BackgroundVariant.Dots}
             gap={30}
-            size={0.45}
-            className="!opacity-[0.05]"
+            size={0.6}
+            className="!opacity-[0.08]"
           />
           <Controls
             showInteractive={false}

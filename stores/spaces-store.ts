@@ -30,6 +30,35 @@ function uid(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function getNodeSpaceId(node: SpacesNode) {
+  return (node.data as { spaceId?: string }).spaceId;
+}
+
+function getSpawnPosition(
+  state: Pick<SpacesState, "nodes" | "cards" | "viewport">,
+  spaceId: string,
+  position?: { x: number; y: number }
+) {
+  if (position) {
+    return position;
+  }
+
+  const zoom = Math.max(state.viewport.zoom || 1, 0.1);
+  const centerX = -state.viewport.x / zoom + 540 / zoom;
+  const centerY = -state.viewport.y / zoom + 260 / zoom;
+  const occupiedCount = state.nodes.filter((node) => {
+    const card = state.cards.find((item) => item.id === node.id);
+    return card ? card.spaceId === spaceId : getNodeSpaceId(node) === spaceId;
+  }).length;
+  const column = occupiedCount % 3;
+  const row = Math.floor(occupiedCount / 3);
+
+  return {
+    x: Math.round(centerX + (column - 1) * 220),
+    y: Math.round(centerY + row * 180),
+  };
+}
+
 interface SpacesState {
   /* Collections */
   spaces: Space[];
@@ -130,11 +159,28 @@ export const useSpacesStore = create<SpacesState>()(
       },
 
       deleteSpace: (spaceId) =>
-        set((s) => ({
-          spaces: s.spaces.filter((sp) => sp.id !== spaceId),
-          cards: s.cards.filter((c) => c.spaceId !== spaceId),
-          activeSpaceId: s.activeSpaceId === spaceId ? null : s.activeSpaceId,
-        })),
+        set((s) => {
+          const nextCards = s.cards.filter((card) => card.spaceId !== spaceId);
+          const nextNodes = s.nodes.filter((node) => {
+            const card = s.cards.find((item) => item.id === node.id);
+            return card ? card.spaceId !== spaceId : getNodeSpaceId(node) !== spaceId;
+          });
+          const nextNodeIds = new Set(nextNodes.map((node) => node.id));
+
+          return {
+            spaces: s.spaces.filter((sp) => sp.id !== spaceId),
+            cards: nextCards,
+            nodes: nextNodes,
+            edges: s.edges.filter(
+              (edge) => nextNodeIds.has(edge.source) && nextNodeIds.has(edge.target)
+            ),
+            activeSpaceId: s.activeSpaceId === spaceId ? null : s.activeSpaceId,
+            selectedCardId:
+              s.selectedCardId && nextNodeIds.has(s.selectedCardId)
+                ? s.selectedCardId
+                : null,
+          };
+        }),
 
       renameSpace: (spaceId, name) =>
         set((s) => ({
@@ -168,7 +214,7 @@ export const useSpacesStore = create<SpacesState>()(
         const node: SpacesNode = {
           id,
           type: "generation",
-          position: position ?? { x: 250 + Math.random() * 200, y: 150 + Math.random() * 200 },
+          position: getSpawnPosition(get(), spaceId, position),
           data: {
             type: "generation",
             cardId: id,
@@ -370,7 +416,7 @@ export const useSpacesStore = create<SpacesState>()(
         const node: SpacesNode = {
           id,
           type: "text",
-          position: position ?? { x: 250 + Math.random() * 200, y: 150 + Math.random() * 200 },
+          position: getSpawnPosition(get(), spaceId, position),
           data: { type: "text", text: "", spaceId },
         };
         set((s) => ({ nodes: [...s.nodes, node] }));
@@ -439,6 +485,12 @@ export const useSpacesStore = create<SpacesState>()(
         spaces: state.spaces,
         cards: state.cards,
         stylePresets: state.stylePresets,
+        nodes: state.nodes,
+        edges: state.edges,
+        viewport: state.viewport,
+        activeSpaceId: state.activeSpaceId,
+        activeSettings: state.activeSettings,
+        activePromptBlocks: state.activePromptBlocks,
       }),
     }
     ),

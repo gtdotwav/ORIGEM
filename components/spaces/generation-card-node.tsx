@@ -4,6 +4,7 @@ import Image from "next/image";
 import { memo, useState, useRef, useEffect } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import {
+  ArrowRightLeft,
   Loader2,
   Copy,
   Trash2,
@@ -126,6 +127,10 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const setCardImages = useSpacesStore((s) => s.setCardImages);
   const setCardError = useSpacesStore((s) => s.setCardError);
   const card = useSpacesStore((s) => s.cards.find((c) => c.id === id));
+  const connectionMeta = useSpacesStore((s) => ({
+    incoming: s.edges.filter((edge) => edge.target === id).length,
+    outgoing: s.edges.filter((edge) => edge.source === id).length,
+  }));
 
   // Pull text from connected text nodes via edges
   const connectedText = useSpacesStore((s) => {
@@ -174,6 +179,12 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const hasImages = card && card.imageUrls.length > 0;
   const status = STATUS_CONFIG[resolvedStatus] ?? STATUS_CONFIG.idle;
   const errorMessage = card?.errorMessage ?? nodeData.errorMessage;
+  const selectedModelLabel =
+    ALL_MODELS.find((model) => model.id === localModel)?.label ?? "Modelo";
+  const showProviderAction =
+    typeof errorMessage === "string" &&
+    (errorMessage.toLowerCase().includes("google api key") ||
+      errorMessage.toLowerCase().includes("providers"));
 
   const persistCardDraft = (updates?: {
     prompt?: string;
@@ -296,10 +307,10 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "relative w-[320px] overflow-hidden rounded-2xl border shadow-xl transition-colors",
+        "group relative w-[336px] overflow-hidden rounded-[22px] border shadow-xl transition-colors",
         selected
-          ? "border-white/[0.16] bg-[oklch(0.12_0_0)] shadow-white/[0.03] ring-1 ring-white/[0.05]"
-          : "border-white/[0.06] bg-[oklch(0.10_0_0)]"
+          ? "border-white/[0.18] bg-[oklch(0.12_0_0)] shadow-white/[0.05] ring-1 ring-white/[0.08]"
+          : "border-white/[0.08] bg-[oklch(0.10_0_0)] hover:border-white/[0.12]"
       )}
       onClick={() => selectCard(id)}
     >
@@ -333,20 +344,54 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           background: "transparent",
         }}
       />
-      <div className="pointer-events-none absolute inset-y-4 left-0 flex w-6 items-center justify-center">
-        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
-          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.22]" />
+      <div className="pointer-events-none absolute inset-y-3 left-0 flex w-7 items-center justify-center">
+        <div
+          className={cn(
+            "flex h-full w-px items-center justify-center transition-colors",
+            connectionMeta.incoming > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+          )}
+        >
+          <div
+            className={cn(
+              "h-2 w-2 rounded-full border transition-colors",
+              connectionMeta.incoming > 0 || selected
+                ? "border-white/45 bg-white/30"
+                : "border-white/18 bg-white/16"
+            )}
+          />
         </div>
       </div>
-      <div className="pointer-events-none absolute inset-y-4 right-0 flex w-6 items-center justify-center">
-        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
-          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.26]" />
+      <div className="pointer-events-none absolute inset-y-3 right-0 flex w-7 items-center justify-center">
+        <div
+          className={cn(
+            "flex h-full w-px items-center justify-center transition-colors",
+            connectionMeta.outgoing > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+          )}
+        >
+          <div
+            className={cn(
+              "h-2 w-2 rounded-full border transition-colors",
+              connectionMeta.outgoing > 0 || selected
+                ? "border-white/45 bg-white/30"
+                : "border-white/18 bg-white/16"
+            )}
+          />
         </div>
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-6 top-0 z-[1] flex items-center justify-between px-2 pt-2 text-[9px] uppercase tracking-[0.2em] text-white/24">
+        <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
+          {selectedModelLabel}
+        </span>
+        <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
+          <ArrowRightLeft className="h-2.5 w-2.5" />
+          {connectionMeta.incoming}/{connectionMeta.outgoing}
+        </span>
       </div>
 
       {/* Image result area */}
       {(hasImages || isGenerating) && (
-        <div className="relative flex h-[180px] items-center justify-center overflow-hidden bg-white/[0.02]">
+        <div className="relative flex h-[188px] items-center justify-center overflow-hidden bg-white/[0.02]">
           {hasImages ? (
             <div
               className={cn(
@@ -404,7 +449,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
                 e.stopPropagation();
                 duplicateCard(id);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
+              className="nodrag nopan flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
               title="Duplicar"
             >
               <Copy className="h-3 w-3" />
@@ -412,7 +457,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             {hasImages && (
               <button
                 type="button"
-                className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
+                className="nodrag nopan flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
                 title="Ampliar"
               >
                 <Maximize2 className="h-3 w-3" />
@@ -424,7 +469,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
                 e.stopPropagation();
                 deleteCard(id);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded-lg border border-red-500/18 bg-black/55 text-red-300/72 backdrop-blur-sm transition-colors hover:border-red-500/28 hover:text-red-200"
+              className="nodrag nopan flex h-6 w-6 items-center justify-center rounded-lg border border-red-500/18 bg-black/55 text-red-300/72 backdrop-blur-sm transition-colors hover:border-red-500/28 hover:text-red-200"
               title="Excluir"
             >
               <Trash2 className="h-3 w-3" />
@@ -441,19 +486,36 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
 
       {/* Settings area — embedded in card */}
       <div className="space-y-2.5 px-3 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-2 text-[10px] text-white/46">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-white/68">{selectedModelLabel}</span>
+            <span className="rounded-full border border-white/[0.08] px-1.5 py-0.5 text-[9px] text-white/32">
+              {localRatio}
+            </span>
+          </div>
+          <span
+            className={cn(
+              "rounded-full border px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.16em]",
+              status.className
+            )}
+          >
+            {status.label}
+          </span>
+        </div>
+
         {/* Prompt */}
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="nodrag nopan" onClick={(e) => e.stopPropagation()}>
           <textarea
             value={promptText}
             onChange={(e) => handlePromptChange(e.target.value)}
             placeholder={connectedText || "Descreva a imagem..."}
             rows={2}
-            className="w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.12]"
+            className="nodrag nopan w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.12]"
           />
         </div>
 
         {/* Reference image */}
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="nodrag nopan" onClick={(e) => e.stopPropagation()}>
           {refImage ? (
             <div className="relative h-16 overflow-hidden rounded-lg border border-white/[0.06]">
               <Image
@@ -467,7 +529,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
               <button
                 type="button"
                 onClick={handleRemoveReference}
-                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-md bg-black/70 text-white/62 backdrop-blur-sm transition-colors hover:text-white/82"
+                className="nodrag nopan absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-md bg-black/70 text-white/62 backdrop-blur-sm transition-colors hover:text-white/82"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -476,7 +538,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
               </span>
             </div>
           ) : (
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/[0.06] px-2.5 py-2 text-[10px] text-white/26 transition-colors">
+            <label className="nodrag nopan flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/[0.06] px-2.5 py-2 text-[10px] text-white/26 transition-colors hover:border-white/[0.12] hover:text-white/42">
               <Upload className="h-3 w-3" />
               Imagem de referencia
               <input
@@ -490,13 +552,13 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         </div>
 
         {/* Model selector */}
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="nodrag nopan" onClick={(e) => e.stopPropagation()}>
           <CompactModelSelect value={localModel} onChange={handleModelChange} />
         </div>
 
         {/* Ratio + Quantity row */}
         <div
-          className="flex items-center gap-2"
+          className="nodrag nopan flex items-center gap-2"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Aspect ratio */}
@@ -539,7 +601,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         </div>
 
         {/* Generate button + status */}
-        <div className="flex items-center gap-2">
+        <div className="nodrag nopan flex items-center gap-2">
           <button
             type="button"
             onClick={handleGenerate}
@@ -560,19 +622,24 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
                 ? `Gerar ${localQty}`
                 : "Gerar"}
           </button>
-          <span
-            className={cn(
-              "rounded-md border px-1.5 py-0.5 text-[9px] font-medium",
-              status.className
-            )}
-          >
-            {status.label}
+          <span className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1 text-[9px] font-medium text-white/40">
+            {connectionMeta.incoming > 0 ? `${connectionMeta.incoming} entrada` : "sem entrada"}
           </span>
         </div>
 
         {errorMessage ? (
           <div className="rounded-lg border border-red-500/15 bg-red-500/10 px-2.5 py-2 text-[10px] leading-relaxed text-red-200/85">
             {errorMessage}
+            {showProviderAction ? (
+              <div className="mt-2">
+                <a
+                  href="/dashboard/settings/providers"
+                  className="inline-flex items-center rounded-md border border-red-300/22 bg-red-300/10 px-2 py-1 text-[10px] font-medium text-red-100 transition-colors hover:border-red-300/32 hover:bg-red-300/14"
+                >
+                  Abrir providers
+                </a>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
