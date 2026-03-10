@@ -20,13 +20,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
+  fromDateKey,
+  sortCalendarEventsChronologically,
   useCalendarStore,
   toDateKey,
   parseSchedulePrompt,
-  type CalendarEvent,
 } from "@/stores/calendar-store";
 import { AutomationSection } from "@/components/calendar/automation-section";
-import { useAutomationStore } from "@/stores/automation-store";
 
 interface CalendarPanelProps {
   open: boolean;
@@ -71,7 +71,24 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDates, setSelectedDates] = useState<Date[]>([today]);
+  const {
+    events,
+    activeDateKeys,
+    addEvent,
+    removeEvent,
+    setActiveDateKeys,
+  } = useCalendarStore();
+  const [selectedDates, setSelectedDates] = useState<Date[]>(() => {
+    if (activeDateKeys.length === 0) {
+      return [today];
+    }
+
+    const restoredDates = activeDateKeys
+      .map(fromDateKey)
+      .filter((date) => !Number.isNaN(date.getTime()));
+
+    return restoredDates.length > 0 ? restoredDates : [today];
+  });
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteDesc, setNoteDesc] = useState("");
@@ -85,11 +102,8 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
   const [isDragging, setIsDragging] = useState(false);
   const dragAnchorRef = useRef<Date | null>(null);
 
-  const { events, addEvent, removeEvent } = useCalendarStore();
-
   // Derived: primary selected date (first in selection)
   const selectedDate = selectedDates[0] ?? null;
-  const selectedDateKey = selectedDate ? toDateKey(selectedDate) : "";
 
   // All selected date keys
   const selectedDateKeys = useMemo(() => selectedDates.map(toDateKey), [selectedDates]);
@@ -102,17 +116,24 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
 
   // Sort events by date then time for timeline
   const sortedEvents = useMemo(
-    () => [...dateEvents].sort((a, b) => {
-      if (a.dateKey !== b.dateKey) return a.dateKey.localeCompare(b.dateKey);
-      if (!a.time && !b.time) return 0;
-      if (!a.time) return 1;
-      if (!b.time) return -1;
-      return a.time.localeCompare(b.time);
-    }),
+    () => sortCalendarEventsChronologically(dateEvents),
     [dateEvents]
   );
 
   const eventDateKeys = useMemo(() => new Set(Object.keys(events).filter((k) => (events[k]?.length ?? 0) > 0)), [events]);
+
+  useEffect(() => {
+    const nextKeys = selectedDates.map(toDateKey).sort();
+
+    if (
+      nextKeys.length === activeDateKeys.length &&
+      nextKeys.every((dateKey, index) => dateKey === activeDateKeys[index])
+    ) {
+      return;
+    }
+
+    setActiveDateKeys(nextKeys);
+  }, [activeDateKeys, selectedDates, setActiveDateKeys]);
 
   // Date range helper
   const getDateRange = useCallback((a: Date, b: Date): Date[] => {
@@ -259,13 +280,13 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -16, scale: 0.98 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed left-12 top-1/2 z-[60] -translate-y-1/2"
+            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6.3rem)] z-[60] md:inset-x-auto md:bottom-auto md:left-12 md:top-1/2 md:-translate-y-1/2"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative flex max-h-[88vh] w-96 flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              className="relative flex max-h-[72vh] w-full flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40 md:max-h-[88vh] md:w-96"
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",
                 backdropFilter: "blur(40px) saturate(1.8)",
@@ -314,7 +335,7 @@ export function CalendarPanel({ open, onClose }: CalendarPanelProps) {
                 className="grid grid-cols-7 gap-0.5 px-3 pb-3 select-none"
                 onMouseLeave={() => { if (isDragging) setIsDragging(false); }}
               >
-                {days.map((cell, i) => {
+                {days.map((cell) => {
                   const _isToday = isToday(cell.date);
                   const _isSelected = isSelected(cell.date);
                   const hasEvents = eventDateKeys.has(toDateKey(cell.date));

@@ -32,10 +32,10 @@ interface MCPState {
   setInstalling: (installing: boolean, serverId?: string | null) => void;
 
   /* ─── Derived ─── */
-  getConnectorsForSpace: (spaceId: string) => MCPConnector[];
-  getToolsForSpace: (spaceId: string) => Array<MCPToolSchema & { connectorId: string; serverName: string }>;
+  getConnectorsForWorkspace: (workspaceId: string) => MCPConnector[];
+  getToolsForWorkspace: (workspaceId: string) => Array<MCPToolSchema & { connectorId: string; serverName: string }>;
   getServerDef: (serverId: string) => MCPServerDefinition | undefined;
-  isServerInstalled: (spaceId: string, serverId: string) => boolean;
+  isServerInstalled: (workspaceId: string, serverId: string) => boolean;
 }
 
 export const useMCPStore = create<MCPState>()(
@@ -67,12 +67,14 @@ export const useMCPStore = create<MCPState>()(
         setInstalling: (installing, serverId) =>
           set({ installing, installingServerId: serverId ?? null }),
 
-        getConnectorsForSpace: (spaceId) =>
-          get().connectors.filter((c) => c.spaceId === spaceId),
+        getConnectorsForWorkspace: (workspaceId) =>
+          get().connectors.filter((connector) => connector.workspaceId === workspaceId),
 
-        getToolsForSpace: (spaceId) => {
+        getToolsForWorkspace: (workspaceId) => {
           const connectors = get().connectors.filter(
-            (c) => c.spaceId === spaceId && (c.status === "connected" || c.status === "disconnected"),
+            (connector) =>
+              connector.workspaceId === workspaceId &&
+              connector.status === "connected",
           );
           const tools: Array<MCPToolSchema & { connectorId: string; serverName: string }> = [];
           for (const c of connectors) {
@@ -86,9 +88,11 @@ export const useMCPStore = create<MCPState>()(
         getServerDef: (serverId) =>
           get().registry.find((s) => s.id === serverId),
 
-        isServerInstalled: (spaceId, serverId) =>
+        isServerInstalled: (workspaceId, serverId) =>
           get().connectors.some(
-            (c) => c.spaceId === spaceId && c.serverId === serverId,
+            (connector) =>
+              connector.workspaceId === workspaceId &&
+              connector.serverId === serverId,
           ),
       }),
       {

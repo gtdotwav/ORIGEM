@@ -5,7 +5,7 @@ import type { ProviderName } from "@/types/provider";
 import { getSnapshotStore } from "@/lib/server/backend/store";
 
 /** Env var fallback map — checked when no key in store */
-const ENV_KEY_MAP: Partial<Record<ProviderName, string>> = {
+export const ENV_KEY_MAP: Partial<Record<ProviderName, string>> = {
   openai: "OPENAI_API_KEY",
   anthropic: "ANTHROPIC_API_KEY",
   google: "GOOGLE_API_KEY",
@@ -18,6 +18,38 @@ const ENV_KEY_MAP: Partial<Record<ProviderName, string>> = {
   baseten: "BASETEN_API_KEY",
 };
 
+export async function getProviderApiKey(provider: ProviderName) {
+  const store = getSnapshotStore();
+  const record = await store.getProviderRecord(provider);
+
+  return (
+    record?.apiKey ||
+    (ENV_KEY_MAP[provider] ? process.env[ENV_KEY_MAP[provider]!] : undefined)
+  );
+}
+
+export async function listConfiguredProviders(): Promise<ProviderName[]> {
+  const store = getSnapshotStore();
+  const records = await store.listProviderRecords();
+  const configured = new Set<ProviderName>();
+
+  for (const record of records) {
+    if (record.apiKey.trim().length > 0) {
+      configured.add(record.provider);
+    }
+  }
+
+  for (const [provider, envKey] of Object.entries(ENV_KEY_MAP) as Array<
+    [ProviderName, string]
+  >) {
+    if (process.env[envKey]) {
+      configured.add(provider);
+    }
+  }
+
+  return [...configured];
+}
+
 /**
  * Returns a Vercel AI SDK language model instance for the given provider + model.
  * Reads API key from SnapshotStore first, falls back to env var.
@@ -26,12 +58,7 @@ export async function getLanguageModel(
   provider: ProviderName,
   modelId: string
 ) {
-  const store = getSnapshotStore();
-  const record = await store.getProviderRecord(provider);
-
-  const apiKey =
-    record?.apiKey ||
-    (ENV_KEY_MAP[provider] ? process.env[ENV_KEY_MAP[provider]!] : undefined);
+  const apiKey = await getProviderApiKey(provider);
 
   if (!apiKey) {
     throw new Error(`no_api_key_for_${provider}`);

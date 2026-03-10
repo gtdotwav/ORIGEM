@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Layers, Plus, FolderKanban, MessageSquare, Filter, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ function WorkspacesPageFallback() {
 }
 
 function WorkspacesContent() {
+  const router = useRouter();
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
@@ -98,6 +100,15 @@ function WorkspacesContent() {
     if (ws) toast.success(`Workspace "${ws.name}" ativado como filtro`);
   };
 
+  const handleOpenWorkspace = (id: string) => {
+    const ws = workspaces.find((workspace) => workspace.id === id);
+    setActiveWorkspace(id);
+
+    if (ws) {
+      toast.success(`Abrindo workspace "${ws.name}"`);
+    }
+  };
+
   const handleArchive = (id: string) => {
     archiveWorkspace(id);
     toast.success("Workspace arquivado");
@@ -126,6 +137,7 @@ function WorkspacesContent() {
             </div>
           </div>
           <button
+            data-tour="workspaces-create"
             type="button"
             onClick={() => {
               setEditTarget(null);
@@ -225,7 +237,10 @@ function WorkspacesContent() {
         />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            data-tour="workspaces-grid"
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {activeWorkspaces.map((ws) => (
               <WorkspaceCard
                 key={ws.id}
@@ -233,6 +248,7 @@ function WorkspacesContent() {
                 sessionCount={getSessionCount(ws.id)}
                 projectCount={getProjectCount(ws.id)}
                 lastActivity={getLastActivity(ws.id)}
+                onOpen={handleOpenWorkspace}
                 onEdit={handleEdit}
                 onActivate={handleActivate}
                 onArchive={handleArchive}
@@ -254,6 +270,7 @@ function WorkspacesContent() {
                     sessionCount={getSessionCount(ws.id)}
                     projectCount={getProjectCount(ws.id)}
                     lastActivity={getLastActivity(ws.id)}
+                    onOpen={handleOpenWorkspace}
                     onEdit={handleEdit}
                     onActivate={handleActivate}
                     onArchive={handleArchive}
@@ -308,6 +325,11 @@ function WorkspacesContent() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         editWorkspace={editTarget}
+        onCreated={(workspace) => {
+          setActiveWorkspace(workspace.id);
+          toast.success(`Workspace "${workspace.name}" criado`);
+          router.push(`/dashboard/workspaces/${workspace.id}`);
+        }}
       />
     </div>
   );

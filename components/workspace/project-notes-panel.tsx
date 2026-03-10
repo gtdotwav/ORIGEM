@@ -5,7 +5,6 @@ import { FileText, Plus, Trash2, Pencil, Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useProjectStore } from "@/stores/project-store";
 import { createId } from "@/lib/chat-orchestrator";
-import { cn } from "@/lib/utils";
 import type { ProjectNote } from "@/types/project";
 
 interface ProjectNotesPanelProps {

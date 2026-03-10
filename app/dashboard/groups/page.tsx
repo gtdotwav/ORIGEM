@@ -113,7 +113,7 @@ function GroupsPageContent() {
   );
 
   const runtime = targetSessionId ? runtimeSessions[targetSessionId] : undefined;
-  const runtimeTasks = runtime?.tasks ?? [];
+  const runtimeTasks = useMemo(() => runtime?.tasks ?? [], [runtime?.tasks]);
 
   const sessionAgents = useMemo(
     () =>
@@ -191,14 +191,18 @@ function GroupsPageContent() {
     }
 
     hydratedSessionIdsRef.current.add(targetSessionId);
-    setIsHydrating(true);
+    queueMicrotask(() => {
+      setIsHydrating(true);
+    });
 
     void hydrateSessionSnapshot(targetSessionId)
       .catch((error) => {
         console.error("Failed to hydrate session on groups page", error);
       })
       .finally(() => {
-        setIsHydrating(false);
+        queueMicrotask(() => {
+          setIsHydrating(false);
+        });
       });
   }, [shouldHydrate, targetSessionId, isHydrating]);
 

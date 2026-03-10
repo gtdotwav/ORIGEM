@@ -59,6 +59,7 @@ interface SpacesState {
   deleteCard: (cardId: string) => void;
   setCardStatus: (cardId: string, status: GenerationStatus) => void;
   setCardImages: (cardId: string, urls: string[]) => void;
+  setCardError: (cardId: string, errorMessage: string) => void;
   selectCard: (cardId: string | null) => void;
   duplicateCard: (cardId: string) => string | null;
 
@@ -156,7 +157,9 @@ export const useSpacesStore = create<SpacesState>()(
           promptBlocks: null,
           settings: { ...get().activeSettings },
           imageUrls: [],
+          referenceImageDataUrl: null,
           status: "idle",
+          errorMessage: null,
           parentCardId: null,
           createdAt: now,
           updatedAt: now,
@@ -173,6 +176,7 @@ export const useSpacesStore = create<SpacesState>()(
             imageUrl: null,
             status: "idle",
             model: get().activeSettings.model,
+            errorMessage: null,
           },
         };
 
@@ -190,11 +194,32 @@ export const useSpacesStore = create<SpacesState>()(
       },
 
       updateCard: (cardId, updates) =>
-        set((s) => ({
-          cards: s.cards.map((c) =>
-            c.id === cardId ? { ...c, ...updates, updatedAt: Date.now() } : c
-          ),
-        })),
+        set((s) => {
+          const updatedAt = Date.now();
+          const cards = s.cards.map((card) =>
+            card.id === cardId ? { ...card, ...updates, updatedAt } : card
+          );
+          const nextCard = cards.find((card) => card.id === cardId);
+
+          return {
+            cards,
+            nodes: s.nodes.map((node) =>
+              node.id === cardId && nextCard
+                ? {
+                    ...node,
+                    data: {
+                      ...node.data,
+                      prompt: nextCard.prompt,
+                      imageUrl: nextCard.imageUrls[0] ?? null,
+                      status: nextCard.status,
+                      model: nextCard.settings.model,
+                      errorMessage: nextCard.errorMessage,
+                    },
+                  }
+                : node
+            ),
+          };
+        }),
 
       deleteCard: (cardId) =>
         set((s) => ({
@@ -211,11 +236,28 @@ export const useSpacesStore = create<SpacesState>()(
       setCardStatus: (cardId, status) => {
         set((s) => ({
           cards: s.cards.map((c) =>
-            c.id === cardId ? { ...c, status, updatedAt: Date.now() } : c
+            c.id === cardId
+              ? {
+                  ...c,
+                  status,
+                  errorMessage: status === "error" ? c.errorMessage : null,
+                  updatedAt: Date.now(),
+                }
+              : c
           ),
           nodes: s.nodes.map((n) =>
             n.id === cardId
-              ? { ...n, data: { ...n.data, status } }
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status,
+                    errorMessage:
+                      status === "error"
+                        ? ((n.data as { errorMessage?: string | null }).errorMessage ?? null)
+                        : null,
+                  },
+                }
               : n
           ),
         }));
@@ -224,12 +266,55 @@ export const useSpacesStore = create<SpacesState>()(
       setCardImages: (cardId, urls) => {
         set((s) => ({
           cards: s.cards.map((c) =>
-            c.id === cardId ? { ...c, imageUrls: urls, status: "done", updatedAt: Date.now() } : c
+            c.id === cardId
+              ? {
+                  ...c,
+                  imageUrls: urls,
+                  status: "done",
+                  errorMessage: null,
+                  updatedAt: Date.now(),
+                }
+              : c
           ),
           nodes: s.nodes.map((n) =>
             n.id === cardId
-              ? { ...n, data: { ...n.data, imageUrl: urls[0] ?? null, status: "done" } }
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    imageUrl: urls[0] ?? null,
+                    status: "done",
+                    errorMessage: null,
+                  },
+                }
               : n
+          ),
+        }));
+      },
+
+      setCardError: (cardId, errorMessage) => {
+        set((s) => ({
+          cards: s.cards.map((card) =>
+            card.id === cardId
+              ? {
+                  ...card,
+                  status: "error",
+                  errorMessage,
+                  updatedAt: Date.now(),
+                }
+              : card
+          ),
+          nodes: s.nodes.map((node) =>
+            node.id === cardId
+              ? {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    status: "error",
+                    errorMessage,
+                  },
+                }
+              : node
           ),
         }));
       },
@@ -253,6 +338,7 @@ export const useSpacesStore = create<SpacesState>()(
         get().updateCard(newId, {
           settings: { ...original.settings },
           promptBlocks: original.promptBlocks ? { ...original.promptBlocks } : null,
+          referenceImageDataUrl: original.referenceImageDataUrl,
           parentCardId: cardId,
         });
         const edge: SpacesEdge = {

@@ -387,10 +387,25 @@ function ContextsPageContent() {
     search,
   ]);
 
+  const activeExpandedContextId = useMemo(() => {
+    if (contextResults.length === 0) {
+      return null;
+    }
+
+    if (
+      expandedContextId &&
+      contextResults.some((result) => result.id === expandedContextId)
+    ) {
+      return expandedContextId;
+    }
+
+    return contextResults[0]?.id ?? null;
+  }, [contextResults, expandedContextId]);
+
   const expandedContext = useMemo(
     () =>
-      contextResults.find((context) => context.id === expandedContextId) ?? null,
-    [contextResults, expandedContextId]
+      contextResults.find((context) => context.id === activeExpandedContextId) ?? null,
+    [contextResults, activeExpandedContextId]
   );
 
   const contextThread = useMemo(() => {
@@ -411,30 +426,20 @@ function ContextsPageContent() {
     }
 
     hydratedSessionIdsRef.current.add(targetSessionId);
-    setIsHydrating(true);
+    queueMicrotask(() => {
+      setIsHydrating(true);
+    });
 
     void hydrateSessionSnapshot(targetSessionId)
       .catch((error) => {
         console.error("Failed to hydrate session snapshot on contexts page", error);
       })
       .finally(() => {
-        setIsHydrating(false);
+        queueMicrotask(() => {
+          setIsHydrating(false);
+        });
       });
   }, [targetSessionId, contextResults.length, isHydrating]);
-
-  useEffect(() => {
-    if (!contextResults.length) {
-      setExpandedContextId(null);
-      return;
-    }
-
-    setExpandedContextId((previous) => {
-      if (previous && contextResults.some((result) => result.id === previous)) {
-        return previous;
-      }
-      return contextResults[0].id;
-    });
-  }, [contextResults]);
 
   useEffect(() => {
     if (!targetSessionId || contextResults.length === 0) {
@@ -603,7 +608,7 @@ function ContextsPageContent() {
       ) : (
         <div className="space-y-3">
           {contextResults.map((result) => {
-            const isExpanded = expandedContextId === result.id;
+            const isExpanded = activeExpandedContextId === result.id;
             const connections = getConnectionsForContext(result);
             const suggestedAgents = result.taskRouting.requiredAgents
               .map((requirement) => requirement.templateId)

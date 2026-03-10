@@ -1,28 +1,37 @@
-import { randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+} from "node:crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 const PREFIX = "enc:";
 
 function deriveKey(secret: string): Buffer {
-  // SHA-256 hash of the secret to get a consistent 32-byte key
-  const { createHash } = require("node:crypto") as typeof import("node:crypto");
   return createHash("sha256").update(secret).digest();
 }
 
 function getSecret(): string {
-  const secret = process.env.ORIGEM_ENCRYPT_SECRET;
-  if (!secret) {
-    // In dev without env var, return empty — keys stored in plaintext
-    return "";
+  return process.env.ORIGEM_ENCRYPT_SECRET?.trim() ?? "";
+}
+
+export function hasEncryptionSecret(): boolean {
+  return getSecret().length > 0;
+}
+
+export function assertEncryptionReady(reason = "persist encrypted secrets"): void {
+  if (!hasEncryptionSecret()) {
+    throw new Error(`ORIGEM_ENCRYPT_SECRET is required to ${reason}.`);
   }
-  return secret;
 }
 
 export function encrypt(plaintext: string): string {
   const secret = getSecret();
-  if (!secret) return plaintext;
+  if (!secret) {
+    throw new Error("ORIGEM_ENCRYPT_SECRET is required to encrypt stored secrets.");
+  }
 
   const key = deriveKey(secret);
   const iv = randomBytes(IV_LENGTH);
@@ -40,14 +49,18 @@ export function encrypt(plaintext: string): string {
 
 export function decrypt(ciphertext: string): string {
   if (!ciphertext.startsWith(PREFIX)) {
-    return ciphertext; // plaintext — not encrypted
+    return ciphertext;
   }
 
   const secret = getSecret();
-  if (!secret) return ciphertext; // no secret available
+  if (!secret) {
+    throw new Error("ORIGEM_ENCRYPT_SECRET is required to decrypt stored secrets.");
+  }
 
   const parts = ciphertext.slice(PREFIX.length).split(":");
-  if (parts.length !== 3) return ciphertext;
+  if (parts.length !== 3) {
+    throw new Error("Stored secret has an invalid encryption format.");
+  }
 
   const [ivB64, encB64, tagB64] = parts;
   const key = deriveKey(secret);
@@ -55,15 +68,19 @@ export function decrypt(ciphertext: string): string {
   const encrypted = Buffer.from(encB64, "base64");
   const tag = Buffer.from(tagB64, "base64");
 
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
-  decipher.setAuthTag(tag);
+  try {
+    const decipher = createDecipheriv(ALGORITHM, key, iv);
+    decipher.setAuthTag(tag);
 
-  const decrypted = Buffer.concat([
-    decipher.update(encrypted),
-    decipher.final(),
-  ]);
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
 
-  return decrypted.toString("utf-8");
+    return decrypted.toString("utf-8");
+  } catch {
+    throw new Error("Failed to decrypt stored secret.");
+  }
 }
 
 export function isEncrypted(value: string): boolean {

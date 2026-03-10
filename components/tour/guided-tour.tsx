@@ -11,25 +11,17 @@ import {
   MessageSquare,
   ImageIcon,
   Code2,
-  CalendarDays,
   LayoutGrid,
-  Workflow,
-  Palette,
-  Users,
-  Bot,
-  Layers,
   MessageCircle,
-  ChevronUp,
   Navigation,
-  SunMoon,
   PanelLeft,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTourStore } from "@/stores/tour-store";
+import { usePathname, useRouter } from "next/navigation";
+import { useTourStore, type TourContextId } from "@/stores/tour-store";
 import { cn } from "@/lib/utils";
-import { FlippingCard } from "@/components/ui/flipping-card";
 
 /* ─── Tour step definitions ─── */
 
@@ -52,89 +44,13 @@ interface SpotlightStep {
   title: string;
   description: string;
   position: Position;
+  mobilePosition?: Position;
   icon?: LucideIcon;
   iconColor?: string;
   iconBg?: string;
 }
 
 type TourStep = ModalStep | SpotlightStep;
-
-const TOUR_STEPS: TourStep[] = [
-  {
-    id: "welcome",
-    type: "modal",
-    title: "Bem-vindo ao ORIGEM",
-    description:
-      "Seu motor psicossem\u00e2ntico de IA. Vamos explorar juntos as ferramentas que transformam sua forma de criar e pensar.",
-  },
-  {
-    id: "chat-input",
-    type: "spotlight",
-    target: '[data-tour="chat-input"]',
-    title: "Sua entrada criativa",
-    description:
-      "Digite qualquer ideia, conceito ou pergunta. O ORIGEM decompoe, analisa e orquestra multiplas camadas de IA para gerar respostas profundas.",
-    position: "top",
-    icon: MessageCircle,
-    iconColor: "text-neon-cyan",
-    iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
-  },
-  {
-    id: "tools-chevron",
-    type: "spotlight",
-    target: '[data-tour="tools-chevron"]',
-    title: "Ferramentas avancadas",
-    description:
-      "Expanda para acessar seletor de LLM, entrada por voz, painel critico e modo de operacao.",
-    position: "top",
-    icon: ChevronUp,
-    iconColor: "text-neon-purple",
-    iconBg: "bg-neon-purple/10 border-neon-purple/20",
-  },
-  {
-    id: "floating-nav",
-    type: "spotlight",
-    target: '[data-tour="nav-logo"]',
-    title: "Navegacao central",
-    description:
-      "Clique no logo para acessar todas as areas: Dashboard, Pipeline 360\u00b0, Space, Workspaces, Apps e muito mais.",
-    position: "bottom",
-    icon: Navigation,
-    iconColor: "text-neon-green",
-    iconBg: "bg-neon-green/10 border-neon-green/20",
-  },
-  {
-    id: "theme-toggle",
-    type: "spotlight",
-    target: '[data-tour="theme-toggle"]',
-    title: "Modo visual",
-    description:
-      "Alterne entre o modo escuro e o modo plain para ajustar a interface ao seu conforto.",
-    position: "bottom",
-    icon: SunMoon,
-    iconColor: "text-neon-orange",
-    iconBg: "bg-neon-orange/10 border-neon-orange/20",
-  },
-  {
-    id: "left-toolbar",
-    type: "spotlight",
-    target: '[data-tour="left-toolbar"]',
-    title: "Barra de ferramentas",
-    description:
-      "Acesso rapido ao historico de chats, conectores, calendario e ORIGEM Spaces para geracao de imagens.",
-    position: "right",
-    icon: PanelLeft,
-    iconColor: "text-neon-pink",
-    iconBg: "bg-neon-pink/10 border-neon-pink/20",
-  },
-  {
-    id: "completion",
-    type: "modal",
-    title: "Pronto para criar!",
-    description:
-      "Escolha por onde comecar. Passe o mouse nos cards para descobrir mais sobre cada caminho.",
-  },
-];
 
 /* ─── Starting paths data ─── */
 
@@ -160,7 +76,18 @@ const START_PATHS: StartPath[] = [
     subtitle: "Conversa inteligente",
     description: "Converse com multiplas IAs orquestradas. Pergunte, crie, analise — o ORIGEM entende o contexto e gera respostas profundas.",
     route: "/dashboard",
-    ctaLabel: "Iniciar conversa",
+    ctaLabel: "Abrir chat",
+  },
+  {
+    id: "workspaces",
+    icon: LayoutGrid,
+    iconColor: "text-neon-orange",
+    iconBg: "bg-neon-orange/10",
+    title: "Workspaces",
+    subtitle: "Estruture seu ambiente",
+    description: "Crie um workspace para separar projetos, sessoes, conectores e contexto operacional.",
+    route: "/dashboard/workspaces",
+    ctaLabel: "Ir para workspaces",
   },
   {
     id: "spaces",
@@ -168,8 +95,8 @@ const START_PATHS: StartPath[] = [
     iconColor: "text-neon-purple",
     iconBg: "bg-neon-purple/10",
     title: "Spaces",
-    subtitle: "Geracao de imagens",
-    description: "Canvas visual com multiplos modelos de imagem. Gere, compare e itere com Nano Banana Pro, DALL-E 3, Flux, Midjourney e mais.",
+    subtitle: "Canvas visual",
+    description: "Use o canvas para gerar imagens, conectar cards e iterar visualmente em um fluxo mais livre.",
     route: "/dashboard/spaces",
     ctaLabel: "Abrir Spaces",
   },
@@ -179,67 +106,240 @@ const START_PATHS: StartPath[] = [
     iconColor: "text-neon-green",
     iconBg: "bg-neon-green/10",
     title: "Code IDE",
-    subtitle: "Editor assistido por IA",
-    description: "IDE completa com preview ao vivo, tabs, terminal e assistencia de IA. Crie projetos web diretamente no navegador.",
+    subtitle: "Editor assistido",
+    description: "Entre no ambiente de codigo com chat, arquivos e preview quando a tarefa exigir execucao tecnica.",
     route: "/dashboard/code",
     ctaLabel: "Abrir IDE",
   },
-  {
-    id: "calendar",
-    icon: CalendarDays,
-    iconColor: "text-neon-orange",
-    iconBg: "bg-neon-orange/10",
-    title: "Calendario",
-    subtitle: "Agenda inteligente",
-    description: "Planeje com IA. Use prompt natural para agendar, visualize em grade, lista ou kanban. Atribua tarefas a agentes.",
-    route: "/dashboard/calendar",
-    ctaLabel: "Ver calendario",
-  },
-  {
-    id: "workspaces",
-    icon: LayoutGrid,
-    iconColor: "text-neon-pink",
-    iconBg: "bg-neon-pink/10",
-    title: "Workspaces",
-    subtitle: "Projetos organizados",
-    description: "Organize tudo em workspaces com cores, filtros e projetos. Cada workspace isola contexto para manter o foco.",
-    route: "/dashboard/workspaces",
-    ctaLabel: "Criar workspace",
-  },
-  {
-    id: "flows",
-    icon: Workflow,
-    iconColor: "text-neon-cyan",
-    iconBg: "bg-neon-cyan/10",
-    title: "Flows",
-    subtitle: "Automacao visual",
-    description: "Monte pipelines de IA conectando blocos visuais. Automatize processos criativos e de analise com drag-and-drop.",
-    route: "/dashboard/flows",
-    ctaLabel: "Criar flow",
-  },
-  {
-    id: "design",
-    icon: Palette,
-    iconColor: "text-neon-purple",
-    iconBg: "bg-neon-purple/10",
-    title: "UX/UI",
-    subtitle: "Criacao visual",
-    description: "Ferramentas de UX/UI assistidas por IA. Gere layouts, paletas, tipografia e componentes visuais automaticamente.",
-    route: "/dashboard/uxui",
-    ctaLabel: "Explorar UX/UI",
-  },
-  {
-    id: "agents",
-    icon: Bot,
-    iconColor: "text-neon-green",
-    iconBg: "bg-neon-green/10",
-    title: "Agentes",
-    subtitle: "IA especializada",
-    description: "6 agentes com personalidades unicas: Planner, Builder, Researcher, Analyst, Designer e Critic. Cada um domina uma area.",
-    route: "/dashboard/agents",
-    ctaLabel: "Conhecer agentes",
-  },
 ];
+
+const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
+  dashboard: [
+    {
+      id: "welcome",
+      type: "modal",
+      title: "Bem-vindo ao ORIGEM",
+      description:
+        "Em menos de um minuto, vamos te mostrar o que realmente importa para comecar: onde pedir, como ajustar, onde navegar e onde abrir contexto.",
+    },
+    {
+      id: "chat-input",
+      type: "spotlight",
+      target: '[data-tour="chat-input"]',
+      title: "Comece por aqui",
+      description:
+        "Escreva o pedido principal aqui. O ORIGEM usa esse campo como ponto de partida para conversar, planejar, analisar e executar.",
+      position: "top",
+      icon: MessageCircle,
+      iconColor: "text-neon-cyan",
+      iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
+    },
+    {
+      id: "chat-controls",
+      type: "spotlight",
+      target: '[data-tour="chat-controls"]',
+      title: "Ajuste o motor antes de enviar",
+      description:
+        "Aqui voce troca modelo, modo de operacao e criticos. E o unico ponto de ajuste que vale aprender no inicio.",
+      position: "top",
+      mobilePosition: "top",
+      icon: SlidersHorizontal,
+      iconColor: "text-neon-purple",
+      iconBg: "bg-neon-purple/10 border-neon-purple/20",
+    },
+    {
+      id: "floating-nav",
+      type: "spotlight",
+      target: '[data-tour="nav-logo"]',
+      title: "Abra as areas principais",
+      description:
+        "O logo abre a navegacao central. Use esse menu quando quiser sair do chat e entrar em Workspaces, Code, Spaces ou outras areas.",
+      position: "bottom",
+      icon: Navigation,
+      iconColor: "text-neon-green",
+      iconBg: "bg-neon-green/10 border-neon-green/20",
+    },
+    {
+      id: "left-toolbar",
+      type: "spotlight",
+      target: '[data-tour="left-toolbar"]',
+      title: "Contexto lateral rapido",
+      description:
+        "Esse dock abre historico, calendario, conectores e outros paineis de apoio. Use quando precisar de contexto sem sair do fluxo principal.",
+      position: "right",
+      mobilePosition: "top",
+      icon: PanelLeft,
+      iconColor: "text-neon-pink",
+      iconBg: "bg-neon-pink/10 border-neon-pink/20",
+    },
+    {
+      id: "completion",
+      type: "modal",
+      title: "Pronto para criar!",
+      description:
+        "Escolha por onde comecar. Cada caminho abaixo leva direto para a area certa do produto.",
+    },
+  ],
+  code: [
+    {
+      id: "code-welcome",
+      type: "modal",
+      title: "Code sem friccao",
+      description:
+        "Aqui voce opera em tres frentes: pedir no chat, revisar os arquivos gerados e validar o resultado no preview.",
+    },
+    {
+      id: "code-files",
+      type: "spotlight",
+      target: '[data-tour="code-files"]',
+      title: "Arquivos primeiro",
+      description:
+        "Use o explorer para abrir a estrutura do projeto, revisar o que foi criado e navegar rapido entre os arquivos alterados.",
+      position: "right",
+      mobilePosition: "bottom",
+      icon: Code2,
+      iconColor: "text-neon-cyan",
+      iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
+    },
+    {
+      id: "code-chat",
+      type: "spotlight",
+      target: '[data-tour="code-chat"]',
+      title: "Itere pelo chat",
+      description:
+        "Pequenas mudancas funcionam melhor quando voce diz exatamente o que quer alterar, validar ou gerar em seguida.",
+      position: "left",
+      mobilePosition: "top",
+      icon: MessageSquare,
+      iconColor: "text-neon-green",
+      iconBg: "bg-neon-green/10 border-neon-green/20",
+    },
+    {
+      id: "code-preview",
+      type: "spotlight",
+      target: '[data-tour="code-preview"]',
+      title: "Valide no preview",
+      description:
+        "Troque para Preview sempre que quiser conferir a interface renderizada sem sair do fluxo de edicao.",
+      position: "left",
+      mobilePosition: "bottom",
+      icon: LayoutGrid,
+      iconColor: "text-neon-purple",
+      iconBg: "bg-neon-purple/10 border-neon-purple/20",
+    },
+    {
+      id: "code-ready",
+      type: "modal",
+      title: "Pronto para editar",
+      description:
+        "Agora voce ja sabe pedir, revisar e validar. O melhor fluxo aqui e iterar em blocos curtos e objetivos.",
+    },
+  ],
+  spaces: [
+    {
+      id: "spaces-welcome",
+      type: "modal",
+      title: "Spaces para fluxo visual",
+      description:
+        "O hub de Spaces serve para criar, reencontrar e abrir canvases visuais sem misturar isso com o chat principal.",
+    },
+    {
+      id: "spaces-create",
+      type: "spotlight",
+      target: '[data-tour="spaces-create"]',
+      title: "Crie o canvas certo",
+      description:
+        "Comece por aqui quando quiser abrir um novo fluxo visual de geracao, referencias e conexoes entre cards.",
+      position: "bottom",
+      mobilePosition: "top",
+      icon: ImageIcon,
+      iconColor: "text-neon-cyan",
+      iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
+    },
+    {
+      id: "spaces-grid",
+      type: "spotlight",
+      target: '[data-tour="spaces-grid"]',
+      title: "Retome rapido",
+      description:
+        "Quando voce ja tem canvases criados, esta grade vira o ponto mais rapido para reabrir, renomear ou limpar um fluxo.",
+      position: "top",
+      mobilePosition: "top",
+      icon: Blocks,
+      iconColor: "text-neon-purple",
+      iconBg: "bg-neon-purple/10 border-neon-purple/20",
+    },
+    {
+      id: "spaces-ready",
+      type: "modal",
+      title: "Pronto para abrir um Space",
+      description:
+        "O melhor caminho aqui e separar cada exploracao visual em um canvas proprio para manter contexto e historico claros.",
+    },
+  ],
+  workspaces: [
+    {
+      id: "workspaces-welcome",
+      type: "modal",
+      title: "Workspaces organizam o ambiente",
+      description:
+        "Use workspaces para separar operacoes, projetos e sessoes por contexto, cliente ou linha de trabalho.",
+    },
+    {
+      id: "workspaces-create",
+      type: "spotlight",
+      target: '[data-tour="workspaces-create"]',
+      title: "Crie com criterio",
+      description:
+        "Cada workspace deve representar um contexto de trabalho claro. Isso evita misturar sessoes e filtros sem necessidade.",
+      position: "bottom",
+      mobilePosition: "top",
+      icon: LayoutGrid,
+      iconColor: "text-neon-blue",
+      iconBg: "bg-neon-blue/10 border-neon-blue/20",
+    },
+    {
+      id: "workspaces-grid",
+      type: "spotlight",
+      target: '[data-tour="workspaces-grid"]',
+      title: "Abra pelo card",
+      description:
+        "Os cards sao a fonte principal daqui. E por eles que voce entra no detalhe, ativa o filtro e administra o workspace.",
+      position: "top",
+      mobilePosition: "top",
+      icon: PanelLeft,
+      iconColor: "text-neon-cyan",
+      iconBg: "bg-neon-cyan/10 border-neon-cyan/20",
+    },
+    {
+      id: "workspaces-ready",
+      type: "modal",
+      title: "Pronto para estruturar",
+      description:
+        "Agora voce ja sabe criar e abrir workspaces. O ganho real aparece quando cada frente de trabalho tem o seu proprio contexto.",
+    },
+  ],
+};
+
+function getTourContext(pathname: string): TourContextId | null {
+  if (pathname === "/dashboard") {
+    return "dashboard";
+  }
+
+  if (pathname === "/dashboard/code") {
+    return "code";
+  }
+
+  if (pathname === "/dashboard/spaces") {
+    return "spaces";
+  }
+
+  if (pathname === "/dashboard/workspaces") {
+    return "workspaces";
+  }
+
+  return null;
+}
 
 /* ─── Spotlight overlay ─── */
 
@@ -255,11 +355,21 @@ function useTargetRect(selector: string | null) {
 
   useEffect(() => {
     if (!selector) {
-      setRect(null);
+      const frame = window.requestAnimationFrame(() => {
+        setRect(null);
+      });
+
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    if (typeof window === "undefined") {
       return;
     }
 
-    const update = () => {
+    let frame = 0;
+    let resizeObserver: ResizeObserver | null = null;
+
+    const updateNow = () => {
       const el = document.querySelector(selector);
       if (el) {
         const r = el.getBoundingClientRect();
@@ -267,21 +377,52 @@ function useTargetRect(selector: string | null) {
       } else {
         setRect(null);
       }
+
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+
+      if (el && "ResizeObserver" in window) {
+        resizeObserver = new ResizeObserver(() => {
+          window.requestAnimationFrame(updateNow);
+        });
+        resizeObserver.observe(el);
+      }
     };
 
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
-    const interval = setInterval(update, 300);
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateNow);
+    };
+
+    const observer = new MutationObserver(scheduleUpdate);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+
+    scheduleUpdate();
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("scroll", scheduleUpdate, true);
 
     return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
-      clearInterval(interval);
+      window.cancelAnimationFrame(frame);
+      resizeObserver?.disconnect();
+      observer.disconnect();
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("scroll", scheduleUpdate, true);
     };
   }, [selector]);
 
   return rect;
+}
+
+function getResolvedPosition(step: SpotlightStep, viewportWidth: number): Position {
+  if (viewportWidth < 768 && step.mobilePosition) {
+    return step.mobilePosition;
+  }
+
+  return step.position;
 }
 
 /* ─── Card positioning ─── */
@@ -329,10 +470,10 @@ function getCardPosition(
 function ParticleBurst() {
   const particles = Array.from({ length: 24 }, (_, i) => {
     const angle = (i / 24) * Math.PI * 2;
-    const distance = 80 + Math.random() * 120;
+    const distance = 96 + (i % 6) * 18;
     const x = Math.cos(angle) * distance;
     const y = Math.sin(angle) * distance;
-    const size = 3 + Math.random() * 4;
+    const size = 3 + (i % 4);
     const colors = [
       "bg-neon-cyan",
       "bg-neon-purple",
@@ -397,32 +538,33 @@ function ProgressDots({
   );
 }
 
-/* ─── Flipping card content for completion step ─── */
-
-function PathCardFront({ path }: { path: StartPath }) {
+function PathCard({ path, onNavigate }: { path: StartPath; onNavigate: (route: string) => void }) {
   const Icon = path.icon;
-  return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
-      <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl", path.iconBg)}>
-        <Icon className={cn("h-6 w-6", path.iconColor)} />
-      </div>
-      <h4 className="text-[13px] font-bold text-foreground/90">{path.title}</h4>
-      <p className="text-[10px] font-medium text-foreground/35">{path.subtitle}</p>
-    </div>
-  );
-}
 
-function PathCardBack({ path, onNavigate }: { path: StartPath; onNavigate: (route: string) => void }) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
-      <p className="text-center text-[10px] leading-relaxed text-foreground/50">
-        {path.description}
-      </p>
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onNavigate(path.route); }}
+    <button
+      type="button"
+      onClick={() => onNavigate(path.route)}
+      className="group flex h-full w-full flex-col rounded-[24px] border border-foreground/[0.08] bg-card/78 p-4 text-left shadow-lg shadow-black/30 transition-all hover:border-foreground/[0.14] hover:bg-card/92 hover:-translate-y-0.5"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl border border-white/8", path.iconBg)}>
+          <Icon className={cn("h-5 w-5", path.iconColor)} />
+        </div>
+        <ArrowRight className="mt-1 h-4 w-4 text-foreground/24 transition-colors group-hover:text-foreground/55" />
+      </div>
+
+      <div className="mt-4 space-y-1.5">
+        <h4 className="text-sm font-semibold text-foreground/90">{path.title}</h4>
+        <p className="text-[11px] font-medium text-foreground/34">{path.subtitle}</p>
+        <p className="pt-1 text-[11px] leading-6 text-foreground/48">
+          {path.description}
+        </p>
+      </div>
+
+      <span
         className={cn(
-          "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition-all hover:shadow-sm",
+          "mt-4 inline-flex w-fit items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition-all hover:shadow-sm",
           path.iconColor,
           path.iconColor.replace("text-", "border-") + "/25",
           path.iconBg
@@ -430,8 +572,8 @@ function PathCardBack({ path, onNavigate }: { path: StartPath; onNavigate: (rout
       >
         {path.ctaLabel}
         <ArrowRight className="h-3 w-3" />
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -439,9 +581,12 @@ function PathCardBack({ path, onNavigate }: { path: StartPath; onNavigate: (rout
 
 export function GuidedTour() {
   const router = useRouter();
+  const pathname = usePathname();
   const isActive = useTourStore((s) => s.isActive);
   const currentStep = useTourStore((s) => s.currentStep);
   const hasCompletedTour = useTourStore((s) => s.hasCompletedTour);
+  const completedContexts = useTourStore((s) => s.completedContexts);
+  const activeContext = useTourStore((s) => s.activeContext);
   const cameFromInvite = useTourStore((s) => s.cameFromInvite);
   const startTour = useTourStore((s) => s.startTour);
   const nextStep = useTourStore((s) => s.nextStep);
@@ -449,20 +594,28 @@ export function GuidedTour() {
   const skipTour = useTourStore((s) => s.skipTour);
   const completeTour = useTourStore((s) => s.completeTour);
 
-  const [mounted, setMounted] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const routeContext = getTourContext(pathname);
+  const contextId = isActive ? activeContext ?? routeContext : routeContext;
+  const steps = contextId ? TOUR_STEPS_BY_CONTEXT[contextId] : [];
+  const hasCompletedContext = routeContext
+    ? routeContext === "dashboard"
+      ? hasCompletedTour || Boolean(completedContexts.dashboard)
+      : Boolean(completedContexts[routeContext])
+    : true;
 
-  useEffect(() => setMounted(true), []);
-
-  // Auto-start tour for first-time users (after a slight delay)
   useEffect(() => {
-    if (mounted && !hasCompletedTour && !isActive) {
-      const timer = setTimeout(() => startTour(), 1500);
-      return () => clearTimeout(timer);
+    if (!routeContext || hasCompletedContext || isActive || steps.length === 0) {
+      return;
     }
-  }, [mounted, hasCompletedTour, isActive, startTour]);
 
-  const rawStep = TOUR_STEPS[currentStep] as TourStep | undefined;
+    const delay = routeContext === "dashboard" ? 1500 : 900;
+    const timer = window.setTimeout(() => startTour(routeContext), delay);
+
+    return () => window.clearTimeout(timer);
+  }, [hasCompletedContext, isActive, routeContext, startTour, steps.length]);
+
+  const rawStep = steps[currentStep] as TourStep | undefined;
 
   // Personalize steps for invited users
   const step = rawStep ? { ...rawStep } : undefined;
@@ -470,12 +623,12 @@ export function GuidedTour() {
     if (step.id === "welcome") {
       step.title = "Que bom ter voce aqui";
       step.description =
-        "Voce chegou por um convite especial. Obrigado por acreditar nesse movimento. Vamos te mostrar como o ORIGEM pode transformar sua forma de criar.";
+        "Voce chegou por um convite especial. Vamos te mostrar so o essencial para entrar rapido no fluxo e comecar a usar o ORIGEM direito.";
     }
     if (step.id === "completion") {
-      step.title = "A jornada comeca agora";
+      step.title = "Escolha seu primeiro caminho";
       step.description =
-        "Explore cada caminho. Passe o mouse nos cards para descobrir como o ORIGEM transforma sua forma de criar.";
+        "Agora voce ja sabe onde operar. Escolha a area certa para a sua primeira acao.";
     }
   }
 
@@ -483,7 +636,7 @@ export function GuidedTour() {
   const spotlightStep = isSpotlight ? (step as SpotlightStep) : null;
   const targetRect = useTargetRect(spotlightStep?.target ?? null);
 
-  const isLastStep = currentStep === TOUR_STEPS.length - 1;
+  const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
   const handleNext = useCallback(() => {
@@ -510,14 +663,68 @@ export function GuidedTour() {
   );
 
   useEffect(() => {
+    if (!isActive || steps.length === 0 || currentStep < steps.length) {
+      return;
+    }
+
+    completeTour();
+  }, [completeTour, currentStep, isActive, steps.length]);
+
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  if (!mounted || !isActive || !step) return null;
+  useEffect(() => {
+    if (!isActive || !spotlightStep) {
+      return;
+    }
+
+    const target = document.querySelector(spotlightStep.target);
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({
+      block: "center",
+      inline: "center",
+      behavior: "smooth",
+    });
+  }, [currentStep, isActive, spotlightStep]);
+
+  useEffect(() => {
+    if (!isActive || !spotlightStep || targetRect) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (currentStep >= steps.length - 1) {
+        completeTour();
+        return;
+      }
+
+      nextStep();
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [completeTour, currentStep, isActive, nextStep, spotlightStep, steps.length, targetRect]);
+
+  if (!routeContext || !isActive || !step) return null;
 
   const spotlightPad = 8;
   const isCompletion = step.id === "completion";
+  const viewportWidth = typeof window === "undefined" ? 1280 : window.innerWidth;
+  const spotlightCardWidth = Math.min(360, viewportWidth - 24);
+  const spotlightCardHeight = 240;
+  const spotlightPosition =
+    isSpotlight && targetRect && spotlightStep
+      ? getCardPosition(
+          targetRect,
+          getResolvedPosition(spotlightStep, viewportWidth),
+          spotlightCardWidth,
+          spotlightCardHeight
+        )
+      : undefined;
 
   return (
     <AnimatePresence mode="wait">
@@ -529,8 +736,7 @@ export function GuidedTour() {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Dark backdrop */}
-        <div className="absolute inset-0 bg-black/70" onClick={skipTour} />
+        <div className="absolute inset-0 bg-black/72" />
 
         {/* Spotlight cutout */}
         {isSpotlight && targetRect && (
@@ -592,7 +798,7 @@ export function GuidedTour() {
                 {step.title}
               </motion.h2>
               <motion.p
-                className="mb-8 max-w-md text-center text-sm leading-relaxed text-foreground/45"
+                className="mb-8 max-w-md text-center text-sm leading-relaxed text-foreground/48"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
@@ -600,9 +806,9 @@ export function GuidedTour() {
                 {step.description}
               </motion.p>
 
-              {/* Flipping cards grid */}
+              {/* Primary paths */}
               <motion.div
-                className="flex max-w-5xl flex-wrap justify-center gap-4"
+                className="grid w-full max-w-4xl gap-3 sm:grid-cols-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
@@ -614,13 +820,7 @@ export function GuidedTour() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ delay: 0.5 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <FlippingCard
-                      width={180}
-                      height={160}
-                      className="!border-foreground/[0.08] !bg-card !shadow-lg !shadow-black/30 dark:!bg-card"
-                      frontContent={<PathCardFront path={path} />}
-                      backContent={<PathCardBack path={path} onNavigate={handleNavigate} />}
-                    />
+                    <PathCard path={path} onNavigate={handleNavigate} />
                   </motion.div>
                 ))}
               </motion.div>
@@ -640,14 +840,14 @@ export function GuidedTour() {
                   <ArrowLeft className="h-4 w-4" />
                 </button>
 
-                <ProgressDots total={TOUR_STEPS.length} current={currentStep} />
+                <ProgressDots total={steps.length} current={currentStep} />
 
                 <button
                   type="button"
                   onClick={completeTour}
                   className="inline-flex items-center gap-2 rounded-xl border border-neon-green/30 bg-neon-green/10 px-5 py-2.5 text-xs font-semibold text-neon-green transition-all hover:bg-neon-green/20"
                 >
-                  Explorar livremente
+                  Explorar depois
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </motion.div>
@@ -670,18 +870,9 @@ export function GuidedTour() {
                 "absolute rounded-2xl border bg-card/95 shadow-2xl shadow-black/50 backdrop-blur-xl",
                 step.type === "modal"
                   ? "left-1/2 top-1/2 w-[90vw] max-w-[460px] -translate-x-1/2 -translate-y-1/2 border-foreground/[0.12]"
-                  : "w-[360px] border-neon-cyan/20"
+                  : "max-w-[calc(100vw-24px)] border-neon-cyan/20"
               )}
-              style={
-                isSpotlight && targetRect
-                  ? getCardPosition(
-                    targetRect,
-                    spotlightStep!.position,
-                    360,
-                    240
-                  )
-                  : undefined
-              }
+              style={isSpotlight && targetRect ? { ...spotlightPosition, width: spotlightCardWidth } : undefined}
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -12, scale: 0.96 }}
@@ -701,7 +892,7 @@ export function GuidedTour() {
                   transition={{ delay: 0.05, duration: 0.3 }}
                 >
                   <span className="text-[10px] font-bold tabular-nums text-foreground/50">
-                    {currentStep} / {TOUR_STEPS.length - 1}
+                    {currentStep} / {steps.length - 1}
                   </span>
                 </motion.div>
               )}
@@ -784,7 +975,7 @@ export function GuidedTour() {
                     "text-foreground/55",
                     step.type === "modal"
                       ? "mb-6 text-center text-sm leading-relaxed"
-                      : "mb-6 text-[13px] leading-relaxed"
+                      : "mb-6 text-[13px] leading-6"
                   )}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -795,14 +986,21 @@ export function GuidedTour() {
 
                 {/* Footer — progress + navigation */}
                 <motion.div
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between gap-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.25, duration: 0.3 }}
                 >
-                  <ProgressDots total={TOUR_STEPS.length} current={currentStep} />
+                  <ProgressDots total={steps.length} current={currentStep} />
 
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={skipTour}
+                      className="hidden text-[10px] font-medium uppercase tracking-[0.2em] text-foreground/24 transition-colors hover:text-foreground/48 sm:inline-flex"
+                    >
+                      Pular
+                    </button>
                     {!isFirstStep && (
                       <button
                         type="button"
@@ -822,7 +1020,11 @@ export function GuidedTour() {
                           : "border border-foreground/[0.10] bg-foreground/[0.06] text-foreground/70 hover:bg-foreground/[0.10]"
                       )}
                     >
-                      {isFirstStep ? "Iniciar tour" : "Proximo"}
+                      {isFirstStep
+                        ? "Iniciar tour"
+                        : isLastStep
+                          ? "Concluir"
+                          : "Proximo"}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -835,7 +1037,7 @@ export function GuidedTour() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  Pressione ESC para pular o tour
+                  Use ESC para sair do tour a qualquer momento
                 </motion.p>
               </div>
             </motion.div>

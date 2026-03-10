@@ -1,7 +1,7 @@
 import { generateText } from "ai";
 import { getLanguageModel } from "@/lib/server/ai/provider-factory";
 import { ORIGEM_TOOLS } from "@/config/origem-tools";
-import { getSpaceTools, executeTool } from "@/lib/mcp/connector-manager";
+import { getWorkspaceTools, executeTool } from "@/lib/mcp/connector-manager";
 import { mcpToolsToAITools, parseMCPToolCall, isMCPToolCall } from "@/lib/mcp/tool-adapter";
 import type { ProviderName } from "@/types/provider";
 
@@ -16,7 +16,7 @@ interface ToolExecutionOptions {
   messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
   systemPrompt?: string;
   maxOutputTokens: number;
-  spaceId?: string;
+  workspaceId?: string;
   sessionId?: string;
   agentId?: string;
   maxToolRounds?: number;
@@ -55,7 +55,7 @@ export async function executeWithTools(options: ToolExecutionOptions): Promise<T
     messages,
     systemPrompt,
     maxOutputTokens,
-    spaceId,
+    workspaceId,
     sessionId,
     agentId,
     maxToolRounds = 5,
@@ -63,12 +63,12 @@ export async function executeWithTools(options: ToolExecutionOptions): Promise<T
 
   const languageModel = await getLanguageModel(provider, model);
 
-  // Build merged tool set: ORIGEM built-in + MCP tools for the Space
+  // Build merged tool set: ORIGEM built-in + MCP tools for the Workspace
   let allTools: Record<string, unknown> = { ...ORIGEM_TOOLS };
 
-  if (spaceId) {
-    const spaceTools = await getSpaceTools(spaceId);
-    for (const st of spaceTools) {
+  if (workspaceId) {
+    const workspaceTools = await getWorkspaceTools(workspaceId);
+    for (const st of workspaceTools) {
       const mcpTools = mcpToolsToAITools([st], st.connectorId, st.serverName);
       allTools = { ...allTools, ...mcpTools };
     }
@@ -146,7 +146,7 @@ export async function executeWithTools(options: ToolExecutionOptions): Promise<T
         parsed.connectorId,
         parsed.toolName,
         ((tc as Record<string, unknown>).args ?? (tc as Record<string, unknown>).input ?? {}) as Record<string, unknown>,
-        { spaceId: spaceId ?? "", sessionId: sessionId ?? "", agentId },
+        { workspaceId: workspaceId ?? "", sessionId: sessionId ?? "", agentId },
       );
 
       const resultText = mcpResult.status === "success"

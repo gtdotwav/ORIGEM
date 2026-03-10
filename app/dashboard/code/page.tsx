@@ -19,22 +19,270 @@ import {
   Blocks,
   Bot,
   User,
-  Loader2,
   RotateCcw,
+  Square,
   Terminal,
   Plus,
   Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
+import { callChatStream } from "@/lib/chat-api";
+import { WorkActivityCard } from "@/components/code/work-activity-card";
 import { FileTree, type FileNode } from "@/components/ui/file-tree";
 
 /* ─── Chat message type ─── */
+type ActivityStepState = "pending" | "active" | "done";
+
+interface ActivityStep {
+  id: string;
+  label: string;
+  state: ActivityStepState;
+}
+
+interface FileChangeSummary {
+  path: string;
+  status: "created" | "updated";
+  addedLines: number;
+  removedLines: number;
+}
+
+interface MessageWorkActivity {
+  summary: string;
+  status: "streaming" | "complete" | "error";
+  startedAt: number;
+  finishedAt?: number;
+  steps: ActivityStep[];
+  reads: string[];
+  searches: string[];
+  changes: FileChangeSummary[];
+}
+
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: number;
+  provider?: string;
+  model?: string;
+  activity?: MessageWorkActivity;
+}
+
+interface ParsedWorklog {
+  summary: string;
+  steps: string[];
+  reads: string[];
+  searches: string[];
+}
+
+const WORKLOG_REGEX = /<origem-worklog>\s*([\s\S]*?)\s*<\/origem-worklog>/i;
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function normalizeWorklogList(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return uniqueStrings(
+    value.filter((item): item is string => typeof item === "string")
+  ).slice(0, 8);
+}
+
+function extractWorklog(text: string): ParsedWorklog | null {
+  const match = text.match(WORKLOG_REGEX);
+  if (!match) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(match[1]) as {
+      summary?: unknown;
+      steps?: unknown;
+      reads?: unknown;
+      searches?: unknown;
+    };
+
+    return {
+      summary:
+        typeof parsed.summary === "string" ? parsed.summary.trim() : "",
+      steps: normalizeWorklogList(parsed.steps),
+      reads: normalizeWorklogList(parsed.reads),
+      searches: normalizeWorklogList(parsed.searches),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function stripWorklogBlock(text: string): string {
+  return text.replace(WORKLOG_REGEX, "").trim();
+}
+
+function getChatSurfaceText(text: string): string {
+  const withoutWorklog = stripWorklogBlock(text);
+  const firstFence = withoutWorklog.indexOf("```");
+
+  if (firstFence === -1) {
+    return withoutWorklog.trim();
+  }
+
+  const prefix = withoutWorklog.slice(0, firstFence).trim();
+  return prefix
+    ? `${prefix}\n\n[Codigo gerado - veja no editor]`
+    : "[Codigo gerado - veja no editor]";
+}
+
+function createFileNode(path: string, content: string): FileNode {
+  const name = path.split("/").pop() ?? path;
+  const extension = name.split(".").pop() ?? "";
+
+  return {
+    name,
+    path,
+    type: "file",
+    extension,
+    content,
+  };
+}
+
+function buildPendingActivity(existingPaths: string[]): MessageWorkActivity {
+  const hasExistingFiles = existingPaths.length > 0;
+  const stepLabels = hasExistingFiles
+    ? [
+        "Lendo o estado atual do projeto",
+        "Mapeando as alteracoes pedidas",
+        "Gerando arquivos revisados",
+        "Atualizando editor e preview",
+      ]
+    : [
+        "Planejando a estrutura inicial",
+        "Gerando os arquivos base",
+        "Organizando o projeto",
+        "Atualizando editor e preview",
+      ];
+
+  return {
+    summary: hasExistingFiles
+      ? "Analisando o projeto atual e preparando as alteracoes."
+      : "Montando a primeira versao do projeto.",
+    status: "streaming",
+    startedAt: Date.now(),
+    steps: stepLabels.map((label, index) => ({
+      id: `${index}-${label}`,
+      label,
+      state: index === 0 ? "active" : "pending",
+    })),
+    reads: existingPaths.slice(0, 4),
+    searches: [],
+    changes: [],
+  };
+}
+
+function advanceActivitySteps(
+  steps: ActivityStep[],
+  activeIndex: number
+): ActivityStep[] {
+  return steps.map((step, index) => ({
+    ...step,
+    state:
+      index < activeIndex
+        ? "done"
+        : index === activeIndex
+          ? "active"
+          : "pending",
+  }));
+}
+
+function computeLineDelta(previousContent: string | undefined, nextContent: string) {
+  const nextLines = nextContent.split("\n");
+  if (previousContent == null) {
+    return { addedLines: nextLines.length, removedLines: 0 };
+  }
+
+  const previousLines = previousContent.split("\n");
+  let start = 0;
+
+  while (
+    start < previousLines.length &&
+    start < nextLines.length &&
+    previousLines[start] === nextLines[start]
+  ) {
+    start += 1;
+  }
+
+  let previousEnd = previousLines.length - 1;
+  let nextEnd = nextLines.length - 1;
+
+  while (
+    previousEnd >= start &&
+    nextEnd >= start &&
+    previousLines[previousEnd] === nextLines[nextEnd]
+  ) {
+    previousEnd -= 1;
+    nextEnd -= 1;
+  }
+
+  return {
+    addedLines: Math.max(0, nextEnd - start + 1),
+    removedLines: Math.max(0, previousEnd - start + 1),
+  };
+}
+
+function summarizeFileChanges(
+  previousFiles: Map<string, string>,
+  blocks: { filename: string; content: string }[]
+): FileChangeSummary[] {
+  return blocks.map(({ filename, content }) => {
+    const previousContent = previousFiles.get(filename);
+    const delta = computeLineDelta(previousContent, content);
+
+    return {
+      path: filename,
+      status: previousContent == null ? "created" : "updated",
+      addedLines: delta.addedLines,
+      removedLines: delta.removedLines,
+    };
+  });
+}
+
+function buildCompletedActivity(
+  pendingActivity: MessageWorkActivity,
+  worklog: ParsedWorklog | null,
+  changes: FileChangeSummary[]
+): MessageWorkActivity {
+  const fallbackReads =
+    pendingActivity.reads.length > 0
+      ? pendingActivity.reads
+      : changes.map((change) => change.path).slice(0, 4);
+  const nextSteps =
+    worklog?.steps.length && worklog.steps.length > 0
+      ? worklog.steps
+      : pendingActivity.steps.map((step) => step.label);
+
+  return {
+    summary:
+      worklog?.summary ||
+      (changes.length > 0
+        ? "Conclui as alteracoes e sincronizei os arquivos gerados."
+        : pendingActivity.summary),
+    status: "complete",
+    startedAt: pendingActivity.startedAt,
+    finishedAt: Date.now(),
+    steps: nextSteps.map((label, index) => ({
+      id: `${index}-${label}`,
+      label,
+      state: "done",
+    })),
+    reads:
+      worklog?.reads.length && worklog.reads.length > 0
+        ? worklog.reads
+        : fallbackReads,
+    searches: worklog?.searches ?? [],
+    changes,
+  };
 }
 
 /* ─── Parse code blocks from AI response ─── */
@@ -65,8 +313,7 @@ function buildFileTree(files: Map<string, string>): FileNode[] {
 
   for (const [path, content] of files) {
     const parts = path.split("/");
-    const filename = parts.pop()!;
-    const ext = filename.split(".").pop() ?? "";
+    parts.pop();
 
     let parent = root;
     let currentPath = "";
@@ -74,19 +321,19 @@ function buildFileTree(files: Map<string, string>): FileNode[] {
     for (const dir of parts) {
       currentPath += (currentPath ? "/" : "") + dir;
       if (!dirs.has(currentPath)) {
-        const dirNode: FileNode = { name: dir, type: "folder", children: [] };
+        const dirNode: FileNode = {
+          name: dir,
+          path: currentPath,
+          type: "folder",
+          children: [],
+        };
         parent.push(dirNode);
         dirs.set(currentPath, dirNode);
       }
       parent = dirs.get(currentPath)!.children!;
     }
 
-    parent.push({
-      name: filename,
-      type: "file",
-      extension: ext,
-      content,
-    });
+    parent.push(createFileNode(path, content));
   }
 
   return root;
@@ -158,6 +405,11 @@ export default function CodeIDEPage() {
   ]);
   const [isSending, setIsSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const streamContentRef = useRef("");
+  const streamFrameRef = useRef<number | null>(null);
+  const progressTimeoutsRef = useRef<number[]>([]);
   const [previewKey, setPreviewKey] = useState(0);
 
   const fileTree = useMemo(() => buildFileTree(files), [files]);
@@ -166,24 +418,103 @@ export default function CodeIDEPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
+  useEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) {
+      return;
+    }
+
+    composer.style.height = "0px";
+    composer.style.height = `${Math.min(composer.scrollHeight, 164)}px`;
+  }, [chatInput]);
+
+  const clearProgressTimers = useCallback(() => {
+    progressTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    progressTimeoutsRef.current = [];
+
+    if (streamFrameRef.current != null) {
+      window.cancelAnimationFrame(streamFrameRef.current);
+      streamFrameRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearProgressTimers();
+      abortControllerRef.current?.abort();
+    };
+  }, [clearProgressTimers]);
+
+  const patchMessage = useCallback(
+    (messageId: string, updater: (message: ChatMessage) => ChatMessage) => {
+      setChatMessages((messages) =>
+        messages.map((message) =>
+          message.id === messageId ? updater(message) : message
+        )
+      );
+    },
+    []
+  );
+
+  const scheduleProgressSteps = useCallback(
+    (messageId: string) => {
+      clearProgressTimers();
+
+      [900, 2200, 3800].forEach((delay, index) => {
+        const timeoutId = window.setTimeout(() => {
+          patchMessage(messageId, (message) => {
+            if (!message.activity || message.activity.status !== "streaming") {
+              return message;
+            }
+
+            return {
+              ...message,
+              activity: {
+                ...message.activity,
+                steps: advanceActivitySteps(message.activity.steps, Math.min(index + 1, message.activity.steps.length - 1)),
+              },
+            };
+          });
+        }, delay);
+
+        progressTimeoutsRef.current.push(timeoutId);
+      });
+    },
+    [clearProgressTimers, patchMessage]
+  );
+
   const handleFileSelect = useCallback((node: FileNode) => {
     setSelectedFile(node);
     setCopied(false);
     setOpenTabs((tabs) => {
-      if (tabs.some((t) => t.name === node.name && t.content === node.content)) return tabs;
+      if (tabs.some((tab) => (tab.path ?? tab.name) === (node.path ?? node.name))) {
+        return tabs;
+      }
       return [...tabs, node];
     });
   }, []);
 
-  const handleCloseTab = useCallback((tabName: string) => {
+  const handleCloseTab = useCallback((tabPath: string) => {
     setOpenTabs((tabs) => {
-      const next = tabs.filter((t) => t.name !== tabName);
-      if (selectedFile?.name === tabName) {
+      const next = tabs.filter((tab) => (tab.path ?? tab.name) !== tabPath);
+      if ((selectedFile?.path ?? selectedFile?.name) === tabPath) {
         setSelectedFile(next.length > 0 ? next[next.length - 1] : null);
       }
       return next;
     });
   }, [selectedFile]);
+
+  const selectFileByPath = useCallback(
+    (path: string) => {
+      const content = files.get(path);
+      if (content == null) {
+        return;
+      }
+
+      handleFileSelect(createFileNode(path, content));
+    },
+    [files, handleFileSelect]
+  );
 
   const handleCopy = useCallback(async () => {
     if (!selectedFile?.content) return;
@@ -191,6 +522,10 @@ export default function CodeIDEPage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [selectedFile]);
+
+  const handleAbortStream = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   /** Update files from AI-generated code blocks */
   const updateFilesFromBlocks = useCallback((blocks: { filename: string; content: string }[]) => {
@@ -204,11 +539,12 @@ export default function CodeIDEPage() {
     });
     // Open first new file
     const first = blocks[0];
-    const ext = first.filename.split(".").pop() ?? "";
-    const node: FileNode = { name: first.filename.split("/").pop()!, type: "file", extension: ext, content: first.content };
+    const node = createFileNode(first.filename, first.content);
     setSelectedFile(node);
     setOpenTabs((tabs) => {
-      const filtered = tabs.filter((t) => t.name !== node.name);
+      const filtered = tabs.filter(
+        (tab) => (tab.path ?? tab.name) !== (node.path ?? node.name)
+      );
       return [...filtered, node];
     });
     setPreviewKey((k) => k + 1);
@@ -216,31 +552,42 @@ export default function CodeIDEPage() {
 
   const handleSendChat = useCallback(async () => {
     if (!chatInput.trim() || isSending) return;
+
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
       role: "user",
       content: chatInput.trim(),
       timestamp: Date.now(),
     };
-    setChatMessages((prev) => [...prev, userMsg]);
     const input = chatInput.trim();
+    const assistantId = `a-${Date.now()}`;
+    const filesSnapshot = new Map(files);
+    const pendingActivity = buildPendingActivity([...filesSnapshot.keys()]);
+
+    setChatMessages((prev) => [
+      ...prev,
+      userMsg,
+      {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+        activity: pendingActivity,
+      },
+    ]);
+    setRightTab("chat");
     setChatInput("");
     setIsSending(true);
+    streamContentRef.current = "";
+    abortControllerRef.current = new AbortController();
+    scheduleProgressSteps(assistantId);
 
     try {
-      // Build context: current files
-      const fileContext = files.size > 0
-        ? `\n\nArquivos atuais do projeto:\n${[...files.entries()].map(([name, content]) => `--- ${name} ---\n${content}`).join("\n\n")}`
+      const fileContext = filesSnapshot.size > 0
+        ? `\n\nArquivos atuais do projeto:\n${[...filesSnapshot.entries()].map(([name, content]) => `--- ${name} ---\n${content}`).join("\n\n")}`
         : "";
 
-      const res = await fetch("/api/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "system",
-              content: `Voce e um desenvolvedor web expert. O usuario pede para criar ou modificar codigo.
+      const systemPrompt = `Voce e um desenvolvedor web expert. O usuario pede para criar ou modificar codigo.
 
 REGRAS IMPORTANTES:
 1. SEMPRE coloque o codigo em blocos com o nome do arquivo: \`\`\`nome-do-arquivo.ext
@@ -252,47 +599,89 @@ REGRAS IMPORTANTES:
 7. O HTML deve ser completo (<!DOCTYPE html>, <head>, <body>)
 8. Use design moderno, escuro, com boa tipografia
 9. Explique brevemente o que criou ANTES dos blocos de codigo
-10. Se o usuario pedir modificacao, reescreva o arquivo inteiro com as mudancas${fileContext}`,
-            },
+10. Se o usuario pedir modificacao, reescreva o arquivo inteiro com as mudancas
+11. Antes da explicacao, inclua um unico bloco neste formato exato:
+<origem-worklog>{"summary":"...","steps":["..."],"reads":["..."],"searches":["..."]}</origem-worklog>
+12. "steps" deve ter de 3 a 5 frases curtas.
+13. "reads" deve listar apenas arquivos relevantes do contexto atual.
+14. "searches" deve listar o que voce analisou no pedido ou no projeto.
+15. Nao use markdown dentro do bloco origem-worklog.${fileContext}`;
+
+      const result = await callChatStream(
+        {
+          messages: [
             ...chatMessages.filter((m) => m.id !== "welcome").map((m) => ({
               role: m.role as "user" | "assistant",
               content: m.content,
             })),
             { role: "user", content: input },
           ],
-        }),
-      });
+          systemPrompt,
+        },
+        (fullContent) => {
+          streamContentRef.current = fullContent;
 
-      if (!res.ok) throw new Error("API error");
+          if (streamFrameRef.current != null) {
+            return;
+          }
 
-      const json = await res.json();
-      const aiText = json.choices?.[0]?.message?.content ?? json.content ?? "Desculpe, nao consegui gerar o codigo. Verifique se um provedor de IA esta configurado em Configuracoes > Provedores.";
+          streamFrameRef.current = window.requestAnimationFrame(() => {
+            const surfaceText = getChatSurfaceText(streamContentRef.current);
 
-      const aiMsg: ChatMessage = {
-        id: `a-${Date.now()}`,
-        role: "assistant",
-        content: aiText,
-        timestamp: Date.now(),
-      };
-      setChatMessages((prev) => [...prev, aiMsg]);
+            patchMessage(assistantId, (message) => ({
+              ...message,
+              content: surfaceText,
+            }));
 
-      // Extract code blocks and create files
-      const blocks = parseCodeBlocks(aiText);
+            streamFrameRef.current = null;
+          });
+        },
+        abortControllerRef.current.signal
+      );
+
+      const cleanedContent = stripWorklogBlock(result.content);
+      const blocks = parseCodeBlocks(cleanedContent);
+      const changes = summarizeFileChanges(filesSnapshot, blocks);
+      const worklog = extractWorklog(result.content);
+
+      patchMessage(assistantId, (message) => ({
+        ...message,
+        content: cleanedContent,
+        provider: result.provider,
+        model: result.model,
+        activity: buildCompletedActivity(pendingActivity, worklog, changes),
+      }));
+
       updateFilesFromBlocks(blocks);
-    } catch {
-      // Fallback for when no provider is configured
-      const fallbackMsg: ChatMessage = {
-        id: `a-${Date.now()}`,
-        role: "assistant",
-        content: "Nao foi possivel conectar ao provedor de IA. Configure um provedor em **Configuracoes > Provedores** para gerar codigo.\n\nEnquanto isso, posso criar um projeto base para voce com arquivos estaticos.",
-        timestamp: Date.now(),
-      };
-      setChatMessages((prev) => [...prev, fallbackMsg]);
+    } catch (error) {
+      const isAbort =
+        error instanceof Error &&
+        (error.name === "AbortError" || error.message === "The user aborted a request.");
 
-      // Generate a basic project as fallback
-      if (files.size === 0 && input.toLowerCase().includes("cri")) {
+      if (isAbort) {
+        patchMessage(assistantId, (message) => ({
+          ...message,
+          content:
+            getChatSurfaceText(streamContentRef.current) ||
+            "Geracao interrompida antes da conclusao.",
+          activity: message.activity
+            ? {
+                ...message.activity,
+                status: "error",
+                summary: "Geracao interrompida antes da conclusao.",
+                finishedAt: Date.now(),
+              }
+            : undefined,
+        }));
+
+        return;
+      }
+
+      const fallbackBlocks: { filename: string; content: string }[] = [];
+
+      if (filesSnapshot.size === 0 && input.toLowerCase().includes("cri")) {
         const topic = input.replace(/^(crie?|faca|gere|monte)\s+(uma?\s+)?/i, "").trim() || "projeto";
-        updateFilesFromBlocks([
+        fallbackBlocks.push(
           {
             filename: "index.html",
             content: `<!DOCTYPE html>
@@ -489,22 +878,69 @@ document.querySelector('.cta-btn')?.addEventListener('click', () => {
 
 console.log('Projeto inicializado com sucesso!');`,
           },
-        ]);
+        );
       }
-    }
 
-    setIsSending(false);
-  }, [chatInput, isSending, chatMessages, files, updateFilesFromBlocks]);
+      if (fallbackBlocks.length > 0) {
+        const fallbackChanges = summarizeFileChanges(filesSnapshot, fallbackBlocks);
+        updateFilesFromBlocks(fallbackBlocks);
+
+        patchMessage(assistantId, (message) => ({
+          ...message,
+          content:
+            "Nao foi possivel conectar ao provedor de IA. Configure um provedor em Configuracoes > Provedores para gerar codigo.\n\nCriei uma base inicial offline para voce continuar editando no editor.",
+          activity: {
+            ...buildCompletedActivity(pendingActivity, null, fallbackChanges),
+            summary: "Nao houve conexao com a IA, entao gerei uma base inicial offline.",
+            status: "complete",
+          },
+        }));
+
+        return;
+      }
+
+      patchMessage(assistantId, (message) => ({
+        ...message,
+        content:
+          "Nao foi possivel conectar ao provedor de IA. Configure um provedor em Configuracoes > Provedores para gerar codigo.",
+        activity: message.activity
+          ? {
+              ...message.activity,
+              status: "error",
+              summary: "A geracao falhou antes de concluir as alteracoes.",
+              finishedAt: Date.now(),
+            }
+          : undefined,
+      }));
+    } finally {
+      clearProgressTimers();
+      abortControllerRef.current = null;
+      setIsSending(false);
+    }
+  }, [
+    chatInput,
+    isSending,
+    chatMessages,
+    files,
+    clearProgressTimers,
+    patchMessage,
+    scheduleProgressSteps,
+    updateFilesFromBlocks,
+  ]);
 
   // When files change, refresh the file tree and update open tabs
   useEffect(() => {
-    if (selectedFile && files.has(selectedFile.name)) {
-      const content = files.get(selectedFile.name)!;
+    const selectedPath = selectedFile?.path ?? selectedFile?.name;
+
+    if (selectedFile && selectedPath && files.has(selectedPath)) {
+      const content = files.get(selectedPath)!;
       if (content !== selectedFile.content) {
-        const updated = { ...selectedFile, content };
+        const updated = { ...selectedFile, content } as FileNode;
         setSelectedFile(updated);
         setOpenTabs((tabs) =>
-          tabs.map((t) => (t.name === selectedFile.name ? updated : t))
+          tabs.map((tab) =>
+            (tab.path ?? tab.name) === selectedPath ? updated : tab
+          )
         );
       }
     }
@@ -576,6 +1012,7 @@ console.log('Projeto inicializado com sucesso!');`,
         <AnimatePresence initial={false}>
           {sidebarOpen && (
             <motion.div
+              data-tour="code-files"
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 240, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
@@ -592,7 +1029,7 @@ console.log('Projeto inicializado com sucesso!');`,
                   <FileTree
                     data={fileTree}
                     onFileSelect={handleFileSelect}
-                    selectedFile={selectedFile?.name ?? null}
+                    selectedFile={selectedFile?.path ?? selectedFile?.name ?? null}
                     className="rounded-none border-0 bg-transparent"
                   />
                 ) : (
@@ -616,12 +1053,14 @@ console.log('Projeto inicializado com sucesso!');`,
               <div className="flex h-8 items-center gap-0 border-b border-white/[0.05] bg-[oklch(0.07_0_0)]">
                 <div className="flex h-full items-center overflow-x-auto">
                   {openTabs.map((tab) => {
-                    const isActive = tab.name === selectedFile.name;
+                    const tabPath = tab.path ?? tab.name;
+                    const isActive = tabPath === (selectedFile.path ?? selectedFile.name);
                     return (
                       <button
-                        key={tab.name}
+                        key={tabPath}
                         type="button"
                         onClick={() => { setSelectedFile(tab); setCopied(false); }}
+                        title={tabPath}
                         className={cn(
                           "group flex h-full items-center gap-2 border-r border-white/[0.03] px-3 text-[11px] transition-colors",
                           isActive
@@ -632,7 +1071,7 @@ console.log('Projeto inicializado com sucesso!');`,
                         <FileCode className={cn("h-3 w-3", isActive ? getExtColor(tab.extension) : "text-white/20")} />
                         {tab.name}
                         <span
-                          onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.name); }}
+                          onClick={(e) => { e.stopPropagation(); handleCloseTab(tabPath); }}
                           className="ml-0.5 flex h-4 w-4 items-center justify-center rounded text-white/30 opacity-0 transition-all hover:bg-white/[0.08] hover:text-white/50 group-hover:opacity-100"
                         >
                           &times;
@@ -718,8 +1157,9 @@ console.log('Projeto inicializado com sucesso!');`,
         <AnimatePresence initial={false}>
           {rightPanelOpen && (
             <motion.div
+              data-tour="code-chat"
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 380, opacity: 1 }}
+              animate={{ width: 420, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-shrink-0 flex-col overflow-hidden border-l border-white/[0.05] bg-[oklch(0.065_0_0)]"
@@ -738,6 +1178,7 @@ console.log('Projeto inicializado com sucesso!');`,
                   Chat IA
                 </button>
                 <button
+                  data-tour="code-preview"
                   type="button"
                   onClick={() => setRightTab("preview")}
                   className={cn(
@@ -753,56 +1194,137 @@ console.log('Projeto inicializado com sucesso!');`,
               {/* Chat tab */}
               {rightTab === "chat" && (
                 <div className="flex flex-1 flex-col overflow-hidden">
-                  <div className="flex-1 space-y-3 overflow-y-auto p-3">
-                    {chatMessages.map((msg) => (
-                      <div key={msg.id} className={cn("flex gap-2", msg.role === "user" && "flex-row-reverse")}>
-                        <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-lg", msg.role === "assistant" ? "bg-neon-cyan/10" : "bg-white/[0.06]")}>
-                          {msg.role === "assistant" ? <Bot className="h-3 w-3 text-neon-cyan/70" /> : <User className="h-3 w-3 text-white/40" />}
-                        </div>
-                        <div className={cn("max-w-[85%] rounded-xl px-3 py-2", msg.role === "assistant" ? "bg-white/[0.04] text-white/65" : "bg-neon-cyan/[0.08] text-white/75")}>
-                          <p className="whitespace-pre-wrap text-[12px] leading-relaxed">
-                            {/* Strip code blocks from display for cleaner chat */}
-                            {msg.role === "assistant" ? msg.content.replace(/```[\s\S]*?```/g, "\n[Codigo gerado — veja no editor]\n").trim() : msg.content}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    {isSending && (
-                      <div className="flex gap-2">
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-neon-cyan/10">
-                          <Loader2 className="h-3 w-3 animate-spin text-neon-cyan/70" />
-                        </div>
-                        <div className="rounded-xl bg-white/[0.04] px-3 py-2">
-                          <p className="text-[12px] text-white/30">Gerando codigo...</p>
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex-1 overflow-y-auto px-3 py-3.5">
+                    <div className="space-y-3">
+                      {chatMessages.map((msg) => {
+                        const isAssistant = msg.role === "assistant";
+                        const surfaceText = isAssistant
+                          ? getChatSurfaceText(msg.content)
+                          : msg.content;
+
+                        return (
+                          <div
+                            key={msg.id}
+                            className={cn(
+                              "flex gap-2.5",
+                              msg.role === "user" && "flex-row-reverse"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "flex h-7 w-7 shrink-0 items-center justify-center rounded-2xl border",
+                                isAssistant
+                                  ? "border-neon-cyan/18 bg-neon-cyan/[0.08]"
+                                  : "border-white/[0.07] bg-white/[0.04]"
+                              )}
+                            >
+                              {isAssistant ? (
+                                <Bot className="h-3.5 w-3.5 text-neon-cyan/70" />
+                              ) : (
+                                <User className="h-3.5 w-3.5 text-white/42" />
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div
+                                className={cn(
+                                  "max-w-[92%] rounded-[22px] border px-3.5 py-3",
+                                  isAssistant
+                                    ? "border-white/[0.07] bg-white/[0.04] text-white/68"
+                                    : "ml-auto border-neon-cyan/18 bg-neon-cyan/[0.08] text-white/78"
+                                )}
+                              >
+                                <p className="whitespace-pre-wrap text-[12px] leading-relaxed">
+                                  {surfaceText ||
+                                    (msg.activity?.status === "streaming"
+                                      ? "Trabalhando nas alteracoes..."
+                                      : "Resposta pronta. Veja os arquivos gerados no editor.")}
+                                </p>
+
+                                {isAssistant && (msg.provider || msg.model) ? (
+                                  <p className="mt-2 text-[10px] text-white/28">
+                                    {[msg.provider, msg.model].filter(Boolean).join(" · ")}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              {isAssistant && msg.activity ? (
+                                <WorkActivityCard
+                                  activity={msg.activity}
+                                  onOpenFile={selectFileByPath}
+                                />
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })}
+
                     <div ref={chatEndRef} />
+                    </div>
                   </div>
 
-                  <div className="border-t border-white/[0.05] p-2.5">
-                    <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2">
-                      <input
-                        type="text"
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendChat();
+                  <div className="border-t border-white/[0.05] p-3">
+                    <div className="overflow-hidden rounded-[24px] border border-white/[0.07] bg-white/[0.03] backdrop-blur-xl">
+                      <div className="flex items-center justify-between border-b border-white/[0.05] px-3.5 py-2 text-[10px] text-white/28">
+                        <span>Pedir alteracoes adicionais</span>
+                        <span>{isSending ? "Gerando..." : "Enter envia"}</span>
+                      </div>
+
+                      <div className="px-3.5 pb-3 pt-2.5">
+                        <textarea
+                          ref={composerRef}
+                          rows={1}
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              if (isSending) {
+                                handleAbortStream();
+                                return;
+                              }
+                              handleSendChat();
+                            }
+                          }}
+                          placeholder={
+                            hasFiles
+                              ? "Descreva exatamente o que deve mudar nos arquivos..."
+                              : "Descreva o que deseja criar..."
                           }
-                        }}
-                        placeholder={hasFiles ? "Peca uma mudanca no codigo..." : "Descreva o que deseja criar..."}
-                        className="flex-1 bg-transparent text-[12px] text-white/70 placeholder:text-white/18 outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSendChat}
-                        disabled={!chatInput.trim() || isSending}
-                        className="flex h-6 w-6 items-center justify-center rounded-lg bg-neon-cyan/12 text-neon-cyan/70 transition-all hover:bg-neon-cyan/20 disabled:opacity-20"
-                      >
-                        <Send className="h-3 w-3" />
-                      </button>
+                          className="max-h-[164px] min-h-[88px] w-full resize-none bg-transparent text-[12px] leading-relaxed text-white/72 placeholder:text-white/18 outline-none"
+                        />
+
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                          <div className="text-[10px] text-white/26">
+                            Shift + Enter quebra linha
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={isSending ? handleAbortStream : handleSendChat}
+                            disabled={!isSending && !chatInput.trim()}
+                            className={cn(
+                              "inline-flex h-9 items-center justify-center gap-2 rounded-full border px-3.5 text-[11px] font-medium transition-all",
+                              isSending
+                                ? "border-white/[0.12] bg-white/[0.06] text-white/82 hover:bg-white/[0.1]"
+                                : "border-neon-cyan/18 bg-neon-cyan/[0.12] text-neon-cyan/80 hover:bg-neon-cyan/[0.18]",
+                              !isSending && !chatInput.trim() && "opacity-30"
+                            )}
+                          >
+                            {isSending ? (
+                              <>
+                                <Square className="h-3 w-3 fill-current" />
+                                Parar
+                              </>
+                            ) : (
+                              <>
+                                <Send className="h-3 w-3" />
+                                Enviar
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -815,7 +1337,9 @@ console.log('Projeto inicializado com sucesso!');`,
                     <div className="flex items-center gap-1.5">
                       <Circle className="h-1.5 w-1.5 fill-neon-green text-neon-green" />
                       <span className="text-[10px] text-white/30">
-                        {selectedFile ? selectedFile.name : "localhost:3000"}
+                        {selectedFile
+                          ? selectedFile.path ?? selectedFile.name
+                          : "localhost:3000"}
                       </span>
                     </div>
                     <button

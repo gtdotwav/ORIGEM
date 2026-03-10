@@ -7,7 +7,6 @@ import {
   RefreshCw,
   Star,
   Paperclip,
-  Clock,
   Check,
   AlertCircle,
   Send,
@@ -188,13 +187,13 @@ export function EmailPanel({ open, onClose }: EmailPanelProps) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -16, scale: 0.98 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed left-12 top-1/2 z-[60] -translate-y-1/2"
+            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6.3rem)] z-[60] md:inset-x-auto md:bottom-auto md:left-12 md:top-1/2 md:-translate-y-1/2"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] blur-xl" />
 
             <div
-              className="relative flex max-h-[88vh] w-96 flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40"
+              className="relative flex max-h-[70vh] w-full flex-col overflow-hidden rounded-2xl border border-foreground/[0.12] shadow-2xl shadow-black/40 md:max-h-[88vh] md:w-96"
               style={{
                 background:
                   "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.04) 100%)",

@@ -56,7 +56,6 @@ export const useProviderStore = create<ProviderState>()(
       {
         name: "origem-providers",
         partialize: (state) => ({
-          providers: state.providers,
           activeProvider: state.activeProvider,
         }),
       }

@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { healthCheck } from "@/lib/mcp/connector-manager";
+import { requireApiSession } from "@/lib/server/api-auth";
 
 export async function POST(request: Request) {
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
+
   try {
     const body = await request.json() as { connectorId?: string };
 

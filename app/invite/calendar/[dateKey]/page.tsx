@@ -7,7 +7,6 @@ import Image from "next/image";
 import {
   Calendar as CalendarIcon,
   ArrowRight,
-  Clock,
   StickyNote,
   Bot,
   Layers,
@@ -18,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { Particles } from "@/components/ui/particles";
 import {
   useCalendarStore,
-  type CalendarEvent,
   type CalendarEventType,
 } from "@/stores/calendar-store";
 

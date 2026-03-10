@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  Blocks,
   Bot,
   Clock,
   ExternalLink,
@@ -15,10 +16,9 @@ import {
   Plus,
   Rocket,
   Send,
-  Blocks,
   Target,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { CardSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
@@ -82,11 +82,9 @@ function relativeTime(date: string | Date) {
 /* ------------------------------------------------------------------ */
 function SessionBrowser({
   sessions,
-  decompositions,
   messages,
 }: {
   sessions: ReturnType<typeof useWorkspaceFilteredSessions>;
-  decompositions: Record<string, DecompositionResult>;
   messages: Message[];
 }) {
   const sorted = useMemo(
@@ -373,14 +371,18 @@ function ProjectsPageContent() {
     if (hydratedSessionIdsRef.current.has(targetSessionId)) return;
 
     hydratedSessionIdsRef.current.add(targetSessionId);
-    setIsHydrating(true);
+    queueMicrotask(() => {
+      setIsHydrating(true);
+    });
 
     void hydrateSessionSnapshot(targetSessionId)
       .catch((error) => {
         console.error("Failed to hydrate session on projects page", error);
       })
       .finally(() => {
-        setIsHydrating(false);
+        queueMicrotask(() => {
+          setIsHydrating(false);
+        });
       });
   }, [shouldHydrate, targetSessionId, isHydrating]);
 
@@ -586,7 +588,6 @@ function ProjectsPageContent() {
       {(!targetSessionId || isBrokenLink) && (
         <SessionBrowser
           sessions={sessions}
-          decompositions={decompositions}
           messages={messages}
         />
       )}

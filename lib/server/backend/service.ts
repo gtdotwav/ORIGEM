@@ -75,28 +75,12 @@ export async function upsertSessionSnapshot(input: unknown) {
   const result = SnapshotUpsertSchema.safeParse(input);
 
   if (!result.success) {
-    // Log validation issues for debugging
     const issues = result.error.issues.map((i) => ({
       path: i.path.join("."),
       code: i.code,
       message: i.message,
     }));
     console.warn("[snapshot] Zod validation issues:", JSON.stringify(issues));
-
-    // Try saving with decompositions stripped (most common failure source)
-    const raw = input as { snapshot?: Record<string, unknown> };
-    if (raw?.snapshot && typeof raw.snapshot === "object") {
-      const fallback = { snapshot: { ...raw.snapshot, decompositions: {} } };
-      const retry = SnapshotUpsertSchema.safeParse(fallback);
-      if (retry.success) {
-        console.warn("[snapshot] Saved without decompositions (fallback)");
-        const normalized = normalizeSnapshot(retry.data.snapshot);
-        const store = getSnapshotStore();
-        return store.upsertSnapshot(normalized.session.id, normalized);
-      }
-    }
-
-    // Re-throw as ZodError for the route handler
     throw result.error;
   }
 

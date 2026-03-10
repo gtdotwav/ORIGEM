@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Orbit, ArrowRight, Clock, Play } from "lucide-react";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
-import { useSessionStore } from "@/stores/session-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 

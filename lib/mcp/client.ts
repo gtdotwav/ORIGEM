@@ -18,6 +18,52 @@ interface MCPClientEntry {
 
 const clientPool = new Map<string, MCPClientEntry>();
 
+function buildRemoteRequestInit(env?: Record<string, string>): RequestInit | undefined {
+  if (!env) return undefined;
+
+  const headers = new Headers();
+  let hasHeaders = false;
+
+  const bearerToken =
+    env.AUTHORIZATION
+      ? null
+      : env.MCP_BEARER_TOKEN ||
+        env.ACCESS_TOKEN ||
+        env.BEARER_TOKEN ||
+        env.API_TOKEN ||
+        env.VERCEL_ACCESS_TOKEN ||
+        env.LINEAR_ACCESS_TOKEN ||
+        env.LINEAR_API_KEY ||
+        env.FIGMA_ACCESS_TOKEN;
+
+  if (env.AUTHORIZATION) {
+    headers.set("Authorization", env.AUTHORIZATION);
+    hasHeaders = true;
+  } else if (bearerToken) {
+    headers.set("Authorization", `Bearer ${bearerToken}`);
+    hasHeaders = true;
+  }
+
+  if (env.FIGMA_ACCESS_TOKEN) {
+    headers.set("X-Figma-Token", env.FIGMA_ACCESS_TOKEN);
+    hasHeaders = true;
+  }
+
+  if (env.OPENAPI_MCP_HEADERS) {
+    try {
+      const extraHeaders = JSON.parse(env.OPENAPI_MCP_HEADERS) as Record<string, string>;
+      for (const [key, value] of Object.entries(extraHeaders)) {
+        headers.set(key, value);
+        hasHeaders = true;
+      }
+    } catch {
+      // Ignore malformed JSON from legacy connector configs.
+    }
+  }
+
+  return hasHeaders ? { headers } : undefined;
+}
+
 /**
  * Connect to an MCP server and return the Client instance.
  * Reuses existing connections from the pool.
@@ -44,12 +90,16 @@ export async function connectMCP(connector: MCPConnector, env?: Record<string, s
     }
     case "sse": {
       if (!connector.url) throw new Error(`MCP connector ${connector.id}: SSE requires url`);
-      transport = new SSEClientTransport(new URL(connector.url));
+      transport = new SSEClientTransport(new URL(connector.url), {
+        requestInit: buildRemoteRequestInit(env),
+      });
       break;
     }
     case "streamable-http": {
       if (!connector.url) throw new Error(`MCP connector ${connector.id}: HTTP requires url`);
-      transport = new StreamableHTTPClientTransport(new URL(connector.url));
+      transport = new StreamableHTTPClientTransport(new URL(connector.url), {
+        requestInit: buildRemoteRequestInit(env),
+      });
       break;
     }
     default:

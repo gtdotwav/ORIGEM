@@ -402,8 +402,9 @@ export const useRuntimeStore = create<RuntimeState>()(
 
         removeSession: (sessionId) =>
           set((state) => {
-            const { [sessionId]: _, ...rest } = state.sessions;
-            return { sessions: rest };
+            const nextSessions = { ...state.sessions };
+            delete nextSessions[sessionId];
+            return { sessions: nextSessions };
           }),
 
         getSession: (sessionId) => get().sessions[sessionId],

@@ -147,14 +147,18 @@ function AgentsPageContent() {
     }
 
     hydratedSessionIdsRef.current.add(targetSessionId);
-    setIsHydrating(true);
+    queueMicrotask(() => {
+      setIsHydrating(true);
+    });
 
     void hydrateSessionSnapshot(targetSessionId)
       .catch((error) => {
         console.error("Failed to hydrate session on agents page", error);
       })
       .finally(() => {
-        setIsHydrating(false);
+        queueMicrotask(() => {
+          setIsHydrating(false);
+        });
       });
   }, [shouldHydrate, targetSessionId, isHydrating]);
 

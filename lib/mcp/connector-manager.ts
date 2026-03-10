@@ -13,12 +13,46 @@ function generateId(): string {
   return `mcp_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function buildConnectorConfig(
+  serverId: string,
+  credentials: Record<string, string>,
+): Pick<MCPConnector, "url" | "command" | "args"> {
+  switch (serverId) {
+    case "filesystem":
+      return {
+        command: "npx",
+        args: ["-y", "@modelcontextprotocol/server-filesystem", process.cwd()],
+      };
+    case "supabase": {
+      const args = [
+        "-y",
+        "@supabase/mcp-server-postgrest",
+        "--apiUrl",
+        credentials.SUPABASE_API_URL,
+      ];
+
+      if (credentials.SUPABASE_API_KEY) {
+        args.push("--apiKey", credentials.SUPABASE_API_KEY);
+      }
+
+      args.push("--schema", credentials.SUPABASE_SCHEMA || "public");
+
+      return {
+        command: "npx",
+        args,
+      };
+    }
+    default:
+      return {};
+  }
+}
+
 /**
- * Install an MCP connector into a Space.
+ * Install an MCP connector into a Workspace.
  * Creates the connector record, stores credentials, connects, and discovers tools.
  */
 export async function installConnector(
-  spaceId: string,
+  workspaceId: string,
   serverId: string,
   credentials: Record<string, string>,
 ): Promise<MCPConnector> {
@@ -40,7 +74,7 @@ export async function installConnector(
 
   const connector: MCPConnector = {
     id: connectorId,
-    spaceId,
+    workspaceId,
     serverId,
     serverName: serverDef.name,
     transport: serverDef.transport,
@@ -54,8 +88,18 @@ export async function installConnector(
     lastHealthCheck: null,
   };
 
-  // Store credentials (encrypted)
-  await store.setCredentials(connectorId, spaceId, serverId, credentials);
+  const resolvedConfig = buildConnectorConfig(serverId, credentials);
+  connector.url = resolvedConfig.url ?? connector.url;
+  connector.command = resolvedConfig.command ?? connector.command;
+  connector.args = resolvedConfig.args ?? connector.args;
+
+  const hasStoredCredentials = Object.values(credentials).some(
+    (value) => value.trim() !== "",
+  );
+
+  if (hasStoredCredentials) {
+    await store.setCredentials(connectorId, workspaceId, serverId, credentials);
+  }
 
   // Save connector
   await store.upsertConnector(connector);
@@ -67,6 +111,7 @@ export async function installConnector(
     connector.tools = tools;
     connector.status = "connected";
     connector.lastHealthCheck = new Date().toISOString();
+    delete connector.error;
     await store.upsertConnector(connector);
     await store.updateConnectorTools(connectorId, tools);
   } catch (err) {
@@ -80,7 +125,7 @@ export async function installConnector(
 }
 
 /**
- * Uninstall a connector from a Space.
+ * Uninstall a connector from a Workspace.
  */
 export async function uninstallConnector(connectorId: string): Promise<void> {
   const store = getMCPStore();
@@ -88,7 +133,7 @@ export async function uninstallConnector(connectorId: string): Promise<void> {
   if (!connector) return;
 
   await disconnectMCP(connectorId);
-  await store.removeCredentials(connectorId, connector.spaceId, connector.serverId);
+  await store.removeCredentials(connectorId, connector.workspaceId, connector.serverId);
   await store.deleteConnector(connectorId);
 }
 
@@ -99,7 +144,7 @@ export async function executeTool(
   connectorId: string,
   toolName: string,
   args: Record<string, unknown>,
-  context: { spaceId: string; sessionId: string; agentId?: string },
+  context: { workspaceId: string; sessionId: string; agentId?: string },
 ): Promise<MCPToolResult> {
   const store = getMCPStore();
   const connector = await store.getConnector(connectorId);
@@ -130,7 +175,7 @@ export async function executeTool(
   // Ensure connected
   if (!isConnected(connectorId)) {
     try {
-      const creds = await store.getCredentials(connectorId, connector.spaceId, connector.serverId);
+      const creds = await store.getCredentials(connectorId, connector.workspaceId, connector.serverId);
       await connectMCP(connector, creds ?? undefined);
       await store.updateConnectorStatus(connectorId, "connected");
     } catch (err) {
@@ -166,11 +211,12 @@ export async function refreshConnectorTools(connectorId: string): Promise<MCPToo
   if (!connector) throw new Error(`Connector not found: ${connectorId}`);
 
   if (!isConnected(connectorId)) {
-    const creds = await store.getCredentials(connectorId, connector.spaceId, connector.serverId);
+    const creds = await store.getCredentials(connectorId, connector.workspaceId, connector.serverId);
     await connectMCP(connector, creds ?? undefined);
   }
 
   const tools = await discoverTools(connectorId);
+  await store.updateConnectorStatus(connectorId, "connected");
   await store.updateConnectorTools(connectorId, tools);
   return tools;
 }
@@ -185,7 +231,7 @@ export async function healthCheck(connectorId: string): Promise<{ ok: boolean; e
 
   try {
     if (!isConnected(connectorId)) {
-      const creds = await store.getCredentials(connectorId, connector.spaceId, connector.serverId);
+      const creds = await store.getCredentials(connectorId, connector.workspaceId, connector.serverId);
       await connectMCP(connector, creds ?? undefined);
     }
     await discoverTools(connectorId);
@@ -199,15 +245,15 @@ export async function healthCheck(connectorId: string): Promise<{ ok: boolean; e
 }
 
 /**
- * Get all tools available in a Space (from all connected MCPs).
+ * Get all tools available in a Workspace (from all connected MCPs).
  */
-export async function getSpaceTools(spaceId: string): Promise<Array<MCPToolSchema & { connectorId: string; serverName: string }>> {
+export async function getWorkspaceTools(workspaceId: string): Promise<Array<MCPToolSchema & { connectorId: string; serverName: string }>> {
   const store = getMCPStore();
-  const connectors = await store.listConnectors(spaceId);
+  const connectors = await store.listConnectors(workspaceId);
   const tools: Array<MCPToolSchema & { connectorId: string; serverName: string }> = [];
 
   for (const c of connectors) {
-    if (c.status !== "connected" && c.status !== "disconnected") continue;
+    if (c.tools.length === 0) continue;
     for (const t of c.tools) {
       const allowed = c.permissions.allowedTools === "*" || c.permissions.allowedTools.includes(t.name);
       if (allowed) {
@@ -227,13 +273,13 @@ async function logAudit(
   status: MCPAuditEntry["status"],
   durationMs: number,
   summary: string,
-  context: { spaceId: string; sessionId: string; agentId?: string },
+  context: { workspaceId: string; sessionId: string; agentId?: string },
 ) {
   const store = getMCPStore();
   await store.addAuditEntry({
     id: generateId(),
     timestamp: new Date().toISOString(),
-    spaceId: context.spaceId,
+    workspaceId: context.workspaceId,
     sessionId: context.sessionId,
     agentId: context.agentId,
     connectorId: connector.id,

@@ -5,7 +5,6 @@ import {
   Search,
   Layers,
   MousePointerClick,
-  Type,
   Tags,
   BarChart3,
   TextCursorInput,
@@ -16,7 +15,6 @@ import {
   Send,
   ArrowRight,
   Target,
-  Gauge,
   Brain,
   Settings,
   Eye,
@@ -27,13 +25,11 @@ import {
   GitBranch,
   Orbit,
   LayoutDashboard,
-  Palette,
   Zap,
   Copy,
   Check,
   Grid3X3,
   LayoutList,
-  Heart,
   X,
   type LucideIcon,
   Wand2,
@@ -1333,7 +1329,7 @@ export default function DesignBankingPage() {
                 "Formulário Multistep Dark",
                 "Pricing Tier Glass",
                 "Tabela de Dados Complexa"
-              ].map((prompt, i) => (
+              ].map((prompt) => (
                 <button
                   key={prompt}
                   className="rounded-full border border-foreground/10 bg-gradient-to-b from-foreground/5 to-transparent px-4 py-1.5 text-xs font-medium text-foreground/50 transition-all hover:-translate-y-0.5 hover:border-neon-cyan/40 hover:text-neon-cyan hover:shadow-[0_0_15px_-3px_oklch(0.78_0.15_195/0.2)]"

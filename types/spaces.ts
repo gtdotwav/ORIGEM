@@ -7,6 +7,7 @@ import type { Node, Edge } from "@xyflow/react";
 export type ImageModel =
   | "origem-native"
   | "nano-banana-pro"
+  | "nano-banana-2"
   | "google-imagen-4"
   | "gpt-image"
   | "flux-pro"
@@ -59,7 +60,9 @@ export interface GenerationCard {
   promptBlocks: PromptBlock | null;
   settings: GenerationSettings;
   imageUrls: string[];
+  referenceImageDataUrl: string | null;
   status: GenerationStatus;
+  errorMessage: string | null;
   parentCardId: string | null;
   createdAt: number;
   updatedAt: number;
@@ -78,8 +81,6 @@ export interface Space {
   description: string;
   workspaceId?: string;
   cardIds: string[];
-  /** MCP connector IDs installed in this Space */
-  mcpConnectorIds?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -93,6 +94,7 @@ export interface GenerationNodeData {
   imageUrl: string | null;
   status: GenerationStatus;
   model: GenerationModel;
+  errorMessage?: string | null;
   [key: string]: unknown;
 }
 
@@ -122,7 +124,7 @@ export type SpacesEdge = Edge & { type?: "flow" | "variation" | "upscale" };
 export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
   model: "nano-banana-pro",
   generationType: "image",
-  quantity: 4,
+  quantity: 1,
   resolution: "1024",
   aspectRatio: "1:1",
   styleStrength: 0.7,
@@ -138,18 +140,23 @@ export interface GenerationModelInfo {
   type: GenerationType;
 }
 
+export const SPACE_ASPECT_RATIOS: AspectRatio[] = [
+  "1:1",
+  "4:3",
+  "3:4",
+  "16:9",
+  "9:16",
+  "3:2",
+  "2:3",
+];
+
+export const SPACE_RESOLUTIONS: Resolution[] = ["512", "1024", "2048", "4096"];
+export const SPACE_QUANTITIES = [1, 2] as const;
+
 export const IMAGE_MODELS: GenerationModelInfo[] = [
-  { id: "nano-banana-pro", label: "Nano Banana Pro", provider: "Banana", type: "image" },
+  { id: "nano-banana-pro", label: "Nano Banana Pro", provider: "Google", type: "image" },
+  { id: "nano-banana-2", label: "Nano Banana 2", provider: "Google", type: "image" },
   { id: "google-imagen-4", label: "Imagen 4", provider: "Google", type: "image" },
-  { id: "gpt-image", label: "GPT Image", provider: "OpenAI", type: "image" },
-  { id: "flux-pro", label: "Flux Pro 1.1", provider: "BFL", type: "image" },
-  { id: "flux-schnell", label: "Flux Schnell", provider: "BFL", type: "image" },
-  { id: "dall-e-3", label: "DALL-E 3", provider: "OpenAI", type: "image" },
-  { id: "sdxl", label: "SDXL Turbo", provider: "Stability", type: "image" },
-  { id: "stable-diffusion-3.5", label: "SD 3.5", provider: "Stability", type: "image" },
-  { id: "ideogram-3", label: "Ideogram 3", provider: "Ideogram", type: "image" },
-  { id: "midjourney-v6", label: "Midjourney v6", provider: "Midjourney", type: "image" },
-  { id: "origem-native", label: "ORIGEM Native", provider: "ORIGEM", type: "image" },
 ];
 
 export const VIDEO_MODELS: GenerationModelInfo[] = [

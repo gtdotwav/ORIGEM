@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   type CronFrequency,
-  type CronParts,
   frequencyToDefaults,
   toCronExpression,
   describeCron,

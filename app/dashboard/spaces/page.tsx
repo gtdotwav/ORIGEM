@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -77,6 +78,7 @@ export default function SpacesHubPage() {
 
       {/* Create hero */}
       <motion.button
+        data-tour="spaces-create"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
@@ -102,6 +104,7 @@ export default function SpacesHubPage() {
       {/* Grid */}
       {spaces.length > 0 && (
         <motion.div
+          data-tour="spaces-grid"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -142,12 +145,16 @@ export default function SpacesHubPage() {
                       {previewImages.length > 0 ? (
                         <div className="grid h-full w-full grid-cols-2 gap-px">
                           {previewImages.map((url, j) => (
-                            <img
-                              key={j}
-                              src={url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
+                            <div key={`${space.id}-${j}-${url}`} className="relative h-full w-full">
+                              <Image
+                                src={url}
+                                alt=""
+                                fill
+                                unoptimized
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
+                                className="object-cover"
+                              />
+                            </div>
                           ))}
                         </div>
                       ) : (

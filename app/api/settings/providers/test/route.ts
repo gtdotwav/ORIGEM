@@ -3,8 +3,11 @@ import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { z } from "zod";
+import { requireApiSession } from "@/lib/server/api-auth";
 import type { ProviderName } from "@/types/provider";
-import { getSnapshotStore } from "@/lib/server/backend/store";
+import { getProviderApiKey } from "@/lib/server/ai/provider-factory";
+import { ApiRouteError, parseJsonBody, toErrorResponse } from "@/lib/server/request";
 
 const MINIMAL_MODELS: Partial<Record<ProviderName, string>> = {
   openai: "gpt-4o-mini",
@@ -18,6 +21,22 @@ const MINIMAL_MODELS: Partial<Record<ProviderName, string>> = {
   cohere: "command-r-plus",
   baseten: "moonshotai/Kimi-K2",
 };
+
+const ProviderTestBodySchema = z.object({
+  provider: z.enum([
+    "anthropic",
+    "openai",
+    "google",
+    "groq",
+    "fireworks",
+    "mistral",
+    "baseten",
+    "perplexity",
+    "together",
+    "cohere",
+  ]),
+  apiKey: z.string().optional(),
+});
 
 function buildModel(provider: ProviderName, apiKey: string) {
   const modelId = MINIMAL_MODELS[provider];
@@ -50,47 +69,31 @@ function buildModel(provider: ProviderName, apiKey: string) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-
-  if (!body || typeof body.provider !== "string") {
-    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
   }
 
-  const provider = body.provider as ProviderName;
-  let apiKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
-
-  // Fall back to saved key if none provided
-  if (!apiKey) {
-    const store = getSnapshotStore();
-    const record = await store.getProviderRecord(provider);
-    apiKey = record?.apiKey ?? "";
-  }
-
-  // Fall back to env var
-  if (!apiKey) {
-    const ENV_MAP: Partial<Record<ProviderName, string>> = {
-      openai: "OPENAI_API_KEY",
-      anthropic: "ANTHROPIC_API_KEY",
-      google: "GOOGLE_API_KEY",
-      groq: "GROQ_API_KEY",
-      fireworks: "FIREWORKS_API_KEY",
-      together: "TOGETHER_API_KEY",
-      mistral: "MISTRAL_API_KEY",
-      perplexity: "PERPLEXITY_API_KEY",
-      cohere: "COHERE_API_KEY",
-      baseten: "BASETEN_API_KEY",
-    };
-    apiKey = process.env[ENV_MAP[provider] ?? ""] ?? "";
-  }
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "no_api_key", message: "Nenhuma API key disponivel." },
-      { status: 400 }
-    );
-  }
+  let providerForLog = "unknown";
 
   try {
+    const body = await parseJsonBody(request, ProviderTestBodySchema, {
+      maxBytes: 8_000,
+    });
+    const provider = body.provider as ProviderName;
+    providerForLog = provider;
+    const apiKey =
+      (typeof body.apiKey === "string" ? body.apiKey.trim() : "") ||
+      (await getProviderApiKey(provider)) ||
+      "";
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "no_api_key", message: "Nenhuma API key disponivel." },
+        { status: 400 }
+      );
+    }
+
     const model = buildModel(provider, apiKey);
     await generateText({
       model,
@@ -100,9 +103,22 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error(`[providers/test] ${provider} test failed:`, error);
+    if (error instanceof ApiRouteError) {
+      return toErrorResponse(error, {
+        code: "invalid_body",
+        status: 400,
+      });
+    }
+
+    console.error(`[providers/test] ${providerForLog} test failed:`, error);
     const message =
       error instanceof Error ? error.message : "Connection failed";
+    if (message.includes("ORIGEM_ENCRYPT_SECRET")) {
+      return NextResponse.json(
+        { error: "storage_unavailable", reason: "encryption_not_configured" },
+        { status: 503 }
+      );
+    }
     const isAuthError =
       message.includes("401") ||
       message.includes("403") ||

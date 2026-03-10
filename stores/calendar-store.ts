@@ -24,9 +24,11 @@ export interface CalendarEvent {
 
 interface CalendarState {
   events: Record<string, CalendarEvent[]>; // keyed by dateKey
+  activeDateKeys: string[];
   addEvent: (event: Omit<CalendarEvent, "id" | "createdAt">) => void;
   updateEvent: (dateKey: string, eventId: string, updates: Partial<Omit<CalendarEvent, "id" | "createdAt">>) => void;
   removeEvent: (dateKey: string, eventId: string) => void;
+  setActiveDateKeys: (dateKeys: string[]) => void;
   getEventsForDate: (dateKey: string) => CalendarEvent[];
 }
 
@@ -40,6 +42,7 @@ export const useCalendarStore = create<CalendarState>()(
     persist(
       (set, get) => ({
         events: {},
+        activeDateKeys: [],
 
         addEvent: (input) => {
           const event: CalendarEvent = {
@@ -75,6 +78,28 @@ export const useCalendarStore = create<CalendarState>()(
           }));
         },
 
+        setActiveDateKeys: (dateKeys) => {
+          const normalized = Array.from(
+            new Set(
+              dateKeys
+                .map((dateKey) => dateKey.trim())
+                .filter(Boolean)
+                .sort()
+            )
+          );
+
+          set((state) => {
+            if (
+              state.activeDateKeys.length === normalized.length &&
+              state.activeDateKeys.every((dateKey, index) => dateKey === normalized[index])
+            ) {
+              return state;
+            }
+
+            return { activeDateKeys: normalized };
+          });
+        },
+
         getEventsForDate: (dateKey) => {
           return get().events[dateKey] ?? [];
         },
@@ -90,6 +115,36 @@ export function toDateKey(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+export function fromDateKey(dateKey: string): Date {
+  const [year, month, day] = dateKey
+    .split("-")
+    .map((value) => Number.parseInt(value, 10));
+
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day)
+  ) {
+    return new Date(NaN);
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+export function sortCalendarEventsChronologically(events: CalendarEvent[]): CalendarEvent[] {
+  return [...events].sort((a, b) => {
+    if (a.dateKey !== b.dateKey) return a.dateKey.localeCompare(b.dateKey);
+    if (!a.time && !b.time) return a.createdAt - b.createdAt;
+    if (!a.time) return 1;
+    if (!b.time) return -1;
+
+    const timeCompare = a.time.localeCompare(b.time);
+    if (timeCompare !== 0) return timeCompare;
+
+    return a.createdAt - b.createdAt;
+  });
 }
 
 // ────────────────────────────────────────────────

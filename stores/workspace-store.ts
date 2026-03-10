@@ -14,6 +14,7 @@ interface WorkspaceState {
   removeWorkspace: (id: string) => void;
   archiveWorkspace: (id: string) => void;
   setActiveWorkspace: (id: string | null) => void;
+  setWorkspaceMCPConnectorIds: (id: string, connectorIds: string[]) => void;
   getWorkspace: (id: string) => Workspace | undefined;
 }
 
@@ -72,6 +73,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           })),
 
         setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
+
+        setWorkspaceMCPConnectorIds: (id, connectorIds) =>
+          set((s) => ({
+            workspaces: s.workspaces.map((workspace) =>
+              workspace.id === id
+                ? {
+                    ...workspace,
+                    mcpConnectorIds: [...connectorIds],
+                    updatedAt: new Date().toISOString(),
+                  }
+                : workspace
+            ),
+          })),
 
         getWorkspace: (id) => get().workspaces.find((w) => w.id === id),
       }),

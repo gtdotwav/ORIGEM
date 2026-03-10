@@ -7,14 +7,24 @@ function emptySessionHandler() {
   return NextResponse.json({});
 }
 
+function unavailableHandler() {
+  return NextResponse.json({ error: "auth_not_configured" }, { status: 503 });
+}
+
 // Wrap handlers to ensure they're always callable
 async function GET(req: NextRequest) {
-  if (!authEnabled) return emptySessionHandler();
+  if (!authEnabled) {
+    return req.nextUrl.pathname.endsWith("/session")
+      ? emptySessionHandler()
+      : unavailableHandler();
+  }
   return handlers.GET(req);
 }
 
 async function POST(req: NextRequest) {
-  if (!authEnabled) return emptySessionHandler();
+  if (!authEnabled) {
+    return unavailableHandler();
+  }
   return handlers.POST(req);
 }
 

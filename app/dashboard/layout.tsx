@@ -20,7 +20,6 @@ export default function DashboardLayout({
   const isSpaceCanvas = pathname.startsWith("/dashboard/spaces/");
   const isCodeIDE = pathname === "/dashboard/code";
   const isFullscreen = isSpaceCanvas || isCodeIDE;
-  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const activeWorkspace = useWorkspaceStore((s) =>
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)
   );
@@ -34,7 +33,7 @@ export default function DashboardLayout({
       {/* Floating nav — hidden inside Spaces canvas */}
       {!isFullscreen && <FloatingNav />}
       <CommandPalette />
-      {!isFullscreen && <GuidedTour />}
+      {!isSpaceCanvas && <GuidedTour />}
 
       {/* Workspace active context bar */}
       {activeWorkspace && !isFullscreen && (

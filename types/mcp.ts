@@ -57,11 +57,13 @@ export interface MCPToolSchema {
   inputSchema: Record<string, unknown>;
 }
 
-/* ─── Connector (installed in a Space) ─── */
+/* ─── Connector (installed in a Workspace) ─── */
 
 export interface MCPConnector {
   id: string;
-  spaceId: string;
+  workspaceId: string;
+  /** @deprecated legacy persisted field */
+  spaceId?: string;
   serverId: string;
   serverName: string;
   transport: MCPTransport;
@@ -95,7 +97,9 @@ export const DEFAULT_MCP_PERMISSION: MCPPermission = {
 
 export interface MCPToolRequest {
   requestId: string;
-  spaceId: string;
+  workspaceId: string;
+  /** @deprecated legacy request field */
+  spaceId?: string;
   sessionId: string;
   agentId?: string;
   connectorId: string;
@@ -127,7 +131,9 @@ export interface MCPToolResult {
 export interface MCPAuditEntry {
   id: string;
   timestamp: string;
-  spaceId: string;
+  workspaceId: string;
+  /** @deprecated legacy persisted field */
+  spaceId?: string;
   sessionId: string;
   agentId?: string;
   connectorId: string;
@@ -142,7 +148,9 @@ export interface MCPAuditEntry {
 
 export interface MCPCredentialRecord {
   connectorId: string;
-  spaceId: string;
+  workspaceId: string;
+  /** @deprecated legacy persisted field */
+  spaceId?: string;
   serverId: string;
   credentials: string; // encrypted JSON
   updatedAt: number;

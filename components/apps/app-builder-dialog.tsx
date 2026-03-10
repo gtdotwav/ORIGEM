@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Rocket, Globe, Image, BookOpen } from "lucide-react";
+import { Plus, Rocket, Globe, ImageIcon, BookOpen } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -180,7 +180,7 @@ export function AppBuilderDialog() {
 
               <div>
                 <label className="mb-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/35">
-                  <Image className="h-3 w-3" />
+                  <ImageIcon className="h-3 w-3" />
                   Midias
                 </label>
                 <Textarea

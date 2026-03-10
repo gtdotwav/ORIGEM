@@ -22,9 +22,10 @@ export function JourneyConnectorCard({
   );
 
   const journeyCursor = runtime?.journeyCursor ?? 0;
-  const visited = runtime?.journeyVisited ?? [];
-
-  const visitedSet = useMemo(() => new Set(visited), [visited]);
+  const visitedSet = useMemo(
+    () => new Set(runtime?.journeyVisited ?? []),
+    [runtime?.journeyVisited]
+  );
   const nextStep = journeyCursor < JOURNEY_STEPS.length
     ? JOURNEY_STEPS[journeyCursor]
     : null;

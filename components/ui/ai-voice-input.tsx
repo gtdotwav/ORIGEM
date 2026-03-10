@@ -23,13 +23,8 @@ export function AIVoiceInput({
 }: AIVoiceInputProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [isClient, setIsClient] = useState(false);
   const [isDemo, setIsDemo] = useState(demoMode);
   const startedRef = useRef(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -45,7 +40,9 @@ export function AIVoiceInput({
     } else if (startedRef.current) {
       startedRef.current = false;
       onStop?.(duration);
-      setDuration(0);
+      queueMicrotask(() => {
+        setDuration(0);
+      });
     }
 
     return () => clearInterval(intervalId);
@@ -100,17 +97,16 @@ export function AIVoiceInput({
         </button>
 
         <div className="flex h-5 items-center gap-px">
-          {isClient &&
-            Array.from({ length: visualizerBars }).map((_, i) => (
-              <div
-                key={i}
-                className="w-0.5 rounded-full bg-neon-cyan/50 animate-pulse"
-                style={{
-                  height: `${20 + Math.random() * 80}%`,
-                  animationDelay: `${i * 0.05}s`,
-                }}
-              />
-            ))}
+          {Array.from({ length: visualizerBars }).map((_, i) => (
+            <div
+              key={i}
+              className="w-0.5 rounded-full bg-neon-cyan/50 animate-pulse"
+              style={{
+                height: `${28 + ((i * 19) % 52)}%`,
+                animationDelay: `${i * 0.05}s`,
+              }}
+            />
+          ))}
         </div>
 
         <span className="font-mono text-[11px] text-neon-cyan/70">

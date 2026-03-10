@@ -89,14 +89,16 @@ export function KanbanCardModal({ event, onClose }: KanbanCardModalProps) {
   // Sync from event
   useEffect(() => {
     if (!event) return;
-    setTitle(event.title);
-    setDescription(event.description);
-    setTime(event.time);
-    setDuration(event.duration);
-    setColor(event.color);
-    setAgent(event.agent ?? "");
-    setContext(event.context ?? "");
-    setDirty(false);
+    queueMicrotask(() => {
+      setTitle(event.title);
+      setDescription(event.description);
+      setTime(event.time);
+      setDuration(event.duration);
+      setColor(event.color);
+      setAgent(event.agent ?? "");
+      setContext(event.context ?? "");
+      setDirty(false);
+    });
     setTimeout(() => titleRef.current?.focus(), 80);
   }, [event]);
 

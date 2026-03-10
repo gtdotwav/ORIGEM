@@ -241,8 +241,6 @@ class GradientScene {
   animationId: number | null = null;
   container: HTMLElement;
   resizeHandler: (() => void) | null = null;
-  mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
-  touchMoveHandler: ((e: TouchEvent) => void) | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -290,17 +288,6 @@ class GradientScene {
     this.scene.add(this.mesh);
 
     const c = this.container;
-    const onMove = (x: number, y: number) => {
-      this.touchTexture.addTouch({ x: x / c.clientWidth, y: 1 - y / c.clientHeight });
-    };
-    this.mouseMoveHandler = (e: MouseEvent) => onMove(e.offsetX, e.offsetY);
-    this.touchMoveHandler = (e: TouchEvent) => {
-      const rect = c.getBoundingClientRect();
-      onMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-    };
-    c.addEventListener("mousemove", this.mouseMoveHandler);
-    c.addEventListener("touchmove", this.touchMoveHandler);
-
     this.resizeHandler = () => {
       this.camera.aspect = c.clientWidth / c.clientHeight;
       this.camera.updateProjectionMatrix();
@@ -328,8 +315,6 @@ class GradientScene {
   cleanup() {
     if (this.animationId) cancelAnimationFrame(this.animationId);
     if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
-    if (this.mouseMoveHandler) this.container.removeEventListener("mousemove", this.mouseMoveHandler);
-    if (this.touchMoveHandler) this.container.removeEventListener("touchmove", this.touchMoveHandler);
     this.renderer.dispose();
     if (this.container && this.renderer.domElement && this.container.contains(this.renderer.domElement)) {
       this.container.removeChild(this.renderer.domElement);
@@ -341,13 +326,20 @@ class GradientScene {
 export function LiquidGradientBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<GradientScene | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const [isDark, setIsDark] = useState(
+    () =>
+      typeof document === "undefined" ||
+      document.documentElement.classList.contains("dark")
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
     const handler = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
@@ -358,7 +350,6 @@ export function LiquidGradientBackground() {
     if (typeof window === "undefined") return;
     const html = document.documentElement;
     const check = () => setIsDark(html.classList.contains("dark"));
-    check();
     const observer = new MutationObserver(check);
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
@@ -409,8 +400,7 @@ export function LiquidGradientBackground() {
   return (
     <div
       ref={containerRef}
-      className="pointer-events-auto fixed inset-0 -z-10 overflow-hidden"
-      style={{ cursor: "default" }}
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     />
   );
 }

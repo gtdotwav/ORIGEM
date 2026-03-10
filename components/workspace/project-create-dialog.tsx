@@ -73,24 +73,26 @@ export function ProjectCreateDialog({
   const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
-    if (editProject) {
-      setName(editProject.name);
-      setDescription(editProject.description);
-      setColor(editProject.color);
-      setIcon(editProject.icon);
-      setPriority(editProject.priority ?? "medium");
-      setDeadline(editProject.deadline ?? "");
-      setTags(editProject.tags ?? []);
-    } else {
-      setName("");
-      setDescription("");
-      setColor("cyan");
-      setIcon("folder");
-      setPriority("medium");
-      setDeadline("");
-      setTags([]);
-    }
-    setTagInput("");
+    queueMicrotask(() => {
+      if (editProject) {
+        setName(editProject.name);
+        setDescription(editProject.description);
+        setColor(editProject.color);
+        setIcon(editProject.icon);
+        setPriority(editProject.priority ?? "medium");
+        setDeadline(editProject.deadline ?? "");
+        setTags(editProject.tags ?? []);
+      } else {
+        setName("");
+        setDescription("");
+        setColor("cyan");
+        setIcon("folder");
+        setPriority("medium");
+        setDeadline("");
+        setTags([]);
+      }
+      setTagInput("");
+    });
   }, [editProject, open]);
 
   const handleAddTag = () => {

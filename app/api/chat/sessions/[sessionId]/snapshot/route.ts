@@ -5,12 +5,19 @@ import {
   getSessionRecord,
   upsertSessionSnapshot,
 } from "@/lib/server/backend/service";
+import { requireApiSession } from "@/lib/server/api-auth";
+import { ApiRouteError, readJsonBody, toErrorResponse } from "@/lib/server/request";
 
 interface Params {
   params: Promise<{ sessionId: string }>;
 }
 
 export async function GET(_: Request, { params }: Params) {
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
+
   const { sessionId } = await params;
   const record = await getSessionRecord(sessionId);
 
@@ -24,45 +31,50 @@ export async function GET(_: Request, { params }: Params) {
 const MAX_SNAPSHOT_BYTES = 10 * 1024 * 1024; // 10MB
 
 export async function PUT(request: Request, { params }: Params) {
-  const contentLength = request.headers.get("content-length");
-  if (contentLength && parseInt(contentLength, 10) > MAX_SNAPSHOT_BYTES) {
-    return NextResponse.json(
-      { error: "payload_too_large", maxBytes: MAX_SNAPSHOT_BYTES },
-      { status: 413 }
-    );
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
   }
 
   const { sessionId } = await params;
-  const body = await request.json().catch(() => null);
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-  }
-
-  const snapshot = (body as { snapshot?: unknown }).snapshot;
-
-  if (!snapshot || typeof snapshot !== "object") {
-    return NextResponse.json({ error: "missing_snapshot" }, { status: 400 });
-  }
-
-  const snapshotSessionId =
-    (snapshot as { session?: { id?: string } }).session?.id;
-
-  if (snapshotSessionId && snapshotSessionId !== sessionId) {
-    return NextResponse.json(
-      {
-        error: "session_id_mismatch",
-        expected: sessionId,
-        received: snapshotSessionId,
-      },
-      { status: 409 }
-    );
-  }
 
   try {
+    const body = await readJsonBody(request, { maxBytes: MAX_SNAPSHOT_BYTES });
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+    }
+
+    const snapshot = (body as { snapshot?: unknown }).snapshot;
+
+    if (!snapshot || typeof snapshot !== "object") {
+      return NextResponse.json({ error: "missing_snapshot" }, { status: 400 });
+    }
+
+    const snapshotSessionId =
+      (snapshot as { session?: { id?: string } }).session?.id;
+
+    if (snapshotSessionId && snapshotSessionId !== sessionId) {
+      return NextResponse.json(
+        {
+          error: "session_id_mismatch",
+          expected: sessionId,
+          received: snapshotSessionId,
+        },
+        { status: 409 }
+      );
+    }
+
     const record = await upsertSessionSnapshot({ snapshot });
     return NextResponse.json(record);
   } catch (error) {
+    if (error instanceof ApiRouteError) {
+      return toErrorResponse(error, {
+        code: "invalid_payload",
+        status: 400,
+      });
+    }
+
     if (error instanceof ZodError) {
       const issues = error.issues.map((i) => ({
         path: i.path.join("."),
@@ -87,6 +99,11 @@ export async function PUT(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_: Request, { params }: Params) {
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
+
   const { sessionId } = await params;
   await deleteSessionRecord(sessionId);
 

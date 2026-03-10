@@ -50,7 +50,7 @@ export function CriticPanel({ className }: { className?: string }) {
           className={cn(
             "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-all",
             activeCount > 0
-              ? "border-neon-pink/30 bg-neon-pink/10 text-neon-pink"
+              ? "border-foreground/[0.12] bg-foreground/[0.08] text-foreground/78"
               : "border-foreground/[0.08] bg-foreground/[0.03] text-foreground/30 hover:bg-foreground/[0.06] hover:text-foreground/50",
             className
           )}
@@ -58,7 +58,7 @@ export function CriticPanel({ className }: { className?: string }) {
           <Shield className="h-3.5 w-3.5" />
           Critico
           {activeCount > 0 && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-neon-pink/20 px-1 text-[10px] font-bold text-neon-pink">
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground/[0.10] px-1 text-[10px] font-bold text-foreground/76">
               {activeCount}
             </span>
           )}

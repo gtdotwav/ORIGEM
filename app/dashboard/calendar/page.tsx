@@ -157,7 +157,10 @@ export default function CalendarFullPage() {
   const eventIdsWithAutomations = new Set(automationJobs.filter((j) => j.calendarEventId).map((j) => j.calendarEventId));
 
   const selectedDateKey = toDateKey(selectedDate);
-  const dateEvents = events[selectedDateKey] ?? [];
+  const dateEvents = useMemo(
+    () => events[selectedDateKey] ?? [],
+    [events, selectedDateKey]
+  );
 
   const sortedEvents = useMemo(
     () =>
@@ -168,14 +171,6 @@ export default function CalendarFullPage() {
         return a.time.localeCompare(b.time);
       }),
     [dateEvents]
-  );
-
-  const eventDateKeys = useMemo(
-    () =>
-      new Set(
-        Object.keys(events).filter((k) => (events[k]?.length ?? 0) > 0)
-      ),
-    [events]
   );
 
   // All events for the current month (for list & kanban views)
@@ -294,12 +289,12 @@ export default function CalendarFullPage() {
     setPromptText(""); setParsedPreview([]); setAddMode(null);
   };
 
-  const inviteLink = useMemo(() => {
+  const inviteLink = (() => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://origemai.com";
     if (inviteScope === "day") return `${origin}/invite/calendar/${selectedDateKey}`;
     if (inviteScope === "month") return `${origin}/invite/calendar/${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
     return `${origin}/invite/calendar/full`;
-  }, [selectedDateKey, currentYear, currentMonth, inviteScope]);
+  })();
 
   const handleCopyInvite = useCallback(() => {
     navigator.clipboard.writeText(inviteLink);

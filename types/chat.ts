@@ -54,6 +54,11 @@ export interface ChatCompletionRequest {
   language?: RuntimeLanguage | "origem";
   maxTokens?: number;
   systemPrompt?: string;
+  workspaceId?: string;
+  /** @deprecated legacy MCP context field */
+  spaceId?: string;
+  sessionId?: string;
+  agentId?: string;
 }
 
 export interface ChatCompletionResponse {

@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/server/api-auth";
 
 const VERCEL_API = "https://api.vercel.com";
 const PROJECT_ID = process.env.VERCEL_PROJECT_ID ?? "";
 const TEAM_ID = process.env.VERCEL_TEAM_ID ?? "";
 
 export async function GET() {
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
+
   const token = process.env.VERCEL_API_TOKEN;
 
   if (!token || !PROJECT_ID || !TEAM_ID) {

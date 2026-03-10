@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Globe,
@@ -26,6 +26,18 @@ import {
 import { EcosystemConfig } from "@/components/chat/ecosystem-config";
 import { useConfiguredProviders } from "@/hooks/use-configured-providers";
 import { PROVIDER_CATALOG } from "@/config/providers";
+
+function readStorageValue(key: string, fallback: string) {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  try {
+    return window.localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 const SECTIONS = [
   {
@@ -75,17 +87,15 @@ const SECTIONS = [
 
 export default function SettingsPage() {
   const { providers: configuredProviders, loading: providersLoading } = useConfiguredProviders();
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [language, setLanguage] = useState("pt-BR");
-  const [runtimeLanguage, setRuntimeLanguage] = useState("pt-BR");
-
-  useEffect(() => {
-    try {
-      setReducedMotion(localStorage.getItem("origem-reduced-motion") === "true");
-      setLanguage(localStorage.getItem("origem-language") ?? "pt-BR");
-      setRuntimeLanguage(localStorage.getItem("origem-default-runtime-language") ?? "pt-BR");
-    } catch { /* localStorage unavailable */ }
-  }, []);
+  const [reducedMotion, setReducedMotion] = useState(
+    () => readStorageValue("origem-reduced-motion", "false") === "true"
+  );
+  const [language, setLanguage] = useState(() =>
+    readStorageValue("origem-language", "pt-BR")
+  );
+  const [runtimeLanguage, setRuntimeLanguage] = useState(() =>
+    readStorageValue("origem-default-runtime-language", "pt-BR")
+  );
 
   const handleMotionToggle = (checked: boolean) => {
     setReducedMotion(checked);

@@ -21,7 +21,7 @@ export {
   executeTool,
   refreshConnectorTools,
   healthCheck,
-  getSpaceTools,
+  getWorkspaceTools,
 } from "./connector-manager";
 
 // Tool Adapter

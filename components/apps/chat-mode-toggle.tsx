@@ -16,7 +16,7 @@ export function ChatModeToggle() {
         <MessageCircle
           className={cn(
             "h-3.5 w-3.5 transition-colors",
-            !isEcosystem ? "text-neon-cyan" : "text-foreground/25"
+            !isEcosystem ? "text-foreground/62" : "text-foreground/25"
           )}
         />
         <span
@@ -38,7 +38,7 @@ export function ChatModeToggle() {
         <Workflow
           className={cn(
             "h-3.5 w-3.5 transition-colors",
-            isEcosystem ? "text-neon-purple" : "text-foreground/25"
+            isEcosystem ? "text-foreground/62" : "text-foreground/25"
           )}
         />
         <span

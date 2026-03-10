@@ -55,7 +55,9 @@ function EditableText({ element, themeClass, onUpdate }: EditableTextProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setValue(element.content);
+    queueMicrotask(() => {
+      setValue(element.content);
+    });
   }, [element.content]);
 
   useEffect(() => {

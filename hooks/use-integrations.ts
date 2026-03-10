@@ -32,7 +32,30 @@ export function useIntegrations() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+
+    const load = async () => {
+      const [ghRes, vcRes] = await Promise.allSettled([
+        fetch("/api/integrations/github").then((r) => r.json()),
+        fetch("/api/integrations/vercel").then((r) => r.json()),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      setState({
+        github: ghRes.status === "fulfilled" ? ghRes.value : { connected: false },
+        vercel: vcRes.status === "fulfilled" ? vcRes.value : { connected: false },
+        loading: false,
+      });
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [refresh]);
 
   return { ...state, refresh };

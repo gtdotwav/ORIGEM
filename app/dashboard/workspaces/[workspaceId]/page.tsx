@@ -81,7 +81,9 @@ function DetailContent() {
   const archiveProject = useProjectStore((s) => s.archiveProject);
   const removeProject = useProjectStore((s) => s.removeProject);
 
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(() =>
+    useWorkspaceStore.persist.hasHydrated()
+  );
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -89,7 +91,6 @@ function DetailContent() {
 
   useEffect(() => {
     const unsub = useWorkspaceStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useWorkspaceStore.persist.hasHydrated()) setHydrated(true);
     return unsub;
   }, []);
 

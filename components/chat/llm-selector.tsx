@@ -121,8 +121,8 @@ export function LLMSelector({ className }: { className?: string }) {
             <Blocks className="h-3 w-3 text-foreground/40" />
           </div>
         ) : (
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-neon-cyan/10">
-            <Zap className="h-3 w-3 text-neon-cyan/70" />
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-foreground/[0.06]">
+            <Zap className="h-3 w-3 text-foreground/46" />
           </div>
         )}
         <div className="min-w-0">
@@ -170,7 +170,7 @@ export function LLMSelector({ className }: { className?: string }) {
                     className={cn(
                       "flex flex-1 flex-col items-center gap-1 rounded-lg border py-2 transition-all",
                       isActive
-                        ? "border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan shadow-[0_0_8px_rgba(0,255,255,0.06)]"
+                        ? "border-foreground/[0.12] bg-foreground/[0.07] text-foreground/78"
                         : "border-foreground/[0.05] text-foreground/30 hover:border-foreground/[0.10] hover:text-foreground/55"
                     )}
                   >
@@ -192,14 +192,14 @@ export function LLMSelector({ className }: { className?: string }) {
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors",
                 !hasManualSelection
-                  ? "bg-neon-cyan/[0.06] text-foreground/75"
+                  ? "bg-foreground/[0.07] text-foreground/75"
                   : "text-foreground/35 hover:bg-foreground/[0.04] hover:text-foreground/55"
               )}
             >
               <Zap className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1 text-[12px] font-medium">Auto</span>
               {!hasManualSelection && (
-                <Check className="h-3.5 w-3.5 shrink-0 text-neon-cyan" />
+                <Check className="h-3.5 w-3.5 shrink-0 text-foreground/72" />
               )}
             </button>
           </div>

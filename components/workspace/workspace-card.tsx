@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Code,
   FolderOpen,
@@ -131,6 +132,7 @@ interface WorkspaceCardProps {
   sessionCount: number;
   projectCount?: number;
   lastActivity: Date | null;
+  onOpen?: (id: string) => void;
   onEdit: (workspace: Workspace) => void;
   onActivate: (id: string) => void;
   onArchive: (id: string) => void;
@@ -142,18 +144,35 @@ export function WorkspaceCard({
   sessionCount,
   projectCount,
   lastActivity,
+  onOpen,
   onEdit,
   onActivate,
   onArchive,
   onDelete,
 }: WorkspaceCardProps) {
+  const router = useRouter();
   const colors = WORKSPACE_COLORS[workspace.color];
   const Icon = WORKSPACE_ICONS[workspace.icon];
+  const detailHref = `/dashboard/workspaces/${workspace.id}`;
+
+  const openWorkspace = () => {
+    onOpen?.(workspace.id);
+    router.push(detailHref);
+  };
 
   return (
     <div
+      role="link"
+      tabIndex={0}
+      onClick={openWorkspace}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openWorkspace();
+        }
+      }}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all duration-300",
+        "group relative cursor-pointer overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/70 backdrop-blur-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
         colors.borderHover,
         colors.glow
       )}
@@ -166,11 +185,16 @@ export function WorkspaceCard({
         )}
       />
 
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white/[0.03] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+
       <div className="p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <Link
-            href={`/dashboard/workspaces/${workspace.id}`}
+            href={detailHref}
             className="flex items-start gap-3"
+            onClick={(event) => event.stopPropagation()}
           >
             <div
               className={cn(
@@ -197,6 +221,7 @@ export function WorkspaceCard({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
+                onClick={(event) => event.stopPropagation()}
                 className="rounded-lg p-1.5 text-foreground/30 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60 group-hover:opacity-100 focus-visible:opacity-100"
                 aria-label="Opcoes do workspace"
               >
@@ -270,8 +295,9 @@ export function WorkspaceCard({
             )}
           </div>
           <Link
-            href={`/dashboard/workspaces/${workspace.id}`}
-            className="inline-flex items-center gap-0.5 text-[10px] text-foreground/25 opacity-0 transition-all group-hover:text-foreground/50 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:text-foreground/50"
+            href={detailHref}
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex items-center gap-0.5 rounded-full border border-foreground/[0.06] bg-foreground/[0.04] px-2 py-1 text-[10px] text-foreground/35 opacity-100 transition-all hover:border-foreground/[0.12] hover:text-foreground/68 group-hover:border-foreground/[0.12] group-hover:text-foreground/58"
           >
             Abrir
             <ArrowUpRight className="h-3 w-3" />

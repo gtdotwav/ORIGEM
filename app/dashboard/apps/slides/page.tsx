@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   Copy,
-  Image,
+  Image as ImageIcon,
   PenTool,
   Plus,
   Presentation,
@@ -27,7 +27,7 @@ import {
   createSectionSlide,
   createImageSlide,
 } from "@/stores/slides-store";
-import type { SlideCreationMode, Slide, SlideElement } from "@/types/slides";
+import type { SlideCreationMode, Slide } from "@/types/slides";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -827,7 +827,7 @@ function SlideEditor({ onBack }: { onBack: () => void }) {
             type="button"
             className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
           >
-            <Image className="h-3 w-3" />
+            <ImageIcon className="h-3 w-3" />
             Imagem
           </button>
           <div className="mx-1 h-4 w-px bg-foreground/[0.06]" />

@@ -42,12 +42,14 @@ interface WorkspaceCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editWorkspace?: Workspace | null;
+  onCreated?: (workspace: Workspace) => void;
 }
 
 export function WorkspaceCreateDialog({
   open,
   onOpenChange,
   editWorkspace,
+  onCreated,
 }: WorkspaceCreateDialogProps) {
   const addWorkspace = useWorkspaceStore((s) => s.addWorkspace);
   const updateWorkspace = useWorkspaceStore((s) => s.updateWorkspace);
@@ -58,17 +60,19 @@ export function WorkspaceCreateDialog({
   const [icon, setIcon] = useState<WorkspaceIcon>("folder");
 
   useEffect(() => {
-    if (editWorkspace) {
-      setName(editWorkspace.name);
-      setDescription(editWorkspace.description);
-      setColor(editWorkspace.color);
-      setIcon(editWorkspace.icon);
-    } else {
-      setName("");
-      setDescription("");
-      setColor("cyan");
-      setIcon("folder");
-    }
+    queueMicrotask(() => {
+      if (editWorkspace) {
+        setName(editWorkspace.name);
+        setDescription(editWorkspace.description);
+        setColor(editWorkspace.color);
+        setIcon(editWorkspace.icon);
+      } else {
+        setName("");
+        setDescription("");
+        setColor("cyan");
+        setIcon("folder");
+      }
+    });
   }, [editWorkspace, open]);
 
   const handleSubmit = () => {
@@ -83,7 +87,7 @@ export function WorkspaceCreateDialog({
       });
     } else {
       const now = new Date().toISOString();
-      addWorkspace({
+      const workspace: Workspace = {
         id: createId("ws"),
         name: name.trim(),
         description: description.trim(),
@@ -92,7 +96,10 @@ export function WorkspaceCreateDialog({
         status: "active",
         createdAt: now,
         updatedAt: now,
-      });
+      };
+
+      addWorkspace(workspace);
+      onCreated?.(workspace);
     }
 
     onOpenChange(false);

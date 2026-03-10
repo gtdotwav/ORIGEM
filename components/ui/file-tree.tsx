@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 interface FileNode {
   name: string
+  path?: string
   type: "file" | "folder"
   children?: FileNode[]
   extension?: string
@@ -50,7 +51,7 @@ function FileItem({ node, depth, isLast, parentPath, onFileSelect, selectedFile 
   const isFolder = node.type === "folder"
   const hasChildren = isFolder && node.children && node.children.length > 0
   const fileIcon = getFileIcon(node.extension)
-  const isSelected = !isFolder && selectedFile === node.name
+  const isSelected = !isFolder && selectedFile === (node.path ?? node.name)
 
   return (
     <div className="select-none">
@@ -169,7 +170,7 @@ function FileItem({ node, depth, isLast, parentPath, onFileSelect, selectedFile 
         >
           {node.children!.map((child, index) => (
             <FileItem
-              key={child.name}
+              key={child.path ?? child.name}
               node={child}
               depth={depth + 1}
               isLast={index === node.children!.length - 1}
@@ -208,7 +209,7 @@ export function FileTree({ data, className, onFileSelect, selectedFile }: FileTr
       <div className="space-y-0.5">
         {data.map((node, index) => (
           <FileItem
-            key={node.name}
+            key={node.path ?? node.name}
             node={node}
             depth={0}
             isLast={index === data.length - 1}

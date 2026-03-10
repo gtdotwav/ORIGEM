@@ -20,7 +20,6 @@ import TextNode from "@/components/spaces/text-node";
 import { ControlPanel } from "@/components/spaces/control-panel";
 import { SpaceContextMenu, useSpaceContextMenuItems } from "@/components/spaces/space-context-menu";
 import { useSpacesStore } from "@/stores/spaces-store";
-import { cn } from "@/lib/utils";
 
 const NODE_TYPES = {
   generation: GenerationCardNode,
@@ -28,8 +27,8 @@ const NODE_TYPES = {
 };
 
 const EDGE_DEFAULTS = {
-  style: { stroke: "rgba(255,255,255,0.08)", strokeWidth: 1.5 },
-  animated: true,
+  style: { stroke: "rgba(255,255,255,0.12)", strokeWidth: 1.35 },
+  animated: false,
 };
 
 export default function SpaceCanvasPage() {
@@ -66,11 +65,6 @@ export default function SpaceCanvasPage() {
     setActiveSpace(spaceId);
   }, [spaceId, spaces, setActiveSpace, createSpace]);
 
-  // Auto-open panel when a card is selected
-  useEffect(() => {
-    if (selectedCardId && !panelOpen) setPanelOpen(true);
-  }, [selectedCardId, panelOpen]);
-
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
       if (connection.source && connection.target) {
@@ -106,6 +100,7 @@ export default function SpaceCanvasPage() {
   };
 
   const cards = useSpacesStore((s) => s.cards);
+  const isPanelVisible = panelOpen || Boolean(selectedCardId);
 
   const spaceNodes = useMemo(
     () =>
@@ -122,7 +117,7 @@ export default function SpaceCanvasPage() {
   const spaceEdges = useMemo(() => {
     const nodeIds = new Set(spaceNodes.map((n) => n.id));
     return edges
-      .filter((e) => nodeIds.has(e.source) || nodeIds.has(e.target))
+      .filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
       .map((e) => ({ ...e, ...EDGE_DEFAULTS }));
   }, [edges, spaceNodes]);
 
@@ -139,12 +134,12 @@ export default function SpaceCanvasPage() {
             <button
               type="button"
               onClick={() => router.push("/dashboard/spaces")}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-white/40 backdrop-blur-xl transition-all hover:bg-white/[0.07] hover:text-white/70"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-white/42 backdrop-blur-xl transition-colors hover:border-white/[0.10] hover:text-white/70"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
             </button>
             <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 backdrop-blur-xl">
-              <Orbit className="h-3 w-3 text-neon-cyan/50" />
+              <Orbit className="h-3 w-3 text-white/34" />
               <span className="text-[12px] font-medium text-white/60">
                 {space?.name ?? "Space"}
               </span>
@@ -155,17 +150,24 @@ export default function SpaceCanvasPage() {
             <button
               type="button"
               onClick={handleAddCard}
-              className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-white/50 backdrop-blur-xl transition-all hover:bg-white/[0.07] hover:text-white/75"
+              className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-white/50 backdrop-blur-xl transition-colors hover:border-white/[0.10] hover:text-white/76"
             >
               <Plus className="h-3 w-3" />
               Novo Card
             </button>
             <button
               type="button"
-              onClick={() => setPanelOpen(!panelOpen)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-white/35 backdrop-blur-xl transition-all hover:bg-white/[0.07] hover:text-white/60"
+              onClick={() => {
+                if (isPanelVisible && selectedCardId) {
+                  selectCard(null);
+                  setPanelOpen(false);
+                  return;
+                }
+                setPanelOpen((current) => !current);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-white/35 backdrop-blur-xl transition-colors hover:border-white/[0.10] hover:text-white/60"
             >
-              {panelOpen ? (
+              {isPanelVisible ? (
                 <PanelRightClose className="h-3.5 w-3.5" />
               ) : (
                 <PanelRightOpen className="h-3.5 w-3.5" />
@@ -194,21 +196,21 @@ export default function SpaceCanvasPage() {
         >
           <Background
             variant={BackgroundVariant.Dots}
-            gap={28}
-            size={0.5}
-            className="!opacity-[0.08]"
+            gap={30}
+            size={0.45}
+            className="!opacity-[0.05]"
           />
           <Controls
             showInteractive={false}
             position="bottom-left"
-            className="!mb-4 !ml-4 !rounded-xl !border !border-white/[0.06] !bg-white/[0.03] !shadow-xl !backdrop-blur-xl [&>button]:!border-white/[0.04] [&>button]:!bg-transparent [&>button]:!text-white/25 [&>button:hover]:!bg-white/[0.06] [&>button:hover]:!text-white/55"
+            className="!mb-4 !ml-4 !rounded-xl !border !border-white/[0.06] !bg-white/[0.03] !shadow-xl !backdrop-blur-xl [&>button]:!border-white/[0.04] [&>button]:!bg-transparent [&>button]:!text-white/30"
           />
           <MiniMap
             nodeStrokeWidth={2}
             position="bottom-right"
-            className="!mb-4 !mr-4 !rounded-xl !border !border-white/[0.06] !bg-white/[0.04] !shadow-xl !backdrop-blur-xl"
+            className="!mb-4 !mr-4 !rounded-xl !border !border-white/[0.06] !bg-white/[0.03] !shadow-xl !backdrop-blur-xl"
             maskColor="rgba(0,0,0,0.6)"
-            nodeColor="rgba(255,255,255,0.08)"
+            nodeColor="rgba(255,255,255,0.12)"
           />
         </ReactFlow>
 
@@ -239,7 +241,7 @@ export default function SpaceCanvasPage() {
 
       {/* Right control panel — collapsible */}
       <AnimatePresence>
-        {panelOpen && (
+        {isPanelVisible && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 320, opacity: 1 }}

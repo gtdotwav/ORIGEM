@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search,
@@ -94,9 +94,12 @@ export function SpaceContextMenu({ items, position, onClose }: SpaceContextMenuP
   // Auto-focus search
   useEffect(() => {
     if (position) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setSearch("");
-      setActiveCategory("all");
+      const timer = window.setTimeout(() => {
+        inputRef.current?.focus();
+        setSearch("");
+        setActiveCategory("all");
+      }, 50);
+      return () => window.clearTimeout(timer);
     }
   }, [position]);
 

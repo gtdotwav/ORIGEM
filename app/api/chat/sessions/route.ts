@@ -3,8 +3,15 @@ import {
   createSessionRecord,
   listSessionRecords,
 } from "@/lib/server/backend/service";
+import { requireApiSession } from "@/lib/server/api-auth";
+import { ApiRouteError, readJsonBody, toErrorResponse } from "@/lib/server/request";
 
 export async function GET() {
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
+
   const records = await listSessionRecords();
 
   return NextResponse.json({
@@ -22,8 +29,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
+  const session = await requireApiSession();
+  if (session instanceof Response) {
+    return session;
+  }
   try {
+    const body = await readJsonBody(request, { maxBytes: 8_000 });
     const record = await createSessionRecord(body);
     return NextResponse.json(
       {
@@ -39,6 +50,13 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof ApiRouteError) {
+      return toErrorResponse(error, {
+        code: "invalid_payload",
+        status: 400,
+      });
+    }
+
     return NextResponse.json(
       {
         error: "invalid_payload",

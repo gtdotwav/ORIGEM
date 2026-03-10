@@ -3,26 +3,22 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ImageIcon,
-  Settings,
-  Send,
   Loader2,
   Blocks as SparklesIcon,
   Paperclip,
-  Mic,
   ArrowUp,
-  MessageCircle,
-  Workflow,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { LeftToolbar } from "@/components/layout/left-toolbar";
-import { LLMSelector } from "@/components/chat/llm-selector";
-import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
-import { CriticPanel } from "@/components/chat/critic-panel";
 import { IdeaSwiper } from "@/components/chat/idea-swiper";
+import { ChatControlsMenu } from "@/components/chat/chat-controls-menu";
+import {
+  buildCalendarPromptContext,
+  mergeCalendarMetadata,
+} from "@/lib/chat/calendar-context";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -98,10 +94,12 @@ export default function DashboardPage() {
 
     const sessionId = createId("session");
     const session = createSession(sessionId, text, activeWorkspaceId ?? undefined);
+    const calendarContext = buildCalendarPromptContext(text);
+    const messageMetadata = mergeCalendarMetadata(options?.metadata, calendarContext);
 
     addSession(session);
     setCurrentSession(sessionId);
-    addMessage(createMessage(sessionId, "user", text, options?.metadata));
+    addMessage(createMessage(sessionId, "user", text, messageMetadata));
     setInput("");
     setSending(true);
 
@@ -109,9 +107,9 @@ export default function DashboardPage() {
 
     try {
       if (isEcosystem) {
-        await runChatOrchestration(sessionId, text);
+        await runChatOrchestration(sessionId, text, { calendarContext });
       } else {
-        await runSimpleChat(sessionId, text);
+        await runSimpleChat(sessionId, text, { calendarContext });
       }
       persistSessionSnapshot(sessionId).catch((err) =>
         console.warn("[snapshot] persist failed (non-blocking):", err)
@@ -188,9 +186,7 @@ export default function DashboardPage() {
   const hasInput = input.trim().length > 0;
 
   return (
-    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 py-8">
-
-      <LeftToolbar />
+    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 pb-[8.5rem] pt-4 md:py-8">
 
       {/* Spacer to push chat card to center */}
       <div className="flex-1" />
@@ -202,12 +198,9 @@ export default function DashboardPage() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 flex w-full max-w-[680px] flex-col items-center"
       >
-        {/* Ambient glow */}
-        <div className="pointer-events-none absolute -inset-16 rounded-[60px] bg-neon-cyan/[0.03] blur-3xl" />
-
-        <div className="w-full overflow-hidden rounded-2xl border border-foreground/[0.05] bg-card/70 shadow-2xl shadow-black/50 backdrop-blur-2xl">
+        <div className="w-full overflow-hidden rounded-[24px] border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 backdrop-blur-2xl md:rounded-[28px]">
           {/* Header */}
-          <div className="px-6 pt-6 pb-4">
+          <div className="px-5 pb-4 pt-5 md:px-6 md:pt-6">
             <div className="mb-1.5 flex items-center gap-2">
               <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-80" />
               <span className="text-[12px] font-medium tracking-wide text-foreground/55">
@@ -215,21 +208,21 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <h1 className="text-[22px] font-semibold leading-tight text-foreground/90">
+            <h1 className="text-[20px] font-semibold leading-tight text-foreground/90 md:text-[22px]">
               Como posso ajudar hoje?
             </h1>
 
             {/* Workspace indicator */}
             {activeWsName && (
-              <div className="mt-2 flex items-center gap-2 text-[11px] text-neon-cyan/60">
-                <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan/50" />
+              <div className="mt-2 flex items-center gap-2 text-[11px] text-foreground/42">
+                <span className="h-1.5 w-1.5 rounded-full bg-foreground/35" />
                 Criando em: {activeWsName}
               </div>
             )}
           </div>
 
           {/* Input area — fully borderless */}
-          <div className="px-6 pb-2" data-tour="chat-input">
+          <div className="px-5 pb-2 md:px-6" data-tour="chat-input">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -263,14 +256,13 @@ export default function DashboardPage() {
                     if (dur > 0) setInput(`[Audio: ${dur}s] ${input}`);
                   }}
                 />
-                <CriticPanel />
                 <button
                   type="button"
                   onClick={() => setIdeasOpen((v) => !v)}
                   className={cn(
                     "flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
                     ideasOpen
-                      ? "bg-neon-purple/10 text-neon-purple"
+                      ? "bg-foreground/[0.08] text-foreground/70"
                       : "text-foreground/25 hover:bg-foreground/[0.06] hover:text-foreground/50"
                   )}
                   aria-label="Gerar ideias"
@@ -296,7 +288,7 @@ export default function DashboardPage() {
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
                     hasInput && !sending
-                      ? "bg-neon-cyan text-black shadow-md shadow-neon-cyan/25 hover:bg-neon-cyan/90 hover:shadow-lg hover:shadow-neon-cyan/30 active:scale-95"
+                      ? "bg-foreground text-background shadow-md shadow-black/20 hover:bg-foreground/90 active:scale-95"
                       : "bg-foreground/[0.06] text-foreground/20"
                   )}
                 >
@@ -318,9 +310,9 @@ export default function DashboardPage() {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden px-4"
               >
-                <div className="mb-3 flex items-center gap-3 rounded-xl border border-neon-cyan/20 bg-neon-cyan/5 px-3 py-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-neon-cyan" />
-                  <span className="text-xs text-neon-cyan">Processando imagem...</span>
+                <div className="mb-3 flex items-center gap-3 rounded-xl border border-foreground/[0.08] bg-foreground/[0.04] px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-foreground/72" />
+                  <span className="text-xs text-foreground/68">Processando imagem...</span>
                 </div>
               </motion.div>
             )}
@@ -329,7 +321,7 @@ export default function DashboardPage() {
           {/* Idea swiper */}
           <AnimatePresence>
             {ideasOpen && (
-              <div className="px-4 pb-3">
+              <div className="px-3 pb-3 md:px-4">
                 <IdeaSwiper
                   onSelectIdea={(prompt) => {
                     setInput(prompt);
@@ -347,36 +339,12 @@ export default function DashboardPage() {
           </AnimatePresence>
 
           {/* Footer bar */}
-          <div className="flex items-center justify-between px-6 py-2.5">
-            {/* Mode indicator */}
-            <div className="flex items-center gap-1.5">
-              {isEcosystem ? (
-                <Workflow className="h-3 w-3 text-neon-purple/60" />
-              ) : (
-                <MessageCircle className="h-3 w-3 text-neon-cyan/50" />
-              )}
-              <span className={cn(
-                "text-[11px] font-medium",
-                isEcosystem ? "text-neon-purple/70" : "text-foreground/45"
-              )}>
-                {isEcosystem ? "Ecossistema" : "Chat direto"}
-              </span>
+          <div className="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-between md:px-6 md:py-2.5">
+            <div className="text-[11px] text-foreground/32">
+              {hasInput ? "Shift + Enter para quebrar linha" : "Acoes extras em Ajustes"}
             </div>
 
-            {/* Right side tools */}
-            <div className="flex items-center gap-1">
-              <LLMSelector className="" />
-              <ChatModeToggle />
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/settings/providers")}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/20 transition-colors hover:bg-foreground/[0.04] hover:text-foreground/40"
-                aria-label="Configuracoes"
-                title="Configuracoes"
-              >
-                <Settings className="h-3 w-3" />
-              </button>
-            </div>
+            <ChatControlsMenu workspaceName={activeWsName} />
           </div>
         </div>
       </motion.div>
@@ -391,6 +359,8 @@ export default function DashboardPage() {
           void handleImageSelected(event);
         }}
       />
+
+      <LeftToolbar />
 
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4">

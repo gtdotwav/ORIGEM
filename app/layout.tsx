@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthSessionProvider } from "@/components/providers/session-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { authEnabled } from "@/lib/auth"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -40,7 +41,7 @@ export default function RootLayout({
         className={`font-sans antialiased ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <AuthSessionProvider enabled={!!process.env.AUTH_SECRET}>
+          <AuthSessionProvider enabled={authEnabled}>
             {children}
           </AuthSessionProvider>
           <Toaster position="bottom-right" richColors />

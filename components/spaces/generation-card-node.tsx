@@ -1,9 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { memo, useState, useRef, useEffect } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import {
-  ImageIcon,
   Loader2,
   Copy,
   Trash2,
@@ -17,27 +17,23 @@ import {
 import { cn } from "@/lib/utils";
 import { useSpacesStore } from "@/stores/spaces-store";
 import type { GenerationNodeData, AspectRatio, GenerationModel } from "@/types/spaces";
-import { IMAGE_MODELS, ALL_MODELS, DEFAULT_GENERATION_SETTINGS } from "@/types/spaces";
+import {
+  IMAGE_MODELS,
+  ALL_MODELS,
+  SPACE_ASPECT_RATIOS,
+  SPACE_QUANTITIES,
+} from "@/types/spaces";
 
 const STATUS_CONFIG = {
-  idle: { label: "pronto", className: "text-white/20" },
-  queued: {
-    label: "fila",
-    className: "bg-neon-orange/10 text-neon-orange/80",
-  },
+  idle: { label: "pronto", className: "border-white/[0.06] bg-white/[0.03] text-white/35" },
+  queued: { label: "fila", className: "border-white/[0.08] bg-white/[0.04] text-white/56" },
   generating: {
     label: "gerando",
-    className: "bg-neon-cyan/10 text-neon-cyan/80",
+    className: "border-white/[0.10] bg-white/[0.06] text-white/76",
   },
-  done: {
-    label: "concluido",
-    className: "bg-neon-green/10 text-neon-green/80",
-  },
+  done: { label: "concluido", className: "border-white/[0.08] bg-white/[0.04] text-white/62" },
   error: { label: "erro", className: "bg-red-500/10 text-red-400/80" },
 } as const;
-
-const RATIOS: AspectRatio[] = ["1:1", "4:3", "16:9", "9:16"];
-const QUANTITIES = [1, 2, 4];
 
 /* ─── Compact model selector ─── */
 function CompactModelSelect({
@@ -70,10 +66,10 @@ function CompactModelSelect({
           setOpen(!open);
         }}
         className={cn(
-          "flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] transition-all",
+          "flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] transition-colors",
           open
-            ? "border-white/[0.14] bg-white/[0.06]"
-            : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.10]"
+            ? "border-white/[0.12] bg-white/[0.05]"
+            : "border-white/[0.06] bg-white/[0.02]"
         )}
       >
         <span className="flex-1 truncate text-left font-medium text-white/60">
@@ -104,13 +100,13 @@ function CompactModelSelect({
                 "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[10px] transition-colors",
                 value === model.id
                   ? "bg-white/[0.06] text-white/75"
-                  : "text-white/40 hover:bg-white/[0.03] hover:text-white/60"
+                  : "text-white/40 hover:bg-white/[0.03] hover:text-white/52"
               )}
             >
               <span className="flex-1 truncate font-medium">{model.label}</span>
               <span className="text-[8px] text-white/20">{model.provider}</span>
               {value === model.id && (
-                <Check className="h-2.5 w-2.5 shrink-0 text-neon-cyan" />
+                <Check className="h-2.5 w-2.5 shrink-0 text-white/72" />
               )}
             </button>
           ))}
@@ -127,6 +123,8 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const duplicateCard = useSpacesStore((s) => s.duplicateCard);
   const updateCard = useSpacesStore((s) => s.updateCard);
   const setCardStatus = useSpacesStore((s) => s.setCardStatus);
+  const setCardImages = useSpacesStore((s) => s.setCardImages);
+  const setCardError = useSpacesStore((s) => s.setCardError);
   const card = useSpacesStore((s) => s.cards.find((c) => c.id === id));
 
   // Pull text from connected text nodes via edges
@@ -150,69 +148,201 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const [localRatio, setLocalRatio] = useState<AspectRatio>(
     card?.settings.aspectRatio ?? "1:1"
   );
-  const [localQty, setLocalQty] = useState(card?.settings.quantity ?? 4);
-  const [refImage, setRefImage] = useState<string | null>(null);
+  const [localQty, setLocalQty] = useState(card?.settings.quantity ?? 1);
+  const [refImage, setRefImage] = useState<string | null>(
+    card?.referenceImageDataUrl ?? null
+  );
+
+  useEffect(() => {
+    if (!card) {
+      return;
+    }
+
+    setPromptText(card.prompt ?? "");
+    setLocalModel(card.settings.model ?? "nano-banana-pro");
+    setLocalRatio(card.settings.aspectRatio ?? "1:1");
+    setLocalQty(card.settings.quantity ?? 1);
+    setRefImage(card.referenceImageDataUrl ?? null);
+  }, [card]);
 
   // Effective prompt: local text takes priority, fallback to connected text nodes
   const effectivePrompt = promptText.trim() || connectedText;
 
+  const resolvedStatus = card?.status ?? nodeData.status;
   const isGenerating =
-    nodeData.status === "generating" || nodeData.status === "queued";
+    resolvedStatus === "generating" || resolvedStatus === "queued";
   const hasImages = card && card.imageUrls.length > 0;
-  const isDone = nodeData.status === "done";
-  const status = STATUS_CONFIG[nodeData.status] ?? STATUS_CONFIG.idle;
+  const status = STATUS_CONFIG[resolvedStatus] ?? STATUS_CONFIG.idle;
+  const errorMessage = card?.errorMessage ?? nodeData.errorMessage;
 
-  const handleGenerate = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!effectivePrompt || isGenerating) return;
+  const persistCardDraft = (updates?: {
+    prompt?: string;
+    model?: GenerationModel;
+    aspectRatio?: AspectRatio;
+    quantity?: number;
+    referenceImageDataUrl?: string | null;
+  }) => {
+    if (!card) {
+      return;
+    }
+
     updateCard(id, {
-      prompt: effectivePrompt,
+      prompt: updates?.prompt ?? promptText,
+      referenceImageDataUrl:
+        updates?.referenceImageDataUrl ?? refImage ?? null,
       settings: {
-        ...(card?.settings ?? DEFAULT_GENERATION_SETTINGS),
-        model: localModel,
-        aspectRatio: localRatio,
-        quantity: localQty,
+        ...card.settings,
+        model: updates?.model ?? localModel,
+        aspectRatio: updates?.aspectRatio ?? localRatio,
+        quantity: updates?.quantity ?? localQty,
       },
     });
+  };
+
+  const handleGenerate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!card || !effectivePrompt || isGenerating) {
+      return;
+    }
+
+    persistCardDraft({
+      prompt: effectivePrompt,
+      model: localModel,
+      aspectRatio: localRatio,
+      quantity: localQty,
+      referenceImageDataUrl: refImage,
+    });
+
     setCardStatus(id, "queued");
-    setTimeout(() => setCardStatus(id, "generating"), 500);
-    setTimeout(() => {
-      const placeholders = Array.from({ length: localQty }, (_, i) =>
-        `https://picsum.photos/seed/${id}-${i}/512/512`
-      );
-      useSpacesStore.getState().setCardImages(id, placeholders);
-    }, 3000);
+    setCardStatus(id, "generating");
+
+    try {
+      const response = await fetch("/api/spaces/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: effectivePrompt,
+          model: localModel,
+          quantity: localQty,
+          aspectRatio: localRatio,
+          resolution: card.settings.resolution,
+          negativePrompt: card.settings.negativePrompt,
+          seed: card.settings.seed,
+          referenceImages: refImage ? [refImage] : [],
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { imageUrls?: string[]; reason?: string; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.imageUrls?.length) {
+        const detail =
+          payload?.reason ||
+          payload?.error ||
+          "Falha ao gerar imagem com o provider configurado.";
+        throw new Error(detail);
+      }
+
+      setCardImages(id, payload.imageUrls);
+    } catch (error) {
+      const detail =
+        error instanceof Error
+          ? error.message.replaceAll("_", " ")
+          : "Falha ao gerar imagem.";
+      setCardError(id, detail);
+    }
   };
 
   const handleRefUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setRefImage(reader.result as string);
+    reader.onload = () => {
+      const nextImage = reader.result as string;
+      setRefImage(nextImage);
+      persistCardDraft({ referenceImageDataUrl: nextImage });
+    };
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+
+  const handlePromptChange = (value: string) => {
+    setPromptText(value);
+    persistCardDraft({ prompt: value });
+  };
+
+  const handleModelChange = (value: GenerationModel) => {
+    setLocalModel(value);
+    persistCardDraft({ model: value });
+  };
+
+  const handleRatioChange = (value: AspectRatio) => {
+    setLocalRatio(value);
+    persistCardDraft({ aspectRatio: value });
+  };
+
+  const handleQuantityChange = (value: number) => {
+    setLocalQty(value);
+    persistCardDraft({ quantity: value });
+  };
+
+  const handleRemoveReference = () => {
+    setRefImage(null);
+    updateCard(id, { referenceImageDataUrl: null });
   };
 
   return (
     <div
       className={cn(
-        "group w-[320px] overflow-hidden rounded-2xl border shadow-xl transition-all duration-200",
+        "relative w-[320px] overflow-hidden rounded-2xl border shadow-xl transition-colors",
         selected
-          ? "border-white/[0.18] bg-[oklch(0.12_0_0)] shadow-white/[0.03] ring-1 ring-white/[0.06]"
-          : "border-white/[0.07] bg-[oklch(0.10_0_0)] hover:border-white/[0.12] hover:shadow-2xl"
+          ? "border-white/[0.16] bg-[oklch(0.12_0_0)] shadow-white/[0.03] ring-1 ring-white/[0.05]"
+          : "border-white/[0.06] bg-[oklch(0.10_0_0)]"
       )}
       onClick={() => selectCard(id)}
     >
       <Handle
         type="target"
         position={Position.Left}
-        className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-white/15 !bg-white/[0.08] !transition-colors hover:!border-white/30"
+        className="!border-0 !bg-transparent"
+        style={{
+          top: 12,
+          left: 0,
+          right: "auto",
+          width: 26,
+          height: "calc(100% - 24px)",
+          transform: "none",
+          borderRadius: 18,
+          background: "transparent",
+        }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-neon-cyan/30 !bg-neon-cyan/15 !transition-colors hover:!border-neon-cyan/50"
+        className="!border-0 !bg-transparent"
+        style={{
+          top: 12,
+          left: "auto",
+          right: 0,
+          width: 26,
+          height: "calc(100% - 24px)",
+          transform: "none",
+          borderRadius: 18,
+          background: "transparent",
+        }}
       />
+      <div className="pointer-events-none absolute inset-y-4 left-0 flex w-6 items-center justify-center">
+        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
+          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.22]" />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-y-4 right-0 flex w-6 items-center justify-center">
+        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
+          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.26]" />
+        </div>
+      </div>
 
       {/* Image result area */}
       {(hasImages || isGenerating) && (
@@ -227,20 +357,24 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
               )}
             >
               {card.imageUrls.slice(0, 4).map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt={`Gen ${i + 1}`}
-                  className="h-full w-full object-cover"
-                />
+                <div key={`${id}-${i}-${url}`} className="relative h-full w-full">
+                  <Image
+                    src={url}
+                    alt={`Gen ${i + 1}`}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 768px) 50vw, 220px"
+                    className="object-cover"
+                  />
+                </div>
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
-                <Loader2 className="h-6 w-6 animate-spin text-neon-cyan/30" />
+                <Loader2 className="h-6 w-6 animate-spin text-white/30" />
                 <div className="absolute inset-0 animate-ping">
-                  <Loader2 className="h-6 w-6 text-neon-cyan/10" />
+                  <Loader2 className="h-6 w-6 text-white/10" />
                 </div>
               </div>
               <span className="text-[10px] font-medium text-white/25">
@@ -249,15 +383,28 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             </div>
           )}
 
-          {/* Quick actions overlay */}
-          <div className="absolute inset-x-0 top-0 flex justify-end gap-1 p-2 opacity-0 transition-all duration-200 group-hover:opacity-100">
+          {isGenerating ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/45 backdrop-blur-[2px]">
+              <div className="relative">
+                <Loader2 className="h-6 w-6 animate-spin text-white/70" />
+                <div className="absolute inset-0 animate-ping">
+                  <Loader2 className="h-6 w-6 text-white/16" />
+                </div>
+              </div>
+              <span className="text-[10px] font-medium text-white/75">
+                Gerando...
+              </span>
+            </div>
+          ) : null}
+
+          <div className="absolute inset-x-0 top-0 flex justify-end gap-1 p-2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 duplicateCard(id);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded-lg bg-black/70 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+              className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
               title="Duplicar"
             >
               <Copy className="h-3 w-3" />
@@ -265,7 +412,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             {hasImages && (
               <button
                 type="button"
-                className="flex h-6 w-6 items-center justify-center rounded-lg bg-black/70 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
                 title="Ampliar"
               >
                 <Maximize2 className="h-3 w-3" />
@@ -277,7 +424,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
                 e.stopPropagation();
                 deleteCard(id);
               }}
-              className="flex h-6 w-6 items-center justify-center rounded-lg bg-black/70 text-red-400/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-red-300"
+              className="flex h-6 w-6 items-center justify-center rounded-lg border border-red-500/18 bg-black/55 text-red-300/72 backdrop-blur-sm transition-colors hover:border-red-500/28 hover:text-red-200"
               title="Excluir"
             >
               <Trash2 className="h-3 w-3" />
@@ -298,26 +445,29 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         <div onClick={(e) => e.stopPropagation()}>
           <textarea
             value={promptText}
-            onChange={(e) => setPromptText(e.target.value)}
+            onChange={(e) => handlePromptChange(e.target.value)}
             placeholder={connectedText || "Descreva a imagem..."}
             rows={2}
-            className="w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.14]"
+            className="w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.12]"
           />
         </div>
 
         {/* Reference image */}
         <div onClick={(e) => e.stopPropagation()}>
           {refImage ? (
-            <div className="relative overflow-hidden rounded-lg border border-white/[0.06]">
-              <img
+            <div className="relative h-16 overflow-hidden rounded-lg border border-white/[0.06]">
+              <Image
                 src={refImage}
                 alt="Referencia"
-                className="h-16 w-full object-cover"
+                fill
+                unoptimized
+                sizes="240px"
+                className="object-cover"
               />
               <button
                 type="button"
-                onClick={() => setRefImage(null)}
-                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-md bg-black/70 text-white/70 backdrop-blur-sm transition-colors hover:text-white"
+                onClick={handleRemoveReference}
+                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-md bg-black/70 text-white/62 backdrop-blur-sm transition-colors hover:text-white/82"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -326,7 +476,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
               </span>
             </div>
           ) : (
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/[0.06] px-2.5 py-2 text-[10px] text-white/20 transition-colors hover:border-white/[0.12] hover:text-white/35">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/[0.06] px-2.5 py-2 text-[10px] text-white/26 transition-colors">
               <Upload className="h-3 w-3" />
               Imagem de referencia
               <input
@@ -341,7 +491,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
 
         {/* Model selector */}
         <div onClick={(e) => e.stopPropagation()}>
-          <CompactModelSelect value={localModel} onChange={setLocalModel} />
+          <CompactModelSelect value={localModel} onChange={handleModelChange} />
         </div>
 
         {/* Ratio + Quantity row */}
@@ -351,16 +501,16 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         >
           {/* Aspect ratio */}
           <div className="flex flex-1 gap-1">
-            {RATIOS.map((r) => (
+            {SPACE_ASPECT_RATIOS.slice(0, 5).map((r) => (
               <button
                 key={r}
                 type="button"
-                onClick={() => setLocalRatio(r)}
+                onClick={() => handleRatioChange(r)}
                 className={cn(
-                  "flex-1 rounded-md border py-1 text-[9px] font-semibold transition-all",
+                  "flex-1 rounded-md border py-1 text-[9px] font-semibold transition-colors",
                   localRatio === r
-                    ? "border-neon-cyan/25 bg-neon-cyan/8 text-neon-cyan"
-                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08] hover:text-white/40"
+                    ? "border-white/[0.14] bg-white/[0.07] text-white/76"
+                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08] hover:text-white/42"
                 )}
               >
                 {r}
@@ -370,16 +520,16 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
 
           {/* Quantity */}
           <div className="flex gap-0.5">
-            {QUANTITIES.map((q) => (
+            {SPACE_QUANTITIES.map((q) => (
               <button
                 key={q}
                 type="button"
-                onClick={() => setLocalQty(q)}
+                onClick={() => handleQuantityChange(q)}
                 className={cn(
-                  "h-6 w-6 rounded-md border text-[10px] font-semibold transition-all",
+                  "h-6 w-6 rounded-md border text-[10px] font-semibold transition-colors",
                   localQty === q
-                    ? "border-neon-purple/25 bg-neon-purple/8 text-neon-purple"
-                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08]"
+                    ? "border-white/[0.14] bg-white/[0.07] text-white/76"
+                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08] hover:text-white/42"
                 )}
               >
                 {q}
@@ -396,7 +546,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             disabled={!effectivePrompt || isGenerating}
             className={cn(
               "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[11px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-20",
-              "border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/18"
+              "border border-white/[0.10] bg-white/[0.05] text-white/76 hover:border-white/[0.14] hover:bg-white/[0.08]"
             )}
           >
             {isGenerating ? (
@@ -412,13 +562,19 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           </button>
           <span
             className={cn(
-              "rounded-md px-1.5 py-0.5 text-[9px] font-medium",
+              "rounded-md border px-1.5 py-0.5 text-[9px] font-medium",
               status.className
             )}
           >
             {status.label}
           </span>
         </div>
+
+        {errorMessage ? (
+          <div className="rounded-lg border border-red-500/15 bg-red-500/10 px-2.5 py-2 text-[10px] leading-relaxed text-red-200/85">
+            {errorMessage}
+          </div>
+        ) : null}
       </div>
     </div>
   );

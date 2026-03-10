@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreHorizontal, Pencil, Archive, Trash2, ArrowUpRight, Tag, Calendar } from "lucide-react";
+import { MoreHorizontal, Pencil, Archive, Trash2, ArrowUpRight, Tag } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

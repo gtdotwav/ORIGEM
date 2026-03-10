@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   GitBranch,
   Loader2,
-  Blocks,
 } from "lucide-react";
 import { PipelineSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
@@ -170,7 +169,7 @@ function FlowsPageContent() {
     [messages, selectedContext?.id, targetSessionId]
   );
 
-  const relevantEvents = useMemo(() => {
+  const relevantEvents = (() => {
     if (!targetSessionId) {
       return [];
     }
@@ -191,7 +190,7 @@ function FlowsPageContent() {
       })
       .slice(-10)
       .reverse();
-  }, [pipelineEvents, runtime?.runId, targetSessionId]);
+  })();
 
   const shouldHydrate =
     Boolean(targetSessionId) &&
@@ -209,14 +208,18 @@ function FlowsPageContent() {
     }
 
     hydratedSessionIdsRef.current.add(targetSessionId);
-    setIsHydrating(true);
+    queueMicrotask(() => {
+      setIsHydrating(true);
+    });
 
     void hydrateSessionSnapshot(targetSessionId)
       .catch((error) => {
         console.error("Failed to hydrate session on flows page", error);
       })
       .finally(() => {
-        setIsHydrating(false);
+        queueMicrotask(() => {
+          setIsHydrating(false);
+        });
       });
   }, [shouldHydrate, targetSessionId, isHydrating]);
 

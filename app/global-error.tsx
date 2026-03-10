@@ -7,6 +7,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const errorReference = error.digest ?? error.name;
+
   return (
     <html lang="pt-BR">
       <body className="bg-black text-white">
@@ -14,6 +16,9 @@ export default function GlobalError({
           <h2 className="text-xl font-semibold">Erro critico</h2>
           <p className="max-w-md text-sm text-white/60">
             A aplicacao encontrou um erro inesperado. Tente recarregar a pagina.
+          </p>
+          <p className="text-xs uppercase tracking-[0.18em] text-white/30">
+            Ref {errorReference}
           </p>
           <button
             type="button"

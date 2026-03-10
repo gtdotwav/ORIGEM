@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback, type CSSProperties } from "react";
 import {
-  Brain,
   Bot,
   Workflow,
   Blocks,
@@ -16,7 +15,7 @@ import {
   ArrowRight,
   Wand2,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface Idea {
@@ -199,9 +198,6 @@ export function IdeaSwiper({ onSelectIdea, onStartChat, onClose }: IdeaSwiperPro
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [activeIndex, navigate, onClose, onStartChat]);
-
-  const idea = IDEAS[activeIndex];
-  const IdeaIcon = idea.icon;
 
   return (
     <motion.div

@@ -7,17 +7,22 @@ import type {
   SessionSnapshotRecord,
 } from "@/lib/server/backend/types";
 import type { ProviderName } from "@/types/provider";
-import { encrypt, decrypt } from "@/lib/server/crypto";
+import { assertEncryptionReady, decrypt, encrypt } from "@/lib/server/crypto";
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), ".data", "origem-backend.json");
 const BLOB_KEY = "origem-backend.json";
+const MAX_BLOB_WRITE_RETRIES = 3;
+
+function createEmptyDb(): BackendDatabaseShape {
+  return { records: {}, providers: {} };
+}
 
 function parseBackendPath() {
   const fromEnv = process.env.ORIGEM_BACKEND_PATH;
   return fromEnv && fromEnv.trim().length > 0 ? fromEnv.trim() : DEFAULT_DB_PATH;
 }
 
-function useBlob(): boolean {
+function shouldUseBlobStorage(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
@@ -25,27 +30,88 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-async function blobRead(): Promise<BackendDatabaseShape | null> {
-  const { list } = await import("@vercel/blob");
-  const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
-  if (blobs.length === 0) return null;
+function isBlobConflictError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
 
-  const response = await fetch(blobs[0].url);
-  if (!response.ok) return null;
-
-  return (await response.json()) as BackendDatabaseShape;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("412") ||
+    message.includes("precondition") ||
+    message.includes("etag") ||
+    message.includes("if-match")
+  );
 }
 
-async function blobWrite(db: BackendDatabaseShape): Promise<void> {
+function mergeBackendDatabases(
+  remote: BackendDatabaseShape,
+  local: BackendDatabaseShape
+): BackendDatabaseShape {
+  const records: BackendDatabaseShape["records"] = { ...remote.records };
+  for (const [sessionId, record] of Object.entries(local.records ?? {})) {
+    const existing = records[sessionId];
+    if (
+      !existing ||
+      record.version > existing.version ||
+      record.updatedAt >= existing.updatedAt
+    ) {
+      records[sessionId] = record;
+    }
+  }
+
+  const providers: BackendDatabaseShape["providers"] = { ...remote.providers };
+  for (const [provider, record] of Object.entries(local.providers ?? {})) {
+    if (!record) {
+      continue;
+    }
+
+    const typedProvider = provider as ProviderName;
+    const existing = providers[typedProvider];
+    if (!existing || record.updatedAt >= existing.updatedAt) {
+      providers[typedProvider] = record;
+    }
+  }
+
+  return { records, providers };
+}
+
+async function blobRead(): Promise<{
+  data: BackendDatabaseShape | null;
+  etag: string | null;
+}> {
+  const { get } = await import("@vercel/blob");
+  const result = await get(BLOB_KEY, { access: "private", useCache: false });
+
+  if (!result || result.statusCode !== 200) {
+    return { data: null, etag: null };
+  }
+
+  const content = await new Response(result.stream).text();
+  return {
+    data: JSON.parse(content) as BackendDatabaseShape,
+    etag: result.blob.etag,
+  };
+}
+
+async function blobWrite(
+  db: BackendDatabaseShape,
+  etag: string | null
+): Promise<string> {
   const { put } = await import("@vercel/blob");
-  await put(BLOB_KEY, JSON.stringify(db), {
-    access: "public",
+  const result = await put(BLOB_KEY, JSON.stringify(db), {
+    access: "private",
     addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: "application/json",
+    ...(etag ? { ifMatch: etag } : {}),
   });
+  return result.etag;
 }
 
 class SnapshotStore {
-  private db: BackendDatabaseShape = { records: {}, providers: {} };
+  private db: BackendDatabaseShape = createEmptyDb();
+  private blobEtag: string | null = null;
   private loaded = false;
   private writeChain: Promise<void> = Promise.resolve();
   private readonly dbPath = parseBackendPath();
@@ -58,8 +124,9 @@ class SnapshotStore {
     this.loaded = true;
 
     try {
-      if (useBlob()) {
-        const data = await blobRead();
+      if (shouldUseBlobStorage()) {
+        const { data, etag } = await blobRead();
+        this.blobEtag = etag;
         if (data && typeof data === "object" && data.records) {
           this.db = {
             records: data.records ?? {},
@@ -77,14 +144,36 @@ class SnapshotStore {
         }
       }
     } catch {
-      this.db = { records: {}, providers: {} };
+      this.db = createEmptyDb();
     }
+  }
+
+  private async writeBlobWithRetry() {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < MAX_BLOB_WRITE_RETRIES; attempt += 1) {
+      try {
+        this.blobEtag = await blobWrite(this.db, this.blobEtag);
+        return;
+      } catch (error) {
+        if (!isBlobConflictError(error)) {
+          throw error;
+        }
+
+        lastError = error;
+        const { data, etag } = await blobRead();
+        this.db = mergeBackendDatabases(data ?? createEmptyDb(), this.db);
+        this.blobEtag = etag;
+      }
+    }
+
+    throw lastError;
   }
 
   private queueWrite() {
     this.writeChain = this.writeChain.then(async () => {
-      if (useBlob()) {
-        await blobWrite(this.db);
+      if (shouldUseBlobStorage()) {
+        await this.writeBlobWithRetry();
       } else {
         await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
         await fs.writeFile(this.dbPath, JSON.stringify(this.db, null, 2), "utf-8");
@@ -166,6 +255,7 @@ class SnapshotStore {
     input: { apiKey: string; selectedModel: string }
   ): Promise<ProviderSecretRecord> {
     await this.ensureLoaded();
+    assertEncryptionReady("persist provider credentials");
 
     const nextRecord: ProviderSecretRecord = {
       provider,

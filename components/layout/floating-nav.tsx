@@ -7,7 +7,6 @@ import { signOut, useSession } from "next-auth/react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import {
-  ChevronDown,
   ChevronRight,
   Layers,
   LayoutDashboard,
@@ -33,7 +32,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-import { useWorkspaceStore } from "@/stores/workspace-store";
 
 type NeonColor = "cyan" | "purple" | "green" | "orange" | "pink" | "blue";
 
@@ -222,61 +220,47 @@ export function FloatingNav() {
   }, [navOpen, handleClickOutside]);
 
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   const active = findActivePage(pathname);
-  const activeColor = active ? COLOR_CLASSES[active.item.color] : null;
+  const is360Expanded = expanded360 || (navOpen && active?.parentLabel === "360º");
   const session = useSession();
   const isAuthenticated = session.status === "authenticated";
-  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
-  const workspaces = useWorkspaceStore((s) => s.workspaces);
-  const activeWsName = workspaces.find((w) => w.id === activeWorkspaceId)?.name;
-
-  // Auto-expand 360º group when a child page is active
-  useEffect(() => {
-    if (active?.parentLabel === "360º" && navOpen) {
-      setExpanded360(true);
-    }
-  }, [active?.parentLabel, navOpen]);
+  const isDark = theme !== "light";
 
   return (
-    <div className="pointer-events-none relative z-50 w-full px-4 pt-6 md:px-6">
+    <div className="pointer-events-none relative z-50 w-full px-3 pt-4 md:px-6 md:pt-6">
       {isAuthenticated && (
-        <div className="pointer-events-auto absolute right-4 top-6 flex items-center gap-2 md:right-6">
+        <div className="pointer-events-auto absolute right-3 top-3 flex items-center gap-1.5 md:right-6 md:top-6 md:gap-2">
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/20 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur-md transition-all hover:bg-foreground/15 hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-full border border-foreground/20 bg-foreground/10 px-2.5 py-1 text-[11px] font-medium text-foreground/80 backdrop-blur-md transition-all hover:bg-foreground/15 hover:text-foreground md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
           >
             Assinar
           </Link>
           {/* Theme toggle — soft slide */}
-          {mounted && (
-            <button
-              data-tour="theme-toggle"
-              type="button"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="relative inline-flex h-7 w-12 items-center rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-md transition-all"
-              aria-label="Alternar tema"
+          <button
+            data-tour="theme-toggle"
+            type="button"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="relative inline-flex h-7 w-11 items-center rounded-full border border-foreground/10 bg-foreground/5 backdrop-blur-md transition-all md:w-12"
+            aria-label="Alternar tema"
+          >
+            <span
+              className={cn(
+                "absolute flex h-5 w-5 items-center justify-center rounded-full bg-foreground shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                isDark ? "left-[22px]" : "left-[3px]"
+              )}
             >
-              <span
-                className={cn(
-                  "absolute flex h-5 w-5 items-center justify-center rounded-full bg-foreground shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                  theme === "dark" ? "left-[22px]" : "left-[3px]"
-                )}
-              >
-                {theme === "dark" ? (
-                  <Moon className="h-3 w-3 text-neutral-800" />
-                ) : (
-                  <Monitor className="h-3 w-3 text-neutral-400" />
-                )}
-              </span>
-            </button>
-          )}
+              {isDark ? (
+                <Moon className="h-3 w-3 text-neutral-800" />
+              ) : (
+                <Monitor className="h-3 w-3 text-neutral-400" />
+              )}
+            </span>
+          </button>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1.5 text-xs font-medium text-foreground/50 backdrop-blur-md transition-all hover:border-foreground/20 hover:text-foreground/70"
+            className="inline-flex items-center gap-1 rounded-full border border-foreground/10 bg-foreground/5 px-2.5 py-1 text-[11px] font-medium text-foreground/50 backdrop-blur-md transition-all hover:border-foreground/20 hover:text-foreground/70 md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
           >
             <LogOut className="h-3.5 w-3.5" />
             Sair
@@ -301,17 +285,17 @@ export function FloatingNav() {
               alt="ORIGEM"
               width={128}
               height={128}
-              className="pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+              className="pointer-events-none h-auto w-[92px] drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] md:w-[128px]"
             />
           </button>
           {/* Label beneath logo */}
-          <span className="text-xs font-semibold tracking-[0.3em] text-foreground/35">
+          <span className="text-[10px] font-semibold tracking-[0.28em] text-foreground/35 md:text-xs md:tracking-[0.3em]">
             ORIGEM
           </span>
 
           {/* Dropdown */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-3 w-[calc(100vw-2rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-2xl border border-foreground/[0.08] bg-card/95 p-2.5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:w-[540px] sm:p-3">
+            <div className="absolute left-1/2 top-full mt-2 w-[calc(100vw-1rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-[24px] border border-foreground/[0.08] bg-card/95 p-2 shadow-2xl shadow-black/50 backdrop-blur-xl sm:mt-3 sm:w-[540px] sm:rounded-2xl sm:p-3">
               {/* Arrow */}
               <div className="absolute -top-1.5 left-1/2 hidden h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-foreground/[0.08] bg-card/95 sm:block" />
 
@@ -362,7 +346,7 @@ export function FloatingNav() {
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 shrink-0 text-foreground/20 transition-transform duration-200",
-                            expanded360 && "rotate-90"
+                            is360Expanded && "rotate-90"
                           )}
                         />
                         {groupActive && (
@@ -423,7 +407,7 @@ export function FloatingNav() {
 
               {/* 360º Sub-grid (expandable) */}
               <AnimatePresence>
-                {expanded360 && (
+                {is360Expanded && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}

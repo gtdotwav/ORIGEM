@@ -30,7 +30,7 @@ function TextNode({ data, id, selected }: NodeProps) {
     if (!nodeData.text && textareaRef.current) {
       textareaRef.current.focus();
     }
-  }, []);
+  }, [nodeData.text]);
 
   const handleBlur = () => {
     if (updateNode) {
@@ -41,22 +41,52 @@ function TextNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "group min-w-[200px] max-w-[400px] rounded-xl border transition-all duration-200",
+        "relative min-w-[200px] max-w-[400px] rounded-xl border transition-colors",
         selected
           ? "border-white/[0.16] bg-[oklch(0.11_0_0)] shadow-lg shadow-white/[0.02] ring-1 ring-white/[0.06]"
-          : "border-white/[0.06] bg-[oklch(0.09_0_0)] hover:border-white/[0.10]"
+          : "border-white/[0.06] bg-[oklch(0.09_0_0)]"
       )}
     >
       <Handle
         type="target"
         position={Position.Left}
-        className="!h-2 !w-2 !rounded-full !border-2 !border-white/15 !bg-white/[0.08] !transition-colors hover:!border-white/30"
+        className="!border-0 !bg-transparent"
+        style={{
+          top: 10,
+          left: 0,
+          right: "auto",
+          width: 22,
+          height: "calc(100% - 20px)",
+          transform: "none",
+          borderRadius: 16,
+          background: "transparent",
+        }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!h-2 !w-2 !rounded-full !border-2 !border-white/15 !bg-white/[0.08] !transition-colors hover:!border-white/30"
+        className="!border-0 !bg-transparent"
+        style={{
+          top: 10,
+          left: "auto",
+          right: 0,
+          width: 22,
+          height: "calc(100% - 20px)",
+          transform: "none",
+          borderRadius: 16,
+          background: "transparent",
+        }}
       />
+      <div className="pointer-events-none absolute inset-y-3 left-0 flex w-5 items-center justify-center">
+        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
+          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.22]" />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-y-3 right-0 flex w-5 items-center justify-center">
+        <div className="flex h-full w-px items-center justify-center bg-white/[0.08]">
+          <div className="h-1.5 w-1.5 rounded-full bg-white/[0.22]" />
+        </div>
+      </div>
 
       {/* Drag handle */}
       <div className="flex items-center gap-1 border-b border-white/[0.04] px-2 py-1.5">

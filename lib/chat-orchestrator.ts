@@ -21,6 +21,8 @@ import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
+import type { CalendarPromptContext } from "@/lib/chat/calendar-context";
 import { JOURNEY_STEPS } from "@/lib/journey";
 
 /** Read the user's configured provider/model from the ecosystem config store. */
@@ -32,6 +34,34 @@ function getConfiguredProviderModel(): { provider: ProviderName; model: string }
   return { provider: "baseten" as ProviderName, model: "moonshotai/Kimi-K2.5" };
 }
 
+function resolveSessionWorkspaceId(sessionId: string): string | undefined {
+  const session = useSessionStore
+    .getState()
+    .sessions.find((currentSession) => currentSession.id === sessionId);
+
+  if (typeof session?.workspaceId === "string" && session.workspaceId.length > 0) {
+    return session.workspaceId;
+  }
+
+  const metadataWorkspaceId = session?.metadata?.workspaceId;
+  if (typeof metadataWorkspaceId === "string" && metadataWorkspaceId.length > 0) {
+    return metadataWorkspaceId;
+  }
+
+  const legacySpaceId = session?.metadata?.spaceId;
+  if (typeof legacySpaceId === "string" && legacySpaceId.length > 0) {
+    const workspaceExists = useWorkspaceStore
+      .getState()
+      .workspaces.some((workspace) => workspace.id === legacySpaceId);
+
+    if (workspaceExists) {
+      return legacySpaceId;
+    }
+  }
+
+  return useWorkspaceStore.getState().activeWorkspaceId ?? undefined;
+}
+
 interface MetricSnapshot {
   contexts: number;
   projects: number;
@@ -41,6 +71,42 @@ interface MetricSnapshot {
 
 interface OrchestrationRunOptions {
   language?: RuntimeLanguage;
+  calendarContext?: CalendarPromptContext | null;
+}
+
+function buildEffectivePrompt(
+  prompt: string,
+  calendarContext?: CalendarPromptContext | null
+) {
+  if (!calendarContext) {
+    return prompt;
+  }
+
+  return `${prompt}\n\n${calendarContext.promptBlock}`;
+}
+
+function injectCalendarContextIntoHistory(
+  history: Array<{ role: "user" | "assistant" | "system"; content: string }>,
+  calendarContext?: CalendarPromptContext | null
+): Array<{ role: "user" | "assistant" | "system"; content: string }> {
+  if (!calendarContext) {
+    return history;
+  }
+
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    if (history[index].role !== "user") {
+      continue;
+    }
+
+    return [
+      ...history.slice(0, index),
+      { role: "system" as const, content: calendarContext.promptBlock },
+      history[index],
+      ...history.slice(index + 1),
+    ];
+  }
+
+  return [...history, { role: "system" as const, content: calendarContext.promptBlock }];
 }
 
 const AGENT_BLUEPRINTS: Record<
@@ -605,6 +671,7 @@ function buildAgentUserPrompt(
 }
 
 async function callAgentLLM(
+  sessionId: string,
   agent: AgentInstance,
   task: RuntimeTask,
   prompt: string,
@@ -631,6 +698,7 @@ async function callAgentLLM(
     const { callChatCompletion } = await import("@/lib/chat-api");
     const { ecosystemConfig, selectedTier } = useChatSettingsStore.getState();
     const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+    const workspaceId = resolveSessionWorkspaceId(sessionId);
 
     const result = await callChatCompletion({
       messages: [{ role: "user", content: userPrompt }],
@@ -639,6 +707,9 @@ async function callAgentLLM(
         : { tier: selectedTier }),
       systemPrompt,
       maxTokens: 2048,
+      sessionId,
+      agentId: agent.id,
+      ...(workspaceId ? { workspaceId } : {}),
     });
 
     return result.content;
@@ -840,6 +911,7 @@ export async function runChatOrchestration(
 
   const selectedLanguage =
     options?.language ?? runtimeStore.getSession(sessionId)?.language ?? "pt-BR";
+  const effectivePrompt = buildEffectivePrompt(prompt, options?.calendarContext);
 
   runtimeStore.setLanguage(sessionId, selectedLanguage);
   runtimeStore.setDistributionReady(sessionId, false);
@@ -848,7 +920,7 @@ export async function runChatOrchestration(
   pipelineStore.setStage("decomposing");
   pipelineStore.setProgress(15);
 
-  const decomposition = buildDecomposition(prompt);
+  const decomposition = buildDecomposition(effectivePrompt);
   decompositionStore.addDecomposition(decomposition);
   runtimeStore.markJourneyStepVisited(sessionId, "contexts");
   pipelineStore.addEvent({
@@ -938,9 +1010,10 @@ export async function runChatOrchestration(
     // Call the LLM for this agent's task
     const llmResponse = currentAgent
       ? await callAgentLLM(
+          sessionId,
           currentAgent,
           nextTask,
-          prompt,
+          effectivePrompt,
           selectedLanguage,
           agentOutputTexts
         )
@@ -1026,6 +1099,7 @@ export async function runChatOrchestration(
     const { callChatCompletion } = await import("@/lib/chat-api");
     const { ecosystemConfig, selectedTier } = useChatSettingsStore.getState();
     const hasManual = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
+    const workspaceId = resolveSessionWorkspaceId(sessionId);
 
     const langInstruction =
       selectedLanguage === "en-US"
@@ -1038,7 +1112,7 @@ export async function runChatOrchestration(
       messages: [
         {
           role: "user",
-          content: `Pedido original do usuario: ${prompt}\n\nResultados dos agentes:\n${agentOutputTexts.join("\n\n")}`,
+          content: `Pedido original do usuario: ${effectivePrompt}\n\nResultados dos agentes:\n${agentOutputTexts.join("\n\n")}`,
         },
       ],
       ...(hasManual
@@ -1046,6 +1120,8 @@ export async function runChatOrchestration(
         : { tier: selectedTier }),
       systemPrompt: `${ORIGEM_SYSTEM_PROMPT}\n\nADDITIONAL CONTEXT: You are now in aggregation mode. Synthesize the agent results into a final cohesive, clear, and actionable response. ${langInstruction}`,
       maxTokens: 4096,
+      sessionId,
+      ...(workspaceId ? { workspaceId } : {}),
     });
 
     finalResponse = aggregationResult.content;
@@ -1067,13 +1143,7 @@ export async function runChatOrchestration(
     );
   }
 
-  const metrics = getSessionMetricSnapshot(sessionId, decomposition.id, tasks);
   const finalRuntime = runtimeStore.getSession(sessionId);
-  const finalTasks =
-    finalRuntime?.tasks && finalRuntime.tasks.length > 0
-      ? finalRuntime.tasks
-      : tasks;
-  const noteCount = finalRuntime?.notes.length ?? 0;
   const nextJourneyStep =
     finalRuntime && finalRuntime.journeyCursor < JOURNEY_STEPS.length
       ? JOURNEY_STEPS[finalRuntime.journeyCursor]
@@ -1128,14 +1198,17 @@ export async function runChatOrchestration(
 /*  Simple chat mode — conversational response without full pipeline  */
 /* ------------------------------------------------------------------ */
 
-function generateSimpleResponse(_prompt: string): string {
+function generateSimpleResponse(): string {
   return `Nenhum provedor de IA configurado. Conecte sua API key em **Settings > Providers** para ativar o motor do ORIGEM.\n\nModelo recomendado: **Kimi K2.5** via Baseten.`;
 }
 
 export async function runSimpleChat(
   sessionId: string,
   prompt: string,
-  options?: { onStreamChunk?: (content: string) => void }
+  options?: {
+    onStreamChunk?: (content: string) => void;
+    calendarContext?: CalendarPromptContext | null;
+  }
 ): Promise<void> {
   const sessionStore = useSessionStore.getState();
   const runtimeStore = useRuntimeStore.getState();
@@ -1149,18 +1222,30 @@ export async function runSimpleChat(
   try {
     const { useChatSettingsStore } = await import("@/stores/chat-settings-store");
     const { selectedTier, getActiveCritics } = useChatSettingsStore.getState();
+    const workspaceId = resolveSessionWorkspaceId(sessionId);
 
-    const history = sessionStore.messages
+    const history: Array<{
+      role: "user" | "assistant" | "system";
+      content: string;
+    }> = sessionStore.messages
       .filter((m) => m.sessionId === sessionId)
+      .filter(
+        (m): m is typeof m & { role: "user" | "assistant" | "system" } =>
+          m.role === "user" || m.role === "assistant" || m.role === "system"
+      )
       .sort(
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       )
       .slice(-10)
       .map((m) => ({
-        role: m.role as "user" | "assistant" | "system",
+        role: m.role,
         content: m.content,
       }));
+    const contextualHistory = injectCalendarContextIntoHistory(
+      history,
+      options?.calendarContext
+    );
 
     const { ecosystemConfig } = useChatSettingsStore.getState();
     const hasManualSelection = ecosystemConfig.provider !== null && ecosystemConfig.model !== "";
@@ -1168,17 +1253,19 @@ export async function runSimpleChat(
     const { ORIGEM_SYSTEM_PROMPT } = await import("@/config/origem-prompt");
 
     const activeCritics = getActiveCritics();
-    const useStreaming = options?.onStreamChunk && activeCritics.length === 0;
+    const useStreaming =
+      options?.onStreamChunk && activeCritics.length === 0 && !workspaceId;
 
     if (useStreaming) {
       const { callChatStream } = await import("@/lib/chat-api");
       const streamResult = await callChatStream(
         {
-          messages: history,
+          messages: contextualHistory,
           ...(hasManualSelection
             ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
             : { tier: selectedTier }),
           systemPrompt: ORIGEM_SYSTEM_PROMPT,
+          sessionId,
         },
         options.onStreamChunk!
       );
@@ -1186,11 +1273,13 @@ export async function runSimpleChat(
     } else {
       const { callChatCompletion } = await import("@/lib/chat-api");
       const result = await callChatCompletion({
-        messages: history,
+        messages: contextualHistory,
         ...(hasManualSelection
           ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
           : { tier: selectedTier }),
         systemPrompt: ORIGEM_SYSTEM_PROMPT,
+        sessionId,
+        ...(workspaceId ? { workspaceId } : {}),
       });
       response = result.content;
     }
@@ -1217,7 +1306,7 @@ export async function runSimpleChat(
       }
     }
   } catch {
-    response = generateSimpleResponse(prompt);
+    response = generateSimpleResponse();
   }
 
   sessionStore.addMessage(createMessage(sessionId, "assistant", response, metadata));
