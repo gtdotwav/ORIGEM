@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, Layers, Plus } from "lucide-react";
+import { Check, ChevronDown, Layers, Plus, ArrowUpRight, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -21,6 +21,21 @@ export function WorkspaceSwitcher() {
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const activeWorkspaces = workspaces.filter((w) => w.status === "active");
+  const activeWorkspaceColors = activeWorkspace
+    ? WORKSPACE_COLORS[activeWorkspace.color]
+    : null;
+  const ActiveWorkspaceIcon = activeWorkspace
+    ? WORKSPACE_ICONS[activeWorkspace.icon]
+    : Layers;
+  const subtitle = useMemo(() => {
+    if (!activeWorkspace) {
+      return "Explorando todos os workspaces";
+    }
+
+    return activeWorkspace.description?.trim().length
+      ? activeWorkspace.description
+      : "Filtro ativo para projetos, sessoes e feed";
+  }, [activeWorkspace]);
 
   if (activeWorkspaces.length === 0) return null;
 
@@ -29,35 +44,80 @@ export function WorkspaceSwitcher() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] px-2.5 py-1.5 text-xs text-foreground/50 transition-all hover:border-foreground/[0.12] hover:text-foreground/70"
+          className="group flex min-w-[250px] max-w-[320px] items-center gap-3 rounded-2xl border border-foreground/[0.08] bg-card/70 px-3 py-2.5 text-left text-foreground/60 shadow-[0_12px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all hover:border-foreground/[0.14] hover:bg-card/85 hover:text-foreground/75"
         >
-          {activeWorkspace ? (
-            <>
+          <div
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-foreground/[0.03] transition-all",
+              activeWorkspaceColors
+                ? cn(activeWorkspaceColors.border, activeWorkspaceColors.bg)
+                : "border-foreground/[0.08]"
+            )}
+          >
+            <ActiveWorkspaceIcon
+              className={cn(
+                "h-4 w-4",
+                activeWorkspaceColors ? activeWorkspaceColors.text : "text-foreground/45"
+              )}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-foreground/28">
+                {activeWorkspace ? "Workspace ativo" : "Escopo geral"}
+              </span>
               <span
                 className={cn(
-                  "h-2 w-2 rounded-full",
-                  WORKSPACE_COLORS[activeWorkspace.color].bg,
-                  WORKSPACE_COLORS[activeWorkspace.color].border,
-                  "border"
+                  "h-1.5 w-1.5 rounded-full",
+                  activeWorkspaceColors?.dot ?? "bg-foreground/30"
                 )}
               />
-              <span className="max-w-[100px] truncate">
-                {activeWorkspace.name}
+            </div>
+            <div className="mt-0.5 flex items-center gap-2">
+              <span className="truncate text-sm font-semibold text-foreground/88">
+                {activeWorkspace ? activeWorkspace.name : "Todos os workspaces"}
               </span>
-            </>
-          ) : (
-            <>
-              <Layers className="h-3 w-3" />
-              <span>Todos</span>
-            </>
-          )}
-          <ChevronDown className="h-3 w-3 opacity-50" />
+              {activeWorkspace ? (
+                <span className="rounded-full border border-foreground/[0.08] bg-foreground/[0.03] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.18em] text-foreground/35">
+                  filtro
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-0.5 truncate text-[11px] text-foreground/38">{subtitle}</p>
+          </div>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-40 transition-transform group-data-[state=open]:rotate-180" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-52 border-foreground/[0.08] bg-card/95 p-1.5 backdrop-blur-xl"
+        sideOffset={10}
+        className="w-[320px] border-foreground/[0.08] bg-card/95 p-2 backdrop-blur-xl"
       >
+        <div className="mb-2 flex items-start justify-between gap-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] px-3 py-2.5">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-foreground/28">
+              Contexto
+            </p>
+            <p className="mt-1 text-sm font-semibold text-foreground/86">
+              {activeWorkspace ? activeWorkspace.name : "Todos os workspaces"}
+            </p>
+            <p className="mt-0.5 text-[11px] text-foreground/38">{subtitle}</p>
+          </div>
+          {activeWorkspace ? (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveWorkspace(null);
+                setOpen(false);
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-foreground/[0.06] bg-foreground/[0.03] text-foreground/40 transition-colors hover:border-foreground/[0.12] hover:text-foreground/72"
+              title="Limpar filtro"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
+        </div>
+
         <button
           type="button"
           onClick={() => {
@@ -65,12 +125,19 @@ export function WorkspaceSwitcher() {
             setOpen(false);
           }}
           className={cn(
-            "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-foreground/[0.06]",
+            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs transition-all hover:bg-foreground/[0.06]",
             !activeWorkspaceId ? "text-foreground/90" : "text-foreground/50"
           )}
         >
-          <Layers className="h-3.5 w-3.5" />
-          <span className="flex-1 text-left">Todos os workspaces</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.03]">
+            <Layers className="h-3.5 w-3.5" />
+          </div>
+          <div className="min-w-0 flex-1 text-left">
+            <p className="truncate text-[12px] font-medium">Todos os workspaces</p>
+            <p className="truncate text-[10px] text-foreground/32">
+              Remove o filtro e reabre a visao completa
+            </p>
+          </div>
           {!activeWorkspaceId && (
             <Check className="h-3.5 w-3.5 text-neon-cyan" />
           )}
@@ -92,12 +159,25 @@ export function WorkspaceSwitcher() {
                 setOpen(false);
               }}
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-all hover:bg-foreground/[0.06]",
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs transition-all hover:bg-foreground/[0.06]",
                 isActive ? "text-foreground/90" : "text-foreground/50"
               )}
             >
-              <Icon className={cn("h-3.5 w-3.5", colors.text)} />
-              <span className="flex-1 truncate text-left">{ws.name}</span>
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+                  colors.border,
+                  colors.bg
+                )}
+              >
+                <Icon className={cn("h-3.5 w-3.5", colors.text)} />
+              </div>
+              <div className="min-w-0 flex-1 text-left">
+                <p className="truncate text-[12px] font-medium">{ws.name}</p>
+                <p className="truncate text-[10px] text-foreground/32">
+                  {ws.description?.trim() || "Workspace pronto para organizar sessoes e projetos"}
+                </p>
+              </div>
               {isActive && (
                 <Check className="h-3.5 w-3.5 text-neon-cyan" />
               )}
@@ -113,10 +193,18 @@ export function WorkspaceSwitcher() {
             router.push("/dashboard/workspaces");
             setOpen(false);
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/60"
         >
-          <Plus className="h-3.5 w-3.5" />
-          <span>Gerenciar workspaces</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-foreground/[0.08] bg-foreground/[0.03]">
+            <Plus className="h-3.5 w-3.5" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-[12px] font-medium">Gerenciar workspaces</p>
+            <p className="text-[10px] text-foreground/32">
+              Criar, editar e abrir a visao completa
+            </p>
+          </div>
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </button>
       </PopoverContent>
     </Popover>
