@@ -98,7 +98,7 @@ function PasswordField({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className="h-11 rounded-xl border-white/10 bg-white/[0.03] pr-11 text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
+          className="h-11 rounded-[14px] border-white/10 bg-black/18 pr-11 text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
         />
         <button
           type="button"
@@ -148,20 +148,20 @@ export function LoginShell({
   );
 
   const title = !authReady
-    ? "Configurar autenticacao"
+    ? "Ativar acesso seguro"
     : bootstrap
-    ? "Crie o primeiro acesso"
+    ? "Criar a conta inicial"
     : mode === "sign-up"
     ? "Criar conta"
     : "Entrar";
 
   const subtitle = !authReady
-    ? "Defina o segredo obrigatorio para habilitar sessoes seguras."
+    ? "Falta apenas o segredo de autenticacao para liberar o login do ambiente."
     : bootstrap
-    ? "Este primeiro usuario sera criado como owner do ambiente."
+    ? "O primeiro usuario entra como owner e inicializa o ambiente."
     : mode === "sign-up"
-    ? "Cadastre uma conta para acessar o ambiente."
-    : "Use sua conta para continuar no ORIGEM.";
+    ? "Abra seu acesso com nome, email e senha."
+    : "Use email e senha para continuar no ORIGEM.";
 
   async function completeCredentialsSignIn(email: string, password: string) {
     const result = await signIn("credentials", {
@@ -258,30 +258,31 @@ export function LoginShell({
 
   if (!authReady) {
     return (
-      <div className="rounded-[28px] border border-white/10 bg-white/[0.035] p-5 shadow-[0_28px_120px_rgba(0,0,0,0.38)] backdrop-blur-2xl sm:p-7">
+      <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-5 shadow-[0_32px_120px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-7">
+        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/42">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/40">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Setup
+            Setup obrigatorio
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-            <p className="text-sm leading-6 text-white/52">{subtitle}</p>
+          <div className="space-y-2.5">
+            <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-white">{title}</h1>
+            <p className="text-sm leading-6 text-white/50">{subtitle}</p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-white/36">
-              Variavel obrigatoria
+          <div className="rounded-[22px] border border-white/10 bg-black/28 p-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">
+              Variavel necessaria
             </p>
-            <code className="mt-3 block rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[13px] text-white/70">
+            <code className="mt-3 block rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-[13px] text-white/72">
               AUTH_SECRET=openssl rand -base64 32
             </code>
           </div>
 
           <p className="text-xs leading-6 text-white/38">
-            Depois de definir o secret, email e senha ficam disponiveis
-            imediatamente. OAuth continua opcional.
+            Depois disso, o acesso por email e senha fica disponivel imediatamente.
+            Google e GitHub continuam opcionais.
           </p>
         </div>
       </div>
@@ -289,22 +290,24 @@ export function LoginShell({
   }
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-black/42 p-5 shadow-[0_28px_120px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-7">
+    <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-5 shadow-[0_32px_120px_rgba(0,0,0,0.46)] backdrop-blur-2xl sm:p-7">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+      <div aria-hidden className="absolute inset-x-10 top-0 h-20 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_72%)] blur-3xl" />
       <div className="space-y-5">
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/42">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/40">
             {bootstrap ? <UserRoundPlus className="h-3.5 w-3.5" /> : <LockKeyhole className="h-3.5 w-3.5" />}
-            {bootstrap ? "Bootstrap" : "Acesso"}
+            {bootstrap ? "Conta inicial" : "Acesso"}
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-            <p className="text-sm leading-6 text-white/52">{subtitle}</p>
+          <div className="space-y-2.5">
+            <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-white">{title}</h1>
+            <p className="text-sm leading-6 text-white/50">{subtitle}</p>
           </div>
         </div>
 
         {error ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/72">
+          <div className="rounded-[20px] border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/72">
             {error}
           </div>
         ) : null}
@@ -318,7 +321,7 @@ export function LoginShell({
             }}
             className="space-y-5"
           >
-            <TabsList className="grid h-11 w-full grid-cols-2 rounded-2xl border border-white/10 bg-white/[0.02] p-1">
+            <TabsList className="grid h-11 w-full grid-cols-2 rounded-[18px] border border-white/10 bg-black/20 p-1">
               <TabsTrigger
                 value="sign-in"
                 className="rounded-xl border-0 text-sm text-white/48 data-[state=active]:bg-white/[0.06] data-[state=active]:text-white"
@@ -347,8 +350,8 @@ export function LoginShell({
                       setSignInForm((current) => ({ ...current, email: event.target.value }))
                     }
                     autoComplete="email"
-                    placeholder="voce@empresa.com"
-                    className="h-11 rounded-xl border-white/10 bg-white/[0.03] text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
+                  placeholder="voce@empresa.com"
+                    className="h-11 rounded-[14px] border-white/10 bg-black/18 text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
                   />
                 </div>
 
@@ -366,7 +369,7 @@ export function LoginShell({
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="h-11 w-full rounded-xl border border-white/12 bg-white text-black hover:bg-white/92"
+                  className="h-11 w-full rounded-[14px] border border-white/12 bg-white text-black hover:bg-white/92"
                 >
                   {pendingAction === "sign-in" ? <Spinner className="h-4 w-4 text-black" /> : null}
                   Continuar
@@ -389,7 +392,7 @@ export function LoginShell({
                     }
                     autoComplete="name"
                     placeholder="Seu nome"
-                    className="h-11 rounded-xl border-white/10 bg-white/[0.03] text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
+                    className="h-11 rounded-[14px] border-white/10 bg-black/18 text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
                   />
                 </div>
 
@@ -406,7 +409,7 @@ export function LoginShell({
                     }
                     autoComplete="email"
                     placeholder="voce@empresa.com"
-                    className="h-11 rounded-xl border-white/10 bg-white/[0.03] text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
+                    className="h-11 rounded-[14px] border-white/10 bg-black/18 text-sm text-white placeholder:text-white/24 focus-visible:border-white/18 focus-visible:ring-white/8"
                   />
                 </div>
 
@@ -432,14 +435,14 @@ export function LoginShell({
                   autoComplete="new-password"
                 />
 
-                <p className="rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-[12px] leading-6 text-white/42">
+                <p className="rounded-[20px] border border-white/8 bg-white/[0.02] px-4 py-3 text-[12px] leading-6 text-white/42">
                   A senha precisa ter 10+ caracteres, letra maiuscula, minuscula e numero.
                 </p>
 
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="h-11 w-full rounded-xl border border-white/12 bg-white text-black hover:bg-white/92"
+                  className="h-11 w-full rounded-[14px] border border-white/12 bg-white text-black hover:bg-white/92"
                 >
                   {pendingAction === "sign-up" ? <Spinner className="h-4 w-4 text-black" /> : null}
                   Criar conta
@@ -478,14 +481,14 @@ export function LoginShell({
               autoComplete="current-password"
             />
 
-            <p className="rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-[12px] leading-6 text-white/42">
+            <p className="rounded-[20px] border border-white/8 bg-white/[0.02] px-4 py-3 text-[12px] leading-6 text-white/42">
               Cadastro fechado neste ambiente. Apenas contas existentes podem entrar.
             </p>
 
             <Button
               type="submit"
               disabled={isPending}
-              className="h-11 w-full rounded-xl border border-white/12 bg-white text-black hover:bg-white/92"
+              className="h-11 w-full rounded-[14px] border border-white/12 bg-white text-black hover:bg-white/92"
             >
               {pendingAction === "sign-in" ? <Spinner className="h-4 w-4 text-black" /> : null}
               Entrar
@@ -512,7 +515,7 @@ export function LoginShell({
                   variant="outline"
                   disabled={isPending}
                   onClick={() => handleOAuth(provider)}
-                  className="h-11 rounded-xl border-white/10 bg-white/[0.02] text-white/82 hover:bg-white/[0.05] hover:text-white"
+                  className="h-11 rounded-[14px] border-white/10 bg-white/[0.02] text-white/82 hover:bg-white/[0.05] hover:text-white"
                 >
                   {pendingAction === provider ? (
                     <Spinner className="h-4 w-4" />

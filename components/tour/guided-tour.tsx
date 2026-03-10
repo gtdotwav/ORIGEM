@@ -411,7 +411,7 @@ function useTargetRect(selector: string | null) {
   useEffect(() => {
     if (!selector) {
       const frame = window.requestAnimationFrame(() => {
-        setRect(null);
+        setRect((current) => (current === null ? current : null));
       });
 
       return () => window.cancelAnimationFrame(frame);
@@ -423,25 +423,56 @@ function useTargetRect(selector: string | null) {
 
     let frame = 0;
     let resizeObserver: ResizeObserver | null = null;
+    let observedElement: Element | null = null;
+
+    const updateRect = (nextRect: SpotlightRect | null) => {
+      setRect((current) => {
+        if (
+          current &&
+          nextRect &&
+          current.top === nextRect.top &&
+          current.left === nextRect.left &&
+          current.width === nextRect.width &&
+          current.height === nextRect.height
+        ) {
+          return current;
+        }
+
+        if (current === null && nextRect === null) {
+          return current;
+        }
+
+        return nextRect;
+      });
+    };
+
+    const bindResizeObserver = (element: Element | null) => {
+      if (observedElement === element) {
+        return;
+      }
+
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+      observedElement = element;
+
+      if (element && "ResizeObserver" in window) {
+        resizeObserver = new ResizeObserver(() => {
+          window.requestAnimationFrame(updateNow);
+        });
+        resizeObserver.observe(element);
+      }
+    };
 
     const updateNow = () => {
       const el = document.querySelector(selector);
       if (el) {
         const r = el.getBoundingClientRect();
-        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+        updateRect({ top: r.top, left: r.left, width: r.width, height: r.height });
       } else {
-        setRect(null);
+        updateRect(null);
       }
 
-      resizeObserver?.disconnect();
-      resizeObserver = null;
-
-      if (el && "ResizeObserver" in window) {
-        resizeObserver = new ResizeObserver(() => {
-          window.requestAnimationFrame(updateNow);
-        });
-        resizeObserver.observe(el);
-      }
+      bindResizeObserver(el);
     };
 
     const scheduleUpdate = () => {
@@ -453,7 +484,6 @@ function useTargetRect(selector: string | null) {
     observer.observe(document.body, {
       childList: true,
       subtree: true,
-      attributes: true,
     });
 
     scheduleUpdate();
