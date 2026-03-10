@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
@@ -11,7 +17,11 @@ import {
   MessageSquare,
   ImageIcon,
   Code2,
+  CalendarDays,
   LayoutGrid,
+  Workflow,
+  Palette,
+  Bot,
   MessageCircle,
   Navigation,
   PanelLeft,
@@ -22,6 +32,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTourStore, type TourContextId } from "@/stores/tour-store";
 import { cn } from "@/lib/utils";
+import { FlippingCard } from "@/components/ui/flipping-card";
 
 /* ─── Tour step definitions ─── */
 
@@ -76,18 +87,7 @@ const START_PATHS: StartPath[] = [
     subtitle: "Conversa inteligente",
     description: "Converse com multiplas IAs orquestradas. Pergunte, crie, analise — o ORIGEM entende o contexto e gera respostas profundas.",
     route: "/dashboard",
-    ctaLabel: "Abrir chat",
-  },
-  {
-    id: "workspaces",
-    icon: LayoutGrid,
-    iconColor: "text-neon-orange",
-    iconBg: "bg-neon-orange/10",
-    title: "Workspaces",
-    subtitle: "Estruture seu ambiente",
-    description: "Crie um workspace para separar projetos, sessoes, conectores e contexto operacional.",
-    route: "/dashboard/workspaces",
-    ctaLabel: "Ir para workspaces",
+    ctaLabel: "Iniciar conversa",
   },
   {
     id: "spaces",
@@ -95,8 +95,8 @@ const START_PATHS: StartPath[] = [
     iconColor: "text-neon-purple",
     iconBg: "bg-neon-purple/10",
     title: "Spaces",
-    subtitle: "Canvas visual",
-    description: "Use o canvas para gerar imagens, conectar cards e iterar visualmente em um fluxo mais livre.",
+    subtitle: "Geracao de imagens",
+    description: "Canvas visual com multiplos modelos de imagem. Gere, compare e itere com Nano Banana Pro, DALL-E 3, Flux, Midjourney e mais.",
     route: "/dashboard/spaces",
     ctaLabel: "Abrir Spaces",
   },
@@ -106,10 +106,65 @@ const START_PATHS: StartPath[] = [
     iconColor: "text-neon-green",
     iconBg: "bg-neon-green/10",
     title: "Code IDE",
-    subtitle: "Editor assistido",
-    description: "Entre no ambiente de codigo com chat, arquivos e preview quando a tarefa exigir execucao tecnica.",
+    subtitle: "Editor assistido por IA",
+    description: "IDE completa com preview ao vivo, tabs, terminal e assistencia de IA. Crie projetos web diretamente no navegador.",
     route: "/dashboard/code",
     ctaLabel: "Abrir IDE",
+  },
+  {
+    id: "calendar",
+    icon: CalendarDays,
+    iconColor: "text-neon-orange",
+    iconBg: "bg-neon-orange/10",
+    title: "Calendario",
+    subtitle: "Agenda inteligente",
+    description: "Planeje com IA. Use prompt natural para agendar, visualize em grade, lista ou kanban. Atribua tarefas a agentes.",
+    route: "/dashboard/calendar",
+    ctaLabel: "Ver calendario",
+  },
+  {
+    id: "workspaces",
+    icon: LayoutGrid,
+    iconColor: "text-neon-pink",
+    iconBg: "bg-neon-pink/10",
+    title: "Workspaces",
+    subtitle: "Projetos organizados",
+    description: "Organize tudo em workspaces com cores, filtros e projetos. Cada workspace isola contexto para manter o foco.",
+    route: "/dashboard/workspaces",
+    ctaLabel: "Criar workspace",
+  },
+  {
+    id: "flows",
+    icon: Workflow,
+    iconColor: "text-neon-cyan",
+    iconBg: "bg-neon-cyan/10",
+    title: "Flows",
+    subtitle: "Automacao visual",
+    description: "Monte pipelines de IA conectando blocos visuais. Automatize processos criativos e de analise com drag-and-drop.",
+    route: "/dashboard/flows",
+    ctaLabel: "Criar flow",
+  },
+  {
+    id: "design",
+    icon: Palette,
+    iconColor: "text-neon-purple",
+    iconBg: "bg-neon-purple/10",
+    title: "UX/UI",
+    subtitle: "Criacao visual",
+    description: "Ferramentas de UX/UI assistidas por IA. Gere layouts, paletas, tipografia e componentes visuais automaticamente.",
+    route: "/dashboard/uxui",
+    ctaLabel: "Explorar UX/UI",
+  },
+  {
+    id: "agents",
+    icon: Bot,
+    iconColor: "text-neon-green",
+    iconBg: "bg-neon-green/10",
+    title: "Agentes",
+    subtitle: "IA especializada",
+    description: "6 agentes com personalidades unicas: Planner, Builder, Researcher, Analyst, Designer e Critic. Cada um domina uma area.",
+    route: "/dashboard/agents",
+    ctaLabel: "Conhecer agentes",
   },
 ];
 
@@ -177,7 +232,7 @@ const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
       type: "modal",
       title: "Pronto para criar!",
       description:
-        "Escolha por onde comecar. Cada caminho abaixo leva direto para a area certa do produto.",
+        "Escolha por onde comecar. Passe o mouse nos cards para descobrir mais sobre cada caminho.",
     },
   ],
   code: [
@@ -538,33 +593,31 @@ function ProgressDots({
   );
 }
 
-function PathCard({ path, onNavigate }: { path: StartPath; onNavigate: (route: string) => void }) {
+function PathCardFront({ path }: { path: StartPath }) {
   const Icon = path.icon;
 
   return (
-    <button
-      type="button"
-      onClick={() => onNavigate(path.route)}
-      className="group flex h-full w-full flex-col rounded-[24px] border border-foreground/[0.08] bg-card/78 p-4 text-left shadow-lg shadow-black/30 transition-all hover:border-foreground/[0.14] hover:bg-card/92 hover:-translate-y-0.5"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl border border-white/8", path.iconBg)}>
-          <Icon className={cn("h-5 w-5", path.iconColor)} />
-        </div>
-        <ArrowRight className="mt-1 h-4 w-4 text-foreground/24 transition-colors group-hover:text-foreground/55" />
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
+      <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl", path.iconBg)}>
+        <Icon className={cn("h-6 w-6", path.iconColor)} />
       </div>
+      <h4 className="text-[13px] font-bold text-foreground/90">{path.title}</h4>
+      <p className="text-[10px] font-medium text-foreground/35">{path.subtitle}</p>
+    </div>
+  );
+}
 
-      <div className="mt-4 space-y-1.5">
-        <h4 className="text-sm font-semibold text-foreground/90">{path.title}</h4>
-        <p className="text-[11px] font-medium text-foreground/34">{path.subtitle}</p>
-        <p className="pt-1 text-[11px] leading-6 text-foreground/48">
-          {path.description}
-        </p>
-      </div>
-
-      <span
+function PathCardBack({ path, onNavigate }: { path: StartPath; onNavigate: (route: string) => void }) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
+      <p className="text-center text-[10px] leading-relaxed text-foreground/50">
+        {path.description}
+      </p>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onNavigate(path.route); }}
         className={cn(
-          "mt-4 inline-flex w-fit items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition-all hover:shadow-sm",
+          "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition-all hover:shadow-sm",
           path.iconColor,
           path.iconColor.replace("text-", "border-") + "/25",
           path.iconBg
@@ -572,8 +625,8 @@ function PathCard({ path, onNavigate }: { path: StartPath; onNavigate: (route: s
       >
         {path.ctaLabel}
         <ArrowRight className="h-3 w-3" />
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }
 
@@ -594,6 +647,11 @@ export function GuidedTour() {
   const skipTour = useTourStore((s) => s.skipTour);
   const completeTour = useTourStore((s) => s.completeTour);
 
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const cardRef = useRef<HTMLDivElement>(null);
   const routeContext = getTourContext(pathname);
   const contextId = isActive ? activeContext ?? routeContext : routeContext;
@@ -605,7 +663,7 @@ export function GuidedTour() {
     : true;
 
   useEffect(() => {
-    if (!routeContext || hasCompletedContext || isActive || steps.length === 0) {
+    if (!mounted || !routeContext || hasCompletedContext || isActive || steps.length === 0) {
       return;
     }
 
@@ -613,7 +671,7 @@ export function GuidedTour() {
     const timer = window.setTimeout(() => startTour(routeContext), delay);
 
     return () => window.clearTimeout(timer);
-  }, [hasCompletedContext, isActive, routeContext, startTour, steps.length]);
+  }, [hasCompletedContext, isActive, mounted, routeContext, startTour, steps.length]);
 
   const rawStep = steps[currentStep] as TourStep | undefined;
 
@@ -709,7 +767,7 @@ export function GuidedTour() {
     return () => window.clearTimeout(timer);
   }, [completeTour, currentStep, isActive, nextStep, spotlightStep, steps.length, targetRect]);
 
-  if (!routeContext || !isActive || !step) return null;
+  if (!mounted || !routeContext || !isActive || !step) return null;
 
   const spotlightPad = 8;
   const isCompletion = step.id === "completion";
@@ -806,9 +864,9 @@ export function GuidedTour() {
                 {step.description}
               </motion.p>
 
-              {/* Primary paths */}
+              {/* Flipping cards grid */}
               <motion.div
-                className="grid w-full max-w-4xl gap-3 sm:grid-cols-2"
+                className="flex max-w-5xl flex-wrap justify-center gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
@@ -820,7 +878,13 @@ export function GuidedTour() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ delay: 0.5 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <PathCard path={path} onNavigate={handleNavigate} />
+                    <FlippingCard
+                      width={180}
+                      height={160}
+                      className="!border-foreground/[0.08] !bg-card !shadow-lg !shadow-black/30 dark:!bg-card"
+                      frontContent={<PathCardFront path={path} />}
+                      backContent={<PathCardBack path={path} onNavigate={handleNavigate} />}
+                    />
                   </motion.div>
                 ))}
               </motion.div>
