@@ -14,6 +14,8 @@ export interface FeedItem {
   tags: string[];
   publishedAt: string;
   createdAt: string;
+  relevance?: number;
+  matchedTerms?: string[];
 }
 
 export interface FeedInteraction {
@@ -23,4 +25,22 @@ export interface FeedInteraction {
   connectionId?: string;
   contextRef?: string;
   createdAt: string;
+}
+
+export type FeedSearchMode = "manual" | "workspace" | "default";
+
+export interface FeedSearchContext {
+  mode: FeedSearchMode;
+  label: string | null;
+  reason: string | null;
+  topics: string[];
+  workspaceId?: string;
+  workspaceName?: string;
+}
+
+export interface FeedSearchResponse {
+  items: FeedItem[];
+  resolvedQuery: string;
+  fetchedAt: string;
+  context: FeedSearchContext;
 }

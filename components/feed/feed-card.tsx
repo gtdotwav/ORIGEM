@@ -105,9 +105,20 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="mb-1.5 text-[15px] font-semibold leading-snug text-foreground/90">
-        {item.title}
-      </h3>
+      {item.sourceUrl ? (
+        <a
+          href={item.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mb-1.5 block text-[15px] font-semibold leading-snug text-foreground/90 transition-colors hover:text-neon-cyan/80"
+        >
+          {item.title}
+        </a>
+      ) : (
+        <h3 className="mb-1.5 text-[15px] font-semibold leading-snug text-foreground/90">
+          {item.title}
+        </h3>
+      )}
 
       {/* Content */}
       <p
@@ -116,9 +127,9 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
           !expanded && "line-clamp-3"
         )}
       >
-        {item.content}
+        {item.summary ?? item.content}
       </p>
-      {item.content.length > 200 && (
+      {(item.summary ?? item.content).length > 200 && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
@@ -140,9 +151,18 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
         </div>
         <span className="text-xs text-foreground/50">{item.author}</span>
         <span className="text-foreground/15">·</span>
-        <span className="text-xs text-foreground/30">{item.source}</span>
-        {item.sourceUrl && (
-          <ExternalLink className="h-3 w-3 text-foreground/20 opacity-0 transition-opacity group-hover:opacity-100" />
+        {item.sourceUrl ? (
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-foreground/30 transition-colors hover:text-foreground/55"
+          >
+            {item.source}
+            <ExternalLink className="h-3 w-3 text-foreground/20 opacity-0 transition-opacity group-hover:opacity-100" />
+          </a>
+        ) : (
+          <span className="text-xs text-foreground/30">{item.source}</span>
         )}
       </div>
 
@@ -159,6 +179,19 @@ export function FeedCard({ item, onShare }: FeedCardProps) {
           ))}
         </div>
       )}
+
+      {item.matchedTerms && item.matchedTerms.length > 0 ? (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {item.matchedTerms.slice(0, 3).map((term) => (
+            <span
+              key={term}
+              className="rounded-full border border-neon-cyan/20 bg-neon-cyan/[0.06] px-2 py-0.5 text-[10px] text-neon-cyan/75"
+            >
+              Relacionado: {term}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {/* Action bar */}
       <div className="flex items-center gap-1 border-t border-foreground/[0.05] pt-3">

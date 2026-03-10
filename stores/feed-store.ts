@@ -1,16 +1,32 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
-import type { FeedItem, FeedItemType, FeedInteraction } from "@/types/feed";
-import { generateSeedFeedItems } from "@/lib/feed-seed";
+import type {
+  FeedItem,
+  FeedItemType,
+  FeedInteraction,
+  FeedSearchContext,
+} from "@/types/feed";
 
 interface FeedState {
   items: FeedItem[];
   interactions: FeedInteraction[];
   searchQuery: string;
   activeFilter: FeedItemType | "all";
+  isLoading: boolean;
+  error: string | null;
+  resolvedQuery: string;
+  lastFetchedAt: string | null;
+  context: FeedSearchContext;
 
-  seedFeedData: () => void;
+  setLiveResults: (payload: {
+    items: FeedItem[];
+    resolvedQuery: string;
+    fetchedAt: string;
+    context: FeedSearchContext;
+  }) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
   toggleLike: (feedItemId: string) => void;
   addRepost: (feedItemId: string) => void;
   addToContext: (feedItemId: string, contextRef: string) => void;
@@ -19,30 +35,55 @@ interface FeedState {
   setActiveFilter: (filter: FeedItemType | "all") => void;
 }
 
+const EMPTY_CONTEXT: FeedSearchContext = {
+  mode: "default",
+  label: null,
+  reason: null,
+  topics: [],
+};
+
 export const useFeedStore = create<FeedState>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         items: [],
         interactions: [],
         searchQuery: "",
         activeFilter: "all",
+        isLoading: false,
+        error: null,
+        resolvedQuery: "",
+        lastFetchedAt: null,
+        context: EMPTY_CONTEXT,
 
-        seedFeedData: () => {
-          if (get().items.length > 0) return;
-          set({ items: generateSeedFeedItems() });
-        },
+        setLiveResults: ({ items, resolvedQuery, fetchedAt, context }) =>
+          set({
+            items,
+            resolvedQuery,
+            lastFetchedAt: fetchedAt,
+            context,
+            error: null,
+            isLoading: false,
+          }),
+
+        setLoading: (loading) => set({ isLoading: loading }),
+        setError: (error) => set({ error, isLoading: false }),
 
         toggleLike: (feedItemId) =>
-          set((s) => {
-            const existing = s.interactions.find(
-              (i) => i.feedItemId === feedItemId && i.type === "like"
+          set((state) => {
+            const existing = state.interactions.find(
+              (interaction) =>
+                interaction.feedItemId === feedItemId &&
+                interaction.type === "like"
             );
+
             return {
               interactions: existing
-                ? s.interactions.filter((i) => i.id !== existing.id)
+                ? state.interactions.filter(
+                    (interaction) => interaction.id !== existing.id
+                  )
                 : [
-                    ...s.interactions,
+                    ...state.interactions,
                     {
                       id: nanoid(),
                       feedItemId,
@@ -54,9 +95,9 @@ export const useFeedStore = create<FeedState>()(
           }),
 
         addRepost: (feedItemId) =>
-          set((s) => ({
+          set((state) => ({
             interactions: [
-              ...s.interactions,
+              ...state.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -67,9 +108,9 @@ export const useFeedStore = create<FeedState>()(
           })),
 
         addToContext: (feedItemId, contextRef) =>
-          set((s) => ({
+          set((state) => ({
             interactions: [
-              ...s.interactions,
+              ...state.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -81,9 +122,9 @@ export const useFeedStore = create<FeedState>()(
           })),
 
         shareWith: (feedItemId, connectionId) =>
-          set((s) => ({
+          set((state) => ({
             interactions: [
-              ...s.interactions,
+              ...state.interactions,
               {
                 id: nanoid(),
                 feedItemId,
@@ -100,8 +141,9 @@ export const useFeedStore = create<FeedState>()(
       {
         name: "origem-feed",
         partialize: (state) => ({
-          items: state.items,
           interactions: state.interactions,
+          searchQuery: state.searchQuery,
+          activeFilter: state.activeFilter,
         }),
       }
     ),
@@ -109,54 +151,12 @@ export const useFeedStore = create<FeedState>()(
   )
 );
 
-/** Check if a feed item is liked */
-export function isLiked(feedItemId: string): boolean {
-  return useFeedStore
-    .getState()
-    .interactions.some((i) => i.feedItemId === feedItemId && i.type === "like");
-}
-
-/** Get interaction counts for a feed item */
-export function getInteractionCounts(feedItemId: string) {
-  const interactions = useFeedStore.getState().interactions;
-  return {
-    likes: interactions.filter((i) => i.feedItemId === feedItemId && i.type === "like").length,
-    reposts: interactions.filter((i) => i.feedItemId === feedItemId && i.type === "repost").length,
-    shares: interactions.filter((i) => i.feedItemId === feedItemId && i.type === "share").length,
-    contexts: interactions.filter((i) => i.feedItemId === feedItemId && i.type === "context").length,
-  };
-}
-
-/** Filter items based on current query and filter */
-export function getFilteredItems(): FeedItem[] {
-  const { items, searchQuery, activeFilter } = useFeedStore.getState();
-  let filtered = items;
-
-  if (activeFilter !== "all") {
-    filtered = filtered.filter((item) => item.type === activeFilter);
+export function getSuggestions(query: string) {
+  if (!query || query.length < 2) {
+    return [];
   }
 
-  if (searchQuery.trim()) {
-    const q = searchQuery.toLowerCase();
-    filtered = filtered.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.content.toLowerCase().includes(q) ||
-        item.author.toLowerCase().includes(q) ||
-        item.source.toLowerCase().includes(q) ||
-        item.tags.some((tag) => tag.toLowerCase().includes(q))
-    );
-  }
-
-  return filtered.sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
-}
-
-/** Get search suggestions based on partial query */
-export function getSuggestions(query: string): { label: string; type: "tag" | "source" }[] {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
+  const normalizedQuery = query.toLowerCase();
   const { items } = useFeedStore.getState();
 
   const tagSet = new Set<string>();
@@ -164,13 +164,25 @@ export function getSuggestions(query: string): { label: string; type: "tag" | "s
 
   for (const item of items) {
     for (const tag of item.tags) {
-      if (tag.toLowerCase().includes(q)) tagSet.add(tag);
+      if (tag.toLowerCase().includes(normalizedQuery)) {
+        tagSet.add(tag);
+      }
     }
-    if (item.source.toLowerCase().includes(q)) sourceSet.add(item.source);
+
+    if (item.source.toLowerCase().includes(normalizedQuery)) {
+      sourceSet.add(item.source);
+    }
   }
 
-  const suggestions: { label: string; type: "tag" | "source" }[] = [];
-  for (const tag of tagSet) suggestions.push({ label: tag, type: "tag" });
-  for (const source of sourceSet) suggestions.push({ label: source, type: "source" });
+  const suggestions: Array<{ label: string; type: "tag" | "source" }> = [];
+
+  for (const tag of tagSet) {
+    suggestions.push({ label: tag, type: "tag" });
+  }
+
+  for (const source of sourceSet) {
+    suggestions.push({ label: source, type: "source" });
+  }
+
   return suggestions.slice(0, 8);
 }

@@ -7,6 +7,7 @@ import {
   MessageCircle,
   FileText,
   Megaphone,
+  Loader2,
   Tag,
   Globe,
   X,
@@ -36,6 +37,9 @@ export function FeedSearchBar() {
   const setSearchQuery = useFeedStore((s) => s.setSearchQuery);
   const activeFilter = useFeedStore((s) => s.activeFilter);
   const setActiveFilter = useFeedStore((s) => s.setActiveFilter);
+  const isLoading = useFeedStore((s) => s.isLoading);
+  const context = useFeedStore((s) => s.context);
+  const resolvedQuery = useFeedStore((s) => s.resolvedQuery);
 
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -76,6 +80,10 @@ export function FeedSearchBar() {
 
   // Close suggestions on click outside
   useEffect(() => {
+    setLocalQuery(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
@@ -87,10 +95,44 @@ export function FeedSearchBar() {
 
   return (
     <div className="space-y-3">
+      {context.mode === "workspace" && !searchQuery.trim() ? (
+        <div className="rounded-xl border border-neon-cyan/15 bg-neon-cyan/[0.04] px-3 py-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium text-neon-cyan/80">
+                Feed guiado pelo workspace {context.label ? `"${context.label}"` : ""}
+              </p>
+              <p className="mt-0.5 text-[11px] text-foreground/45">
+                {context.reason ?? "Usando o contexto do trabalho atual para buscar resultados."}
+              </p>
+            </div>
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-neon-cyan/70" />
+            ) : null}
+          </div>
+          {context.topics.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {context.topics.map((topic) => (
+                <span
+                  key={topic}
+                  className="rounded-full border border-neon-cyan/20 bg-black/20 px-2 py-0.5 text-[10px] text-foreground/60"
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {/* Search input */}
       <div ref={containerRef} className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/30" />
+          {isLoading ? (
+            <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-neon-cyan/60" />
+          ) : (
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/30" />
+          )}
           <input
             ref={inputRef}
             type="text"
@@ -104,7 +146,7 @@ export function FeedSearchBar() {
             onKeyDown={(e) => {
               if (e.key === "Escape") setShowSuggestions(false);
             }}
-            placeholder="Buscar por título, autor, tag, fonte..."
+            placeholder="Escreva um tema para buscar notícias, blogs e anúncios em tempo real..."
             className="w-full rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] py-2.5 pl-10 pr-10 text-sm text-foreground/90 placeholder:text-foreground/25 backdrop-blur-sm transition-colors focus:border-foreground/20 focus:outline-none focus:ring-0"
           />
           {localQuery && (
@@ -142,6 +184,15 @@ export function FeedSearchBar() {
           </div>
         )}
       </div>
+
+      {resolvedQuery && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-foreground/35">
+          <span className="text-foreground/25">Busca atual</span>
+          <span className="rounded-full border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1 text-foreground/65">
+            {resolvedQuery}
+          </span>
+        </div>
+      )}
 
       {/* Filter pills */}
       <div className="flex flex-wrap gap-1.5">
