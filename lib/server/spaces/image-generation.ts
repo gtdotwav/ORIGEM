@@ -186,27 +186,37 @@ export async function generateSpaceImages(input: {
   }
 
   const promptText = appendNegativePrompt(input.prompt, input.negativePrompt);
-  const promptPayload: SpaceImagePrompt =
-    input.referenceImages && input.referenceImages.length > 0
-      ? {
-          text: promptText,
-          images: input.referenceImages,
-        }
-      : promptText;
+  
+  if (input.referenceImages && input.referenceImages.length > 0 && input.model !== "nano-banana-pro") {
+    throw new Error("reference_images_require_nano_banana");
+  }
 
-  const images = await generateGoogleImageBatch({
-    modelId,
-    prompt: promptPayload,
-    aspectRatio: input.aspectRatio,
-    quantity: input.quantity,
-    resolution: input.resolution,
-    seed: input.seed,
-    abortSignal: input.abortSignal,
-  });
+  // Google Provider in Vercel AI SDK expects a string prompt for images
+  const promptPayload = promptText;
 
-  return {
-    imageUrls: images.map((image) => image.url),
-    provider: "google",
-    modelId,
-  };
+  try {
+    const images = await generateGoogleImageBatch({
+      modelId,
+      prompt: promptPayload,
+      aspectRatio: input.aspectRatio,
+      quantity: input.quantity,
+      resolution: input.resolution,
+      seed: input.seed,
+      abortSignal: input.abortSignal,
+    });
+
+    return {
+      imageUrls: images.map((image) => image.url),
+      provider: "google",
+      modelId,
+    };
+  } catch (error: any) {
+    if (error.message?.includes("API key not valid") || error.message?.includes("API key")) {
+      throw new Error("google_api_key_invalid");
+    }
+    if (error.message?.includes("unsupported")) {
+      throw new Error("google_model_unsupported_or_region");
+    }
+    throw error;
+  }
 }

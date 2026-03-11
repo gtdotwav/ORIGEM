@@ -76,11 +76,12 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "space_generation_failed";
 
     const status =
-      message === "no_google_api_key"
+      message === "no_google_api_key" || message === "google_api_key_invalid"
         ? 400
         : message === "unsupported_space_model" ||
           message === "reference_images_require_nano_banana" ||
-          message === "unsupported_aspect_ratio_for_imagen"
+          message === "unsupported_aspect_ratio_for_imagen" ||
+          message === "google_model_unsupported_or_region"
         ? 422
         : 500;
 
@@ -88,12 +89,14 @@ export async function POST(request: Request) {
       {
         error: "space_generation_failed",
         reason:
-          message === "no_google_api_key"
-            ? "Conecte uma Google API key em Providers para gerar imagens."
+          message === "no_google_api_key" || message === "google_api_key_invalid"
+            ? "API Key do Google inválida ou não configurada em Providers."
             : message === "reference_images_require_nano_banana"
             ? "Imagens de referencia exigem um modelo Nano Banana."
             : message === "unsupported_aspect_ratio_for_imagen"
             ? "Esse aspect ratio nao esta disponivel para Imagen."
+            : message === "google_model_unsupported_or_region"
+            ? "Esse modelo não está disponível na sua conta Google ou região."
             : message,
       },
       { status, headers: rateHeaders }

@@ -431,10 +431,10 @@ export default function ChatPage() {
                     >
                       <div
                         className={cn(
-                          "group relative max-w-[94%] rounded-2xl border px-4 py-3 sm:max-w-[88%]",
+                          "group relative max-w-[94%] rounded-[20px] border px-5 py-4 sm:max-w-[85%] shadow-sm backdrop-blur-md transition-all",
                           isUser
-                            ? "border-foreground/[0.12] bg-foreground/[0.08] text-foreground/92"
-                            : "border-foreground/[0.09] bg-black/28 text-foreground/85"
+                            ? "border-neon-cyan/25 bg-gradient-to-br from-neon-cyan/[0.08] to-neon-cyan/[0.02] text-neon-cyan/95 shadow-neon-cyan/5"
+                            : "border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 text-white/90 shadow-black/20"
                         )}
                       >
                         {!isUser && (
@@ -527,17 +527,17 @@ export default function ChatPage() {
 
                 {isSending && streamingContent !== null && streamingContent.length > 0 && (
                   <div className="flex w-full animate-message-in justify-start">
-                    <div className="group relative max-w-[94%] rounded-2xl border border-foreground/[0.09] bg-black/28 px-4 py-3 text-foreground/85 sm:max-w-[88%]">
+                    <div className="group relative max-w-[94%] rounded-[20px] border border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 px-5 py-4 text-white/90 shadow-sm shadow-black/20 backdrop-blur-md sm:max-w-[85%]">
                       <MarkdownRenderer content={streamingContent} />
-                      <span className="mt-2 inline-block h-4 w-1 animate-pulse bg-foreground/[0.72]" />
+                      <span className="mt-2 inline-block h-[18px] w-1.5 animate-pulse rounded-full bg-neon-cyan/70" />
                     </div>
                   </div>
                 )}
 
                 {isSending && streamingContent === null && (
                   <div className="flex justify-start">
-                    <div className="max-w-[94%] rounded-2xl border border-foreground/[0.09] bg-black/28 px-4 py-3 sm:max-w-[88%]">
-                      <div className="inline-flex items-center gap-2 text-xs text-foreground/65">
+                    <div className="max-w-[94%] rounded-[20px] border border-white/[0.08] bg-black/40 px-5 py-4 backdrop-blur-md sm:max-w-[85%]">
+                      <div className="inline-flex items-center gap-2.5 text-[13px] text-white/60">
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
                         Processando e delegando em tempo real...
                       </div>
