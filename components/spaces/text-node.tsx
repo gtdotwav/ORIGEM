@@ -49,10 +49,10 @@ function TextNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "relative min-w-[220px] max-w-[420px] rounded-2xl border transition-colors",
+        "group relative min-w-[220px] max-w-[420px] rounded-[24px] border transition-all duration-500",
         selected
-          ? "border-white/[0.16] bg-[oklch(0.11_0_0)] shadow-lg shadow-white/[0.02] ring-1 ring-white/[0.06]"
-          : "border-white/[0.06] bg-[oklch(0.09_0_0)] hover:border-white/[0.10]"
+          ? "border-white/20 bg-black/40 shadow-[0_0_30px_rgba(255,255,255,0.05)] backdrop-blur-2xl"
+          : "border-white/[0.06] bg-black/20 hover:border-white/10 hover:bg-black/30 backdrop-blur-xl"
       )}
     >
       <Handle
@@ -115,21 +115,21 @@ function TextNode({ data, id, selected }: NodeProps) {
       </div>
 
       {/* Drag handle */}
-      <div className="flex items-center justify-between border-b border-white/[0.04] px-2.5 py-2">
-        <div className="flex items-center gap-1">
-        <GripVertical className="h-3 w-3 text-white/10" />
-        <span className="text-[9px] font-medium uppercase tracking-wider text-white/20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.03]">
+        <div className="flex items-center gap-2">
+        <GripVertical className="h-4 w-4 text-white/15" />
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
           Texto
         </span>
         </div>
-        <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[9px] uppercase tracking-[0.18em] text-white/28">
-          <ArrowRightLeft className="h-2.5 w-2.5" />
+        <span className="flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-white/40">
+          <ArrowRightLeft className="h-3 w-3" />
           {incomingConnections}/{outgoingConnections}
         </span>
       </div>
 
       {/* Text area */}
-      <div className="nodrag nopan p-3" onClick={(e) => e.stopPropagation()}>
+      <div className="nodrag nopan p-2" onClick={(e) => e.stopPropagation()}>
         <textarea
           ref={textareaRef}
           value={text}
@@ -139,7 +139,7 @@ function TextNode({ data, id, selected }: NodeProps) {
           }}
           onBlur={handleBlur}
           placeholder="Digite aqui..."
-          className="nodrag nopan w-full resize-none bg-transparent text-[13px] leading-relaxed text-white/70 placeholder:text-white/15 outline-none"
+          className="nodrag nopan w-full resize-none rounded-xl border border-transparent bg-transparent px-3 py-3 text-[13px] leading-relaxed text-white/80 placeholder:text-white/20 outline-none transition-all duration-300 focus:bg-white/[0.03] focus:shadow-[0_0_15px_rgba(255,255,255,0.02)]"
           rows={1}
         />
       </div>

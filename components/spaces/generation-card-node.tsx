@@ -68,10 +68,10 @@ function CompactModelSelect({
           setOpen(!open);
         }}
         className={cn(
-          "flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] transition-colors",
-          open
-            ? "border-white/[0.12] bg-white/[0.05]"
-            : "border-white/[0.06] bg-white/[0.02]"
+            "flex w-full items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10.5px] font-medium transition-all duration-300 outline-none",
+            open
+              ? "bg-white/[0.08] text-white/90 shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/[0.08]"
+              : "bg-white/[0.03] text-white/60 hover:bg-white/[0.06] hover:text-white/80 border border-transparent"
         )}
       >
         <span className="flex-1 truncate text-left font-medium text-white/60">
@@ -86,7 +86,7 @@ function CompactModelSelect({
       </button>
       {open && (
         <div
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[200px] overflow-y-auto rounded-lg border border-white/[0.08] bg-[oklch(0.12_0_0)] shadow-xl"
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[200px] overflow-y-auto rounded-lg border border-white/[0.06] bg-black/80 backdrop-blur-2xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {IMAGE_MODELS.map((model) => (
@@ -320,11 +320,11 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[22px] border shadow-xl transition-all duration-300",
+        "group relative overflow-hidden rounded-[24px] border transition-all duration-500",
         isExpanded || !hasImages ? "w-[336px]" : "w-[260px]",
         selected
-          ? "border-white/[0.18] bg-[oklch(0.12_0_0)] shadow-white/[0.05] ring-1 ring-white/[0.08]"
-          : "border-white/[0.08] bg-[oklch(0.10_0_0)] hover:border-white/[0.12]"
+          ? "border-white/20 bg-black/40 shadow-[0_0_30px_rgba(255,255,255,0.05)] backdrop-blur-2xl"
+          : "border-white/[0.06] bg-black/20 hover:border-white/10 hover:bg-black/30 backdrop-blur-xl"
       )}
       onClick={() => selectCard(id)}
     >
@@ -518,21 +518,23 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
       {/* Settings area — embedded in card */}
       {(!hasImages || isExpanded) && (
         <div className="space-y-2.5 px-3 py-3">
-          <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-2 text-[10px] text-white/46">
+          <div className="flex items-center justify-between px-1 py-1 text-[10px]">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-white/68">{selectedModelLabel}</span>
-            <span className="rounded-full border border-white/[0.08] px-1.5 py-0.5 text-[9px] text-white/32">
+            <span className="font-semibold text-white/80">{selectedModelLabel}</span>
+            <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] font-medium text-white/50 tracking-wide">
               {localRatio}
             </span>
           </div>
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.16em]",
-              status.className
-            )}
-          >
-            {status.label}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.16em]",
+                status.className
+              )}
+            >
+              {status.label}
+            </span>
+          </div>
         </div>
 
         {/* Prompt */}
@@ -542,7 +544,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             onChange={(e) => handlePromptChange(e.target.value)}
             placeholder={connectedText || "Descreva a imagem..."}
             rows={2}
-            className="nodrag nopan w-full resize-none rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-[11px] leading-relaxed text-white/65 placeholder:text-white/18 outline-none transition-colors focus:border-white/[0.12]"
+            className="nodrag nopan w-full resize-none rounded-xl border border-transparent bg-white/[0.03] px-3 py-2.5 text-[11px] leading-relaxed text-white/80 placeholder:text-white/20 outline-none transition-all duration-300 focus:bg-white/[0.05] focus:shadow-[0_0_15px_rgba(255,255,255,0.03)]"
           />
         </div>
 
@@ -570,9 +572,9 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
               </span>
             </div>
           ) : (
-            <label className="nodrag nopan flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-white/[0.06] px-2.5 py-2 text-[10px] text-white/26 transition-colors hover:border-white/[0.12] hover:text-white/42">
-              <Upload className="h-3 w-3" />
-              Imagem de referencia
+            <label className="nodrag nopan flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.01] px-3 py-3 text-[10.5px] font-medium text-white/40 transition-all hover:border-white/[0.15] hover:bg-white/[0.03] hover:text-white/60">
+              <Upload className="h-3.5 w-3.5" />
+              Upload Referência
               <input
                 type="file"
                 accept="image/*"
@@ -590,21 +592,21 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
 
         {/* Ratio + Quantity row */}
         <div
-          className="nodrag nopan flex items-center gap-2"
+          className="nodrag nopan flex items-center gap-1.5"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Aspect ratio */}
-          <div className="flex flex-1 gap-1">
+          <div className="flex flex-1 gap-1 rounded-lg bg-white/[0.03] p-1">
             {SPACE_ASPECT_RATIOS.slice(0, 5).map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => handleRatioChange(r)}
                 className={cn(
-                  "flex-1 rounded-md border py-1 text-[9px] font-semibold transition-colors",
+                  "flex-1 rounded-md py-1.5 text-[9.5px] font-semibold transition-all duration-300",
                   localRatio === r
-                    ? "border-white/[0.14] bg-white/[0.07] text-white/76"
-                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08] hover:text-white/42"
+                    ? "bg-white/[0.12] text-white/90 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
+                    : "text-white/30 hover:bg-white/[0.05] hover:text-white/60"
                 )}
               >
                 {r}
@@ -613,17 +615,17 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           </div>
 
           {/* Quantity */}
-          <div className="flex gap-0.5">
+          <div className="flex gap-1 rounded-lg bg-white/[0.03] p-1">
             {SPACE_QUANTITIES.map((q) => (
               <button
                 key={q}
                 type="button"
                 onClick={() => handleQuantityChange(q)}
                 className={cn(
-                  "h-6 w-6 rounded-md border text-[10px] font-semibold transition-colors",
+                  "flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-semibold transition-all duration-300",
                   localQty === q
-                    ? "border-white/[0.14] bg-white/[0.07] text-white/76"
-                    : "border-white/[0.04] text-white/25 hover:border-white/[0.08] hover:text-white/42"
+                    ? "bg-white/[0.12] text-white/90 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
+                    : "text-white/30 hover:bg-white/[0.05] hover:text-white/60"
                 )}
               >
                 {q}
@@ -639,8 +641,8 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             onClick={handleGenerate}
             disabled={!effectivePrompt || isGenerating}
             className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[11px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-20",
-              "border border-white/[0.10] bg-white/[0.05] text-white/76 hover:border-white/[0.14] hover:bg-white/[0.08]"
+              "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[11px] font-semibold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-30",
+              "bg-white/[0.06] text-white/90 hover:bg-white/[0.10] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
             )}
           >
             {isGenerating ? (
