@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "npm install @tailwindcss/typography react-markdown remark-gfm",
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
