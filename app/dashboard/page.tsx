@@ -7,6 +7,8 @@ import {
   Blocks as SparklesIcon,
   Paperclip,
   ArrowUp,
+  Orbit,
+  Plug,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
@@ -201,10 +203,10 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex w-full max-w-[680px] flex-col items-center"
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex w-full max-w-[720px] flex-col items-center"
       >
-        <div className="w-full overflow-hidden rounded-[24px] border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 backdrop-blur-2xl md:rounded-[28px]">
+        <div className="w-full overflow-hidden rounded-[28px] border border-white/10 bg-black/40 shadow-[0_0_80px_rgba(0,0,0,0.6)] backdrop-blur-3xl md:rounded-[32px]">
           {/* Header */}
           <div className="px-5 pb-4 pt-5 md:px-6 md:pt-6">
             <div className="mb-1.5 flex items-center gap-2">
@@ -235,7 +237,7 @@ export default function DashboardPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Descreva o que precisa..."
                 rows={1}
-                className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15px] leading-relaxed text-foreground caret-neon-cyan placeholder:text-foreground/40 outline-none ring-0"
+                className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15.5px] font-medium leading-relaxed text-white/90 caret-neon-cyan placeholder:text-white/30 outline-none ring-0 transition-all selection:bg-white/20"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -245,7 +247,7 @@ export default function DashboardPage() {
               />
 
               {/* Toolbar */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 border-t border-white/[0.04] pt-3">
                 {/* Left tools */}
                 <button
                   type="button"
@@ -292,16 +294,16 @@ export default function DashboardPage() {
                   onClick={() => void startSessionFromHome()}
                   disabled={!hasInput || sending || uploadingImage}
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
+                    "flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300",
                     hasInput && !sending
-                      ? "bg-foreground text-background shadow-md shadow-black/20 hover:bg-foreground/90 active:scale-95"
-                      : "bg-foreground/[0.06] text-foreground/20"
+                      ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:bg-white/90 hover:scale-105 active:scale-95"
+                      : "bg-white/[0.06] text-white/25"
                   )}
                 >
                   {sending || uploadingImage ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <ArrowUp className="h-4 w-4" />
+                    <ArrowUp className="h-4.5 w-4.5" />
                   )}
                 </button>
               </div>
@@ -370,12 +372,12 @@ export default function DashboardPage() {
 
       {/* Starting Points Section */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 mt-10 flex w-full max-w-[680px] flex-col"
+        transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 mt-10 flex w-full max-w-[720px] flex-col"
       >
-        <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.15em] text-foreground/40">
+        <p className="mb-5 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
           Ou escolha seu ponto de partida
         </p>
 
@@ -383,65 +385,59 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard/agents")}
-            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
           >
-            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
-              <SparklesIcon className="h-4 w-4" />
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+              <SparklesIcon className="h-4.5 w-4.5" />
             </div>
-            <span className="text-[13px] font-medium text-foreground/90">Criar Agente</span>
-            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Montar autonomia do zero</span>
+            <span className="text-[14px] font-semibold text-white/90">Criar Agente</span>
+            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Montar autonomia do zero</span>
           </button>
 
           <button
             type="button"
-            onClick={() => {
-              /* Future: Open Skill Explorer modal/page */
-            }}
-            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+            onClick={() => router.push("/dashboard/skills")}
+            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
           >
-            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-[13px] font-medium text-foreground/90">Executar Skill</span>
-            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Usar automacao pronta</span>
+            <span className="text-[14px] font-semibold text-white/90">Executar Skill</span>
+            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Usar automacao pronta</span>
           </button>
 
           <button
             type="button"
             onClick={() => router.push("/dashboard/connections")}
-            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
           >
-            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+              <Plug className="h-4.5 w-4.5" />
             </div>
-            <span className="text-[13px] font-medium text-foreground/90">Conectar Dados</span>
-            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Importar infra e MCP</span>
+            <span className="text-[14px] font-semibold text-white/90">Conectar Dados</span>
+            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Importar infra e MCP</span>
           </button>
 
           <button
             type="button"
-            onClick={() => router.push("/dashboard/canvas")}
-            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+            onClick={() => router.push("/dashboard/spaces")}
+            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
           >
-            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+              <Orbit className="h-4.5 w-4.5" />
             </div>
-            <span className="text-[13px] font-medium text-foreground/90">Abrir Canvas</span>
-            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Orquestrar fluxos visuais</span>
+            <span className="text-[14px] font-semibold text-white/90">Abrir Spaces</span>
+            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Geração de mídia visual</span>
           </button>
         </div>
       </motion.div>
 
       {/* Footer */}
-      <div className="flex flex-1 items-end pb-4 pt-8">
+      <div className="flex flex-1 items-end pb-4 pt-12">
         <div className="text-center">
-          <p className="text-[10px] text-foreground/30">ORIGEM — Intelligence OS</p>
+          <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/20">ORIGEM — Intelligence OS</p>
         </div>
       </div>
     </div>
