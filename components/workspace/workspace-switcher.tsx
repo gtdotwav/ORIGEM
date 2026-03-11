@@ -44,11 +44,11 @@ export function WorkspaceSwitcher() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="group flex min-w-[250px] max-w-[320px] items-center gap-3 rounded-2xl border border-foreground/[0.08] bg-card/70 px-3 py-2.5 text-left text-foreground/60 shadow-[0_12px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all hover:border-foreground/[0.14] hover:bg-card/85 hover:text-foreground/75"
+          className="group flex min-w-[220px] max-w-[260px] items-center gap-2.5 rounded-full border border-foreground/[0.06] bg-card/50 px-2 py-1.5 text-left text-foreground/70 shadow-lg shadow-black/20 backdrop-blur-3xl transition-all hover:border-foreground/[0.12] hover:bg-card/70 hover:shadow-xl hover:shadow-black/30"
         >
           <div
             className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-foreground/[0.03] transition-all",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-foreground/[0.03] transition-all",
               activeWorkspaceColors
                 ? cn(activeWorkspaceColors.border, activeWorkspaceColors.bg)
                 : "border-foreground/[0.08]"
@@ -91,9 +91,9 @@ export function WorkspaceSwitcher() {
       <PopoverContent
         align="start"
         sideOffset={10}
-        className="w-[320px] border-foreground/[0.08] bg-card/95 p-2 backdrop-blur-xl"
+        className="w-[300px] rounded-[24px] border-foreground/[0.08] bg-card/80 p-2 shadow-2xl shadow-black/40 backdrop-blur-3xl"
       >
-        <div className="mb-2 flex items-start justify-between gap-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] px-3 py-2.5">
+        <div className="mb-2 flex items-start justify-between gap-3 rounded-[16px] border border-foreground/[0.06] bg-foreground/[0.03] px-3 py-2.5">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-foreground/28">
               Contexto
