@@ -13,7 +13,7 @@ import {
   Brain,
   FolderKanban,
   Bot,
-
+  Zap,
   Users,
   GitBranch,
   Workflow,
@@ -64,6 +64,13 @@ const NAV_ENTRIES: NavEntry[] = [
     href: "/dashboard/control",
     icon: LayoutDashboard,
     color: "cyan",
+  },
+  {
+    label: "Skills",
+    description: "Capacidades atômicas modulares",
+    href: "/dashboard/skills",
+    icon: Zap,
+    color: "orange",
   },
   {
     label: "360º",

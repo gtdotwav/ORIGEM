@@ -8,6 +8,10 @@ import {
   Loader2,
   Send,
   Blocks,
+  Brain,
+  Zap,
+  Sparkles,
+  Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
@@ -566,7 +570,27 @@ export default function ChatPage() {
               void sendMessage();
             }}
           >
-            <div className="mb-2 flex items-center justify-end">
+            <div className="mb-2 flex items-center justify-between">
+              {/* Context Selector */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:pb-0">
+                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  <Brain className="h-3.5 w-3.5 text-neon-purple" />
+                  Contexto
+                </button>
+                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  <Zap className="h-3.5 w-3.5 text-neon-orange" />
+                  Skill
+                </button>
+                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  <Sparkles className="h-3.5 w-3.5 text-neon-cyan" />
+                  Modelo
+                </button>
+                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  <Wrench className="h-3.5 w-3.5 text-foreground/50" />
+                  Ferramentas
+                </button>
+              </div>
+
               <ChatControlsMenu workspaceName={currentWorkspaceName} />
             </div>
 

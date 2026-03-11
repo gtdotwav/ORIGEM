@@ -368,8 +368,78 @@ export default function DashboardPage() {
 
       <LeftToolbar />
 
+      {/* Starting Points Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 mt-10 flex w-full max-w-[680px] flex-col"
+      >
+        <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.15em] text-foreground/40">
+          Ou escolha seu ponto de partida
+        </p>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/agents")}
+            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+          >
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
+              <SparklesIcon className="h-4 w-4" />
+            </div>
+            <span className="text-[13px] font-medium text-foreground/90">Criar Agente</span>
+            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Montar autonomia do zero</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              /* Future: Open Skill Explorer modal/page */
+            }}
+            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+          >
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span className="text-[13px] font-medium text-foreground/90">Executar Skill</span>
+            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Usar automacao pronta</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/connections")}
+            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+          >
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className="text-[13px] font-medium text-foreground/90">Conectar Dados</span>
+            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Importar infra e MCP</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/canvas")}
+            className="group flex flex-col items-start rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-4 text-left transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.04]"
+          >
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05] text-foreground/60 transition-colors group-hover:text-neon-cyan">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </div>
+            <span className="text-[13px] font-medium text-foreground/90">Abrir Canvas</span>
+            <span className="mt-1 text-[11px] leading-relaxed text-foreground/45">Orquestrar fluxos visuais</span>
+          </button>
+        </div>
+      </motion.div>
+
       {/* Footer */}
-      <div className="flex flex-1 items-end pb-4">
+      <div className="flex flex-1 items-end pb-4 pt-8">
         <div className="text-center">
           <p className="text-[10px] text-foreground/30">ORIGEM — Intelligence OS</p>
         </div>
