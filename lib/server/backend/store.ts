@@ -1,7 +1,4 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import type {
-  BackendDatabaseShape,
   ProviderSecretRecord,
   SessionSnapshot,
   SessionSnapshotRecord,
@@ -9,237 +6,84 @@ import type {
 import type { ProviderName } from "@/types/provider";
 import { assertEncryptionReady, decrypt, encrypt } from "@/lib/server/crypto";
 
-const DEFAULT_DB_PATH = path.join(process.cwd(), ".data", "origem-backend.json");
-const BLOB_KEY = "origem-backend.json";
-const MAX_BLOB_WRITE_RETRIES = 8;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://uzqzetbcynoiptmnufxv.supabase.co";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_0ljR9h3-FUMUuKHGA9EVQA_qHgeCn0n";
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function createEmptyDb(): BackendDatabaseShape {
-  return { records: {}, providers: {} };
-}
-
-function parseBackendPath() {
-  const fromEnv = process.env.ORIGEM_BACKEND_PATH;
-  return fromEnv && fromEnv.trim().length > 0 ? fromEnv.trim() : DEFAULT_DB_PATH;
-}
-
-function shouldUseBlobStorage(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
-}
-
-function clone<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
-}
-
-function isBlobConflictError(error: unknown) {
-  return false; // Vercel Blob does not support ETags directly for put.
-}
-
-function mergeBackendDatabases(
-  remote: BackendDatabaseShape,
-  local: BackendDatabaseShape
-): BackendDatabaseShape {
-  const records: BackendDatabaseShape["records"] = { ...remote.records };
-  for (const [sessionId, record] of Object.entries(local.records ?? {})) {
-    const existing = records[sessionId];
-    if (
-      !existing ||
-      record.version > existing.version ||
-      record.updatedAt >= existing.updatedAt
-    ) {
-      records[sessionId] = record;
-    }
-  }
-
-  const providers: BackendDatabaseShape["providers"] = { ...remote.providers };
-  for (const [provider, record] of Object.entries(local.providers ?? {})) {
-    if (!record) {
-      continue;
-    }
-
-    const typedProvider = provider as ProviderName;
-    const existing = providers[typedProvider];
-    if (!existing || record.updatedAt >= existing.updatedAt) {
-      providers[typedProvider] = record;
-    }
-  }
-
-  return { records, providers };
-}
-
-async function blobRead(): Promise<{
-  data: BackendDatabaseShape | null;
-  etag: string | null;
-}> {
-  const { list } = await import("@vercel/blob");
-  const { blobs } = await list({ prefix: BLOB_KEY });
-  const target = blobs.find((b) => b.pathname === BLOB_KEY);
-
-  if (!target) {
-    return { data: null, etag: null };
-  }
-
-  const res = await fetch(target.downloadUrl, { cache: "no-store" });
+async function supabaseFetch(endpoint: string, options: RequestInit = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation",
+      ...(options.headers || {}),
+    },
+  });
+  
   if (!res.ok) {
-    return { data: null, etag: null };
+    const text = await res.text().catch(() => "");
+    throw new Error(`Supabase error: ${res.statusText} - ${text}`);
   }
   
-  const content = await res.text();
-  return {
-    data: JSON.parse(content) as BackendDatabaseShape,
-    etag: null,
-  };
-}
-
-async function blobWrite(
-  db: BackendDatabaseShape,
-  etag: string | null
-): Promise<string> {
-  const { put } = await import("@vercel/blob");
-  await put(BLOB_KEY, JSON.stringify(db), {
-    access: "private",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/json",
-  });
-  return "";
+  if (res.status === 204) return null;
+  return res.json();
 }
 
 class SnapshotStore {
-  private db: BackendDatabaseShape = createEmptyDb();
-  private blobEtag: string | null = null;
-  private loaded = false;
-  private writeChain: Promise<void> = Promise.resolve();
-  private readonly dbPath = parseBackendPath();
-
-  private async ensureLoaded() {
-    if (this.loaded) {
-      return;
-    }
-
-    this.loaded = true;
-
-    try {
-      if (shouldUseBlobStorage()) {
-        const { data, etag } = await blobRead();
-        this.blobEtag = etag;
-        if (data && typeof data === "object" && data.records) {
-          this.db = {
-            records: data.records ?? {},
-            providers: data.providers ?? {},
-          };
-        }
-      } else {
-        const content = await fs.readFile(this.dbPath, "utf-8");
-        const parsed = JSON.parse(content) as BackendDatabaseShape;
-        if (parsed && typeof parsed === "object" && parsed.records) {
-          this.db = {
-            records: parsed.records ?? {},
-            providers: parsed.providers ?? {},
-          };
-        }
-      }
-    } catch (error: any) {
-      // If the file or blob doesn't exist, we just start fresh
-      if (error?.code === "ENOENT" || error?.message?.includes("404")) {
-        this.db = createEmptyDb();
-      } else {
-        // Critical: Do NOT initialize an empty DB if this is a temporary read failure
-        // Otherwise, the very next write will overwrite all data!
-        console.error("[SnapshotStore] Critical failure loading database:", error);
-        this.loaded = false; // allow retry on next call
-        throw new Error("storage_unavailable: failed to read backend store");
-      }
-    }
-  }
-
-  private async writeBlobWithRetry() {
-    let lastError: unknown;
-
-    for (let attempt = 0; attempt < MAX_BLOB_WRITE_RETRIES; attempt += 1) {
-      try {
-        this.blobEtag = await blobWrite(this.db, this.blobEtag);
-        return;
-      } catch (error) {
-        if (!isBlobConflictError(error)) {
-          throw error;
-        }
-
-        lastError = error;
-        const { data, etag } = await blobRead();
-        this.db = mergeBackendDatabases(data ?? createEmptyDb(), this.db);
-        this.blobEtag = etag;
-        await delay(60 * (attempt + 1));
-      }
-    }
-
-    throw lastError;
-  }
-
-  private queueWrite() {
-    const currentTask = this.writeChain.then(async () => {
-      if (shouldUseBlobStorage()) {
-        await this.writeBlobWithRetry();
-      } else {
-        await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
-        await fs.writeFile(this.dbPath, JSON.stringify(this.db, null, 2), "utf-8");
-      }
-    });
-
-    this.writeChain = currentTask.catch((error) => {
-      console.error("[SnapshotStore] Write task failed, but recovering write chain:", error);
-    });
-
-    return currentTask;
-  }
-
   async listRecords(): Promise<SessionSnapshotRecord[]> {
-    await this.ensureLoaded();
-
-    return Object.values(this.db.records)
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .map((item) => clone(item));
+    const data = await supabaseFetch("session_records?select=*");
+    return (data || []).map((row: any) => ({
+      ...row,
+      sessionId: row.session_id,
+      updatedAt: row.updated_at,
+    })).sort((a: any, b: any) => b.updatedAt - a.updatedAt);
   }
 
   async getRecord(sessionId: string): Promise<SessionSnapshotRecord | null> {
-    await this.ensureLoaded();
-    const record = this.db.records[sessionId];
-    return record ? clone(record) : null;
+    const data = await supabaseFetch(`session_records?session_id=eq.${encodeURIComponent(sessionId)}&select=*`);
+    if (!data || data.length === 0) return null;
+    const row = data[0];
+    return {
+      ...row,
+      sessionId: row.session_id,
+      updatedAt: row.updated_at,
+    };
   }
 
   async upsertSnapshot(
     sessionId: string,
     snapshot: SessionSnapshot
   ): Promise<SessionSnapshotRecord> {
-    await this.ensureLoaded();
-
-    const previous = this.db.records[sessionId];
+    const previous = await this.getRecord(sessionId);
     const now = Date.now();
-    const nextRecord: SessionSnapshotRecord = {
-      sessionId,
+    const nextRecord = {
+      session_id: sessionId,
       version: previous ? previous.version + 1 : 1,
-      updatedAt: now,
-      snapshot: clone(snapshot),
+      updated_at: now,
+      snapshot: snapshot,
     };
 
-    this.db.records[sessionId] = nextRecord;
-    await this.queueWrite();
+    const data = await supabaseFetch("session_records", {
+      method: "POST",
+      headers: {
+        "Prefer": "resolution=merge-duplicates",
+      },
+      body: JSON.stringify([nextRecord]),
+    });
 
-    return clone(nextRecord);
+    return {
+      sessionId,
+      version: nextRecord.version,
+      updatedAt: nextRecord.updated_at,
+      snapshot: nextRecord.snapshot,
+    };
   }
 
   async deleteRecord(sessionId: string): Promise<void> {
-    await this.ensureLoaded();
-
-    if (!this.db.records[sessionId]) {
-      return;
-    }
-
-    delete this.db.records[sessionId];
-    await this.queueWrite();
+    await supabaseFetch(`session_records?session_id=eq.${encodeURIComponent(sessionId)}`, {
+      method: "DELETE",
+    });
   }
 
   private decryptRecord(record: ProviderSecretRecord): ProviderSecretRecord {
@@ -247,39 +91,60 @@ class SnapshotStore {
   }
 
   async listProviderRecords(): Promise<ProviderSecretRecord[]> {
-    await this.ensureLoaded();
-
-    return Object.values(this.db.providers)
-      .filter((item): item is ProviderSecretRecord => Boolean(item))
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .map((item) => this.decryptRecord(clone(item)));
+    const data = await supabaseFetch("provider_records?select=*");
+    return (data || [])
+      .map((row: any) => ({
+        provider: row.provider as ProviderName,
+        apiKey: row.api_key,
+        selectedModel: row.selected_model,
+        updatedAt: row.updated_at,
+      }))
+      .sort((a: any, b: any) => b.updatedAt - a.updatedAt)
+      .map((item: any) => Object.assign({}, item, { apiKey: decrypt(item.apiKey) }));
   }
 
   async getProviderRecord(
     provider: ProviderName
   ): Promise<ProviderSecretRecord | null> {
-    await this.ensureLoaded();
-    const record = this.db.providers[provider];
-    return record ? this.decryptRecord(clone(record)) : null;
+    const data = await supabaseFetch(`provider_records?provider=eq.${encodeURIComponent(provider)}&select=*`);
+    if (!data || data.length === 0) return null;
+    const row = data[0];
+    const record = {
+      provider: row.provider as ProviderName,
+      apiKey: row.api_key,
+      selectedModel: row.selected_model,
+      updatedAt: row.updated_at,
+    };
+    return this.decryptRecord(record);
   }
 
   async upsertProviderRecord(
     provider: ProviderName,
     input: { apiKey: string; selectedModel: string }
   ): Promise<ProviderSecretRecord> {
-    await this.ensureLoaded();
     assertEncryptionReady("persist provider credentials");
 
-    const nextRecord: ProviderSecretRecord = {
+    const nextRecord = {
       provider,
-      apiKey: encrypt(input.apiKey),
-      selectedModel: input.selectedModel,
-      updatedAt: Date.now(),
+      api_key: encrypt(input.apiKey),
+      selected_model: input.selectedModel,
+      updated_at: Date.now(),
     };
 
-    this.db.providers[provider] = nextRecord;
-    await this.queueWrite();
-    return { ...clone(nextRecord), apiKey: input.apiKey };
+    await supabaseFetch("provider_records", {
+      method: "POST",
+      headers: {
+        "Prefer": "resolution=merge-duplicates",
+      },
+      body: JSON.stringify([nextRecord]),
+    });
+
+    return { 
+      provider,
+      apiKey: input.apiKey,
+      selectedModel: input.selectedModel,
+      updatedAt: nextRecord.updated_at 
+    };
   }
 }
 
