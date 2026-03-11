@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -20,96 +22,32 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
   };
 
   return (
-    <div className="group/code relative my-2 rounded-xl border border-foreground/[0.08] bg-black/40">
-      {lang && (
-        <div className="flex items-center justify-between border-b border-foreground/[0.06] px-3 py-1.5">
-          <span className="text-[10px] text-foreground/30">{lang}</span>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="text-foreground/25 transition-colors hover:text-foreground/50"
-          >
-            {copied ? (
-              <Check className="h-3 w-3 text-neon-green" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-          </button>
-        </div>
-      )}
-      <pre className="overflow-x-auto px-3 py-2.5">
-        <code className="font-mono text-xs text-foreground/80">{code}</code>
-      </pre>
-      {!lang && (
+    <div className="group/code relative my-4 overflow-hidden rounded-xl border border-foreground/[0.08] bg-black/40">
+      <div className="flex items-center justify-between border-b border-foreground/[0.06] bg-black/60 px-3 py-1.5 backdrop-blur-md">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-foreground/50">
+          {lang || "Code"}
+        </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/code:opacity-100 text-foreground/25 hover:text-foreground/50"
+          className="text-foreground/30 transition-colors hover:text-foreground/80"
         >
           {copied ? (
-            <Check className="h-3 w-3 text-neon-green" />
+            <Check className="h-3.5 w-3.5 text-neon-green" />
           ) : (
-            <Copy className="h-3 w-3" />
+            <Copy className="h-3.5 w-3.5" />
           )}
         </button>
-      )}
+      </div>
+      <div className="overflow-x-auto p-4">
+        <pre className="!m-0 !bg-transparent !p-0">
+          <code className="font-mono text-xs leading-relaxed text-foreground/80">
+            {code}
+          </code>
+        </pre>
+      </div>
     </div>
   );
-}
-
-function renderInlineMarkdown(text: string): React.ReactNode[] {
-  const nodes: React.ReactNode[] = [];
-  let remaining = text;
-  let key = 0;
-
-  while (remaining.length > 0) {
-    // Bold
-    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
-    if (boldMatch) {
-      nodes.push(<strong key={key++} className="font-semibold text-foreground/95">{boldMatch[1]}</strong>);
-      remaining = remaining.slice(boldMatch[0].length);
-      continue;
-    }
-
-    // Italic
-    const italicMatch = remaining.match(/^\*(.+?)\*/);
-    if (italicMatch) {
-      nodes.push(<em key={key++}>{italicMatch[1]}</em>);
-      remaining = remaining.slice(italicMatch[0].length);
-      continue;
-    }
-
-    // Code span
-    const codeMatch = remaining.match(/^`([^`]+)`/);
-    if (codeMatch) {
-      nodes.push(
-        <code
-          key={key++}
-          className="rounded-md bg-neon-cyan/10 px-1.5 py-0.5 font-mono text-xs text-neon-cyan/90"
-        >
-          {codeMatch[1]}
-        </code>
-      );
-      remaining = remaining.slice(codeMatch[0].length);
-      continue;
-    }
-
-    // Regular text — consume until next special char
-    const nextSpecial = remaining.search(/[*`]/);
-    if (nextSpecial === -1) {
-      nodes.push(remaining);
-      break;
-    } else if (nextSpecial === 0) {
-      // Special char that didn't match patterns — treat as text
-      nodes.push(remaining[0]);
-      remaining = remaining.slice(1);
-    } else {
-      nodes.push(remaining.slice(0, nextSpecial));
-      remaining = remaining.slice(nextSpecial);
-    }
-  }
-
-  return nodes;
 }
 
 export function MarkdownRenderer({
@@ -119,82 +57,61 @@ export function MarkdownRenderer({
   content: string;
   className?: string;
 }) {
-  const elements: React.ReactNode[] = [];
-  let key = 0;
+  return (
+    <div
+      className={cn(
+        "prose prose-invert max-w-none",
+        "prose-p:leading-relaxed prose-p:text-[13px] prose-p:text-foreground/85 md:prose-p:text-sm",
+        "prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground/95",
+        "prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm",
+        "prose-a:text-neon-cyan prose-a:no-underline hover:prose-a:underline",
+        "prose-strong:font-semibold prose-strong:text-foreground/95",
+        "prose-ul:text-[13px] md:prose-ul:text-sm prose-ul:text-foreground/85 prose-ul:my-2",
+        "prose-ol:text-[13px] md:prose-ol:text-sm prose-ol:text-foreground/85 prose-ol:my-2",
+        "prose-li:my-0.5",
+        "prose-table:text-[13px] md:prose-table:text-sm",
+        "prose-th:border-foreground/[0.06] prose-th:bg-foreground/[0.03] prose-th:px-3 prose-th:py-2",
+        "prose-td:border-foreground/[0.06] prose-td:px-3 prose-td:py-2 text-foreground/85",
+        "prose-blockquote:border-l-2 prose-blockquote:border-neon-cyan/50 prose-blockquote:bg-neon-cyan/5 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:text-foreground/75 prose-blockquote:not-italic",
+        "prose-hr:border-foreground/[0.08] prose-hr:my-4",
+        "prose-pre:p-0 prose-pre:bg-transparent prose-pre:m-0",
+        className
+      )}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code(props: any) {
+            const { className, children, ...rest } = props;
+            const match = /language-(\w+)/.exec(className || "");
+            const lang = match ? match[1] : undefined;
+            const isBlock = Boolean(match);
 
-  // Split by code blocks first
-  const parts = content.split(/(```[\s\S]*?```)/g);
+            if (isBlock) {
+              return (
+                <CodeBlock
+                  code={String(children).replace(/\n$/, "")}
+                  lang={lang}
+                />
+              );
+            }
 
-  for (const part of parts) {
-    // Code block
-    const codeBlockMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
-    if (codeBlockMatch) {
-      elements.push(
-        <CodeBlock key={key++} lang={codeBlockMatch[1] || undefined} code={codeBlockMatch[2].trimEnd()} />
-      );
-      continue;
-    }
-
-    // Process lines for non-code-block content
-    const lines = part.split("\n");
-    let i = 0;
-
-    while (i < lines.length) {
-      const line = lines[i];
-
-      // Empty line
-      if (line.trim() === "") {
-        i++;
-        continue;
-      }
-
-      // Bullet list
-      if (/^[-*]\s/.test(line)) {
-        const items: string[] = [];
-        while (i < lines.length && /^[-*]\s/.test(lines[i])) {
-          items.push(lines[i].replace(/^[-*]\s/, ""));
-          i++;
-        }
-        elements.push(
-          <ul key={key++} className="my-1 ml-4 list-disc space-y-0.5">
-            {items.map((item, j) => (
-              <li key={j} className="text-sm leading-relaxed text-foreground/85">
-                {renderInlineMarkdown(item)}
-              </li>
-            ))}
-          </ul>
-        );
-        continue;
-      }
-
-      // Numbered list
-      if (/^\d+[.)]\s/.test(line)) {
-        const items: string[] = [];
-        while (i < lines.length && /^\d+[.)]\s/.test(lines[i])) {
-          items.push(lines[i].replace(/^\d+[.)]\s/, ""));
-          i++;
-        }
-        elements.push(
-          <ol key={key++} className="my-1 ml-4 list-decimal space-y-0.5">
-            {items.map((item, j) => (
-              <li key={j} className="text-sm leading-relaxed text-foreground/85">
-                {renderInlineMarkdown(item)}
-              </li>
-            ))}
-          </ol>
-        );
-        continue;
-      }
-
-      // Regular paragraph
-      elements.push(
-        <p key={key++} className="text-sm leading-relaxed whitespace-pre-wrap">
-          {renderInlineMarkdown(line)}
-        </p>
-      );
-      i++;
-    }
-  }
-
-  return <div className={cn("space-y-1", className)}>{elements}</div>;
+            return (
+              <code
+                className={cn(
+                  "rounded-md bg-neon-cyan/10 px-1.5 py-0.5 font-mono text-[11.5px] text-neon-cyan/90 before:content-none after:content-none",
+                  className
+                )}
+                {...rest}
+              >
+                {children}
+              </code>
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
