@@ -413,6 +413,10 @@ export default function CodeIDEPage() {
         activeHandoff,
       });
 
+      const { useChatSettingsStore } = await import("@/stores/chat-settings-store");
+      const { selectedTier, ecosystemConfig } = useChatSettingsStore.getState();
+      const hasManualSelection = Boolean(ecosystemConfig.provider) && Boolean(ecosystemConfig.model);
+
       const result = await callChatStream(
         {
           messages: [
@@ -423,6 +427,9 @@ export default function CodeIDEPage() {
             { role: "user", content: input },
           ],
           systemPrompt,
+          ...(hasManualSelection
+            ? { provider: ecosystemConfig.provider ?? undefined, model: ecosystemConfig.model }
+            : { tier: selectedTier }),
         },
         (fullContent) => {
           streamContentRef.current = fullContent;
