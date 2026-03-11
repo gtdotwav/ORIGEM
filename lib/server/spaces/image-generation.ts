@@ -16,9 +16,9 @@ export type SupportedSpaceImageModel =
   (typeof SUPPORTED_SPACE_IMAGE_MODELS)[number];
 
 const GOOGLE_MODEL_MAP: Record<SupportedSpaceImageModel, string> = {
-  "nano-banana-pro": "gemini-3-pro-image-preview",
-  "nano-banana-2": "gemini-3.1-flash-image-preview",
-  "google-imagen-4": "imagen-4.0-generate-001",
+  "nano-banana-pro": "imagen-3.0-generate-001",
+  "nano-banana-2": "imagen-3.0-generate-001",
+  "google-imagen-4": "imagen-3.0-generate-001",
 };
 
 const IMAGEN_SUPPORTED_RATIOS = new Set<AspectRatio>([
@@ -111,21 +111,21 @@ async function generateGoogleImageBatch(input: {
   const google = createGoogleGenerativeAI({ apiKey });
   const isImagenModel = input.modelId.startsWith("imagen-");
 
-  if (isImagenModel && !IMAGEN_SUPPORTED_RATIOS.has(input.aspectRatio)) {
-    throw new Error("unsupported_aspect_ratio_for_imagen");
+  let safeRatio = input.aspectRatio;
+  if (isImagenModel && !IMAGEN_SUPPORTED_RATIOS.has(safeRatio)) {
+    if (safeRatio === "3:2") safeRatio = "4:3";
+    else if (safeRatio === "2:3") safeRatio = "3:4";
+    else safeRatio = "1:1";
   }
 
-  if (
-    isImagenModel &&
-    typeof input.prompt !== "string"
-  ) {
-    throw new Error("reference_images_require_nano_banana");
-  }
+  const safePrompt = typeof input.prompt === "string" 
+    ? input.prompt 
+    : (input.prompt as any).text;
 
   const providerOptions = isImagenModel
     ? {
         google: {
-          aspectRatio: input.aspectRatio,
+          aspectRatio: safeRatio,
           personGeneration: "allow_adult" as const,
         },
       }
@@ -140,9 +140,9 @@ async function generateGoogleImageBatch(input: {
   if (isImagenModel) {
     const result = await generateImage({
       model: google.image(input.modelId),
-      prompt: input.prompt,
+      prompt: safePrompt as any,
       n: input.quantity,
-      aspectRatio: input.aspectRatio,
+      aspectRatio: safeRatio,
       providerOptions,
       maxRetries: 1,
     });
@@ -159,8 +159,8 @@ async function generateGoogleImageBatch(input: {
     Array.from({ length: input.quantity }, () =>
       generateImage({
         model: google.image(input.modelId),
-        prompt: input.prompt,
-        aspectRatio: input.aspectRatio,
+        prompt: safePrompt as any,
+        aspectRatio: safeRatio,
         seed: input.seed ?? undefined,
         providerOptions,
         maxRetries: 1,
