@@ -100,7 +100,7 @@ async function blobWrite(
 ): Promise<string> {
   const { put } = await import("@vercel/blob");
   await put(BLOB_KEY, JSON.stringify(db), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
