@@ -35,17 +35,7 @@ function clone<T>(value: T): T {
 }
 
 function isBlobConflictError(error: unknown) {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("412") ||
-    message.includes("precondition") ||
-    message.includes("etag") ||
-    message.includes("if-match")
-  );
+  return false; // Vercel Blob does not support ETags directly for put.
 }
 
 function mergeBackendDatabases(
@@ -84,17 +74,23 @@ async function blobRead(): Promise<{
   data: BackendDatabaseShape | null;
   etag: string | null;
 }> {
-  const { get } = await import("@vercel/blob");
-  const result = await get(BLOB_KEY, { access: "private", useCache: false });
+  const { list } = await import("@vercel/blob");
+  const { blobs } = await list({ prefix: BLOB_KEY });
+  const target = blobs.find((b) => b.pathname === BLOB_KEY);
 
-  if (!result || result.statusCode !== 200) {
+  if (!target) {
     return { data: null, etag: null };
   }
 
-  const content = await new Response(result.stream).text();
+  const res = await fetch(target.downloadUrl, { cache: "no-store" });
+  if (!res.ok) {
+    return { data: null, etag: null };
+  }
+  
+  const content = await res.text();
   return {
     data: JSON.parse(content) as BackendDatabaseShape,
-    etag: result.blob.etag,
+    etag: null,
   };
 }
 
@@ -103,14 +99,13 @@ async function blobWrite(
   etag: string | null
 ): Promise<string> {
   const { put } = await import("@vercel/blob");
-  const result = await put(BLOB_KEY, JSON.stringify(db), {
-    access: "private",
+  await put(BLOB_KEY, JSON.stringify(db), {
+    access: "public",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
-    ...(etag ? { ifMatch: etag } : {}),
   });
-  return result.etag;
+  return "";
 }
 
 class SnapshotStore {
