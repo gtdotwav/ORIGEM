@@ -127,10 +127,12 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const setCardImages = useSpacesStore((s) => s.setCardImages);
   const setCardError = useSpacesStore((s) => s.setCardError);
   const card = useSpacesStore((s) => s.cards.find((c) => c.id === id));
-  const connectionMeta = useSpacesStore((s) => ({
-    incoming: s.edges.filter((edge) => edge.target === id).length,
-    outgoing: s.edges.filter((edge) => edge.source === id).length,
-  }));
+  const incomingConnections = useSpacesStore(
+    (s) => s.edges.filter((edge) => edge.target === id).length
+  );
+  const outgoingConnections = useSpacesStore(
+    (s) => s.edges.filter((edge) => edge.source === id).length
+  );
 
   // Pull text from connected text nodes via edges
   const connectedText = useSpacesStore((s) => {
@@ -348,13 +350,13 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         <div
           className={cn(
             "flex h-full w-px items-center justify-center transition-colors",
-            connectionMeta.incoming > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            incomingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
           )}
         >
           <div
             className={cn(
               "h-2 w-2 rounded-full border transition-colors",
-              connectionMeta.incoming > 0 || selected
+              incomingConnections > 0 || selected
                 ? "border-white/45 bg-white/30"
                 : "border-white/18 bg-white/16"
             )}
@@ -365,13 +367,13 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         <div
           className={cn(
             "flex h-full w-px items-center justify-center transition-colors",
-            connectionMeta.outgoing > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            outgoingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
           )}
         >
           <div
             className={cn(
               "h-2 w-2 rounded-full border transition-colors",
-              connectionMeta.outgoing > 0 || selected
+              outgoingConnections > 0 || selected
                 ? "border-white/45 bg-white/30"
                 : "border-white/18 bg-white/16"
             )}
@@ -385,7 +387,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         </span>
         <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
           <ArrowRightLeft className="h-2.5 w-2.5" />
-          {connectionMeta.incoming}/{connectionMeta.outgoing}
+          {incomingConnections}/{outgoingConnections}
         </span>
       </div>
 
@@ -623,7 +625,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
                 : "Gerar"}
           </button>
           <span className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1 text-[9px] font-medium text-white/40">
-            {connectionMeta.incoming > 0 ? `${connectionMeta.incoming} entrada` : "sem entrada"}
+            {incomingConnections > 0 ? `${incomingConnections} entrada` : "sem entrada"}
           </span>
         </div>
 

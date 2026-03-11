@@ -10,10 +10,12 @@ import type { TextNodeData } from "@/types/spaces";
 function TextNode({ data, id, selected }: NodeProps) {
   const nodeData = data as unknown as TextNodeData;
   const updateNode = useSpacesStore((s) => s.updateNodeData);
-  const connectionMeta = useSpacesStore((s) => ({
-    incoming: s.edges.filter((edge) => edge.target === id).length,
-    outgoing: s.edges.filter((edge) => edge.source === id).length,
-  }));
+  const incomingConnections = useSpacesStore(
+    (s) => s.edges.filter((edge) => edge.target === id).length
+  );
+  const outgoingConnections = useSpacesStore(
+    (s) => s.edges.filter((edge) => edge.source === id).length
+  );
   const [text, setText] = useState(nodeData.text || "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -85,13 +87,13 @@ function TextNode({ data, id, selected }: NodeProps) {
         <div
           className={cn(
             "flex h-full w-px items-center justify-center",
-            connectionMeta.incoming > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            incomingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
           )}
         >
           <div
             className={cn(
               "h-2 w-2 rounded-full border",
-              connectionMeta.incoming > 0 || selected
+              incomingConnections > 0 || selected
                 ? "border-white/45 bg-white/30"
                 : "border-white/18 bg-white/16"
             )}
@@ -102,13 +104,13 @@ function TextNode({ data, id, selected }: NodeProps) {
         <div
           className={cn(
             "flex h-full w-px items-center justify-center",
-            connectionMeta.outgoing > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            outgoingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
           )}
         >
           <div
             className={cn(
               "h-2 w-2 rounded-full border",
-              connectionMeta.outgoing > 0 || selected
+              outgoingConnections > 0 || selected
                 ? "border-white/45 bg-white/30"
                 : "border-white/18 bg-white/16"
             )}
@@ -126,7 +128,7 @@ function TextNode({ data, id, selected }: NodeProps) {
         </div>
         <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[9px] uppercase tracking-[0.18em] text-white/28">
           <ArrowRightLeft className="h-2.5 w-2.5" />
-          {connectionMeta.incoming}/{connectionMeta.outgoing}
+          {incomingConnections}/{outgoingConnections}
         </span>
       </div>
 
