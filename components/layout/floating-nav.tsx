@@ -295,7 +295,7 @@ export function FloatingNav() {
 
           {/* Dropdown */}
           {navOpen && (
-            <div className="absolute left-1/2 top-full mt-2 w-[calc(100vw-1rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-[24px] border border-foreground/[0.08] bg-card/95 p-2 shadow-2xl shadow-black/50 backdrop-blur-xl sm:mt-3 sm:w-[540px] sm:rounded-2xl sm:p-3">
+            <div className="absolute left-1/2 top-full mt-2 w-[calc(100vw-1rem)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-200 rounded-[24px] border border-foreground/[0.06] bg-card/76 p-2 shadow-2xl shadow-black/45 backdrop-blur-2xl sm:mt-3 sm:w-[540px] sm:rounded-2xl sm:p-3">
               {/* Arrow */}
               <div className="absolute -top-1.5 left-1/2 hidden h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-foreground/[0.08] bg-card/95 sm:block" />
 

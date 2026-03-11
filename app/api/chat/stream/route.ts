@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       model: languageModel,
       messages: allMessages,
       maxOutputTokens: selection.maxTokens,
+      abortSignal: request.signal,
     });
 
     return result.toTextStreamResponse({
@@ -59,6 +60,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof ApiRouteError) {
+      if (error.code === "invalid_body") {
+        console.error("[stream] Bad Request:", JSON.stringify(error.details, null, 2));
+      }
       return toErrorResponse(error, {
         code: "invalid_body",
         status: 400,

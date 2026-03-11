@@ -51,6 +51,7 @@ export async function POST(request: Request) {
       resolution: body.resolution ?? "1024",
       negativePrompt: body.negativePrompt ?? "",
       referenceImages: body.referenceImages ?? [],
+      abortSignal: request.signal,
     });
     return NextResponse.json({
       ok: true,
@@ -60,6 +61,9 @@ export async function POST(request: Request) {
     }, { headers: rateHeaders });
   } catch (error) {
     if (error instanceof ApiRouteError) {
+      if (error.code === "invalid_body") {
+        console.error("[spaces-generate] Bad Request:", JSON.stringify(error.details, null, 2));
+      }
       return toErrorResponse(error, {
         code: "invalid_body",
         status: 400,

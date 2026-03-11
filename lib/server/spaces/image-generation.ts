@@ -101,6 +101,7 @@ async function generateGoogleImageBatch(input: {
   quantity: number;
   resolution: Resolution;
   seed?: number | null;
+  abortSignal?: AbortSignal;
 }): Promise<Array<{ url: string; mediaType: string }>> {
   const apiKey = await resolveGoogleApiKey();
 
@@ -145,6 +146,7 @@ async function generateGoogleImageBatch(input: {
       aspectRatio: safeRatio,
       providerOptions,
       maxRetries: 1,
+      abortSignal: input.abortSignal,
     });
 
     return Promise.all(
@@ -164,6 +166,7 @@ async function generateGoogleImageBatch(input: {
         seed: input.seed ?? undefined,
         providerOptions,
         maxRetries: 1,
+        abortSignal: input.abortSignal,
       })
     )
   );
@@ -187,6 +190,7 @@ export async function generateSpaceImages(input: {
   negativePrompt?: string;
   seed?: number | null;
   referenceImages?: string[];
+  abortSignal?: AbortSignal;
 }): Promise<{
   imageUrls: string[];
   provider: "google";
@@ -214,6 +218,7 @@ export async function generateSpaceImages(input: {
     quantity: input.quantity,
     resolution: input.resolution,
     seed: input.seed,
+    abortSignal: input.abortSignal,
   });
 
   return {

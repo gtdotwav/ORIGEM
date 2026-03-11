@@ -159,7 +159,7 @@ function WorkspacesContent() {
 
       {/* Metrics */}
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-3.5 backdrop-blur-2xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-blue/20 bg-neon-blue/10">
               <Layers className="h-3 w-3 text-neon-blue" />
@@ -177,7 +177,7 @@ function WorkspacesContent() {
             </p>
           )}
         </div>
-        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-3.5 backdrop-blur-2xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-purple/20 bg-neon-purple/10">
               <FolderKanban className="h-3 w-3 text-neon-purple" />
@@ -188,7 +188,7 @@ function WorkspacesContent() {
           </div>
           <p className="text-2xl font-bold text-foreground">{totalProjects}</p>
         </div>
-        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-3.5 backdrop-blur-2xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-cyan/20 bg-neon-cyan/10">
               <MessageSquare className="h-3 w-3 text-neon-cyan" />
@@ -202,7 +202,7 @@ function WorkspacesContent() {
             de {sessions.length} total
           </p>
         </div>
-        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3.5 backdrop-blur-xl">
+        <div className="rounded-xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-3.5 backdrop-blur-2xl">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-neon-green/20 bg-neon-green/10">
               <Filter className="h-3 w-3 text-neon-green" />
