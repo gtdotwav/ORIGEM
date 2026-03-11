@@ -54,19 +54,7 @@ function toGoogleImageSize(resolution: Resolution): "512" | "1K" | "2K" | "4K" {
   }
 }
 
-async function resolveGoogleApiKey(): Promise<string> {
-  try {
-    const store = getSnapshotStore();
-    const record = await store.getProviderRecord("google");
-    if (record?.apiKey.trim()) {
-      return record.apiKey.trim();
-    }
-  } catch (error) {
-    console.warn("[spaces] Failed to load saved Google API key:", error);
-  }
-
-  return (await getProviderApiKey("google"))?.trim() ?? "";
-}
+// Removed obsolete resolveGoogleApiKey in favor of central getProviderApiKey
 
 async function persistImage(
   base64: string,
@@ -103,7 +91,7 @@ async function generateGoogleImageBatch(input: {
   seed?: number | null;
   abortSignal?: AbortSignal;
 }): Promise<Array<{ url: string; mediaType: string }>> {
-  const apiKey = await resolveGoogleApiKey();
+  const apiKey = await getProviderApiKey("google");
 
   if (!apiKey) {
     throw new Error("no_google_api_key");
@@ -124,12 +112,7 @@ async function generateGoogleImageBatch(input: {
     : (input.prompt as any).text;
 
   const providerOptions = isImagenModel
-    ? {
-        google: {
-          aspectRatio: safeRatio,
-          personGeneration: "allow_adult" as const,
-        },
-      }
+    ? undefined // The Vercel SDK handles aspectRatio for us at the top level now
     : {
         google: {
           imageConfig: {

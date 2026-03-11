@@ -70,6 +70,8 @@ export async function POST(request: Request) {
       });
     }
 
+    console.error("[spaces-generate] Server error:", error);
+
     const message =
       error instanceof Error ? error.message : "space_generation_failed";
 
