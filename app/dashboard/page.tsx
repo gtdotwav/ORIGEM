@@ -200,7 +200,7 @@ export default function DashboardPage() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 flex w-full max-w-[720px] flex-col items-center"
       >
-        <div className="w-full overflow-hidden rounded-[28px] border border-white/10 bg-black/40 shadow-[0_0_80px_rgba(0,0,0,0.6)] backdrop-blur-3xl md:rounded-[32px]">
+        <div className="w-full overflow-hidden rounded-[28px] border border-white/10 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl md:rounded-[32px]">
           {/* Header */}
           <div className="px-5 pb-4 pt-5 md:px-6 md:pt-6">
             <div className="mb-1.5 flex items-center gap-2">
@@ -223,13 +223,13 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Input area — fully borderless */}
+          {/* Input area */}
           <div className="px-5 pb-2 md:px-6" data-tour="chat-input">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Descreva o que precisa..."
+                placeholder="Qual o próximo nível que vamos desbloquear hoje?"
                 rows={1}
                 className="block w-full resize-none border-none bg-transparent px-0 pt-0 pb-3 text-[15.5px] font-medium leading-relaxed text-white/90 caret-neon-cyan placeholder:text-white/30 outline-none ring-0 transition-all selection:bg-white/20"
                 onKeyDown={(e) => {
@@ -340,14 +340,46 @@ export default function DashboardPage() {
             )}
           </AnimatePresence>
 
-          {/* Footer bar */}
-          <div className="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-between md:px-6 md:py-2.5">
-            <div className="text-[11px] text-foreground/32">
-              {hasInput ? "Shift + Enter para quebrar linha" : "Acoes extras em Ajustes"}
+          {/* Quick Actions (Replacing Starting Points) */}
+          <div className="border-t border-white/[0.04] bg-white/[0.01] px-5 py-4 md:px-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/agents")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
+              >
+                <SparklesIcon className="h-3 w-3 text-neon-cyan" />
+                Criar Agente
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/skills")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
+              >
+                <svg className="h-3 w-3 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Executar Skill
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/connections")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
+              >
+                <Plug className="h-3 w-3 text-neon-orange" />
+                Conectar Dados
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/spaces")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
+              >
+                <Orbit className="h-3 w-3 text-white/70" />
+                Abrir Spaces
+              </button>
             </div>
-
-            <ChatControlsMenu workspaceName={activeWsName} />
           </div>
+
         </div>
       </motion.div>
 
@@ -364,69 +396,7 @@ export default function DashboardPage() {
 
       <LeftToolbar />
 
-      {/* Starting Points Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 mt-10 flex w-full max-w-[720px] flex-col"
-      >
-        <p className="mb-5 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-          Ou escolha seu ponto de partida
-        </p>
-
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/agents")}
-            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
-          >
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-              <SparklesIcon className="h-4.5 w-4.5" />
-            </div>
-            <span className="text-[14px] font-semibold text-white/90">Criar Agente</span>
-            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Montar autonomia do zero</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/skills")}
-            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
-          >
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-[14px] font-semibold text-white/90">Executar Skill</span>
-            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Usar automacao pronta</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/connections")}
-            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
-          >
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-              <Plug className="h-4.5 w-4.5" />
-            </div>
-            <span className="text-[14px] font-semibold text-white/90">Conectar Dados</span>
-            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Importar infra e MCP</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/spaces")}
-            className="group flex flex-col items-start rounded-3xl border border-white/[0.06] bg-black/40 p-5 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
-          >
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.03] text-white/50 transition-all duration-300 group-hover:bg-white/[0.08] group-hover:text-neon-cyan group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-              <Orbit className="h-4.5 w-4.5" />
-            </div>
-            <span className="text-[14px] font-semibold text-white/90">Abrir Spaces</span>
-            <span className="mt-1.5 text-[11.5px] leading-relaxed text-white/40">Geração de mídia visual</span>
-          </button>
-        </div>
-      </motion.div>
+      {/* Left Toolbar is now floating free */}
 
       {/* Footer */}
       <div className="flex flex-1 items-end pb-4 pt-12">
