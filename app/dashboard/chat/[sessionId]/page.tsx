@@ -136,7 +136,6 @@ export default function ChatPage() {
   const ensureSessionRuntime = useRuntimeStore((s) => s.ensureSession);
   const agents = useAgentStore((s) => s.agents);
   const groups = useAgentStore((s) => s.groups);
-  const chatMode = usePersonaStore((s) => s.chatMode);
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
 
@@ -311,8 +310,17 @@ export default function ChatPage() {
     setIsSending(true);
 
     try {
-      if (chatMode === "ecosystem") {
-        await runChatOrchestration(sessionId, text, {
+      const lastAssistantMessage = sessionMessages.length > 0 
+        ? sessionMessages.slice().reverse().find((m) => m.role === "assistant")
+        : undefined;
+      
+      const isConfirming360 = 
+        lastAssistantMessage?.metadata?.is360Offer && 
+        /^(sim|quero|pode|yes|claro|com certeza|bora|vamos|manda|faz)/i.test(text);
+
+      if (isConfirming360) {
+        const originalPrompt = (lastAssistantMessage?.metadata?.originalPrompt as string) || text;
+        await runChatOrchestration(sessionId, originalPrompt, {
           language: selectedLanguage,
           calendarContext,
         });

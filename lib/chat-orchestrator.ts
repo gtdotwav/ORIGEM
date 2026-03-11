@@ -1284,7 +1284,7 @@ export async function runSimpleChat(
       response = result.content;
     }
 
-    if (activeCritics.length > 0) {
+    if (activeCritics.length > 0 && response !== "[OFFER_360_MODE]") {
       try {
         const { runCriticPipeline } = await import("@/lib/chat-api");
         const criticResults = await runCriticPipeline(
@@ -1305,6 +1305,15 @@ export async function runSimpleChat(
         // Critic pipeline failed, use original response
       }
     }
+
+    if (response.trim() === "[OFFER_360_MODE]") {
+      response = "Identifiquei que sua solicitação envolve um planejamento estratégico denso. Posso iniciar o pensamento ecossistêmico (ORIGEM 360) para decompor este pedido, criar as etapas e delegar a multiplos agentes operando em paralelo agora mesmo. Você deseja que eu aplique a didática 360º para executá-lo?";
+      metadata = {
+        is360Offer: true,
+        originalPrompt: prompt,
+      };
+    }
+
   } catch {
     response = generateSimpleResponse();
   }

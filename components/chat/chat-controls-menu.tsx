@@ -11,14 +11,12 @@ import {
 } from "lucide-react";
 import { LLMSelector } from "@/components/chat/llm-selector";
 import { CriticPanel } from "@/components/chat/critic-panel";
-import { ChatModeToggle } from "@/components/apps/chat-mode-toggle";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { usePersonaStore } from "@/stores/persona-store";
 
 interface ChatControlsMenuProps {
   workspaceName?: string;
@@ -30,8 +28,6 @@ export function ChatControlsMenu({
   className,
 }: ChatControlsMenuProps) {
   const [open, setOpen] = useState(false);
-  const chatMode = usePersonaStore((s) => s.chatMode);
-  const isEcosystem = chatMode === "ecosystem";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,7 +48,7 @@ export function ChatControlsMenu({
               Ajustes
             </p>
             <p className="truncate text-[10.5px] font-medium text-white/40">
-              {isEcosystem ? "Ecossistema" : "Chat direto"}
+              Configurações
             </p>
           </div>
           <ChevronDown
@@ -71,21 +67,17 @@ export function ChatControlsMenu({
         <div className="space-y-3">
           <div className="rounded-2xl border border-white/[0.06] bg-black/40 px-3 py-2.5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">
-              Contexto
+              Contexto do Workspace
             </p>
-            <div className="mt-2 flex items-center gap-2 text-[11.5px] text-white/80">
-              {isEcosystem ? (
-                <Workflow className="h-3.5 w-3.5 text-neon-cyan" />
-              ) : (
-                <MessageCircle className="h-3.5 w-3.5 text-neon-cyan" />
-              )}
-              <span>{isEcosystem ? "Modo ecossistema" : "Modo chat direto"}</span>
-            </div>
             {workspaceName ? (
-              <p className="mt-1.5 text-[11px] text-white/40">
-                Workspace ativo: {workspaceName}
+              <p className="mt-1.5 text-[11px] text-white/80">
+                Ativo: {workspaceName}
               </p>
-            ) : null}
+            ) : (
+                <p className="mt-1.5 text-[11px] text-white/40">
+                  Nenhum workspace ativo
+                </p>
+            )}
           </div>
 
           <div className="space-y-2 rounded-2xl border border-white/[0.06] bg-black/40 p-3">
@@ -99,13 +91,6 @@ export function ChatControlsMenu({
                 </p>
               </div>
               <LLMSelector />
-            </div>
-
-            <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] px-3 py-2.5">
-              <p className="mb-2 text-[12px] font-medium text-white/90">
-                Modo
-              </p>
-              <ChatModeToggle />
             </div>
 
             <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-3 py-2.5">

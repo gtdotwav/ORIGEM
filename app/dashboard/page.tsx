@@ -68,8 +68,6 @@ export default function DashboardPage() {
   const activeWsName = useWorkspaceStore((s) =>
     s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.name
   );
-  const chatMode = usePersonaStore((s) => s.chatMode);
-  const isEcosystem = chatMode === "ecosystem";
   const [ideasOpen, setIdeasOpen] = useState(false);
 
   useEffect(() => {
@@ -110,11 +108,7 @@ export default function DashboardPage() {
     router.push(`/dashboard/chat/${sessionId}`);
 
     try {
-      if (isEcosystem) {
-        await runChatOrchestration(sessionId, text, { calendarContext });
-      } else {
-        await runSimpleChat(sessionId, text, { calendarContext });
-      }
+      await runSimpleChat(sessionId, text, { calendarContext });
       persistSessionSnapshot(sessionId).catch((err) =>
         console.warn("[snapshot] persist failed (non-blocking):", err)
       );
