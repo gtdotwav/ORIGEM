@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo, useState, useRef, useEffect } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useConnection, type NodeProps } from "@xyflow/react";
 import {
   ArrowRightLeft,
   Loader2,
@@ -134,6 +134,8 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   const outgoingConnections = useSpacesStore(
     (s) => s.edges.filter((edge) => edge.source === id).length
   );
+  const connection = useConnection();
+  const isConnecting = connection.inProgress && connection.fromNode?.id !== id;
 
   // Pull text from connected text nodes via edges
   const connectedText = useSpacesStore((s) => {
@@ -329,16 +331,19 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!border-0 !bg-transparent"
+        isConnectableStart={false}
+        className={cn(
+          "!border-0 !bg-transparent",
+          !isConnecting && "!pointer-events-none"
+        )}
         style={{
-          top: 12,
-          left: 0,
-          right: "auto",
-          width: 26,
-          height: "calc(100% - 24px)",
+          inset: 0,
+          width: "100%",
+          height: "100%",
           transform: "none",
-          borderRadius: 18,
+          borderRadius: 22,
           background: "transparent",
+          zIndex: isConnecting ? 10 : -1,
         }}
       />
       <Handle
@@ -346,49 +351,40 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         position={Position.Right}
         className="!border-0 !bg-transparent"
         style={{
-          top: 12,
+          top: 0,
           left: "auto",
           right: 0,
-          width: 26,
-          height: "calc(100% - 24px)",
+          width: 32,
+          height: "100%",
           transform: "none",
-          borderRadius: 18,
+          borderRadius: "0 22px 22px 0",
           background: "transparent",
+          zIndex: 10,
         }}
       />
-      <div className="pointer-events-none absolute inset-y-3 left-0 flex w-7 items-center justify-center">
+      
+      {/* Target indicator */}
+      <div className="pointer-events-none absolute inset-y-0 -left-[4px] z-20 flex items-center justify-center">
         <div
           className={cn(
-            "flex h-full w-px items-center justify-center transition-colors",
-            incomingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            "h-2 w-2 rounded-full border transition-all duration-300",
+            incomingConnections > 0 || selected
+              ? "scale-110 border-white/60 bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+              : "scale-100 border-white/20 bg-white/10"
           )}
-        >
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full border transition-colors",
-              incomingConnections > 0 || selected
-                ? "border-white/45 bg-white/30"
-                : "border-white/18 bg-white/16"
-            )}
-          />
-        </div>
+        />
       </div>
-      <div className="pointer-events-none absolute inset-y-3 right-0 flex w-7 items-center justify-center">
+
+      {/* Source indicator */}
+      <div className="pointer-events-none absolute inset-y-0 -right-[4px] z-20 flex items-center justify-center">
         <div
           className={cn(
-            "flex h-full w-px items-center justify-center transition-colors",
-            outgoingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            "h-2 w-2 rounded-full border transition-all duration-300",
+            outgoingConnections > 0 || selected
+              ? "scale-110 border-white/60 bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+              : "scale-100 border-white/20 bg-white/10"
           )}
-        >
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full border transition-colors",
-              outgoingConnections > 0 || selected
-                ? "border-white/45 bg-white/30"
-                : "border-white/18 bg-white/16"
-            )}
-          />
-        </div>
+        />
       </div>
 
       {isExpanded && (

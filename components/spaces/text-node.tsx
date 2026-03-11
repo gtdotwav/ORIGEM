@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState, useRef, useEffect, useCallback } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useConnection, type NodeProps } from "@xyflow/react";
 import { ArrowRightLeft, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -16,6 +16,8 @@ function TextNode({ data, id, selected }: NodeProps) {
   const outgoingConnections = useSpacesStore(
     (s) => s.edges.filter((edge) => edge.source === id).length
   );
+  const connection = useConnection();
+  const isConnecting = connection.inProgress && connection.fromNode?.id !== id;
   const [text, setText] = useState(nodeData.text || "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -56,16 +58,19 @@ function TextNode({ data, id, selected }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!border-0 !bg-transparent"
+        isConnectableStart={false}
+        className={cn(
+          "!border-0 !bg-transparent",
+          !isConnecting && "!pointer-events-none"
+        )}
         style={{
-          top: 10,
-          left: 0,
-          right: "auto",
-          width: 22,
-          height: "calc(100% - 20px)",
+          inset: 0,
+          width: "100%",
+          height: "100%",
           transform: "none",
           borderRadius: 16,
           background: "transparent",
+          zIndex: isConnecting ? 10 : -1,
         }}
       />
       <Handle
@@ -73,49 +78,40 @@ function TextNode({ data, id, selected }: NodeProps) {
         position={Position.Right}
         className="!border-0 !bg-transparent"
         style={{
-          top: 10,
+          top: 0,
           left: "auto",
           right: 0,
-          width: 22,
-          height: "calc(100% - 20px)",
+          width: 32,
+          height: "100%",
           transform: "none",
-          borderRadius: 16,
+          borderRadius: "0 16px 16px 0",
           background: "transparent",
+          zIndex: 10,
         }}
       />
-      <div className="pointer-events-none absolute inset-y-3 left-0 flex w-6 items-center justify-center">
+      
+      {/* Target indicator */}
+      <div className="pointer-events-none absolute inset-y-0 -left-[4px] z-20 flex items-center justify-center">
         <div
           className={cn(
-            "flex h-full w-px items-center justify-center",
-            incomingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            "h-2 w-2 rounded-full border transition-all duration-300",
+            incomingConnections > 0 || selected
+              ? "scale-110 border-white/60 bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+              : "scale-100 border-white/20 bg-white/10"
           )}
-        >
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full border",
-              incomingConnections > 0 || selected
-                ? "border-white/45 bg-white/30"
-                : "border-white/18 bg-white/16"
-            )}
-          />
-        </div>
+        />
       </div>
-      <div className="pointer-events-none absolute inset-y-3 right-0 flex w-6 items-center justify-center">
+
+      {/* Source indicator */}
+      <div className="pointer-events-none absolute inset-y-0 -right-[4px] z-20 flex items-center justify-center">
         <div
           className={cn(
-            "flex h-full w-px items-center justify-center",
-            outgoingConnections > 0 || selected ? "bg-white/[0.18]" : "bg-white/[0.08]"
+            "h-2 w-2 rounded-full border transition-all duration-300",
+            outgoingConnections > 0 || selected
+              ? "scale-110 border-white/60 bg-white/40 shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+              : "scale-100 border-white/20 bg-white/10"
           )}
-        >
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full border",
-              outgoingConnections > 0 || selected
-                ? "border-white/45 bg-white/30"
-                : "border-white/18 bg-white/16"
-            )}
-          />
-        </div>
+        />
       </div>
 
       {/* Drag handle */}
