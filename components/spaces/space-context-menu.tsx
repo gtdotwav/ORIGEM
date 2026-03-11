@@ -130,12 +130,12 @@ export function SpaceContextMenu({ items, position, onClose }: SpaceContextMenuP
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -4 }}
         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed z-[100] w-[280px] overflow-hidden rounded-xl border border-white/[0.08] shadow-2xl shadow-black/60"
+        className="fixed z-[100] w-[280px] overflow-hidden rounded-[20px] border border-white/[0.08] shadow-2xl shadow-black/80"
         style={{
           left: position.x,
           top: position.y,
-          background: "linear-gradient(180deg, rgba(22,22,22,0.98) 0%, rgba(18,18,18,0.99) 100%)",
-          backdropFilter: "blur(40px) saturate(1.5)",
+          background: "linear-gradient(180deg, rgba(22,22,22,0.95) 0%, rgba(14,14,14,0.98) 100%)",
+          backdropFilter: "blur(48px) saturate(1.8)",
         }}
       >
         {/* Search */}

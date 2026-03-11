@@ -3,7 +3,7 @@
 import {
   BaseEdge,
   EdgeLabelRenderer,
-  getSmoothStepPath,
+  getBezierPath,
   type EdgeProps,
 } from "@xyflow/react";
 
@@ -32,15 +32,13 @@ export default function SpaceConnectionEdge({
   style,
   type,
 }: EdgeProps) {
-  const [path, labelX, labelY] = getSmoothStepPath({
+  const [path, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
-    borderRadius: 18,
-    offset: 24,
   });
 
   const strokeColor =
@@ -70,7 +68,7 @@ export default function SpaceConnectionEdge({
         interactionWidth={34}
         style={{
           stroke: strokeColor,
-          strokeWidth: selected ? 2.8 : 2.2,
+          strokeWidth: selected ? 2.0 : 1.5,
           strokeDasharray: type === "variation" ? "7 6" : undefined,
           strokeLinecap: "round",
           ...style,

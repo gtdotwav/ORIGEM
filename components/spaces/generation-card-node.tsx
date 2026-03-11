@@ -14,6 +14,7 @@ import {
   Check,
   Upload,
   X,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpacesStore } from "@/stores/spaces-store";
@@ -172,6 +173,14 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
     setRefImage(card.referenceImageDataUrl ?? null);
   }, [card]);
 
+  const [isExpanded, setIsExpanded] = useState(!card?.imageUrls?.length);
+
+  useEffect(() => {
+    if (card?.imageUrls && card.imageUrls.length > 0) {
+      setIsExpanded(false);
+    }
+  }, [card?.imageUrls?.length]);
+
   // Effective prompt: local text takes priority, fallback to connected text nodes
   const effectivePrompt = promptText.trim() || connectedText;
 
@@ -309,7 +318,8 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "group relative w-[336px] overflow-hidden rounded-[22px] border shadow-xl transition-colors",
+        "group relative overflow-hidden rounded-[22px] border shadow-xl transition-all duration-300",
+        isExpanded || !hasImages ? "w-[336px]" : "w-[260px]",
         selected
           ? "border-white/[0.18] bg-[oklch(0.12_0_0)] shadow-white/[0.05] ring-1 ring-white/[0.08]"
           : "border-white/[0.08] bg-[oklch(0.10_0_0)] hover:border-white/[0.12]"
@@ -381,19 +391,26 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-6 top-0 z-[1] flex items-center justify-between px-2 pt-2 text-[9px] uppercase tracking-[0.2em] text-white/24">
-        <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
-          {selectedModelLabel}
-        </span>
-        <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
-          <ArrowRightLeft className="h-2.5 w-2.5" />
-          {incomingConnections}/{outgoingConnections}
-        </span>
-      </div>
+      {isExpanded && (
+        <div className="pointer-events-none absolute inset-x-6 top-0 z-[1] flex items-center justify-between px-2 pt-2 text-[9px] uppercase tracking-[0.2em] text-white/24">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
+            {selectedModelLabel}
+          </span>
+          <span className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1">
+            <ArrowRightLeft className="h-2.5 w-2.5" />
+            {incomingConnections}/{outgoingConnections}
+          </span>
+        </div>
+      )}
 
       {/* Image result area */}
       {(hasImages || isGenerating) && (
-        <div className="relative flex h-[188px] items-center justify-center overflow-hidden bg-white/[0.02]">
+        <div
+          className={cn(
+            "relative flex items-center justify-center overflow-hidden bg-white/[0.02] transition-all duration-300",
+            !isExpanded && hasImages ? "h-[346px]" : "h-[188px]"
+          )}
+        >
           {hasImages ? (
             <div
               className={cn(
@@ -459,6 +476,22 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
             {hasImages && (
               <button
                 type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                className={cn(
+                  "nodrag nopan flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72",
+                  isExpanded && "bg-white/10 text-white/90"
+                )}
+                title={isExpanded ? "Ocultar ajustes" : "Mostrar ajustes"}
+              >
+                <Settings2 className="h-3 w-3" />
+              </button>
+            )}
+            {hasImages && (
+              <button
+                type="button"
                 className="nodrag nopan flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.08] bg-black/55 text-white/55 backdrop-blur-sm transition-colors hover:border-white/[0.12] hover:text-white/72"
                 title="Ampliar"
               >
@@ -487,8 +520,9 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
       )}
 
       {/* Settings area — embedded in card */}
-      <div className="space-y-2.5 px-3 py-3">
-        <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-2 text-[10px] text-white/46">
+      {(!hasImages || isExpanded) && (
+        <div className="space-y-2.5 px-3 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-2 text-[10px] text-white/46">
           <div className="flex items-center gap-2">
             <span className="font-medium text-white/68">{selectedModelLabel}</span>
             <span className="rounded-full border border-white/[0.08] px-1.5 py-0.5 text-[9px] text-white/32">
@@ -645,6 +679,7 @@ function GenerationCardNode({ data, id, selected }: NodeProps) {
           </div>
         ) : null}
       </div>
+      )}
     </div>
   );
 }

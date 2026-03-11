@@ -45,7 +45,7 @@ export function SpacesSidebar() {
   ];
 
   return (
-    <div className="flex h-full w-14 flex-col items-center border-r border-white/[0.05] bg-[oklch(0.07_0_0)] py-3">
+    <div className="pointer-events-auto flex flex-col items-center rounded-[20px] border border-white/[0.08] bg-[oklch(0.08_0_0)]/80 p-2 pb-3 pt-2 shadow-2xl backdrop-blur-xl">
       {/* New button */}
       <button
         type="button"

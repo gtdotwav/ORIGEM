@@ -142,13 +142,15 @@ export default function SpaceCanvasPage() {
 
   return (
     <div className="fixed inset-0 z-50 flex bg-[oklch(0.08_0_0)]">
-      {/* Left sidebar */}
-      <SpacesSidebar />
-
       {/* Center — Infinite Canvas */}
       <div className="relative flex-1">
+        {/* Left floating sidebar */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-4">
+          <SpacesSidebar />
+        </div>
+
         {/* Top bar — floating glass overlay */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between pl-20 pr-4 py-3">
           <div className="pointer-events-auto flex items-center gap-3">
             <button
               type="button"
@@ -228,10 +230,10 @@ export default function SpaceCanvasPage() {
           zoomOnScroll={false}
           zoomOnPinch
           selectionOnDrag={false}
-          connectionLineType={ConnectionLineType.SmoothStep}
+          connectionLineType={ConnectionLineType.Bezier}
           connectionLineStyle={{
             stroke: "rgba(255,255,255,0.34)",
-            strokeWidth: 2.4,
+            strokeWidth: 2.0,
           }}
           onlyRenderVisibleElements
           elevateEdgesOnSelect
