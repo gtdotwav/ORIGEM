@@ -188,7 +188,7 @@ export function ChatHistoryPanel({
                     className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[11px] text-foreground/35 transition-all hover:bg-neon-purple/8 hover:text-neon-purple/70"
                   >
                     <Workflow className="h-3 w-3" />
-                    Canvas de Fluxos
+                    Canvas de Orquestracao
                   </button>
                 )}
                 <button

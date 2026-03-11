@@ -15,6 +15,7 @@ import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import type { FeedItem } from "@/types/feed";
 import { DEFAULT_FEED_QUERY, buildFeedContextFromWorkspace } from "@/lib/feed/context";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 
 function FeedPageFallback() {
   return (
@@ -35,6 +36,7 @@ function FeedPageFallback() {
 }
 
 function FeedPageContent() {
+  const mounted = useClientMounted();
   const items = useFeedStore((s) => s.items);
   const interactions = useFeedStore((s) => s.interactions);
   const searchQuery = useFeedStore((s) => s.searchQuery);
@@ -210,6 +212,10 @@ function FeedPageContent() {
   function handleShare(item: FeedItem) {
     setShareItem(item);
     setShareOpen(true);
+  }
+
+  if (!mounted) {
+    return <FeedPageFallback />;
   }
 
   return (

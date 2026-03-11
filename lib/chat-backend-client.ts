@@ -10,6 +10,20 @@ import type {
   SessionSnapshotRecord,
 } from "@/lib/server/backend/types";
 import type { SessionRuntime } from "@/types/runtime";
+import type { Message } from "@/types/session";
+
+const MAX_SNAPSHOT_MESSAGES = 40;
+const MAX_MESSAGE_CONTENT_LENGTH = 6_000;
+const MAX_AGENT_OUTPUTS = 10;
+const MAX_OUTPUT_CONTENT_LENGTH = 4_000;
+const MAX_PIPELINE_EVENTS = 80;
+const MAX_METADATA_DEPTH = 3;
+const MAX_METADATA_KEYS = 20;
+const MAX_METADATA_ITEMS = 16;
+const MAX_METADATA_STRING_LENGTH = 1_800;
+const lastPersistedSnapshotBodies = new Map<string, string>();
+const pendingSnapshotBodies = new Map<string, string>();
+let snapshotPersistChain: Promise<void> = Promise.resolve();
 
 export async function ensureSessionRecord(
   sessionId: string,
@@ -67,6 +81,102 @@ function normalizeRuntime(sessionId: string, runtime?: SessionRuntime): SessionR
   };
 }
 
+function compactText(value: string, limit: number) {
+  if (value.length <= limit) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(0, limit - 3)).trimEnd()}...`;
+}
+
+function compactUnknown(value: unknown, depth = 0): unknown {
+  if (typeof value === "string") {
+    return compactText(value, MAX_METADATA_STRING_LENGTH);
+  }
+
+  if (
+    value === null ||
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    value === undefined
+  ) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, MAX_METADATA_ITEMS)
+      .map((item) => compactUnknown(item, depth + 1));
+  }
+
+  if (typeof value === "object") {
+    if (depth >= MAX_METADATA_DEPTH) {
+      return "[omitted]";
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>).slice(
+      0,
+      MAX_METADATA_KEYS
+    );
+
+    return Object.fromEntries(
+      entries.map(([key, entryValue]) => {
+        if (key === "imageAttachment" && entryValue && typeof entryValue === "object") {
+          const attachment = entryValue as Record<string, unknown>;
+          return [
+            key,
+            {
+              ...attachment,
+              dataUrl: undefined,
+              omittedFromSnapshot: true,
+            },
+          ];
+        }
+
+        return [key, compactUnknown(entryValue, depth + 1)];
+      })
+    );
+  }
+
+  return String(value);
+}
+
+function pickMessagesForSnapshot(messages: Message[]) {
+  const importantMessages = messages.filter(
+    (message) =>
+      message.metadata?.contextChat === true ||
+      message.metadata?.checkpoint === true ||
+      message.metadata?.includeJourney === true ||
+      message.metadata?.journeyStep === true
+  );
+  const conversationalMessages = messages.filter((message) => message.role !== "system");
+  const recentMessages = messages.slice(-8);
+  const deduped = new Map<string, Message>();
+
+  for (const message of [
+    ...importantMessages.slice(-16),
+    ...conversationalMessages.slice(-24),
+    ...recentMessages,
+  ]) {
+    deduped.set(message.id, message);
+  }
+
+  return Array.from(deduped.values())
+    .sort(
+      (left, right) =>
+        new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+    )
+    .slice(-MAX_SNAPSHOT_MESSAGES)
+    .map((message) => ({
+      ...message,
+      content: compactText(message.content, MAX_MESSAGE_CONTENT_LENGTH),
+      metadata:
+        message.metadata && typeof message.metadata === "object"
+          ? (compactUnknown(message.metadata) as Record<string, unknown>)
+          : message.metadata,
+    }));
+}
+
 function toSerializableSnapshot(sessionId: string): SessionSnapshot | null {
   const sessionState = useSessionStore.getState();
   const runtimeState = useRuntimeStore.getState();
@@ -79,9 +189,10 @@ function toSerializableSnapshot(sessionId: string): SessionSnapshot | null {
     return null;
   }
 
-  const sessionMessages = sessionState.messages.filter(
+  const rawSessionMessages = sessionState.messages.filter(
     (message) => message.sessionId === sessionId
   );
+  const sessionMessages = pickMessagesForSnapshot(rawSessionMessages);
 
   const decompositionIds = new Set<string>();
 
@@ -111,16 +222,42 @@ function toSerializableSnapshot(sessionId: string): SessionSnapshot | null {
   }, {});
 
   return {
-    session,
+    session: {
+      ...session,
+      metadata:
+        session.metadata && typeof session.metadata === "object"
+          ? (compactUnknown(session.metadata) as Record<string, unknown>)
+          : session.metadata,
+    },
     messages: sessionMessages,
     runtime: normalizeRuntime(sessionId, runtimeState.sessions[sessionId]),
-    agents: agentState.agents.filter((agent) => agent.sessionId === sessionId),
+    agents: agentState.agents
+      .filter((agent) => agent.sessionId === sessionId)
+      .map((agent) => ({
+        ...agent,
+        systemPrompt: compactText(agent.systemPrompt, MAX_OUTPUT_CONTENT_LENGTH),
+        config:
+          agent.config && typeof agent.config === "object"
+            ? (compactUnknown(agent.config) as Record<string, unknown>)
+            : agent.config,
+        outputs: agent.outputs.slice(-MAX_AGENT_OUTPUTS).map((output) => ({
+          ...output,
+          content: compactText(output.content, MAX_OUTPUT_CONTENT_LENGTH),
+          metadata:
+            output.metadata && typeof output.metadata === "object"
+              ? (compactUnknown(output.metadata) as Record<string, unknown>)
+              : output.metadata,
+        })),
+      })),
     groups: agentState.groups.filter((group) => group.sessionId === sessionId),
     decompositions: scopedDecompositions,
     pipeline: {
       stage: pipelineState.stage,
       progress: pipelineState.progress,
-      events: pipelineState.events,
+      events: pipelineState.events.slice(-MAX_PIPELINE_EVENTS).map((event) => ({
+        ...event,
+        data: compactUnknown(event.data),
+      })),
       error: pipelineState.error,
       startedAt: pipelineState.startedAt,
       completedAt: pipelineState.completedAt,
@@ -224,21 +361,70 @@ export async function persistSessionSnapshot(sessionId: string): Promise<void> {
     return;
   }
 
-  const response = await fetch(`/api/chat/sessions/${sessionId}/snapshot`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ snapshot }),
+  const body = JSON.stringify({ snapshot });
+  const pendingBody = pendingSnapshotBodies.get(sessionId);
+  const lastPersistedBody = lastPersistedSnapshotBodies.get(sessionId);
+
+  if (pendingBody === body || lastPersistedBody === body) {
+    return snapshotPersistChain;
+  }
+
+  pendingSnapshotBodies.set(sessionId, body);
+
+  const flushPromise = snapshotPersistChain.then(async () => {
+    let firstError: Error | null = null;
+
+    while (pendingSnapshotBodies.size > 0) {
+      const nextEntry = pendingSnapshotBodies.entries().next().value as
+        | [string, string]
+        | undefined;
+      if (!nextEntry) {
+        break;
+      }
+
+      const [nextSessionId, nextBody] = nextEntry;
+      pendingSnapshotBodies.delete(nextSessionId);
+
+      if (lastPersistedSnapshotBodies.get(nextSessionId) === nextBody) {
+        continue;
+      }
+
+      try {
+        const response = await fetch(`/api/chat/sessions/${nextSessionId}/snapshot`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: nextBody,
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          if (errorBody?.issues) {
+            console.error("[snapshot] Validation issues:", errorBody.issues);
+          }
+
+          throw new Error(`Failed to persist snapshot (${response.status})`);
+        }
+
+        lastPersistedSnapshotBodies.set(nextSessionId, nextBody);
+      } catch (error) {
+        if (!firstError) {
+          firstError =
+            error instanceof Error
+              ? error
+              : new Error("Failed to persist snapshot");
+        }
+      }
+    }
+
+    if (firstError) {
+      throw firstError;
+    }
   });
 
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => null);
-    if (errorBody?.issues) {
-      console.error("[snapshot] Validation issues:", errorBody.issues);
-    }
-    throw new Error(`Failed to persist snapshot (${response.status})`);
-  }
+  snapshotPersistChain = flushPromise.catch(() => {});
+  await flushPromise;
 }
 
 export async function hydrateSessionSnapshot(

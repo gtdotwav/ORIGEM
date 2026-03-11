@@ -18,6 +18,7 @@ import { ChatSessionMenu } from "@/components/chat/chat-session-menu";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
 import { LeftToolbar } from "@/components/layout/left-toolbar";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import {
   ensureSessionRecord,
   hydrateSessionSnapshot,
@@ -109,6 +110,7 @@ function formatMessageTime(date: string | Date) {
 
 export default function ChatPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const mounted = useClientMounted();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
@@ -330,6 +332,10 @@ export default function ChatPage() {
 
   const liveProgress = runtime?.overallProgress ?? progress;
   const showLiveRuntimeBubble = Boolean(runtime?.isRunning) && !isSending;
+
+  if (!mounted) {
+    return <div className="mx-auto min-h-[calc(100vh-130px)] w-full max-w-4xl px-4 pb-[8.5rem] pt-2 md:px-6 md:pb-6 md:pt-4" />;
+  }
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-4xl flex-col px-4 pb-[8.5rem] pt-2 md:h-[calc(100vh-130px)] md:px-6 md:pb-6 md:pt-4">

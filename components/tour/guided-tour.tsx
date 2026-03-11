@@ -294,9 +294,9 @@ const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
     {
       id: "spaces-welcome",
       type: "modal",
-      title: "Spaces para fluxo visual",
+      title: "Spaces para geracao visual",
       description:
-        "O hub de Spaces serve para criar, reencontrar e abrir canvases visuais sem misturar isso com o chat principal.",
+        "O hub de Spaces serve para criar, reencontrar e abrir canvases de geracao visual sem misturar isso com o canvas da orquestracao.",
     },
     {
       id: "spaces-create",
@@ -304,7 +304,7 @@ const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
       target: '[data-tour="spaces-create"]',
       title: "Crie o canvas certo",
       description:
-        "Comece por aqui quando quiser abrir um novo fluxo visual de geracao, referencias e conexoes entre cards.",
+        "Comece por aqui quando quiser abrir um novo space para referencias, variacoes e geracao de imagens.",
       position: "bottom",
       mobilePosition: "top",
       icon: ImageIcon,
@@ -317,7 +317,7 @@ const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
       target: '[data-tour="spaces-grid"]',
       title: "Retome rapido",
       description:
-        "Quando voce ja tem canvases criados, esta grade vira o ponto mais rapido para reabrir, renomear ou limpar um fluxo.",
+        "Quando voce ja tem spaces criados, esta grade vira o ponto mais rapido para reabrir, renomear ou limpar uma exploracao visual.",
       position: "top",
       mobilePosition: "top",
       icon: Blocks,
@@ -329,7 +329,7 @@ const TOUR_STEPS_BY_CONTEXT: Record<TourContextId, TourStep[]> = {
       type: "modal",
       title: "Pronto para abrir um Space",
       description:
-        "O melhor caminho aqui e separar cada exploracao visual em um canvas proprio para manter contexto e historico claros.",
+        "O melhor caminho aqui e separar cada exploracao visual em um space proprio para manter contexto e historico claros.",
     },
   ],
   workspaces: [

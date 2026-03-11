@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
@@ -74,6 +75,7 @@ function formatSessionTime(value: string | Date) {
 }
 
 export default function DashboardControlPage() {
+  const mounted = useClientMounted();
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [providerConnectedCount, setProviderConnectedCount] = useState(0);
@@ -166,6 +168,10 @@ export default function DashboardControlPage() {
 
   const PAGE_SIZE = 8;
   const totalPages = Math.ceil(latestSessions.length / PAGE_SIZE);
+
+  if (!mounted) {
+    return <div className="mx-auto min-h-[70vh] w-full max-w-6xl px-4 md:px-6" />;
+  }
 
   const startSessionFromDashboard = async () => {
     const text = input.trim();

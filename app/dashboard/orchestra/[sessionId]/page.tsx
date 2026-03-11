@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import {
-  hydrateSessionSnapshot,
   persistSessionSnapshot,
 } from "@/lib/chat-backend-client";
 import { createMessage, runChatOrchestration } from "@/lib/chat-orchestrator";
@@ -32,6 +31,9 @@ import {
   getSelectedContext,
   getSessionContexts,
 } from "@/lib/session-journey";
+import { persistSessionHandoff } from "@/lib/session-handoff";
+import { useClientMounted } from "@/hooks/use-client-mounted";
+import { useSessionSnapshotHydration } from "@/hooks/use-session-snapshot-hydration";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
@@ -63,12 +65,12 @@ const STATUS_STYLE = {
 
 function OrchestraPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const queryContextId = searchParams.get("contextId");
+  const mounted = useClientMounted();
 
-  const [isHydrating, setIsHydrating] = useState(false);
   const [isRunningOrchestra, setIsRunningOrchestra] = useState(false);
-  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
   const sessions = useWorkspaceFilteredSessions();
   const messages = useSessionStore((state) => state.messages);
@@ -150,32 +152,16 @@ function OrchestraPage() {
   );
 
   const shouldHydrate =
-    !isHydrating &&
     !targetSession &&
     contexts.length === 0 &&
     runtimeTasks.length === 0 &&
     sessionAgents.length === 0;
-
-  useEffect(() => {
-    if (!sessionId || !shouldHydrate) {
-      return;
-    }
-
-    if (hydratedSessionIdsRef.current.has(sessionId)) {
-      return;
-    }
-
-    hydratedSessionIdsRef.current.add(sessionId);
-    setIsHydrating(true);
-
-    void hydrateSessionSnapshot(sessionId)
-      .catch((error) => {
-        console.error("Failed to hydrate session on orchestra page", error);
-      })
-      .finally(() => {
-        setIsHydrating(false);
-      });
-  }, [sessionId, shouldHydrate, isHydrating]);
+  const { isHydrating } = useSessionSnapshotHydration({
+    sessionId,
+    enabled: shouldHydrate,
+    logLabel: "orchestra page",
+    deferStateUpdate: false,
+  });
 
   useEffect(() => {
     if (!sessionId) {
@@ -255,6 +241,53 @@ function OrchestraPage() {
       setIsRunningOrchestra(false);
     }
   };
+
+  const navigateWithHandoff = (target: "chat" | "code" | "slides") => {
+    const payload = persistSessionHandoff({
+      sessionId,
+      target,
+      contextId: selectedContext?.id ?? null,
+    });
+
+    persistSessionSnapshot(sessionId).catch((err) =>
+      console.warn("[snapshot] persist failed (non-blocking):", err)
+    );
+
+    if (target === "chat") {
+      const href = payload?.contextId
+        ? `/dashboard/chat/${encodeURIComponent(sessionId)}?contextId=${encodeURIComponent(
+            payload.contextId
+          )}`
+        : `/dashboard/chat/${encodeURIComponent(sessionId)}`;
+      router.push(href);
+      return;
+    }
+
+    const base =
+      target === "code" ? "/dashboard/code" : "/dashboard/apps/slides";
+    const params = new URLSearchParams({
+      sessionId,
+    });
+
+    if (payload?.contextId) {
+      params.set("contextId", payload.contextId);
+    }
+
+    router.push(`${base}?${params.toString()}`);
+  };
+
+  if (!mounted) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <MetricSkeleton />
+          <MetricSkeleton />
+          <MetricSkeleton />
+          <MetricSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -528,9 +561,10 @@ function OrchestraPage() {
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {/* Continue in Chat */}
-              <Link
-                href={`/dashboard/chat/${sessionId}`}
-                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-neon-cyan/30 hover:bg-neon-cyan/[0.04]"
+              <button
+                type="button"
+                onClick={() => navigateWithHandoff("chat")}
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 text-left transition-all hover:border-neon-cyan/30 hover:bg-neon-cyan/[0.04]"
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-neon-cyan/20 bg-neon-cyan/10 transition-all group-hover:scale-105">
                   <MessageSquare className="h-5 w-5 text-neon-cyan" />
@@ -544,12 +578,13 @@ function OrchestraPage() {
                 <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-neon-cyan/70 opacity-0 transition-all group-hover:opacity-100">
                   Abrir <ArrowRight className="h-3 w-3" />
                 </div>
-              </Link>
+              </button>
 
               {/* Open Code Editor */}
-              <Link
-                href="/dashboard/code"
-                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-green-400/30 hover:bg-green-400/[0.04]"
+              <button
+                type="button"
+                onClick={() => navigateWithHandoff("code")}
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 text-left transition-all hover:border-green-400/30 hover:bg-green-400/[0.04]"
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-green-400/20 bg-green-400/10 transition-all group-hover:scale-105">
                   <Code2 className="h-5 w-5 text-green-400" />
@@ -563,12 +598,13 @@ function OrchestraPage() {
                 <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-green-400/70 opacity-0 transition-all group-hover:opacity-100">
                   Abrir <ArrowRight className="h-3 w-3" />
                 </div>
-              </Link>
+              </button>
 
               {/* Create Slides */}
-              <Link
-                href="/dashboard/apps/slides"
-                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 transition-all hover:border-neon-purple/30 hover:bg-neon-purple/[0.04]"
+              <button
+                type="button"
+                onClick={() => navigateWithHandoff("slides")}
+                className="group rounded-xl border border-foreground/[0.08] bg-black/25 p-4 text-left transition-all hover:border-neon-purple/30 hover:bg-neon-purple/[0.04]"
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-neon-purple/20 bg-neon-purple/10 transition-all group-hover:scale-105">
                   <Presentation className="h-5 w-5 text-neon-purple" />
@@ -582,7 +618,7 @@ function OrchestraPage() {
                 <div className="mt-2 inline-flex items-center gap-1 text-[10px] text-neon-purple/70 opacity-0 transition-all group-hover:opacity-100">
                   Abrir <ArrowRight className="h-3 w-3" />
                 </div>
-              </Link>
+              </button>
 
               {/* Run Orchestra Again */}
               <button

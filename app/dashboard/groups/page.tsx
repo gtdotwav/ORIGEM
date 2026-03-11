@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
-import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   getContextDirections,
   getJourneyStepHref,
@@ -22,6 +21,7 @@ import {
   getSelectedContext,
   getSessionContexts,
 } from "@/lib/session-journey";
+import { useSessionSnapshotHydration } from "@/hooks/use-session-snapshot-hydration";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
@@ -72,9 +72,6 @@ function GroupsPageContent() {
   const searchParams = useSearchParams();
   const querySessionId = searchParams.get("sessionId");
   const queryContextId = searchParams.get("contextId");
-
-  const [isHydrating, setIsHydrating] = useState(false);
-  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
   const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
@@ -176,35 +173,14 @@ function GroupsPageContent() {
 
   const shouldHydrate =
     Boolean(targetSessionId) &&
-    !isHydrating &&
     effectiveGroups.length === 0 &&
     runtimeTasks.length === 0 &&
     contexts.length === 0;
-
-  useEffect(() => {
-    if (!targetSessionId || !shouldHydrate) {
-      return;
-    }
-
-    if (hydratedSessionIdsRef.current.has(targetSessionId)) {
-      return;
-    }
-
-    hydratedSessionIdsRef.current.add(targetSessionId);
-    queueMicrotask(() => {
-      setIsHydrating(true);
-    });
-
-    void hydrateSessionSnapshot(targetSessionId)
-      .catch((error) => {
-        console.error("Failed to hydrate session on groups page", error);
-      })
-      .finally(() => {
-        queueMicrotask(() => {
-          setIsHydrating(false);
-        });
-      });
-  }, [shouldHydrate, targetSessionId, isHydrating]);
+  const { isHydrating } = useSessionSnapshotHydration({
+    sessionId: targetSessionId,
+    enabled: shouldHydrate,
+    logLabel: "groups page",
+  });
 
   useEffect(() => {
     if (!targetSessionId) {

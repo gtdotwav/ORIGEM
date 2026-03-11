@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -25,7 +25,6 @@ import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { ProjectCard } from "@/components/workspace/project-card";
 import { ProjectCreateDialog } from "@/components/workspace/project-create-dialog";
 import {
-  hydrateSessionSnapshot,
   persistSessionSnapshot,
 } from "@/lib/chat-backend-client";
 import { createMessage } from "@/lib/chat-orchestrator";
@@ -36,6 +35,7 @@ import {
   getSelectedContext,
   getSessionContexts,
 } from "@/lib/session-journey";
+import { useSessionSnapshotHydration } from "@/hooks/use-session-snapshot-hydration";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useProjectStore } from "@/stores/project-store";
@@ -255,8 +255,6 @@ function ProjectsPageContent() {
   const querySessionId = searchParams.get("sessionId");
   const queryContextId = searchParams.get("contextId");
 
-  const [isHydrating, setIsHydrating] = useState(false);
-  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [editProjectTarget, setEditProjectTarget] = useState<Project | null>(null);
   const [contextInstruction, setContextInstruction] = useState("");
@@ -310,9 +308,6 @@ function ProjectsPageContent() {
     return sessions.find((session) => session.id === targetSessionId) ?? null;
   }, [sessions, targetSessionId]);
 
-  // Detect broken link: querySessionId provided but session not found
-  const isBrokenLink = Boolean(querySessionId) && !targetSession && !isHydrating;
-
   const contexts = useMemo(
     () =>
       getSessionContexts(
@@ -362,29 +357,16 @@ function ProjectsPageContent() {
 
   const shouldHydrate =
     Boolean(targetSessionId) &&
-    !isHydrating &&
     runtimeTasks.length === 0 &&
     contexts.length === 0;
+  const { isHydrating } = useSessionSnapshotHydration({
+    sessionId: targetSessionId,
+    enabled: shouldHydrate,
+    logLabel: "projects page",
+  });
 
-  useEffect(() => {
-    if (!targetSessionId || !shouldHydrate) return;
-    if (hydratedSessionIdsRef.current.has(targetSessionId)) return;
-
-    hydratedSessionIdsRef.current.add(targetSessionId);
-    queueMicrotask(() => {
-      setIsHydrating(true);
-    });
-
-    void hydrateSessionSnapshot(targetSessionId)
-      .catch((error) => {
-        console.error("Failed to hydrate session on projects page", error);
-      })
-      .finally(() => {
-        queueMicrotask(() => {
-          setIsHydrating(false);
-        });
-      });
-  }, [shouldHydrate, targetSessionId, isHydrating]);
+  // Detect broken link: querySessionId provided but session not found
+  const isBrokenLink = Boolean(querySessionId) && !targetSession && !isHydrating;
 
   useEffect(() => {
     if (!targetSessionId) return;

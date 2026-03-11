@@ -15,6 +15,7 @@ import { LeftToolbar } from "@/components/layout/left-toolbar";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { IdeaSwiper } from "@/components/chat/idea-swiper";
 import { ChatControlsMenu } from "@/components/chat/chat-controls-menu";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import {
   buildCalendarPromptContext,
   mergeCalendarMetadata,
@@ -51,6 +52,7 @@ function readFileAsDataUrl(file: File) {
 }
 
 export default function DashboardPage() {
+  const mounted = useClientMounted();
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -184,6 +186,10 @@ export default function DashboardPage() {
   };
 
   const hasInput = input.trim().length > 0;
+
+  if (!mounted) {
+    return <div className="min-h-[calc(100vh-80px)]" />;
+  }
 
   return (
     <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-between overflow-hidden px-4 pb-[8.5rem] pt-4 md:py-8">

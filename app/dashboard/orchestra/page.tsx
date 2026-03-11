@@ -4,10 +4,12 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Orbit, ArrowRight, Clock, Play } from "lucide-react";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 export default function OrchestraHubPage() {
+  const mounted = useClientMounted();
   const sessions = useWorkspaceFilteredSessions();
   const runtimeSessions = useRuntimeStore((s) => s.sessions);
 
@@ -19,6 +21,10 @@ export default function OrchestraHubPage() {
         .slice(0, 20),
     [sessions]
   );
+
+  if (!mounted) {
+    return <div className="mx-auto min-h-[70vh] max-w-4xl px-4 py-6 sm:px-6 sm:py-8" />;
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">

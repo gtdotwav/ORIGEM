@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
@@ -17,6 +18,9 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
+import { hydrateSessionSnapshot } from "@/lib/chat-backend-client";
+import { useClientMounted } from "@/hooks/use-client-mounted";
+import { buildSessionHandoff, getStoredSessionHandoff } from "@/lib/session-handoff";
 import {
   useSlidesStore,
   createBlankSlide,
@@ -27,6 +31,10 @@ import {
   createSectionSlide,
   createImageSlide,
 } from "@/stores/slides-store";
+import { useAgentStore } from "@/stores/agent-store";
+import { useDecompositionStore } from "@/stores/decomposition-store";
+import { useRuntimeStore } from "@/stores/runtime-store";
+import { useSessionStore } from "@/stores/session-store";
 import type { SlideCreationMode, Slide } from "@/types/slides";
 
 /* ------------------------------------------------------------------ */
@@ -445,16 +453,26 @@ function InputPhase({
   mode,
   onBack,
   onGenerate,
+  defaultPrompt,
+  defaultTitle,
+  defaultTopic,
+  defaultContent,
+  importedSessionTitle,
 }: {
   mode: SlideCreationMode;
   onBack: () => void;
   onGenerate: (slides: Slide[], title: string) => void;
+  defaultPrompt?: string;
+  defaultTitle?: string;
+  defaultTopic?: string;
+  defaultContent?: string;
+  importedSessionTitle?: string | null;
 }) {
-  const [prompt, setPrompt] = useState("");
-  const [title, setTitle] = useState("");
-  const [topic, setTopic] = useState("");
+  const [prompt, setPrompt] = useState(defaultPrompt ?? "");
+  const [title, setTitle] = useState(defaultTitle ?? "");
+  const [topic, setTopic] = useState(defaultTopic ?? "");
   const [numSlides, setNumSlides] = useState(5);
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(defaultContent ?? "");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const modeMeta = MODES.find((m) => m.id === mode)!;
@@ -515,6 +533,12 @@ function InputPhase({
             backdropFilter: "blur(20px)",
           }}
         >
+          {importedSessionTitle ? (
+            <div className="mb-4 rounded-xl border border-neon-cyan/20 bg-neon-cyan/8 px-3 py-2 text-xs text-neon-cyan/85">
+              Contexto importado da orquestra: {importedSessionTitle}
+            </div>
+          ) : null}
+
           {mode === "prompt" && (
             <div className="space-y-3">
               <p className="text-xs text-foreground/40">
@@ -956,11 +980,106 @@ function SlideEditor({ onBack }: { onBack: () => void }) {
 /*  Main Page                                                          */
 /* ------------------------------------------------------------------ */
 export default function SlidesPage() {
+  const searchParams = useSearchParams();
+  const mounted = useClientMounted();
+  const handoffSessionId = searchParams.get("sessionId");
+  const handoffContextId = searchParams.get("contextId");
   const phase = useSlidesStore((s) => s.phase);
   const creationMode = useSlidesStore((s) => s.creationMode);
   const setCreationMode = useSlidesStore((s) => s.setCreationMode);
   const setPhase = useSlidesStore((s) => s.setPhase);
   const addPresentation = useSlidesStore((s) => s.addPresentation);
+  const sessions = useSessionStore((state) => state.sessions);
+  const messages = useSessionStore((state) => state.messages);
+  const decompositions = useDecompositionStore((state) => state.decompositions);
+  const activeDecompositionId = useDecompositionStore(
+    (state) => state.activeDecompositionId
+  );
+  const runtime = useRuntimeStore((state) =>
+    handoffSessionId ? state.sessions[handoffSessionId] : undefined
+  );
+  const agents = useAgentStore((state) => state.agents);
+  const groups = useAgentStore((state) => state.groups);
+  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
+  const appliedHandoffRef = useRef<string | null>(null);
+
+  const handoffRevision = useMemo(
+    () =>
+      [
+        sessions.length,
+        messages.length,
+        Object.keys(decompositions).length,
+        activeDecompositionId ?? "",
+        runtime?.updatedAt ?? 0,
+        agents.length,
+        groups.length,
+      ].join(":"),
+    [
+      activeDecompositionId,
+      agents.length,
+      decompositions,
+      groups.length,
+      messages.length,
+      runtime?.updatedAt,
+      sessions.length,
+    ]
+  );
+  const liveHandoff = useMemo(
+    () => {
+      const revision = handoffRevision;
+      void revision;
+
+      return handoffSessionId
+        ? buildSessionHandoff({
+            sessionId: handoffSessionId,
+            target: "slides",
+            contextId: handoffContextId,
+          })
+        : null;
+    },
+    [handoffContextId, handoffRevision, handoffSessionId]
+  );
+  const storedHandoff = useMemo(
+    () => {
+      const revision = handoffRevision;
+      void revision;
+
+      return handoffSessionId ? getStoredSessionHandoff(handoffSessionId) : null;
+    },
+    [handoffRevision, handoffSessionId]
+  );
+  const activeHandoff = liveHandoff ?? storedHandoff;
+
+  useEffect(() => {
+    if (!mounted || !handoffSessionId) {
+      return;
+    }
+
+    const hasSession = sessions.some((session) => session.id === handoffSessionId);
+    if (hasSession || hydratedSessionIdsRef.current.has(handoffSessionId)) {
+      return;
+    }
+
+    hydratedSessionIdsRef.current.add(handoffSessionId);
+    void hydrateSessionSnapshot(handoffSessionId).catch((error) => {
+      console.error("Failed to hydrate session snapshot on slides surface", error);
+    });
+  }, [mounted, handoffSessionId, sessions]);
+
+  useEffect(() => {
+    if (!mounted || !activeHandoff) {
+      return;
+    }
+
+    const handoffKey = `${activeHandoff.sessionId}:${activeHandoff.generatedAt}`;
+    if (appliedHandoffRef.current === handoffKey) {
+      return;
+    }
+
+    appliedHandoffRef.current = handoffKey;
+    setCreationMode("prompt");
+    setPhase("input");
+  }, [activeHandoff, mounted, setCreationMode, setPhase]);
 
   const handleModeSelect = (mode: SlideCreationMode) => {
     setCreationMode(mode);
@@ -981,6 +1100,10 @@ export default function SlidesPage() {
     setCreationMode(null);
     setPhase("modes");
   };
+
+  if (!mounted) {
+    return <div className="min-h-[70vh]" />;
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -1008,6 +1131,11 @@ export default function SlidesPage() {
             mode={creationMode}
             onBack={handleBackToModes}
             onGenerate={handleGenerate}
+            defaultPrompt={activeHandoff?.slidesPrompt}
+            defaultTitle={activeHandoff?.sessionTitle}
+            defaultTopic={activeHandoff?.sessionTitle}
+            defaultContent={activeHandoff?.summary}
+            importedSessionTitle={activeHandoff?.sessionTitle}
           />
         </motion.div>
       )}

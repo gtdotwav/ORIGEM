@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Globe,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { EcosystemConfig } from "@/components/chat/ecosystem-config";
 import { useConfiguredProviders } from "@/hooks/use-configured-providers";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import { PROVIDER_CATALOG } from "@/config/providers";
 
 function readStorageValue(key: string, fallback: string) {
@@ -87,6 +88,7 @@ const SECTIONS = [
 
 export default function SettingsPage() {
   const { providers: configuredProviders, loading: providersLoading } = useConfiguredProviders();
+  const mounted = useClientMounted();
   const [reducedMotion, setReducedMotion] = useState(
     () => readStorageValue("origem-reduced-motion", "false") === "true"
   );
@@ -96,6 +98,14 @@ export default function SettingsPage() {
   const [runtimeLanguage, setRuntimeLanguage] = useState(() =>
     readStorageValue("origem-default-runtime-language", "pt-BR")
   );
+
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
+    document.documentElement.classList.toggle("reduce-motion", reducedMotion);
+  }, [mounted, reducedMotion]);
 
   const handleMotionToggle = (checked: boolean) => {
     setReducedMotion(checked);
@@ -121,6 +131,28 @@ export default function SettingsPage() {
     localStorage.setItem("origem-default-runtime-language", value);
     toast.success(`Linguagem de resposta padrao: ${LANG_LABELS[value] ?? value}`);
   };
+
+  if (!mounted) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-8 flex items-start gap-3">
+          <div className="h-11 w-11 animate-pulse rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]" />
+          <div className="space-y-2">
+            <div className="h-6 w-40 animate-pulse rounded bg-foreground/[0.08]" />
+            <div className="h-4 w-56 animate-pulse rounded bg-foreground/[0.05]" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-28 animate-pulse rounded-2xl border border-foreground/[0.08] bg-card/60"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">

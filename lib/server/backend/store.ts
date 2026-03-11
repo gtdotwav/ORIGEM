@@ -11,7 +11,11 @@ import { assertEncryptionReady, decrypt, encrypt } from "@/lib/server/crypto";
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), ".data", "origem-backend.json");
 const BLOB_KEY = "origem-backend.json";
-const MAX_BLOB_WRITE_RETRIES = 3;
+const MAX_BLOB_WRITE_RETRIES = 8;
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function createEmptyDb(): BackendDatabaseShape {
   return { records: {}, providers: {} };
@@ -143,8 +147,17 @@ class SnapshotStore {
           };
         }
       }
-    } catch {
-      this.db = createEmptyDb();
+    } catch (error: any) {
+      // If the file or blob doesn't exist, we just start fresh
+      if (error?.code === "ENOENT" || error?.message?.includes("404")) {
+        this.db = createEmptyDb();
+      } else {
+        // Critical: Do NOT initialize an empty DB if this is a temporary read failure
+        // Otherwise, the very next write will overwrite all data!
+        console.error("[SnapshotStore] Critical failure loading database:", error);
+        this.loaded = false; // allow retry on next call
+        throw new Error("storage_unavailable: failed to read backend store");
+      }
     }
   }
 
@@ -164,6 +177,7 @@ class SnapshotStore {
         const { data, etag } = await blobRead();
         this.db = mergeBackendDatabases(data ?? createEmptyDb(), this.db);
         this.blobEtag = etag;
+        await delay(60 * (attempt + 1));
       }
     }
 
@@ -171,7 +185,7 @@ class SnapshotStore {
   }
 
   private queueWrite() {
-    this.writeChain = this.writeChain.then(async () => {
+    const currentTask = this.writeChain.then(async () => {
       if (shouldUseBlobStorage()) {
         await this.writeBlobWithRetry();
       } else {
@@ -180,7 +194,11 @@ class SnapshotStore {
       }
     });
 
-    return this.writeChain;
+    this.writeChain = currentTask.catch((error) => {
+      console.error("[SnapshotStore] Write task failed, but recovering write chain:", error);
+    });
+
+    return currentTask;
   }
 
   async listRecords(): Promise<SessionSnapshotRecord[]> {

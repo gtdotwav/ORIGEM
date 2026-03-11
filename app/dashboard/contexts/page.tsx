@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -17,10 +17,10 @@ import { ContextSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { toast } from "sonner";
 import {
-  hydrateSessionSnapshot,
   persistSessionSnapshot,
 } from "@/lib/chat-backend-client";
 import { createMessage } from "@/lib/chat-orchestrator";
+import { useSessionSnapshotHydration } from "@/hooks/use-session-snapshot-hydration";
 import { useAgentStore } from "@/stores/agent-store";
 import { useDecompositionStore } from "@/stores/decomposition-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
@@ -312,10 +312,8 @@ function ContextsPageContent() {
   const searchParams = useSearchParams();
   const querySessionId = searchParams.get("sessionId");
   const [search, setSearch] = useState("");
-  const [isHydrating, setIsHydrating] = useState(false);
   const [expandedContextId, setExpandedContextId] = useState<string | null>(null);
   const [contextInstruction, setContextInstruction] = useState("");
-  const hydratedSessionIdsRef = useRef<Set<string>>(new Set());
 
   const sessions = useWorkspaceFilteredSessions();
   const currentSessionId = useSessionStore((state) => state.currentSessionId);
@@ -416,30 +414,11 @@ function ContextsPageContent() {
     return getContextMessages(messages, targetSessionId, expandedContext.id);
   }, [messages, targetSessionId, expandedContext]);
 
-  useEffect(() => {
-    if (!targetSessionId || contextResults.length > 0 || isHydrating) {
-      return;
-    }
-
-    if (hydratedSessionIdsRef.current.has(targetSessionId)) {
-      return;
-    }
-
-    hydratedSessionIdsRef.current.add(targetSessionId);
-    queueMicrotask(() => {
-      setIsHydrating(true);
-    });
-
-    void hydrateSessionSnapshot(targetSessionId)
-      .catch((error) => {
-        console.error("Failed to hydrate session snapshot on contexts page", error);
-      })
-      .finally(() => {
-        queueMicrotask(() => {
-          setIsHydrating(false);
-        });
-      });
-  }, [targetSessionId, contextResults.length, isHydrating]);
+  const { isHydrating } = useSessionSnapshotHydration({
+    sessionId: targetSessionId,
+    enabled: Boolean(targetSessionId) && contextResults.length === 0,
+    logLabel: "contexts page",
+  });
 
   useEffect(() => {
     if (!targetSessionId || contextResults.length === 0) {

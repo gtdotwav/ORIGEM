@@ -107,8 +107,8 @@ const NAV_ENTRIES: NavEntry[] = [
         color: "cyan",
       },
       {
-        label: "6 · Mapa de Fluxo",
-        description: "Visualize sessões conectadas",
+        label: "6 · Canvas",
+        description: "Visualize a cadeia da execucao",
         href: "/dashboard/canvas",
         icon: Workflow,
         color: "orange",

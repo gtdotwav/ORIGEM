@@ -78,21 +78,18 @@ export async function PUT(request: Request) {
       });
     }
 
-    console.error("[providers] Invalid payload:", error);
+    console.error("[providers] Storage error or internal failure:", error);
+    const isCryptoError =
+      error instanceof Error &&
+      error.message.includes("ORIGEM_ENCRYPT_SECRET");
+
     return NextResponse.json(
       {
-        error:
-          error instanceof Error &&
-          error.message.includes("ORIGEM_ENCRYPT_SECRET")
-            ? "storage_unavailable"
-            : "invalid_payload",
+        error: isCryptoError ? "storage_unavailable" : "storage_error",
+        details: error instanceof Error ? error.message : "unknown",
       },
       {
-        status:
-          error instanceof Error &&
-          error.message.includes("ORIGEM_ENCRYPT_SECRET")
-            ? 503
-            : 400,
+        status: isCryptoError ? 503 : 500,
       }
     );
   }

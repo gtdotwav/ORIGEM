@@ -3,6 +3,7 @@ import type { Node, Edge } from "@xyflow/react";
 export type OrigemNodeType =
   | "input"
   | "context"
+  | "project"
   | "agent"
   | "output"
   | "preview"
@@ -47,6 +48,15 @@ export interface AgentNodeData {
   [key: string]: unknown;
 }
 
+export interface ProjectNodeData {
+  type: "project";
+  projectId: string;
+  name: string;
+  goalCount: number;
+  priority: string;
+  [key: string]: unknown;
+}
+
 export interface OutputNodeData {
   type: "output";
   outputId: string;
@@ -78,6 +88,7 @@ export interface ChatSessionNodeData {
 export type OrigemNodeData =
   | InputNodeData
   | ContextNodeData
+  | ProjectNodeData
   | AgentNodeData
   | OutputNodeData
   | GroupNodeData

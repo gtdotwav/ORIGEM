@@ -12,6 +12,7 @@ import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { CardSkeleton, MetricSkeleton } from "@/components/shared/cosmic-skeleton";
 import { WorkspaceCard } from "@/components/workspace/workspace-card";
 import { WorkspaceCreateDialog } from "@/components/workspace/workspace-create-dialog";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import type { Workspace } from "@/types/workspace";
 
 function WorkspacesPageFallback() {
@@ -33,6 +34,7 @@ function WorkspacesPageFallback() {
 }
 
 function WorkspacesContent() {
+  const mounted = useClientMounted();
   const router = useRouter();
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
@@ -118,6 +120,10 @@ function WorkspacesContent() {
     removeWorkspace(id);
     toast.success("Workspace excluido");
   };
+
+  if (!mounted) {
+    return <WorkspacesPageFallback />;
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">

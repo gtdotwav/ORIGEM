@@ -3,6 +3,7 @@
 import { Blocks, Trash2, Drama, Rocket, Presentation, Baby } from "lucide-react";
 import { AppCard } from "@/components/apps/app-card";
 import { AppBuilderDialog } from "@/components/apps/app-builder-dialog";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import { useCustomAppStore } from "@/stores/custom-app-store";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -12,8 +13,13 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default function AppsPage() {
+  const mounted = useClientMounted();
   const customApps = useCustomAppStore((s) => s.apps);
   const removeApp = useCustomAppStore((s) => s.removeApp);
+
+  if (!mounted) {
+    return <div className="mx-auto min-h-[70vh] max-w-5xl px-4 py-6 sm:px-6 sm:py-8" />;
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">

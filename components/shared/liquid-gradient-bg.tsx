@@ -234,7 +234,7 @@ class GradientScene {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
-  clock: THREE.Clock;
+  timer: THREE.Timer;
   touchTexture: TouchTexture;
   mesh: THREE.Mesh | null = null;
   uniforms: Record<string, { value: unknown }>;
@@ -258,7 +258,9 @@ class GradientScene {
     this.camera.position.z = 50;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000000);
-    this.clock = new THREE.Clock();
+    this.timer = new THREE.Timer();
+    this.timer.connect(document);
+    this.timer.reset();
     this.touchTexture = new TouchTexture();
 
     this.uniforms = {
@@ -304,17 +306,19 @@ class GradientScene {
     this.tick();
   }
 
-  tick() {
-    const delta = Math.min(this.clock.getDelta(), 0.1);
+  tick(timestamp?: number) {
+    this.timer.update(timestamp);
+    const delta = Math.min(this.timer.getDelta(), 0.1);
     this.touchTexture.update();
     (this.uniforms.uTime.value as number) += delta;
     this.renderer.render(this.scene, this.camera);
-    this.animationId = requestAnimationFrame(() => this.tick());
+    this.animationId = requestAnimationFrame((nextTimestamp) => this.tick(nextTimestamp));
   }
 
   cleanup() {
     if (this.animationId) cancelAnimationFrame(this.animationId);
     if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
+    this.timer.dispose();
     this.renderer.dispose();
     if (this.container && this.renderer.domElement && this.container.contains(this.renderer.domElement)) {
       this.container.removeChild(this.renderer.domElement);
@@ -326,21 +330,14 @@ class GradientScene {
 export function LiquidGradientBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<GradientScene | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-  const [isDark, setIsDark] = useState(
-    () =>
-      typeof document === "undefined" ||
-      document.documentElement.classList.contains("dark")
-  );
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handler = () => setReducedMotion(mq.matches);
+    handler();
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
@@ -350,6 +347,7 @@ export function LiquidGradientBackground() {
     if (typeof window === "undefined") return;
     const html = document.documentElement;
     const check = () => setIsDark(html.classList.contains("dark"));
+    check();
     const observer = new MutationObserver(check);
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();

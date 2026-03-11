@@ -9,6 +9,7 @@ import { ConnectionCreateDialog } from "@/components/connections/connection-crea
 import { InviteLinkDialog } from "@/components/connections/invite-link-dialog";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
+import { useClientMounted } from "@/hooks/use-client-mounted";
 import type { Connection, ConnectionStatus } from "@/types/connection";
 
 type TabFilter = "all" | ConnectionStatus;
@@ -31,6 +32,7 @@ function ConnectionsPageFallback() {
 }
 
 function ConnectionsPageContent() {
+  const mounted = useClientMounted();
   const connections = useConnectionStore((s) => s.connections);
   const inviteLinks = useConnectionStore((s) => s.inviteLinks);
 
@@ -75,6 +77,10 @@ function ConnectionsPageContent() {
     { value: "accepted", label: `Aceitos (${counts.accepted})` },
     { value: "blocked", label: `Bloqueados (${counts.blocked})` },
   ];
+
+  if (!mounted) {
+    return <ConnectionsPageFallback />;
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
