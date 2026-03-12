@@ -390,7 +390,7 @@ export default function ChatPage() {
               <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
                 <Blocks className="h-5 w-5 text-foreground/42" />
                 <p className="text-sm text-foreground/60">
-                  Envie sua primeira mensagem para disparar delegacao de contexto, projeto, agentes e grupos.
+                  Envie sua primeira mensagem para acionar analise, execucao e ferramentas do workspace a partir do mesmo contexto.
                 </p>
               </div>
             ) : (
@@ -578,27 +578,32 @@ export default function ChatPage() {
             }}
           >
             <div className="mb-2 flex items-center justify-between">
-              {/* Context Selector */}
+              {/* Runtime context strip */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:pb-0">
-                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
                   <Brain className="h-3.5 w-3.5 text-neon-purple" />
-                  Contexto
-                </button>
-                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  {currentWorkspaceName
+                    ? `Workspace: ${currentWorkspaceName}`
+                    : "Workspace geral"}
+                </div>
+                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
                   <Zap className="h-3.5 w-3.5 text-neon-orange" />
-                  Skill
-                </button>
-                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  Skills modulares
+                </div>
+                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
                   <Sparkles className="h-3.5 w-3.5 text-neon-cyan" />
-                  Modelo
-                </button>
-                <button type="button" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75 transition-colors hover:bg-foreground/[0.06]">
+                  Providers e modelos
+                </div>
+                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
                   <Wrench className="h-3.5 w-3.5 text-foreground/50" />
-                  Ferramentas
-                </button>
+                  Ferramentas MCP por workspace
+                </div>
               </div>
 
-              <ChatControlsMenu workspaceName={currentWorkspaceName} />
+              <ChatControlsMenu
+                workspaceName={currentWorkspaceName}
+                currentSessionId={sessionId}
+              />
             </div>
 
             <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2">

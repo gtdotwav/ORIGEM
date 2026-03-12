@@ -47,7 +47,7 @@ const IDEAS: Idea[] = [
     icon: Bot,
     title: "Montar equipe de agentes",
     prompt:
-      "Crie uma equipe de agentes especializados para [objetivo]: defina papéis, competências, estratégia de colaboração e pipeline de execução.",
+      "Crie uma equipe de agentes especializados para [objetivo]: defina papeis, competencias, estrategia de colaboracao e ordem de execucao.",
     description:
       "Configure uma orquestra de agentes IA especializados para resolver qualquer desafio.",
     tags: ["agentes", "orquestração"],
@@ -57,9 +57,9 @@ const IDEAS: Idea[] = [
   {
     id: 3,
     icon: Workflow,
-    title: "Pipeline de automação",
+    title: "Fluxo de automacao",
     prompt:
-      "Projete um pipeline completo para automatizar [processo]: etapas, triggers, validações, fallbacks e métricas de sucesso.",
+      "Projete um fluxo completo para automatizar [processo]: etapas, triggers, validacoes, fallbacks e metricas de sucesso.",
     description:
       "Desenhe fluxos de automação end-to-end com validação e monitoramento.",
     tags: ["fluxos", "automação"],
@@ -69,11 +69,11 @@ const IDEAS: Idea[] = [
   {
     id: 4,
     icon: Target,
-    title: "Análise estratégica 360º",
+    title: "Analise estrategica integrada",
     prompt:
-      "Realize uma análise estratégica 360º de [empresa/produto/ideia]: SWOT, posicionamento, oportunidades de mercado e roadmap de execução.",
+      "Realize uma analise estrategica de [empresa/produto/ideia]: contexto, posicionamento, oportunidades de mercado, riscos e roadmap de execucao.",
     description:
-      "Visão holística completa com análise de mercado, riscos e oportunidades.",
+      "Visao integrada do cenario com mercado, riscos e oportunidades.",
     tags: ["estratégia", "análise"],
     gradient: "from-neon-green/20 to-neon-cyan/10",
     neonColor: "text-neon-green",

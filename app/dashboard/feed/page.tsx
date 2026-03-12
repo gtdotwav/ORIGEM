@@ -1,7 +1,16 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Rss, Heart, Newspaper, RefreshCw, Sparkles, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowUpRight,
+  Heart,
+  Loader2,
+  Newspaper,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useFeedStore } from "@/stores/feed-store";
@@ -13,9 +22,17 @@ import { FeedCard } from "@/components/feed/feed-card";
 import { ShareDialog } from "@/components/feed/share-dialog";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
+import { persistSessionSnapshot } from "@/lib/chat-backend-client";
+import {
+  createId,
+  createMessage,
+  createSession,
+  runSimpleChat,
+} from "@/lib/chat-orchestrator";
 import type { FeedItem } from "@/types/feed";
 import { DEFAULT_FEED_QUERY, buildFeedContextFromWorkspace } from "@/lib/feed/context";
 import { useClientMounted } from "@/hooks/use-client-mounted";
+import { toast } from "sonner";
 
 function FeedPageFallback() {
   return (
@@ -37,6 +54,7 @@ function FeedPageFallback() {
 
 function FeedPageContent() {
   const mounted = useClientMounted();
+  const router = useRouter();
   const items = useFeedStore((s) => s.items);
   const interactions = useFeedStore((s) => s.interactions);
   const searchQuery = useFeedStore((s) => s.searchQuery);
@@ -53,10 +71,14 @@ function FeedPageContent() {
   const projects = useProjectStore((s) => s.projects);
   const sessions = useSessionStore((s) => s.sessions);
   const messages = useSessionStore((s) => s.messages);
+  const addSession = useSessionStore((s) => s.addSession);
+  const addMessage = useSessionStore((s) => s.addMessage);
+  const setCurrentSession = useSessionStore((s) => s.setCurrentSession);
 
   const [shareItem, setShareItem] = useState<FeedItem | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
+  const [sendingToChat, setSendingToChat] = useState(false);
   const requestIdRef = useRef(0);
 
   const workspaceContext = useMemo(
@@ -209,6 +231,60 @@ function FeedPageContent() {
       })
     : null;
 
+  async function handleContinueInChat() {
+    const query = effectiveQuery.trim();
+    if (!query || sendingToChat) {
+      return;
+    }
+
+    const highlights = filteredItems.slice(0, 5);
+    const researchBlock = highlights
+      .map((item, index) => {
+        const summary = (item.summary ?? item.content).slice(0, 220).replace(/\s+/g, " ").trim();
+        return `${index + 1}. ${item.title} (${item.source})\n${summary}`;
+      })
+      .join("\n\n");
+
+    const prompt = [
+      `Sintetize a pesquisa ao vivo sobre "${query}" e transforme isso em próximos passos práticos.`,
+      effectiveContext.reason ? `Contexto: ${effectiveContext.reason}` : null,
+      researchBlock ? `Sinais coletados:\n\n${researchBlock}` : null,
+      "Quero uma leitura objetiva com principais sinais, implicações e recomendações acionáveis.",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const sessionId = createId("session");
+    const session = createSession(
+      sessionId,
+      `Pesquisa: ${query}`,
+      activeWorkspaceId ?? undefined
+    );
+
+    addSession(session);
+    setCurrentSession(sessionId);
+    addMessage(
+      createMessage(sessionId, "user", prompt, {
+        researchQuery: query,
+        researchContext: effectiveContext,
+      })
+    );
+    setSendingToChat(true);
+    router.push(`/dashboard/chat/${sessionId}`);
+
+    try {
+      await runSimpleChat(sessionId, prompt);
+      persistSessionSnapshot(sessionId).catch((error) =>
+        console.warn("[snapshot] persist failed (non-blocking):", error)
+      );
+    } catch (error) {
+      console.error("Failed to continue research in chat", error);
+      toast.error("Nao foi possivel continuar a pesquisa no chat.");
+    } finally {
+      setSendingToChat(false);
+    }
+  }
+
   function handleShare(item: FeedItem) {
     setShareItem(item);
     setShareOpen(true);
@@ -222,23 +298,38 @@ function FeedPageContent() {
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-neon-blue/10 border border-neon-blue/20">
-          <Rss className="h-6 w-6 text-neon-blue" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-neon-blue/20 bg-neon-blue/10">
+          <Newspaper className="h-6 w-6 text-neon-blue" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground/95">Feed</h1>
+          <h1 className="text-2xl font-bold text-foreground/95">Pesquisa ao vivo</h1>
           <p className="text-sm text-foreground/40">
-            Descoberta ao vivo por tema, workspace e contexto de conversa
+            Noticias, posts, blogs e anuncios puxados em tempo real por tema, workspace e conversa
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setRefreshTick((value) => value + 1)}
-          className="ml-auto inline-flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2 text-xs font-medium text-foreground/60 transition-all hover:border-foreground/[0.14] hover:bg-foreground/[0.05]"
-        >
-          <RefreshCw className={isLoading ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
-          Atualizar
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void handleContinueInChat()}
+            disabled={sendingToChat || (!effectiveQuery.trim() && filteredItems.length === 0)}
+            className="inline-flex items-center gap-2 rounded-xl border border-neon-cyan/20 bg-neon-cyan/10 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/15 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {sendingToChat ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            )}
+            Levar ao chat
+          </button>
+          <button
+            type="button"
+            onClick={() => setRefreshTick((value) => value + 1)}
+            className="inline-flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-2 text-xs font-medium text-foreground/60 transition-all hover:border-foreground/[0.14] hover:bg-foreground/[0.05]"
+          >
+            <RefreshCw className={isLoading ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
+            Atualizar
+          </button>
+        </div>
       </div>
 
       {/* Metrics */}
@@ -246,14 +337,14 @@ function FeedPageContent() {
         <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Newspaper className="h-3.5 w-3.5 text-neon-cyan/60" />
-            <span className="text-xs text-foreground/30">Total</span>
+            <span className="text-xs text-foreground/30">Resultados</span>
           </div>
           <p className="mt-1 text-xl font-bold text-foreground/90">{items.length}</p>
         </div>
         <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3">
           <div className="flex items-center gap-2">
             <Heart className="h-3.5 w-3.5 text-pink-400/60" />
-            <span className="text-xs text-foreground/30">Curtidas</span>
+            <span className="text-xs text-foreground/30">Sinais salvos</span>
           </div>
           <p className="mt-1 text-xl font-bold text-foreground/90">{totalLikes}</p>
         </div>
@@ -276,14 +367,14 @@ function FeedPageContent() {
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <span className="rounded-full border border-neon-blue/20 bg-neon-blue/10 px-2.5 py-1 text-neon-blue">
             {context.mode === "manual"
-              ? "Busca manual"
+              ? "Pesquisa manual"
               : context.mode === "workspace"
                 ? `Workspace ${context.label ?? ""}`.trim()
-                : "Descoberta geral"}
+                : "Pesquisa geral"}
           </span>
           <span className="text-foreground/45">
             {context.reason ??
-              "Escreva um tema para puxar resultados em tempo real."}
+              "Escreva um tema para puxar sinais ao vivo."}
           </span>
         </div>
       </div>
@@ -292,7 +383,7 @@ function FeedPageContent() {
       {error ? (
         <CosmicEmptyState
           icon={AlertCircle}
-          title="Nao foi possivel atualizar o feed"
+          title="Nao foi possivel atualizar a pesquisa"
           description={error}
           neonColor="orange"
           action={{
@@ -313,12 +404,12 @@ function FeedPageContent() {
 
       {!isLoading && !error && filteredItems.length === 0 ? (
         <CosmicEmptyState
-          icon={Rss}
+          icon={Newspaper}
           title="Nenhum item encontrado"
           description={
             searchQuery
               ? "Tente ajustar o tema digitado ou troque o filtro de tipo."
-              : "Sem resultados para o contexto atual. Tente atualizar ou escrever um tema mais específico."
+              : "Sem resultados para o contexto atual. Tente atualizar ou escrever um tema mais especifico."
           }
           neonColor="blue"
           action={{

@@ -100,7 +100,7 @@ export function FeedSearchBar() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-medium text-neon-cyan/80">
-                Feed guiado pelo workspace {context.label ? `"${context.label}"` : ""}
+                Pesquisa guiada pelo workspace {context.label ? `"${context.label}"` : ""}
               </p>
               <p className="mt-0.5 text-[11px] text-foreground/45">
                 {context.reason ?? "Usando o contexto do trabalho atual para buscar resultados."}
@@ -146,7 +146,7 @@ export function FeedSearchBar() {
             onKeyDown={(e) => {
               if (e.key === "Escape") setShowSuggestions(false);
             }}
-            placeholder="Escreva um tema para buscar notícias, blogs e anúncios em tempo real..."
+            placeholder="Escreva um tema para buscar noticias, posts, blogs e anuncios em tempo real..."
             className="w-full rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] py-2.5 pl-10 pr-10 text-sm text-foreground/90 placeholder:text-foreground/25 backdrop-blur-sm transition-colors focus:border-foreground/20 focus:outline-none focus:ring-0"
           />
           {localQuery && (

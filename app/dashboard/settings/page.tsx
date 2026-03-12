@@ -44,7 +44,7 @@ const SECTIONS = [
   {
     title: "Provedores de IA",
     description:
-      "Configure API keys para Claude, GPT, Gemini, Groq, Fireworks e outros. Necessario para ativar decomposicao e agentes.",
+      "Configure API keys e modelos para Claude, GPT, Gemini, Groq, Fireworks e outros. Isso sustenta o runtime principal da plataforma.",
     icon: Key,
     iconClass: "text-neon-cyan",
     borderClass: "border-neon-cyan/20 hover:border-neon-cyan/40",
@@ -77,9 +77,9 @@ const SECTIONS = [
     badge: "Next.js 16",
   },
   {
-    title: "Controle de Execucao",
+    title: "Runtime de IA",
     description:
-      "Configure o provedor e modelo padrao do modo 360, linguagem das respostas e parametros de execucao dos agentes.",
+      "Defina provider, modelo e linguagem padrao para o chat e para as execucoes assistidas do produto.",
     icon: SlidersHorizontal,
     iconClass: "text-amber-300",
     borderClass: "border-amber-300/15 hover:border-amber-300/30",
@@ -218,11 +218,11 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                {section.title === "Controle de Execucao" && (
+                {section.title === "Runtime de IA" && (
                   <div className="mt-3 space-y-3">
                     <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-3">
                       <p className="mb-2 text-[10px] uppercase tracking-wide text-foreground/35">
-                        Configuracao do Ecossistema 360
+                        Configuracao padrao do runtime
                       </p>
                       <EcosystemConfig />
                     </div>
@@ -242,7 +242,7 @@ export default function SettingsPage() {
                       </Select>
                     </div>
                     <p className="text-[10px] leading-relaxed text-foreground/30">
-                      Prioridade de funcoes e notas de execucao sao configuradas por sessao, dentro do painel de Canvas/Orquestra de cada chat.
+                      Ferramentas e conectores operacionais sao ajustados por workspace ou pela propria sessao de chat.
                     </p>
                   </div>
                 )}
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                       className="inline-flex items-center gap-2 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20"
                     >
                       <Plug className="h-3.5 w-3.5" />
-                      Connect
+                      Abrir providers
                     </Link>
                   </div>
                 )}
@@ -329,18 +329,17 @@ export default function SettingsPage() {
           Sobre ORIGEM
         </div>
         <p className="text-xs leading-relaxed text-foreground/45">
-          Motor de IA Psicossemantica — Decomponha linguagem em significado atomico,
-          orquestre agentes especializados e visualize tudo em um canvas infinito.
+          Sistema operacional de inteligencia para chat, agenda, workspaces, providers e execucao assistida a partir de um contexto unico.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
             v0.1.0
           </span>
           <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
-            Psychosemantic Engine
+            Intelligence Runtime
           </span>
           <span className="rounded-md border border-foreground/[0.10] bg-foreground/[0.05] px-2 py-0.5 text-[10px] text-foreground/40">
-            Multi-Agent Orchestration
+            Workspace-Centric
           </span>
         </div>
       </div>

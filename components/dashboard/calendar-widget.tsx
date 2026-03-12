@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { format, addDays, startOfToday, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -53,9 +54,13 @@ export function CalendarWidget() {
               {format(selectedDate, "MMMM", { locale: ptBR })}
             </span>
           </div>
-          <button title="Expandir calendario" className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-colors hover:bg-white/[0.06] hover:text-foreground/70">
+          <Link
+            href="/dashboard/calendar"
+            title="Abrir calendario completo"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-colors hover:bg-white/[0.06] hover:text-foreground/70"
+          >
             <Maximize2 className="h-3.5 w-3.5" />
-          </button>
+          </Link>
         </div>
 
         {/* Horizontal Calendar Strip */}

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { CardSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { ProjectCard } from "@/components/workspace/project-card";
@@ -52,7 +53,7 @@ function formatExecutionStrategy(strategy: string | undefined) {
   if (strategy === "consensus") return "consenso";
   if (strategy === "parallel") return "paralelo";
   if (strategy === "sequential") return "sequencial";
-  if (strategy === "pipeline") return "pipeline";
+  if (strategy === "pipeline") return "orquestrado";
   return "nao definido";
 }
 
@@ -429,52 +430,53 @@ function ProjectsPageContent() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="mb-6 flex flex-wrap items-start justify-between gap-3"
+        className="mb-6"
       >
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <FolderKanban className="h-5 w-5 text-blue-300" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Projetos</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Objetivo, plano de execucao e follow-up do contexto.
-            </p>
-            {targetSession && (
-              <p className="mt-1 text-xs text-foreground/35">
-                Sessao: {targetSession.title} · {formatSessionTime(targetSession.updatedAt)}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {targetSessionId && targetSession && (
-            <>
-              <Link
-                href={`/dashboard/chat/${targetSessionId}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-              >
-                <MessageSquare className="h-3.5 w-3.5" />
-                Chat
-              </Link>
-              <Link
-                href={getJourneyStepHref("agents", targetSessionId, selectedContext?.id)}
-                className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Agentes
-              </Link>
-              <Link
-                href={getJourneyStepHref("groups", targetSessionId, selectedContext?.id)}
-                className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
-              >
-                Grupos
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </>
-          )}
-        </div>
+        <OperationLensHeader
+          icon={FolderKanban}
+          iconClassName="text-blue-300"
+          title="Projetos"
+          description="Esta camada traduz o contexto validado em objetivo, plano e follow-up para a mesma sessao de trabalho."
+          supportingCopy="Projetos nao competem com o chat. Eles consolidam o que ja foi entendido e delegado para a operacao continuar com precisao."
+          sessionTitle={targetSession?.title ?? null}
+          updatedAtLabel={
+            targetSession ? formatSessionTime(targetSession.updatedAt) : null
+          }
+          meta={[
+            { label: "Contextos", value: `${contexts.length}` },
+            { label: "Agentes", value: `${sessionAgents.length}` },
+            { label: "Tarefas", value: `${runtimeTasks.length}` },
+          ]}
+          actions={
+            <div className="flex items-center gap-2">
+              {targetSessionId && targetSession ? (
+                <>
+                  <Link
+                    href={`/dashboard/chat/${targetSessionId}`}
+                    className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Chat
+                  </Link>
+                  <Link
+                    href={getJourneyStepHref("agents", targetSessionId, selectedContext?.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Agentes
+                  </Link>
+                  <Link
+                    href={getJourneyStepHref("groups", targetSessionId, selectedContext?.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+                  >
+                    Grupos
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </>
+              ) : null}
+            </div>
+          }
+        />
       </motion.div>
 
       {/* Workspace Projects Grid */}

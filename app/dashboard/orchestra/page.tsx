@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { Orbit, ArrowRight, Clock, Play } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { useClientMounted } from "@/hooks/use-client-mounted";
 import { useRuntimeStore } from "@/stores/runtime-store";
@@ -28,23 +29,29 @@ export default function OrchestraHubPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-          <Orbit className="h-5 w-5 text-neon-purple" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Orquestra</h1>
-          <p className="mt-1 text-sm text-foreground/50">
-            Visão unificada da execução — contexto, agentes, projetos, grupos e fluxos trabalhando em conjunto.
-          </p>
-        </div>
-      </div>
+      <OperationLensHeader
+        icon={Orbit}
+        iconClassName="text-neon-purple"
+        title="Orquestra"
+        description="Selecione uma sessao para abrir a leitura consolidada de contexto, tarefas, agentes, grupos e checkpoints."
+        supportingCopy="A Orquestra e a visao de consolidacao da operacao. Ela nao substitui o chat; ela mostra tudo que a mesma sessao ja conectou."
+        meta={[{ label: "Sessoes prontas", value: `${orchestrableSessions.length}` }]}
+        actions={
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+          >
+            Voltar ao dashboard
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        }
+      />
 
       {orchestrableSessions.length === 0 ? (
         <CosmicEmptyState
           icon={Orbit}
           title="Nenhuma sessão disponível"
-          description="Inicie uma conversa no modo Ecossistema para orquestrar agentes e ver o resultado aqui."
+          description="Inicie ou retome uma sessao para consolidar contexto, tarefas e entregas aqui."
         />
       ) : (
         <div className="space-y-2">

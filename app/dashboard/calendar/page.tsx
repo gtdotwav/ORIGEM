@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import {
   ArrowLeft,
   Calendar as CalendarIcon,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Grid3X3,
@@ -26,6 +27,8 @@ import {
   X,
   GripVertical,
   CalendarDays,
+  Maximize2,
+  Minimize2,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -124,6 +127,7 @@ function getTypeLabel(type: CalendarEventType) {
 
 export default function CalendarFullPage() {
   const today = new Date();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date>(today);
@@ -131,10 +135,8 @@ export default function CalendarFullPage() {
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
   const [inviteScope, setInviteScope] = useState<"day" | "month" | "full">("day");
-  const [inviteSent, setInviteSent] = useState(false);
-  const [assignee, setAssignee] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Drag state for kanban
   const [draggedEvent, setDraggedEvent] = useState<(CalendarEvent & { _dateKey: string }) | null>(null);
@@ -222,13 +224,32 @@ export default function CalendarFullPage() {
     return cells;
   }, [currentMonth, currentYear]);
 
+  const yearOptions = Array.from({ length: 9 }, (_, index) => today.getFullYear() - 2 + index);
+
+  const setViewportMonth = useCallback((month: number, year: number) => {
+    setCurrentMonth(month);
+    setCurrentYear(year);
+    setSelectedDate((prev) => {
+      const maxDay = new Date(year, month + 1, 0).getDate();
+      return new Date(year, month, Math.min(prev.getDate(), maxDay));
+    });
+  }, []);
+
   const prevMonth = () => {
-    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
-    else setCurrentMonth(currentMonth - 1);
+    if (currentMonth === 0) {
+      setViewportMonth(11, currentYear - 1);
+      return;
+    }
+
+    setViewportMonth(currentMonth - 1, currentYear);
   };
   const nextMonth = () => {
-    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
-    else setCurrentMonth(currentMonth + 1);
+    if (currentMonth === 11) {
+      setViewportMonth(0, currentYear + 1);
+      return;
+    }
+
+    setViewportMonth(currentMonth + 1, currentYear);
   };
   const goToday = () => {
     setCurrentMonth(today.getMonth());
@@ -302,15 +323,28 @@ export default function CalendarFullPage() {
     setTimeout(() => setInviteCopied(false), 2000);
   }, [inviteLink]);
 
-  const handleSendInvite = useCallback(() => {
-    if (!inviteEmail.trim()) return;
-    // Simulate sending invite
-    setInviteSent(true);
-    setTimeout(() => {
-      setInviteSent(false);
-      setInviteEmail("");
-    }, 2500);
-  }, [inviteEmail]);
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!containerRef.current) {
+      return;
+    }
+
+    if (document.fullscreenElement === containerRef.current) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await containerRef.current.requestFullscreen();
+  }, []);
 
   // Kanban drag handlers
   const handleDragStart = (ev: CalendarEvent & { _dateKey: string }) => {
@@ -378,42 +412,81 @@ export default function CalendarFullPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] flex-col">
+    <div ref={containerRef} className="flex h-[calc(100vh-64px)] flex-col bg-background">
       {/* ── Top Bar ── */}
-      <div className="flex items-center justify-between border-b border-foreground/[0.08] bg-background/90 px-6 py-3 backdrop-blur-md">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-foreground/[0.08] bg-background/92 px-4 py-3 backdrop-blur-md md:px-6">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Link
             href="/dashboard"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/70"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4 text-neon-cyan" />
-            <h1 className="text-sm font-semibold text-foreground/90">Calendario</h1>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-neon-cyan" />
+              <h1 className="text-sm font-semibold text-foreground/90">Calendario</h1>
+            </div>
+            <p className="mt-1 text-[11px] text-foreground/35">
+              {selectedDate.toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
+            </p>
           </div>
-          <div className="h-5 w-px bg-foreground/[0.08]" />
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] px-2 py-1.5">
             <button type="button" onClick={prevMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/70">
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
-            <button type="button" onClick={goToday} className="min-w-[140px] px-2 text-center text-sm font-semibold text-foreground/80 transition-colors hover:text-foreground">
-              {MONTHS[currentMonth]} {currentYear}
-            </button>
+            <div className="relative">
+              <select
+                aria-label="Selecionar mes"
+                value={currentMonth}
+                onChange={(event) =>
+                  setViewportMonth(Number(event.target.value), currentYear)
+                }
+                className="appearance-none rounded-lg border border-transparent bg-transparent py-1.5 pl-3 pr-8 text-sm font-semibold text-foreground/82 outline-none transition-colors hover:border-foreground/[0.08] hover:bg-foreground/[0.03]"
+              >
+                {MONTHS.map((month, index) => (
+                  <option key={month} value={index}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/30" />
+            </div>
+            <div className="relative">
+              <select
+                aria-label="Selecionar ano"
+                value={currentYear}
+                onChange={(event) =>
+                  setViewportMonth(currentMonth, Number(event.target.value))
+                }
+                className="appearance-none rounded-lg border border-transparent bg-transparent py-1.5 pl-3 pr-8 text-sm font-semibold text-foreground/82 outline-none transition-colors hover:border-foreground/[0.08] hover:bg-foreground/[0.03]"
+              >
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/30" />
+            </div>
             <button type="button" onClick={nextMonth} className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/40 transition-all hover:bg-foreground/[0.06] hover:text-foreground/70">
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
+            <button
+              type="button"
+              onClick={goToday}
+              className="rounded-lg border border-foreground/[0.08] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 transition-all hover:bg-foreground/[0.04] hover:text-foreground/65"
+            >
+              Hoje
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={goToday}
-            className="rounded-md border border-foreground/[0.08] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/40 transition-all hover:bg-foreground/[0.04] hover:text-foreground/60"
-          >
-            Hoje
-          </button>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {/* View mode toggle */}
           <div className="flex rounded-lg border border-foreground/[0.08] bg-foreground/[0.02] p-0.5">
             {([
@@ -438,7 +511,18 @@ export default function CalendarFullPage() {
             ))}
           </div>
 
-          <div className="h-6 w-px bg-foreground/[0.08]" />
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="flex items-center gap-1.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/45 transition-all hover:border-foreground/[0.14] hover:text-foreground/72"
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-3.5 w-3.5" />
+            ) : (
+              <Maximize2 className="h-3.5 w-3.5" />
+            )}
+            {isFullscreen ? "Sair do full" : "Tela cheia"}
+          </button>
 
           <button
             type="button"
@@ -446,7 +530,7 @@ export default function CalendarFullPage() {
             className="flex items-center gap-1.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.02] px-3 py-1.5 text-[11px] font-medium text-foreground/45 transition-all hover:border-neon-purple/25 hover:text-neon-purple"
           >
             <UserPlus className="h-3.5 w-3.5" />
-            Convidar
+            Compartilhar
           </button>
 
           <button
@@ -455,7 +539,7 @@ export default function CalendarFullPage() {
             className="flex items-center gap-1.5 rounded-lg border border-neon-cyan/25 bg-neon-cyan/12 px-3 py-1.5 text-[11px] font-semibold text-neon-cyan transition-all hover:bg-neon-cyan/20 shadow-sm shadow-neon-cyan/10"
           >
             <Plus className="h-3.5 w-3.5" />
-            Evento
+            Novo evento
           </button>
         </div>
       </div>
@@ -997,17 +1081,6 @@ export default function CalendarFullPage() {
                         <input type="time" value={noteTime} onChange={(e) => setNoteTime(e.target.value)} className="w-[88px] rounded-lg border border-foreground/[0.08] bg-black/20 py-2 pl-7 pr-1 text-[12px] tabular-nums text-foreground/60 outline-none focus:border-neon-cyan/30 [&::-webkit-calendar-picker-indicator]:invert" />
                       </div>
                     </div>
-                    <select
-                      value={assignee}
-                      onChange={(e) => setAssignee(e.target.value)}
-                      className="w-full rounded-lg border border-foreground/[0.08] bg-black/20 px-3 py-2 text-[12px] text-foreground/60 outline-none focus:border-neon-cyan/30"
-                    >
-                      <option value="">Sem atribuicao</option>
-                      {AGENTS.map((a) => (
-                        <option key={a.id} value={a.id}>{a.name} — {a.role}</option>
-                      ))}
-                      <option value="partner">Parceiro (convidado)</option>
-                    </select>
                     <textarea
                       value={noteDesc}
                       onChange={(e) => setNoteDesc(e.target.value)}
@@ -1016,7 +1089,7 @@ export default function CalendarFullPage() {
                       className="w-full resize-none rounded-lg border border-foreground/[0.08] bg-black/20 px-3 py-2 text-[12px] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-neon-cyan/30"
                     />
                     <div className="flex justify-end gap-2">
-                      <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); setNoteTime(""); setAssignee(""); }} className="rounded-lg px-3 py-1.5 text-[11px] text-foreground/35 hover:text-foreground/55">
+                      <button type="button" onClick={() => { setAddMode(null); setNoteTitle(""); setNoteDesc(""); setNoteTime(""); }} className="rounded-lg px-3 py-1.5 text-[11px] text-foreground/35 hover:text-foreground/55">
                         Cancelar
                       </button>
                       <button type="button" onClick={handleAddNote} disabled={!noteTitle.trim()} className="flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/12 px-3 py-1.5 text-[11px] font-semibold text-neon-cyan transition-all hover:bg-neon-cyan/20 disabled:opacity-30">
@@ -1136,7 +1209,7 @@ export default function CalendarFullPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => { setShowInviteModal(false); setInviteEmail(""); setInviteSent(false); }}
+                  onClick={() => setShowInviteModal(false)}
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-colors hover:bg-foreground/[0.06] hover:text-foreground/60"
                 >
                   <X className="h-4 w-4" />
@@ -1204,61 +1277,20 @@ export default function CalendarFullPage() {
                   </div>
                 </div>
 
-                {/* Email invite */}
-                <div>
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
-                    Enviar por email
+                <div className="rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-foreground/30">
+                    Compartilhar
                   </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      placeholder="email@parceiro.com"
-                      className="flex-1 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] px-3.5 py-2.5 text-[12px] text-foreground/70 placeholder:text-foreground/20 outline-none transition-colors focus:border-neon-purple/30"
-                      onKeyDown={(e) => { if (e.key === "Enter") handleSendInvite(); }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSendInvite}
-                      disabled={!inviteEmail.trim() || inviteSent}
-                      className={cn(
-                        "flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[11px] font-semibold transition-all disabled:opacity-40",
-                        inviteSent
-                          ? "border border-neon-green/30 bg-neon-green/10 text-neon-green"
-                          : "border border-neon-purple/25 bg-neon-purple/10 text-neon-purple hover:bg-neon-purple/20"
-                      )}
-                    >
-                      {inviteSent ? (
-                        <><Check className="h-3.5 w-3.5" /> Enviado!</>
-                      ) : (
-                        <><Send className="h-3.5 w-3.5" /> Enviar</>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Quick assign to agents */}
-                <div>
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-foreground/30">
-                    Atribuir a agente
+                  <p className="mt-2 text-[12px] leading-relaxed text-foreground/50">
+                    Copie o link acima ou abra seu cliente de email com o convite preenchido.
                   </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {AGENTS.map((agent) => (
-                      <button
-                        key={agent.id}
-                        type="button"
-                        className="flex items-center gap-2 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] px-2.5 py-2 text-left transition-all hover:border-neon-purple/25 hover:bg-neon-purple/[0.05]"
-                      >
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-neon-purple/10">
-                          <Bot className="h-2.5 w-2.5 text-neon-purple" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate text-[10px] font-semibold text-foreground/65">{agent.name}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent("Convite de calendario ORIGEM")}&body=${encodeURIComponent(`Acesse seu convite: ${inviteLink}`)}`}
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-neon-purple/25 bg-neon-purple/10 px-3.5 py-2 text-[11px] font-semibold text-neon-purple transition-all hover:bg-neon-purple/20"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    Abrir email
+                  </a>
                 </div>
               </div>
 
@@ -1269,7 +1301,7 @@ export default function CalendarFullPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => { setShowInviteModal(false); setInviteEmail(""); setInviteSent(false); }}
+                  onClick={() => setShowInviteModal(false)}
                   className="rounded-lg border border-foreground/[0.08] px-4 py-1.5 text-[11px] font-semibold text-foreground/45 transition-all hover:bg-foreground/[0.04] hover:text-foreground/65"
                 >
                   Fechar

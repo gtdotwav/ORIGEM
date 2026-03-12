@@ -20,6 +20,7 @@ import {
   Rocket,
   Users,
 } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import {
   persistSessionSnapshot,
@@ -62,6 +63,15 @@ const STATUS_STYLE = {
   done: "text-green-200 border-green-300/30 bg-green-300/10",
   blocked: "text-red-200 border-red-300/30 bg-red-300/10",
 } as const;
+
+function formatDateTime(value: string | Date) {
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 function OrchestraPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -291,42 +301,47 @@ function OrchestraPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <Orbit className="h-5 w-5 text-fuchsia-300" />
+      <OperationLensHeader
+        icon={Orbit}
+        iconClassName="text-fuchsia-300"
+        title="Orquestra da sessao"
+        description="Esta leitura consolida contexto, agentes, projeto, grupos e fluxo da mesma sessao em uma unica superficie."
+        supportingCopy="Use a Orquestra para validar continuidade, checkpoints e proximos destinos sem perder o fio do que o chat ja decidiu."
+        sessionTitle={targetSession?.title ?? sessionId}
+        updatedAtLabel={
+          targetSession ? formatDateTime(targetSession.updatedAt) : null
+        }
+        meta={[
+          { label: "Progresso", value: `${overallProgress}%` },
+          { label: "Agentes", value: `${sessionAgents.length}` },
+          { label: "Grupos", value: `${sessionGroups.length}` },
+          { label: "Checkpoints", value: `${checkpointMessages.length}` },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link
+              href={getJourneyStepHref("flows", sessionId, selectedContext?.id)}
+              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Fluxos
+            </Link>
+            <button
+              type="button"
+              onClick={() => void runOrchestraNow()}
+              disabled={isRunningOrchestra}
+              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25 disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {isRunningOrchestra ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
+              {isRunningOrchestra ? "Executando..." : "Rodar orquestra"}
+            </button>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Orquestra Final</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Contexto, agentes, projetos, grupos e fluxos trabalhando em conjunto.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href={getJourneyStepHref("flows", sessionId, selectedContext?.id)}
-            className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Fluxos
-          </Link>
-          <button
-            type="button"
-            onClick={() => void runOrchestraNow()}
-            disabled={isRunningOrchestra}
-            className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25 disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            {isRunningOrchestra ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Play className="h-3.5 w-3.5" />
-            )}
-            {isRunningOrchestra ? "Executando..." : "Rodar Orquestra Agora"}
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {isHydrating ? (
         <div className="space-y-4">

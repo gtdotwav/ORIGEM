@@ -12,6 +12,7 @@ import {
   Loader2,
   Blocks,
 } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { MetricSkeleton, CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import {
@@ -153,54 +154,52 @@ function AgentsPageContent() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <Bot className="h-5 w-5 text-cyan-300" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Agentes Conectados</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Direcao herdada do contexto e delegacao real por funcao.
-            </p>
-            {targetSession ? (
-              <p className="mt-1 text-xs text-foreground/50">
-                Sessao: {targetSession.title} · atualizada em{" "}
-                {formatDateTime(targetSession.updatedAt)}
-              </p>
+      <OperationLensHeader
+        icon={Bot}
+        iconClassName="text-cyan-300"
+        title="Agentes conectados"
+        description="Esta visao mostra como a mesma sessao distribuiu papeis, funcoes e progresso entre agentes especializados."
+        supportingCopy="A delegacao aqui nao e independente: ela deriva do contexto ativo e alimenta diretamente projetos, grupos e fluxo."
+        sessionTitle={targetSession?.title ?? null}
+        updatedAtLabel={
+          targetSession ? formatDateTime(targetSession.updatedAt) : null
+        }
+        meta={[
+          { label: "Agentes", value: `${sessionAgents.length}` },
+          { label: "Funcoes", value: `${runtimeTasks.length}` },
+          { label: "Direcoes", value: `${contextDirections.length}` },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref(
+                  "contexts",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Contexto
+              </Link>
+            ) : null}
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref(
+                  "projects",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+              >
+                Ir para Projetos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             ) : null}
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref(
-                "contexts",
-                targetSessionId,
-                selectedContext?.id
-              )}
-              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Contexto
-            </Link>
-          ) : null}
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref(
-                "projects",
-                targetSessionId,
-                selectedContext?.id
-              )}
-              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
-            >
-              Ir para Projetos
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ) : null}
-        </div>
-      </div>
+        }
+      />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-3 backdrop-blur-2xl">

@@ -91,9 +91,9 @@ function ConnectionsPageContent() {
             <Users2 className="h-6 w-6 text-neon-cyan" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground/95">Conexões</h1>
+            <h1 className="text-2xl font-bold text-foreground/95">Equipe</h1>
             <p className="text-sm text-foreground/40">
-              Gerencie sua rede de contatos e colaboradores
+              Gerencie parceiros, contatos e colaboradores do workspace
             </p>
           </div>
         </div>
@@ -182,10 +182,10 @@ function ConnectionsPageContent() {
       {filtered.length === 0 ? (
         <CosmicEmptyState
           icon={Users2}
-          title={connections.length === 0 ? "Nenhuma conexão" : "Nenhum resultado"}
+          title={connections.length === 0 ? "Nenhum contato ainda" : "Nenhum resultado"}
           description={
             connections.length === 0
-              ? "Adicione conexões para colaborar e compartilhar conteúdo."
+              ? "Adicione pessoas e parceiros para colaborar com mais contexto."
               : "Tente ajustar sua busca ou filtro."
           }
           neonColor="cyan"

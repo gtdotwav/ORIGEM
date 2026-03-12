@@ -756,7 +756,7 @@ export default function CanvasPage() {
                 {Math.max(sessionGroups.length, 1)}
               </p>
               <p className="mt-1 text-[11px] text-foreground/40">
-                {selectedContext?.taskRouting.executionStrategy ?? "pipeline"}
+                {selectedContext?.taskRouting.executionStrategy ?? "orquestrado"}
               </p>
             </div>
 

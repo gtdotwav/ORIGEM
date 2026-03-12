@@ -140,7 +140,7 @@ const START_PATHS: StartPath[] = [
     iconBg: "bg-neon-cyan/10",
     title: "Flows",
     subtitle: "Automacao visual",
-    description: "Monte pipelines de IA conectando blocos visuais. Automatize processos criativos e de analise com drag-and-drop.",
+    description: "Monte fluxos de IA conectando blocos visuais. Automatize processos criativos e de analise com drag-and-drop.",
     route: "/dashboard/flows",
     ctaLabel: "Criar flow",
   },

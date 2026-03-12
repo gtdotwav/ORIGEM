@@ -9,15 +9,15 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Atom,
-  Bot,
-  Brain,
-  FolderKanban,
+  CalendarDays,
   GitBranch,
+  Layers,
   Loader2,
+  Newspaper,
   Orbit,
+  Plug,
   Send,
   Blocks,
-  Users,
 } from "lucide-react";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { useClientMounted } from "@/hooks/use-client-mounted";
@@ -28,18 +28,17 @@ import {
   createSession,
   runChatOrchestration,
 } from "@/lib/chat-orchestrator";
-import { useAgentStore } from "@/stores/agent-store";
-import { useDecompositionStore } from "@/stores/decomposition-store";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useRuntimeStore } from "@/stores/runtime-store";
 import { useSessionStore } from "@/stores/session-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useWorkspaceFilteredSessions } from "@/hooks/use-workspace-sessions";
 
 const SUGGESTIONS = [
-  "Criar fluxo multiagente com consenso",
-  "Definir contexto e delegar em paralelo",
-  "Montar plano didatico Contexto -> Fluxo",
-  "Unificar outputs x, y, z no pipeline",
+  "Planejar a semana e distribuir prioridades",
+  "Consolidar o que esta ativo e decidir proximos passos",
+  "Revisar agenda, runtime e follow-ups do workspace",
+  "Abrir uma sessao operacional para destravar a execucao",
 ];
 
 const STAGE_LABELS: Record<string, string> = {
@@ -94,10 +93,8 @@ export default function DashboardControlPage() {
   const pipelineStage = usePipelineStore((state) => state.stage);
   const pipelineProgress = usePipelineStore((state) => state.progress);
   const resetPipeline = usePipelineStore((state) => state.reset);
-
-  const decompositions = useDecompositionStore((state) => state.decompositions);
-  const agents = useAgentStore((state) => state.agents);
-  const groups = useAgentStore((state) => state.groups);
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const activeWorkspaceId = useWorkspaceStore((state) => state.activeWorkspaceId);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -146,6 +143,16 @@ export default function DashboardControlPage() {
   const activeSessionCount = useMemo(
     () => sessions.filter((session) => session.status === "active").length,
     [sessions]
+  );
+
+  const activeWorkspace = useMemo(
+    () => workspaces.find((workspace) => workspace.id === activeWorkspaceId),
+    [activeWorkspaceId, workspaces]
+  );
+
+  const activeWorkspaceCount = useMemo(
+    () => workspaces.filter((workspace) => workspace.status === "active").length,
+    [workspaces]
   );
 
   const runtimeList = useMemo(() => Object.values(runtimes), [runtimes]);
@@ -206,14 +213,14 @@ export default function DashboardControlPage() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-foreground/35">
-              Dashboard Control Center
+              Visao operacional
             </p>
             <h1 className="text-2xl font-semibold text-foreground/90">
-              Controle operacional completo da engrenagem
+              Sessões, runtime e estado global em um só lugar
             </h1>
             <p className="mt-1 text-sm text-foreground/55">
-              Dispare sessoes, monitore delegacao em tempo real e avance
-              {" "}Contexto {"->"} Agentes {"->"} Projetos {"->"} Grupos {"->"} Fluxos {"->"} Orquestra.
+              Use esta tela para acompanhar a operacao viva, retomar sessoes importantes
+              e abrir as superficies certas sem fragmentar contexto.
             </p>
           </div>
 
@@ -223,10 +230,10 @@ export default function DashboardControlPage() {
               className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.10] bg-black/35 px-2.5 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.2] hover:bg-foreground/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Principal
+              Chat principal
             </Link>
             <div className="rounded-xl border border-foreground/[0.08] bg-black/30 px-3 py-2 text-xs text-foreground/65">
-              Pipeline global: {STAGE_LABELS[pipelineStage] ?? pipelineStage}
+              Runtime global: {STAGE_LABELS[pipelineStage] ?? pipelineStage}
             </div>
           </div>
         </div>
@@ -241,7 +248,7 @@ export default function DashboardControlPage() {
         <div className="rounded-xl border border-foreground/[0.08] bg-black/30 p-3">
           <div className="mb-2 inline-flex items-center gap-2 text-sm text-foreground/70">
             <Blocks className="h-4 w-4 text-neon-cyan" />
-            Iniciar nova sessão controlada
+            Abrir sessao operacional
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -249,7 +256,7 @@ export default function DashboardControlPage() {
               type="text"
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Digite a instrução mestre para acionar todas as funcionalidades..."
+              placeholder="Descreva o objetivo operacional que precisa destravar agora..."
               className="min-w-[260px] flex-1 rounded-lg border border-foreground/[0.08] bg-card px-3 py-2 text-sm text-foreground placeholder:text-foreground/30 outline-none"
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -265,7 +272,7 @@ export default function DashboardControlPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              {sending ? "Executando..." : "Disparar"}
+              {sending ? "Executando..." : "Abrir"}
             </button>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -290,24 +297,28 @@ export default function DashboardControlPage() {
           <p className="text-xs text-foreground/45">{activeSessionCount} ativas</p>
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Contextos</p>
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Workspaces</p>
           <p className="mt-1 text-xl font-semibold text-foreground">
-            {Object.keys(decompositions).length}
+            {activeWorkspaceCount}
           </p>
-          <p className="text-xs text-foreground/45">decomposicoes registradas</p>
-        </div>
-        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
-          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Agentes e Grupos</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">
-            {agents.length} / {groups.length}
+          <p className="text-xs text-foreground/45">
+            {workspaces.length} no total
           </p>
-          <p className="text-xs text-foreground/45">instancias da sessao global</p>
         </div>
         <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
           <p className="text-[10px] uppercase tracking-wide text-foreground/35">Runtime</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{runningRuntimes.length}</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">
+            {runningRuntimes.length}
+          </p>
           <p className="text-xs text-foreground/45">
-            execucoes ao vivo · {totalRuntimeTasks} tarefas · {totalNotes} notas
+            {totalRuntimeTasks} tarefas · {totalNotes} notas
+          </p>
+        </div>
+        <div className="rounded-xl border border-foreground/[0.08] bg-card/70 p-3 backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-wide text-foreground/35">Providers</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{providerConnectedCount}</p>
+          <p className="text-xs text-foreground/45">
+            {providerTotalCount || 0} disponiveis
           </p>
         </div>
       </div>
@@ -316,7 +327,7 @@ export default function DashboardControlPage() {
         <section className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/65">
-              Sessoes e Comandos
+              Sessoes recentes
             </h2>
             {latestSessionId ? (
               <Link
@@ -333,9 +344,9 @@ export default function DashboardControlPage() {
             <CosmicEmptyState
               icon={Blocks}
               title="Nenhuma sessao ativa"
-              description="Crie uma nova sessao no dashboard para iniciar a orquestracao."
+              description="Abra uma sessao pelo chat principal ou por esta tela para iniciar a operacao."
               neonColor="cyan"
-              action={{ label: "Ir ao dashboard", href: "/dashboard" }}
+              action={{ label: "Ir ao chat principal", href: "/dashboard" }}
             />
           ) : (
             <>
@@ -393,10 +404,10 @@ export default function DashboardControlPage() {
                           Chat
                         </Link>
                         <Link
-                          href={`/dashboard/contexts?sessionId=${encodeURIComponent(session.id)}`}
-                          className="rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/45 hover:bg-cyan-300/20"
+                          href="/dashboard/calendar"
+                          className="rounded-lg border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[11px] text-emerald-200 transition-all hover:border-emerald-300/45 hover:bg-emerald-300/20"
                         >
-                          Contextos
+                          Agenda
                         </Link>
                         <Link
                           href={`/dashboard/orchestra/${session.id}`}
@@ -425,31 +436,37 @@ export default function DashboardControlPage() {
         <aside className="space-y-4">
           <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/65">
-              Modulos de Controle
+              Superficies operacionais
             </h2>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/dashboard/contexts" className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-2 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/40 hover:bg-cyan-300/15">
+              <Link href="/dashboard" className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-2 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/40 hover:bg-cyan-300/15">
                 <div className="mb-1 inline-flex items-center gap-1">
-                  <Brain className="h-3.5 w-3.5" />
-                  Contextos
+                  <Blocks className="h-3.5 w-3.5" />
+                  Chat
                 </div>
               </Link>
-              <Link href="/dashboard/agents" className="rounded-lg border border-blue-300/20 bg-blue-300/10 px-2.5 py-2 text-[11px] text-blue-200 transition-all hover:border-blue-300/40 hover:bg-blue-300/15">
+              <Link href="/dashboard/calendar" className="rounded-lg border border-blue-300/20 bg-blue-300/10 px-2.5 py-2 text-[11px] text-blue-200 transition-all hover:border-blue-300/40 hover:bg-blue-300/15">
                 <div className="mb-1 inline-flex items-center gap-1">
-                  <Bot className="h-3.5 w-3.5" />
-                  Agentes
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  Calendario
                 </div>
               </Link>
-              <Link href="/dashboard/projects" className="rounded-lg border border-indigo-300/20 bg-indigo-300/10 px-2.5 py-2 text-[11px] text-indigo-200 transition-all hover:border-indigo-300/40 hover:bg-indigo-300/15">
+              <Link href="/dashboard/workspaces" className="rounded-lg border border-indigo-300/20 bg-indigo-300/10 px-2.5 py-2 text-[11px] text-indigo-200 transition-all hover:border-indigo-300/40 hover:bg-indigo-300/15">
                 <div className="mb-1 inline-flex items-center gap-1">
-                  <FolderKanban className="h-3.5 w-3.5" />
-                  Projetos
+                  <Layers className="h-3.5 w-3.5" />
+                  Workspaces
                 </div>
               </Link>
-              <Link href="/dashboard/groups" className="rounded-lg border border-green-300/20 bg-green-300/10 px-2.5 py-2 text-[11px] text-green-200 transition-all hover:border-green-300/40 hover:bg-green-300/15">
+              <Link href="/dashboard/settings/providers" className="rounded-lg border border-green-300/20 bg-green-300/10 px-2.5 py-2 text-[11px] text-green-200 transition-all hover:border-green-300/40 hover:bg-green-300/15">
                 <div className="mb-1 inline-flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
-                  Grupos
+                  <Plug className="h-3.5 w-3.5" />
+                  Providers
+                </div>
+              </Link>
+              <Link href="/dashboard/feed" className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-2 text-[11px] text-cyan-200 transition-all hover:border-cyan-300/40 hover:bg-cyan-300/15">
+                <div className="mb-1 inline-flex items-center gap-1">
+                  <Newspaper className="h-3.5 w-3.5" />
+                  Pesquisa
                 </div>
               </Link>
               <Link href="/dashboard/flows" className="rounded-lg border border-orange-300/20 bg-orange-300/10 px-2.5 py-2 text-[11px] text-orange-200 transition-all hover:border-orange-300/40 hover:bg-orange-300/15">
@@ -469,15 +486,22 @@ export default function DashboardControlPage() {
 
           <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-4 backdrop-blur-xl">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/65">
-              Infra e Estado
+              Estado global
             </h2>
             <div className="space-y-2 text-xs text-foreground/60">
               <div className="flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-black/25 px-2.5 py-2">
                 <span className="inline-flex items-center gap-1.5">
                   <Atom className="h-3.5 w-3.5 text-neon-cyan" />
-                  Pipeline
+                  Runtime
                 </span>
                 <span>{STAGE_LABELS[pipelineStage] ?? pipelineStage}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-black/25 px-2.5 py-2">
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers className="h-3.5 w-3.5 text-violet-300" />
+                  Workspace ativo
+                </span>
+                <span>{activeWorkspace?.name ?? "Geral"}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg border border-foreground/[0.06] bg-black/25 px-2.5 py-2">
                 <span className="inline-flex items-center gap-1.5">
@@ -494,7 +518,7 @@ export default function DashboardControlPage() {
               onClick={resetPipeline}
               className="mt-3 w-full rounded-lg border border-foreground/[0.10] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.2] hover:bg-foreground/[0.08]"
             >
-              Resetar Pipeline Global
+              Resetar runtime global
             </button>
           </div>
         </aside>

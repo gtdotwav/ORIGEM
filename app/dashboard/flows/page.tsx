@@ -10,6 +10,7 @@ import {
   GitBranch,
   Loader2,
 } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { PipelineSkeleton, TaskRowSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import {
@@ -103,10 +104,19 @@ function eventLabel(event: PipelineEvent) {
   }
 
   if (event.type === "pipeline_complete") {
-    return "Pipeline finalizado";
+    return "Execucao consolidada";
   }
 
   return event.type;
+}
+
+function formatDateTime(value: string | Date) {
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function FlowsPageContent() {
@@ -134,6 +144,13 @@ function FlowsPageContent() {
 
   const latestSessionId = useMemo(() => getLatestSessionId(sessions), [sessions]);
   const targetSessionId = querySessionId ?? currentSessionId ?? latestSessionId;
+  const targetSession = useMemo(
+    () =>
+      targetSessionId
+        ? sessions.find((session) => session.id === targetSessionId) ?? null
+        : null,
+    [sessions, targetSessionId]
+  );
 
   const contexts = useMemo(
     () =>
@@ -211,48 +228,52 @@ function FlowsPageContent() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <GitBranch className="h-5 w-5 text-orange-300" />
+      <OperationLensHeader
+        icon={GitBranch}
+        iconClassName="text-orange-300"
+        title="Fluxos em tempo real"
+        description="Esta leitura mostra a execucao viva da mesma sessao, conectando contexto, grupos, tarefas e checkpoints do runtime."
+        supportingCopy="Fluxo nao e um modulo isolado. Ele e a trilha operacional do que a inteligencia decidiu, delegou e esta consolidando agora."
+        sessionTitle={targetSession?.title ?? null}
+        updatedAtLabel={
+          targetSession ? formatDateTime(targetSession.updatedAt) : null
+        }
+        meta={[
+          { label: "Progresso", value: `${progress}%` },
+          { label: "Tarefas", value: `${runtimeTasks.length}` },
+          { label: "Eventos", value: `${relevantEvents.length}` },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref(
+                  "groups",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Grupos
+              </Link>
+            ) : null}
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref(
+                  "orchestra",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+              >
+                Ir para Orquestra
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : null}
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Fluxos em Tempo Real</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Pipeline conectado a contexto, grupos e tarefas do runtime.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref(
-                "groups",
-                targetSessionId,
-                selectedContext?.id
-              )}
-              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Grupos
-            </Link>
-          ) : null}
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref(
-                "orchestra",
-                targetSessionId,
-                selectedContext?.id
-              )}
-              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
-            >
-              Ir para Orquestra
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ) : null}
-        </div>
-      </div>
+        }
+      />
 
       {isHydrating ? (
         <div className="rounded-2xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-6 backdrop-blur-2xl">
@@ -265,7 +286,7 @@ function FlowsPageContent() {
         <CosmicEmptyState
           icon={GitBranch}
           title="Nenhum fluxo ativo"
-          description="Fluxos aparecem quando tarefas sao executadas no pipeline."
+          description="Fluxos aparecem quando tarefas entram em execucao no runtime."
           neonColor="orange"
         />
       ) : (
@@ -273,7 +294,7 @@ function FlowsPageContent() {
           <div className="mb-4 rounded-2xl border border-foreground/[0.06] bg-card/76 shadow-2xl shadow-black/45 p-4 backdrop-blur-2xl">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs uppercase tracking-[0.14em] text-foreground/40">
-                Estado do pipeline
+                Estado do fluxo
               </p>
               <span className="text-xs text-foreground/60">
                 {STAGE_LABELS[pipelineStage]} · {progress}%
@@ -372,7 +393,7 @@ function FlowsPageContent() {
                   Eventos recentes
                 </p>
                 {relevantEvents.length === 0 ? (
-                  <p className="mt-2 text-xs text-foreground/50">Sem eventos no pipeline ainda.</p>
+                  <p className="mt-2 text-xs text-foreground/50">Sem eventos de execucao ainda.</p>
                 ) : (
                   <div className="mt-2 space-y-1.5">
                     {relevantEvents.map((event, index) => (

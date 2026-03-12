@@ -3,12 +3,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
+  CalendarDays,
   Loader2,
   Blocks as SparklesIcon,
   Paperclip,
   ArrowUp,
-  Orbit,
+  LayoutDashboard,
+  Layers,
   Plug,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
@@ -25,13 +28,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { usePersonaStore } from "@/stores/persona-store";
 import { persistSessionSnapshot } from "@/lib/chat-backend-client";
 import {
   createId,
   createMessage,
   createSession,
-  runChatOrchestration,
   runSimpleChat,
 } from "@/lib/chat-orchestrator";
 
@@ -158,7 +159,7 @@ export default function DashboardPage() {
       const typedPrompt = input.trim();
       const prompt =
         typedPrompt ||
-        `Analise a imagem anexada (${file.name}) e gere contexto, agentes, projeto e plano de execucao.`;
+        `Analise a imagem anexada (${file.name}) e gere um plano de execucao claro com contexto, prioridades e proximos passos.`;
 
       const metadata: { imageAttachment: ImageAttachmentMetadata } = {
         imageAttachment: {
@@ -203,24 +204,33 @@ export default function DashboardPage() {
         <div className="w-full overflow-hidden rounded-[28px] border border-white/10 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl md:rounded-[32px]">
           {/* Header */}
           <div className="px-5 pb-4 pt-5 md:px-6 md:pt-6">
-            <div className="mb-1.5 flex items-center gap-2">
-              <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-80" />
-              <span className="text-[12px] font-medium tracking-wide text-foreground/55">
-                Bem-vindo ao ORIGEM
-              </span>
-            </div>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="mb-1.5 flex items-center gap-2">
+                  <Image src="/logo.png" alt="ORIGEM" width={18} height={18} className="pointer-events-none opacity-80" />
+                  <span className="text-[12px] font-medium tracking-wide text-foreground/55">
+                    Inteligencia central
+                  </span>
+                </div>
 
-            <h1 className="text-[20px] font-semibold leading-tight text-foreground/90 md:text-[22px]">
-              Como posso ajudar hoje?
-            </h1>
+                <h1 className="text-[20px] font-semibold leading-tight text-foreground/90 md:text-[22px]">
+                  Como podemos mover a operacao agora?
+                </h1>
 
-            {/* Workspace indicator */}
-            {activeWsName && (
-              <div className="mt-2 flex items-center gap-2 text-[11px] text-foreground/42">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground/35" />
-                Criando em: {activeWsName}
+                <p className="mt-2 max-w-[520px] text-[12px] leading-relaxed text-foreground/42">
+                  Chat, providers, ferramentas do workspace e agenda trabalhando a partir do mesmo contexto.
+                </p>
+
+                {activeWsName && (
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-foreground/42">
+                    <span className="h-1.5 w-1.5 rounded-full bg-foreground/35" />
+                    Workspace ativo: {activeWsName}
+                  </div>
+                )}
               </div>
-            )}
+
+              <ChatControlsMenu workspaceName={activeWsName} className="shrink-0" />
+            </div>
           </div>
 
           {/* Input area */}
@@ -345,37 +355,43 @@ export default function DashboardPage() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/agents")}
+                onClick={() => router.push("/dashboard/calendar")}
                 className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
               >
-                <SparklesIcon className="h-3 w-3 text-neon-cyan" />
-                Criar Agente
+                <CalendarDays className="h-3 w-3 text-neon-cyan" />
+                Abrir Calendario
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/skills")}
+                onClick={() => router.push("/dashboard/workspaces")}
                 className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
               >
-                <svg className="h-3 w-3 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Executar Skill
+                <Layers className="h-3 w-3 text-neon-purple" />
+                Abrir Workspaces
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/connections")}
+                onClick={() => router.push("/dashboard/settings/providers")}
                 className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
               >
                 <Plug className="h-3 w-3 text-neon-orange" />
-                Conectar Dados
+                Configurar Providers
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/spaces")}
+                onClick={() => router.push("/dashboard/feed")}
                 className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
               >
-                <Orbit className="h-3 w-3 text-white/70" />
-                Abrir Spaces
+                <Search className="h-3 w-3 text-neon-cyan" />
+                Pesquisa ao vivo
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/control")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[11px] font-medium text-white/60 transition-colors hover:border-white/[0.2] hover:bg-white/[0.04] hover:text-white"
+              >
+                <LayoutDashboard className="h-3 w-3 text-white/70" />
+                Ver Operacao
               </button>
             </div>
           </div>

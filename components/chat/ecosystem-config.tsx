@@ -53,7 +53,7 @@ export function EcosystemConfig({ className }: { className?: string }) {
   return (
     <div className={cn("space-y-3", className)}>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground/30">
-        Config 360
+        Runtime padrao
       </p>
 
       {/* Provider */}
@@ -71,7 +71,7 @@ export function EcosystemConfig({ className }: { className?: string }) {
           className="w-full rounded-lg border border-foreground/[0.08] bg-foreground/[0.04] px-2.5 py-1.5 text-xs text-foreground/70 outline-none transition-colors focus:border-foreground/20"
         >
           <option value="" className="bg-card">
-            Auto (melhor disponivel)
+            Auto (melhor provider disponivel)
           </option>
           {configured.map((p) => {
             const meta = PROVIDER_CATALOG.find((c) => c.name === p.provider);
@@ -139,7 +139,7 @@ export function EcosystemConfig({ className }: { className?: string }) {
 
       {configured.length === 0 && (
         <p className="text-[10px] text-neon-orange/60">
-          Nenhum provedor configurado. Va em Settings &gt; Providers.
+          Nenhum provider configurado. Abra Settings &gt; Providers.
         </p>
       )}
     </div>

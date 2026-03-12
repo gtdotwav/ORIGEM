@@ -959,10 +959,10 @@ const COMPONENTS: ComponentEntry[] = [
   },
   {
     id: "pipeline-stepper",
-    name: "Pipeline Stepper",
-    description: "Stepper de estagios do pipeline com estado",
+    name: "Execution Stepper",
+    description: "Stepper de estagios da execucao com estado",
     category: "data",
-    tags: ["pipeline", "stepper", "stage"],
+    tags: ["execucao", "stepper", "stage"],
     preview: PreviewPipelineStepper,
   },
   {
@@ -976,7 +976,7 @@ const COMPONENTS: ComponentEntry[] = [
   {
     id: "event-log",
     name: "Event Log",
-    description: "Feed de eventos do pipeline com timestamps",
+    description: "Feed de eventos da execucao com timestamps",
     category: "data",
     tags: ["event", "log", "feed"],
     preview: PreviewEventLog,

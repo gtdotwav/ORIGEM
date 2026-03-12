@@ -35,7 +35,7 @@ const PLANS = [
       "Decomposicao intermediaria",
       "3 workspaces",
       "Historico de 30 dias",
-      "Modo 360 basico",
+      "Execucao assistida basica",
     ],
     cta: "Assinar Starter",
     href: "/checkout?plan=starter",
@@ -44,16 +44,16 @@ const PLANS = [
   {
     name: "Pro",
     description:
-      "Para profissionais que precisam do ecossistema 360 completo com agentes e orquestracao.",
+      "Para profissionais que precisam de chat, agentes e execucao conectados na mesma operacao.",
     price: "$29",
     priceSub: "/mes",
     features: [
       "Sessoes ilimitadas",
-      "Modo 360 com agentes reais",
+      "Execucao multiagente",
       "Decomposicao avancada",
       "Workspaces ilimitados",
       "Historico permanente",
-      "Critic pipeline",
+      "Critic para revisao",
       "Suporte prioritario",
     ],
     cta: "Assinar Pro",

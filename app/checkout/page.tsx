@@ -21,7 +21,7 @@ const PLAN_DATA: Record<
       "Decomposicao intermediaria",
       "3 workspaces",
       "Historico de 30 dias",
-      "Modo 360 basico",
+      "Execucao assistida basica",
     ],
   },
   pro: {
@@ -30,11 +30,11 @@ const PLAN_DATA: Record<
     period: "/mes",
     features: [
       "Sessoes ilimitadas",
-      "Modo 360 com agentes reais",
+      "Execucao multiagente",
       "Decomposicao avancada",
       "Workspaces ilimitados",
       "Historico permanente",
-      "Critic pipeline",
+      "Critic para revisao",
       "Suporte prioritario",
     ],
   },

@@ -13,6 +13,7 @@ import {
   Tags,
   Target,
 } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { ContextSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import { toast } from "sonner";
@@ -92,7 +93,7 @@ const CONNECTION_META: Record<
   },
   flows: {
     label: "Fluxos",
-    description: "Orquestrar x, y, z e consolidar pipeline.",
+    description: "Consolidar a execucao e acompanhar o fluxo resultante.",
     className: "text-orange-300 border-orange-300/30 bg-orange-300/10",
     href: (sessionId, contextId) =>
       `/dashboard/flows?sessionId=${encodeURIComponent(
@@ -101,7 +102,7 @@ const CONNECTION_META: Record<
   },
   orchestra: {
     label: "Orquestra",
-    description: "Rodar engrenagem visual com conexoes finais.",
+    description: "Abrir a execucao visual com tudo conectado.",
     className: "text-fuchsia-300 border-fuchsia-300/30 bg-fuchsia-300/10",
     href: (sessionId, contextId) =>
       `/dashboard/orchestra/${encodeURIComponent(
@@ -138,7 +139,7 @@ function formatExecutionStrategy(strategy: TaskRoutingResult["executionStrategy"
   if (strategy === "sequential") {
     return "sequencial";
   }
-  return "pipeline";
+  return "orquestrado";
 }
 
 function detectConnectionTargets(text: string): ConnectionKey[] {
@@ -518,26 +519,29 @@ function ContextsPageContent() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-              <Brain className="h-5 w-5 text-cyan-300" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">Contextos</h1>
-              <p className="mt-1 text-sm text-foreground/40">
-                Clique em um contexto para expandir e conversar dentro do plano.
-              </p>
-              {targetSession ? (
-                <p className="mt-1 text-xs text-foreground/35">
-                  Sessao ativa: {targetSession.title}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          {targetSessionId ? (
+      <OperationLensHeader
+        icon={Brain}
+        iconClassName="text-cyan-300"
+        title="Contextos"
+        description="Cada contexto organiza intencao, sinais e prioridades antes de distribuir agentes, projetos, grupos e fluxo."
+        supportingCopy="Use esta etapa para ajustar a direcao da mesma sessao sem quebrar continuidade. Tudo o que voce registrar aqui orienta o resto da operacao."
+        sessionTitle={targetSession?.title ?? null}
+        meta={[
+          {
+            label: "Contextos ativos",
+            value: `${contextResults.length}`,
+          },
+          ...(activeExpandedContextId
+            ? [
+                {
+                  label: "Foco",
+                  value: activeExpandedContextId.slice(0, 8),
+                },
+              ]
+            : []),
+        ]}
+        actions={
+          targetSessionId ? (
             <Link
               href={`/dashboard/chat/${targetSessionId}`}
               className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan"
@@ -545,9 +549,9 @@ function ContextsPageContent() {
               <ArrowLeft className="h-3.5 w-3.5" />
               Voltar para chat
             </Link>
-          ) : null}
-        </div>
-      </div>
+          ) : null
+        }
+      />
 
       <div className="mb-6 flex items-center gap-3 rounded-xl border border-foreground/[0.08] bg-card/70 px-4 py-3 backdrop-blur-xl">
         <Search className="h-4 w-4 text-foreground/20" />

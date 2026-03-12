@@ -17,33 +17,28 @@ import { usePersonaStore } from "@/stores/persona-store";
 import { useConnectionStore } from "@/stores/connection-store";
 import { CELEBRITY_PERSONAS, PERSONA_ICONS } from "@/lib/personas";
 import {
+  Newspaper,
   LayoutDashboard,
-  Brain,
-  Bot,
-  FolderKanban,
-  Users,
-  GitBranch,
   Settings,
   Key,
   Gauge,
   Layers,
+  CalendarDays,
   MessageSquare,
   Plus,
   Blocks,
   Filter,
   Baby,
-  Workflow,
-  Rss,
   Users2,
   Code2,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Calendario", href: "/dashboard/calendar", icon: CalendarDays },
   { label: "Code", href: "/dashboard/code", icon: Code2 },
   { label: "Workspaces", href: "/dashboard/workspaces", icon: Layers },
-  { label: "Feed", href: "/dashboard/feed", icon: Rss },
-  { label: "Conexões", href: "/dashboard/connections", icon: Users2 },
+  { label: "Equipe", href: "/dashboard/connections", icon: Users2 },
   { label: "Apps", href: "/dashboard/apps", icon: Blocks },
   { label: "Celebridade IA", href: "/dashboard/apps/celebrity-chat", icon: MessageSquare },
   { label: "ORIGEM Kids", href: "/dashboard/apps/kids", icon: Baby },
@@ -52,18 +47,10 @@ const navItems = [
   { label: "Controle", href: "/dashboard/control", icon: Gauge },
 ];
 
-const pipelineItems = [
-  { label: "Contextos", href: "/dashboard/contexts", icon: Brain },
-  { label: "Agentes", href: "/dashboard/agents", icon: Bot },
-  { label: "Projetos", href: "/dashboard/projects", icon: FolderKanban },
-  { label: "Grupos", href: "/dashboard/groups", icon: Users },
-  { label: "Fluxos", href: "/dashboard/flows", icon: GitBranch },
-  { label: "Canvas", href: "/dashboard/canvas", icon: Workflow },
-];
-
 const actionItems = [
   { label: "Nova sessão", href: "/dashboard", icon: Plus },
   { label: "Novo workspace", href: "/dashboard/workspaces", icon: Layers },
+  { label: "Pesquisa ao vivo", href: "/dashboard/feed", icon: Newspaper },
   {
     label: "Configurar provedores",
     href: "/dashboard/settings/providers",
@@ -124,18 +111,6 @@ export function CommandPalette() {
           ))}
         </CommandGroup>
 
-        <CommandGroup heading="360º — Pipeline">
-          {pipelineItems.map((item) => (
-            <CommandItem
-              key={item.href}
-              onSelect={() => select(item.href)}
-            >
-              <item.icon />
-              <span>{item.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-
         {recentSessions.length > 0 && (
           <CommandGroup heading="Sessões recentes">
             {recentSessions.map((session) => (
@@ -179,7 +154,7 @@ export function CommandPalette() {
         )}
 
         {acceptedConnections.length > 0 && (
-          <CommandGroup heading="Conexões recentes">
+          <CommandGroup heading="Equipe recente">
             {acceptedConnections.map((conn) => (
               <CommandItem
                 key={conn.id}

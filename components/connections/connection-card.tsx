@@ -7,7 +7,7 @@ import {
   Trash2,
   Pencil,
   MessageSquare,
-  Compass,
+  Users2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -108,9 +108,9 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               <MessageSquare className="mr-2 h-3.5 w-3.5" />
               Adicionar ao Chat
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toast.info("Em breve: adicionar ao 360º")}>
-              <Compass className="mr-2 h-3.5 w-3.5" />
-              Adicionar ao 360º
+            <DropdownMenuItem onClick={() => toast.info("Em breve: vincular ao workspace")}>
+              <Users2 className="mr-2 h-3.5 w-3.5" />
+              Vincular ao workspace
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-foreground/[0.06]" />
             {connection.status !== "blocked" ? (

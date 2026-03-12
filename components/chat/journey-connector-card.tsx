@@ -46,11 +46,11 @@ export function JourneyConnectorCard({
     <div className="mt-3 rounded-xl border border-neon-cyan/20 bg-neon-cyan/5 p-3">
       <div className="mb-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-neon-cyan">
         <Milestone className="h-3.5 w-3.5" />
-        Jornada conectada da engrenagem
+        Jornada conectada da execucao
       </div>
 
       <p className="mb-2 text-xs text-foreground/65">
-        Siga a trilha didatica para conectar tudo: Contexto → Agentes → Projeto → Grupos → Fluxos → Orquestra.
+        Siga a trilha recomendada para transformar a conversa em execucao: Contexto → Agentes → Projeto → Grupos → Fluxos → Orquestra.
       </p>
 
       <div className="mb-3 grid gap-1.5">

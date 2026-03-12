@@ -12,6 +12,7 @@ import {
   Users,
   Vote,
 } from "lucide-react";
+import { OperationLensHeader } from "@/components/dashboard/operation-lens-header";
 import { CardSkeleton } from "@/components/shared/cosmic-skeleton";
 import { CosmicEmptyState } from "@/components/shared/cosmic-empty-state";
 import {
@@ -68,6 +69,15 @@ interface GroupView {
   isVirtual: boolean;
 }
 
+function formatDateTime(value: string | Date) {
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function GroupsPageContent() {
   const searchParams = useSearchParams();
   const querySessionId = searchParams.get("sessionId");
@@ -92,6 +102,13 @@ function GroupsPageContent() {
 
   const latestSessionId = useMemo(() => getLatestSessionId(sessions), [sessions]);
   const targetSessionId = querySessionId ?? currentSessionId ?? latestSessionId;
+  const targetSession = useMemo(
+    () =>
+      targetSessionId
+        ? sessions.find((session) => session.id === targetSessionId) ?? null
+        : null,
+    [sessions, targetSessionId]
+  );
 
   const contexts = useMemo(
     () =>
@@ -197,44 +214,48 @@ function GroupsPageContent() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-foreground/[0.08] bg-foreground/[0.04]">
-            <Users className="h-5 w-5 text-green-300" />
+      <OperationLensHeader
+        icon={Users}
+        iconClassName="text-green-300"
+        title="Grupos de execucao"
+        description="Aqui a mesma sessao define como agentes colaboram, em consenso, paralelo ou sequencia, para cumprir o plano ativo."
+        supportingCopy="Grupos sao uma camada de coordenacao da operacao. Eles existem para dar forma a colaboracao que ja nasceu no contexto e nos projetos."
+        sessionTitle={targetSession?.title ?? null}
+        updatedAtLabel={
+          targetSession ? formatDateTime(targetSession.updatedAt) : null
+        }
+        meta={[
+          { label: "Grupos", value: `${effectiveGroups.length}` },
+          { label: "Agentes", value: `${sessionAgents.length}` },
+          { label: "Funcoes", value: `${runtimeTasks.length}` },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref(
+                  "projects",
+                  targetSessionId,
+                  selectedContext?.id
+                )}
+                className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Projetos
+              </Link>
+            ) : null}
+            {targetSessionId ? (
+              <Link
+                href={getJourneyStepHref("flows", targetSessionId, selectedContext?.id)}
+                className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
+              >
+                Ir para Fluxos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : null}
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Grupos de Execucao</h1>
-            <p className="mt-1 text-sm text-foreground/50">
-              Colaboracao de agentes organizada para cumprir o plano do projeto.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref(
-                "projects",
-                targetSessionId,
-                selectedContext?.id
-              )}
-              className="inline-flex items-center gap-1 rounded-lg border border-foreground/[0.12] bg-foreground/[0.05] px-3 py-2 text-xs text-foreground/70 transition-all hover:border-foreground/[0.24] hover:bg-foreground/[0.08]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Projetos
-            </Link>
-          ) : null}
-          {targetSessionId ? (
-            <Link
-              href={getJourneyStepHref("flows", targetSessionId, selectedContext?.id)}
-              className="inline-flex items-center gap-1 rounded-lg border border-neon-cyan/35 bg-neon-cyan/15 px-3 py-2 text-xs font-medium text-neon-cyan transition-all hover:border-neon-cyan/60 hover:bg-neon-cyan/25"
-            >
-              Ir para Fluxos
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ) : null}
-        </div>
-      </div>
+        }
+      />
 
       {isHydrating ? (
         <div className="rounded-2xl border border-foreground/[0.08] bg-card/70 p-6 backdrop-blur-xl">
@@ -358,7 +379,7 @@ function GroupsPageContent() {
               Proxima etapa recomendada
             </div>
             <p className="mt-1 text-xs text-foreground/70">
-              Executar pipeline completo e acompanhar cada estagio da engrenagem em tempo real.
+              Executar a cadeia completa e acompanhar cada etapa em tempo real.
             </p>
             <div className="mt-2">
               <Link
