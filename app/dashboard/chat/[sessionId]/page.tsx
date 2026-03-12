@@ -21,7 +21,6 @@ import { ChatControlsMenu } from "@/components/chat/chat-controls-menu";
 import { ChatSessionMenu } from "@/components/chat/chat-session-menu";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
-import { LeftToolbar } from "@/components/layout/left-toolbar";
 import { useClientMounted } from "@/hooks/use-client-mounted";
 import {
   ensureSessionRecord,
@@ -627,8 +626,6 @@ export default function ChatPage() {
           </form>
         </div>
       </section>
-
-      <LeftToolbar currentSessionId={sessionId} />
     </div>
   );
 }

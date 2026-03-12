@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Zap, Plus, Search, BookOpen, Fingerprint, GitBranch } from "lucide-react";
 import { motion } from "motion/react";
-import { LeftToolbar } from "@/components/layout/left-toolbar";
-
 const SKILLS_MARKETPLACE = [
   { id: 1, title: "Auditoria de Projeto", desc: "Varre repositorios em busca de debito tecnico e oportunidades arquiteturais.", level: "Nivel 1", icon: Fingerprint, color: "text-neon-cyan" },
   { id: 2, title: "Qualificacao de Lead", desc: "Avalia intent e maturidade comercial baseada nos registros do seu CRM.", level: "Nivel 2", icon: BookOpen, color: "text-neon-pink" },
@@ -135,8 +133,6 @@ export default function SkillsPage() {
           </div>
         )}
       </motion.div>
-
-      <LeftToolbar />
     </div>
   );
 }

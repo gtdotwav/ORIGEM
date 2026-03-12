@@ -13,10 +13,10 @@ import {
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { LeftToolbar } from "@/components/layout/left-toolbar";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { IdeaSwiper } from "@/components/chat/idea-swiper";
 import { ChatControlsMenu } from "@/components/chat/chat-controls-menu";
+import { CalendarWidget } from "@/components/dashboard/calendar-widget";
 import { useClientMounted } from "@/hooks/use-client-mounted";
 import {
   buildCalendarPromptContext,
@@ -383,6 +383,8 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
+      <CalendarWidget />
+
       <input
         ref={imageInputRef}
         type="file"
@@ -393,8 +395,6 @@ export default function DashboardPage() {
           void handleImageSelected(event);
         }}
       />
-
-      <LeftToolbar />
 
       {/* Left Toolbar is now floating free */}
 
