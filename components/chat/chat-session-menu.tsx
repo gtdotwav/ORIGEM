@@ -37,7 +37,7 @@ export function ChatSessionMenu({
           </div>
           <div className="min-w-0">
             <p className="text-[11px] font-medium text-foreground/72">
-              Detalhes
+              Execucao
             </p>
             <p className="truncate text-[10px] text-foreground/32">
               {stageLabel}

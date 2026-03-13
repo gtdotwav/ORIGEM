@@ -18,9 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "ORIGEM — Psychosemantic AI Engine",
+  title: "ORIGEM — Sistema operacional de inteligencia",
   description:
-    "Decompose language into atomic meaning. Orchestrate AI agents on an infinite canvas.",
+    "Opere IA com contexto visivel, ferramentas conectadas, controle de runtime e execucao clara.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

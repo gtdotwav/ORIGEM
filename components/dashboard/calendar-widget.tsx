@@ -5,11 +5,17 @@ import { useMemo, useState, useEffect } from "react";
 import { format, addDays, startOfToday, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar as CalendarIcon, Clock, MoreHorizontal, Maximize2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCalendarStore, toDateKey } from "@/stores/calendar-store";
 
-export function CalendarWidget() {
+export function CalendarWidget({
+  variant = "standalone",
+  className,
+}: {
+  variant?: "standalone" | "panel";
+  className?: string;
+}) {
   const events = useCalendarStore((s) => s.events);
   const [mounted, setMounted] = useState(false);
   
@@ -38,12 +44,27 @@ export function CalendarWidget() {
     });
   }, [events, selectedDate, mounted]);
 
+  const isPanel = variant === "panel";
+
   if (!mounted) {
-    return <div className="mt-8 h-40 w-full max-w-[720px] mx-auto rounded-3xl border border-white/[0.04] bg-white/[0.01]" />;
+    return (
+      <div
+        className={cn(
+          "h-40 rounded-3xl border border-white/[0.04] bg-white/[0.01]",
+          isPanel ? "w-full" : "mx-auto mt-8 w-full max-w-[720px]",
+          className
+        )}
+      />
+    );
   }
 
   return (
-    <div className="mx-auto mt-6 w-full max-w-[720px] px-1 pb-6">
+    <div
+      className={cn(
+        isPanel ? "w-full" : "mx-auto mt-6 w-full max-w-[720px] px-1 pb-6",
+        className
+      )}
+    >
       <div className="overflow-hidden rounded-[28px] border border-white/[0.04] bg-black/40 shadow-xl backdrop-blur-3xl md:rounded-[32px]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-4">
@@ -123,7 +144,15 @@ export function CalendarWidget() {
                 <div className="mb-3 rounded-full border border-white/[0.04] bg-white/[0.02] p-2.5">
                   <Clock className="h-4 w-4 text-foreground/30" />
                 </div>
-                <p className="text-[12px] font-medium text-foreground/40">Agenda livre para criar.</p>
+                <p className="text-[12px] font-medium text-foreground/40">
+                  Agenda livre para criar.
+                </p>
+                <Link
+                  href="/dashboard/calendar"
+                  className="mt-3 inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-white/68 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+                >
+                  Abrir calendario
+                </Link>
               </motion.div>
             ) : (
               <div className="space-y-2">
@@ -155,9 +184,6 @@ export function CalendarWidget() {
                         </p>
                       )}
                     </div>
-                    <button className="opacity-0 transition-opacity group-hover:opacity-100 p-2 rounded-lg hover:bg-white/[0.06]">
-                      <MoreHorizontal className="h-4 w-4 text-foreground/40 hover:text-foreground/80" />
-                    </button>
                   </motion.div>
                 ))}
               </div>

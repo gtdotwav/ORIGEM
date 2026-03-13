@@ -1,60 +1,46 @@
 import Link from "next/link";
 import {
-  Activity,
   ArrowRight,
-  LayoutGrid,
-  Puzzle,
-  Workflow,
-  Zap,
+  CalendarDays,
+  Code2,
+  FolderKanban,
+  Presentation,
+  Search,
 } from "lucide-react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { PublicAmbient } from "@/components/public/public-ambient";
+import { ProductCommandPreview } from "@/components/public/product-command-preview";
 
-const OPERATING_PILLARS = [
+const OPERATING_SURFACES = [
   {
-    title: "Contexto persistente",
-    description: "Workspaces, memoria e objetivos operando como uma unica base legivel.",
-  },
-  {
-    title: "Execucao orquestrada",
-    description: "Sessoes, skills e fluxos conectados sem atrito visual nem operacional.",
-  },
-  {
-    title: "Conexao real",
-    description: "MCP, ferramentas e dados externos tratados como parte do mesmo sistema.",
-  },
-];
-
-const ARCHITECTURE_MODULES = [
-  {
-    icon: LayoutGrid,
-    title: "Workspace",
+    icon: Search,
+    title: "Pesquisa conectada",
     description:
-      "A camada onde contexto, arquivos, personas e memoria institucional permanecem coerentes ao longo da operacao.",
+      "Busque sinais, posts, noticias e referencias sem separar descoberta, analise e decisao.",
   },
   {
-    icon: Workflow,
-    title: "Canvas e Orquestra",
+    icon: CalendarDays,
+    title: "Planejamento acionavel",
     description:
-      "O desenho operacional da execucao. Fluxos, etapas, dependencias e visibilidade da cadeia inteira em uma leitura unica.",
+      "Transforme objetivos em agenda, blocos de execucao e convites sem sair do mesmo fluxo.",
   },
   {
-    icon: Zap,
-    title: "Skills",
+    icon: Code2,
+    title: "Execucao tecnica",
     description:
-      "Capacidades prontas para rodar tarefas delimitadas. Menos improviso, mais repetibilidade.",
+      "Leve a direcao direto para codigo, UI e sistema com o mesmo contexto de trabalho.",
   },
   {
-    icon: Puzzle,
-    title: "MCP e conectores",
+    icon: Presentation,
+    title: "Entregas prontas",
     description:
-      "A ponte entre o sistema e suas ferramentas, bancos, APIs e dados locais sem acoplamento desnecessario.",
+      "Converta estrategia, pesquisa e execucao em slides, outputs e materiais finais com coerencia.",
   },
   {
-    icon: Activity,
-    title: "Runtime",
+    icon: FolderKanban,
+    title: "Contexto governado",
     description:
-      "Execucao observavel com controle, historico, retries e rastreabilidade do que cada agente fez.",
+      "Workspaces, memoria, arquivos e conectores permanecem organizados para a operacao continuar.",
   },
 ];
 
@@ -76,12 +62,12 @@ export default function PublicHomePage() {
         <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-white/42">
           <span>ORIGEM</span>
           <span className="hidden h-3 w-px bg-white/10 sm:block" />
-          <span className="hidden text-white/28 sm:block">AI Operating System</span>
+          <span className="hidden text-white/28 sm:block">Sistema operacional de IA</span>
         </div>
 
         <div className="flex items-center gap-3 text-sm text-white/58 sm:gap-4">
-          <Link href="#arquitetura" className="hidden transition-colors hover:text-white sm:block">
-            Arquitetura
+          <Link href="#produto" className="hidden transition-colors hover:text-white sm:block">
+            Produto
           </Link>
           <Link href="/pricing" className="hidden transition-colors hover:text-white sm:block">
             Planos
@@ -101,20 +87,20 @@ export default function PublicHomePage() {
           <BrandLockup
             size="hero"
             align="center"
-            eyebrow="Camada operacional para agentes"
-            subtitle="Psychosemantic AI Engine"
+            eyebrow="Sistema de comando para agentes"
+            subtitle="Sistema operacional de inteligencia"
             className="mx-auto"
             priority
           />
 
           <div className="mt-8">
             <h1 className="mx-auto max-w-4xl text-5xl font-semibold tracking-[-0.07em] text-white sm:text-6xl md:text-7xl md:leading-[0.95]">
-              Contexto, direcao e execucao
-              <br className="hidden md:block" /> para agentes de IA.
+              Contexto visivel.
+              <br className="hidden md:block" /> Comando claro. Execucao conectada.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/50 sm:text-lg">
-              Uma superficie unica para operar skills, MCP, sessoes e automacoes com clareza,
-              ritmo e controle real da execucao.
+              O ORIGEM organiza chat, runtime, ferramentas, agenda e entregas na mesma
+              superficie para manter clareza, ritmo e continuidade em toda a operacao.
             </p>
           </div>
 
@@ -127,51 +113,39 @@ export default function PublicHomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="#arquitetura"
+              href="#produto"
               className="inline-flex min-w-[210px] items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-medium text-white/78 transition-all hover:border-white/18 hover:bg-white/[0.06] hover:text-white"
             >
-              Ver arquitetura
+              Ver como funciona
             </Link>
           </div>
 
-          <div className="mt-14 grid gap-3 text-left sm:grid-cols-3">
-            {OPERATING_PILLARS.map((pillar) => (
-              <div
-                key={pillar.title}
-                className="rounded-[24px] border border-white/8 bg-white/[0.03] p-5 backdrop-blur-xl"
-              >
-                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-white/34">
-                  {pillar.title}
-                </p>
-                <p className="mt-3 text-sm leading-7 text-white/52">{pillar.description}</p>
-              </div>
-            ))}
-          </div>
+          <ProductCommandPreview />
         </section>
 
-        <section id="arquitetura" className="mx-auto max-w-6xl px-6 pb-24 md:px-12">
+        <section id="produto" className="mx-auto max-w-6xl px-6 pb-24 md:px-12">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-[11px] font-medium uppercase tracking-[0.34em] text-white/34">
-              Arquitetura
+              Operacao conectada
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
-              Cinco camadas, uma leitura clara.
+              Tudo o que a operacao precisa, sem quebrar o contexto.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-white/48">
-              A plataforma foi organizada para parecer simples mesmo quando a operacao fica
-              complexa. Cada camada tem um papel visivel e um limite nitido.
+              Em vez de espalhar a jornada em modulos isolados, o ORIGEM conecta pesquisa,
+              planejamento, execucao e entrega na mesma linha de raciocinio.
             </p>
           </div>
 
           <div className="mt-14 grid gap-4 lg:grid-cols-12">
-            {ARCHITECTURE_MODULES.map((module, index) => {
+            {OPERATING_SURFACES.map((module, index) => {
               const Icon = module.icon;
 
               return (
                 <article
                   key={module.title}
                   className={`relative overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.025] p-6 backdrop-blur-xl transition-all hover:border-white/14 hover:bg-white/[0.04] sm:p-8 ${
-                    index < 2 ? "lg:col-span-6" : "lg:col-span-4"
+                    index < 2 ? "lg:col-span-6" : index === 4 ? "lg:col-span-12" : "lg:col-span-4"
                   }`}
                 >
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
@@ -200,14 +174,14 @@ export default function PublicHomePage() {
         <section id="skills" className="mx-auto max-w-6xl px-6 pb-24 md:px-12">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-[11px] font-medium uppercase tracking-[0.34em] text-white/34">
-              Skills
+              Fluxos prontos
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
-              Capacidades prontas para operar.
+              Rotinas recorrentes sem reinventar a operacao.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-white/48">
-              Em vez de reconstruir processos a cada conversa, a ORIGEM transforma tarefas
-              recorrentes em blocos reutilizaveis.
+              Skills e fluxos reutilizaveis reduzem improviso e mantem qualidade quando a
+              execucao precisa escalar.
             </p>
           </div>
 
@@ -218,7 +192,7 @@ export default function PublicHomePage() {
                 className="rounded-[24px] border border-white/8 bg-white/[0.02] p-6 backdrop-blur-xl transition-all hover:border-white/14 hover:bg-white/[0.04]"
               >
                 <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-white/28">
-                  Skill 0{index + 1}
+                  Fluxo 0{index + 1}
                 </p>
                 <h3 className="mt-4 text-xl font-semibold tracking-[-0.04em] text-white">
                   {skill}
@@ -238,11 +212,11 @@ export default function PublicHomePage() {
               Pronto para operar
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
-              Entre no ecossistema ORIGEM.
+              Entre e coloque a operacao para girar.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-white/48">
-              A marca, a interface e a operacao passam a trabalhar na mesma direcao: menos
-              ruido, mais precisao.
+              Menos troca de contexto, mais clareza de comando e uma linha de execucao mais
+              precisa do inicio ao output final.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link

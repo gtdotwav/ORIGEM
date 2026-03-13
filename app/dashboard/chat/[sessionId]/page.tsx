@@ -1,17 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
+  ArrowUpRight,
   Copy,
   Loader2,
   Send,
   Blocks,
-  Brain,
-  Zap,
-  Sparkles,
-  Wrench,
+  CalendarDays,
+  FolderKanban,
+  Workflow,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
@@ -19,6 +20,8 @@ import { JourneyConnectorCard } from "@/components/chat/journey-connector-card";
 import { AgentTaskCards } from "@/components/chat/agent-task-cards";
 import { ChatControlsMenu } from "@/components/chat/chat-controls-menu";
 import { ChatSessionMenu } from "@/components/chat/chat-session-menu";
+import { CalendarWidget } from "@/components/dashboard/calendar-widget";
+import { WorkspaceReadinessStrip } from "@/components/dashboard/workspace-readiness-strip";
 import { AIVoiceInput } from "@/components/ui/ai-voice-input";
 import { CriticAnnotations } from "@/components/chat/critic-annotations";
 import { useClientMounted } from "@/hooks/use-client-mounted";
@@ -168,6 +171,14 @@ export default function ChatPage() {
     () =>
       workspaces.find((workspace) => workspace.id === currentWorkspaceId)?.name,
     [currentWorkspaceId, workspaces]
+  );
+  const sessionAgentCount = useMemo(
+    () => agents.filter((agent) => agent.sessionId === sessionId).length,
+    [agents, sessionId]
+  );
+  const sessionGroupCount = useMemo(
+    () => groups.filter((group) => group.sessionId === sessionId).length,
+    [groups, sessionId]
   );
 
   const sessionMessages = useMemo(
@@ -345,33 +356,43 @@ export default function ChatPage() {
   const showLiveRuntimeBubble = Boolean(runtime?.isRunning) && !isSending;
 
   if (!mounted) {
-    return <div className="mx-auto min-h-[calc(100vh-130px)] w-full max-w-4xl px-4 pb-[8.5rem] pt-2 md:px-6 md:pb-6 md:pt-4" />;
+    return <div className="mx-auto min-h-[calc(100vh-130px)] w-full max-w-7xl px-4 pb-[8.5rem] pt-2 md:px-6 md:pb-6 md:pt-4" />;
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-4xl flex-col px-4 pb-[8.5rem] pt-2 md:h-[calc(100vh-130px)] md:px-6 md:pb-6 md:pt-4">
+    <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-7xl flex-col px-4 pb-[8.5rem] pt-2 md:h-[calc(100vh-130px)] md:px-6 md:pb-6 md:pt-4">
 
-      <div className="mb-3 rounded-[24px] border border-foreground/[0.08] bg-card/74 p-4 shadow-2xl backdrop-blur-xl md:mb-4 md:rounded-[28px]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-foreground/42">
-              Sessao de Chat
-            </p>
-            <h1 className="text-lg font-semibold text-foreground/90">
-              {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
-            </h1>
-            <p className="mt-1 text-[11px] text-foreground/34">
-              {currentWorkspaceName
-                ? `Workspace: ${currentWorkspaceName}`
-                : "Sem workspace associado"}
-            </p>
+      <div className="mb-3 rounded-[28px] border border-foreground/[0.08] bg-card/74 p-4 shadow-2xl backdrop-blur-xl md:mb-4 md:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03]">
+              <Image src="/logo.png" alt="ORIGEM" width={20} height={20} className="opacity-85" />
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-foreground/42">
+                Sessao ativa
+              </p>
+              <h1 className="text-lg font-semibold text-foreground/92">
+                {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
+              </h1>
+              <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-foreground/40">
+                A mesma sessao segue com contexto, runtime, ferramentas e execucao visiveis no topo.
+              </p>
+            </div>
           </div>
-          <ChatSessionMenu
-            sessionId={sessionId}
-            stageLabel={STAGE_LABELS[stage] ?? stage}
-            progress={liveProgress}
-            workspaceName={currentWorkspaceName}
-          />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <ChatControlsMenu
+              workspaceName={currentWorkspaceName}
+              currentSessionId={sessionId}
+            />
+            <ChatSessionMenu
+              sessionId={sessionId}
+              stageLabel={STAGE_LABELS[stage] ?? stage}
+              progress={liveProgress}
+              workspaceName={currentWorkspaceName}
+            />
+          </div>
         </div>
 
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
@@ -380,257 +401,326 @@ export default function ChatPage() {
             style={{ width: `${liveProgress}%` }}
           />
         </div>
+
+        <WorkspaceReadinessStrip
+          workspaceId={currentWorkspaceId ?? null}
+          workspaceName={currentWorkspaceName}
+          compact
+          className="mt-4"
+        />
       </div>
 
-      {/* Chat area — full width */}
-      <section className="min-h-[28rem] flex-1 rounded-[24px] border border-foreground/[0.08] bg-card/72 shadow-2xl backdrop-blur-xl md:min-h-0 md:rounded-[28px]">
-        <div className="flex h-full min-h-0 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
-            {sessionMessages.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-                <Blocks className="h-5 w-5 text-foreground/42" />
-                <p className="text-sm text-foreground/60">
-                  Envie sua primeira mensagem para acionar analise, execucao e ferramentas do workspace a partir do mesmo contexto.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {sessionMessages.map((message) => {
-                  const isUser = message.role === "user";
-                  const isNote = message.role === "system" && isNoteMessage(message.metadata);
-                  const isJourneyStepUpdate =
-                    message.role === "system" && isJourneySystemMessage(message.metadata);
-                  const imageAttachment = getImageAttachment(message.metadata);
+      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_320px]">
+        <section className="min-h-[28rem] flex-1 rounded-[24px] border border-foreground/[0.08] bg-card/72 shadow-2xl backdrop-blur-xl md:min-h-0 md:rounded-[28px]">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
+              {sessionMessages.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                  <Blocks className="h-5 w-5 text-foreground/42" />
+                  <p className="text-sm text-foreground/60">
+                    Envie sua primeira mensagem para acionar analise, execucao e ferramentas do workspace a partir do mesmo contexto.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {sessionMessages.map((message) => {
+                    const isUser = message.role === "user";
+                    const isNote = message.role === "system" && isNoteMessage(message.metadata);
+                    const isJourneyStepUpdate =
+                      message.role === "system" && isJourneySystemMessage(message.metadata);
+                    const imageAttachment = getImageAttachment(message.metadata);
 
-                  if (isNote) {
-                    return (
-                      <div key={message.id} className="flex justify-center">
-                        <div className="max-w-[94%] rounded-xl border border-foreground/[0.09] bg-foreground/[0.05] px-3 py-2 sm:max-w-[88%]">
-                          <p className="text-xs text-foreground/84">{message.content}</p>
-                          <span className="mt-1 block text-[10px] text-foreground/45">
-                            {formatMessageTime(message.createdAt)}
-                          </span>
+                    if (isNote) {
+                      return (
+                        <div key={message.id} className="flex justify-center">
+                          <div className="max-w-[94%] rounded-xl border border-foreground/[0.09] bg-foreground/[0.05] px-3 py-2 sm:max-w-[88%]">
+                            <p className="text-xs text-foreground/84">{message.content}</p>
+                            <span className="mt-1 block text-[10px] text-foreground/45">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }
+                      );
+                    }
 
-                  if (isJourneyStepUpdate) {
-                    return (
-                      <div key={message.id} className="flex justify-center">
-                        <div className="max-w-[94%] rounded-xl border border-foreground/[0.09] bg-foreground/[0.05] px-3 py-2 sm:max-w-[88%]">
-                          <p className="text-xs text-foreground/84">{message.content}</p>
-                          <span className="mt-1 block text-[10px] text-foreground/45">
-                            {formatMessageTime(message.createdAt)}
-                          </span>
+                    if (isJourneyStepUpdate) {
+                      return (
+                        <div key={message.id} className="flex justify-center">
+                          <div className="max-w-[94%] rounded-xl border border-foreground/[0.09] bg-foreground/[0.05] px-3 py-2 sm:max-w-[88%]">
+                            <p className="text-xs text-foreground/84">{message.content}</p>
+                            <span className="mt-1 block text-[10px] text-foreground/45">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }
+                      );
+                    }
 
-                  return (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        "flex w-full animate-message-in",
-                        isUser ? "justify-end" : "justify-start"
-                      )}
-                    >
+                    return (
                       <div
+                        key={message.id}
                         className={cn(
-                          "group relative max-w-[94%] rounded-[20px] border px-5 py-4 sm:max-w-[85%] shadow-sm backdrop-blur-md transition-all",
-                          isUser
-                            ? "border-neon-cyan/25 bg-gradient-to-br from-neon-cyan/[0.08] to-neon-cyan/[0.02] text-neon-cyan/95 shadow-neon-cyan/5"
-                            : "border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 text-white/90 shadow-black/20"
+                          "flex w-full animate-message-in",
+                          isUser ? "justify-end" : "justify-start"
                         )}
                       >
-                        {!isUser && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(message.content).then(
-                                () => toast.success("Copiado!"),
-                                () => toast.error("Falha ao copiar")
-                              );
-                            }}
-                            aria-label="Copiar mensagem"
-                            className="absolute right-2 top-2 rounded-md p-1 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100 focus-visible:opacity-100"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        {imageAttachment ? (
-                          <div className="mb-2 overflow-hidden rounded-xl border border-foreground/[0.12] bg-black/20">
-                            <div className="relative h-64 w-full">
-                              <Image
-                                src={imageAttachment.dataUrl}
-                                alt={imageAttachment.name}
-                                fill
-                                unoptimized
-                                sizes="(max-width: 768px) 100vw, 720px"
-                                className="object-cover"
+                        <div
+                          className={cn(
+                            "group relative max-w-[94%] rounded-[20px] border px-5 py-4 sm:max-w-[85%] shadow-sm backdrop-blur-md transition-all",
+                            isUser
+                              ? "border-neon-cyan/25 bg-gradient-to-br from-neon-cyan/[0.08] to-neon-cyan/[0.02] text-neon-cyan/95 shadow-neon-cyan/5"
+                              : "border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 text-white/90 shadow-black/20"
+                          )}
+                        >
+                          {!isUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(message.content).then(
+                                  () => toast.success("Copiado!"),
+                                  () => toast.error("Falha ao copiar")
+                                );
+                              }}
+                              aria-label="Copiar mensagem"
+                              className="absolute right-2 top-2 rounded-md p-1 text-foreground/20 opacity-0 transition-all hover:bg-foreground/[0.06] hover:text-foreground/50 group-hover:opacity-100 focus-visible:opacity-100"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          {imageAttachment ? (
+                            <div className="mb-2 overflow-hidden rounded-xl border border-foreground/[0.12] bg-black/20">
+                              <div className="relative h-64 w-full">
+                                <Image
+                                  src={imageAttachment.dataUrl}
+                                  alt={imageAttachment.name}
+                                  fill
+                                  unoptimized
+                                  sizes="(max-width: 768px) 100vw, 720px"
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div className="px-2.5 py-1.5 text-[10px] text-foreground/60">
+                                {imageAttachment.name}
+                              </div>
+                            </div>
+                          ) : null}
+                          {isUser ? (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          ) : (
+                            <MarkdownRenderer content={message.content} />
+                          )}
+                          {!isUser &&
+                            Array.isArray(
+                              (message.metadata as Record<string, unknown> | undefined)
+                                ?.criticResults
+                            ) && (
+                              <CriticAnnotations
+                                results={
+                                  (message.metadata as Record<string, unknown>)
+                                    .criticResults as import("@/types/chat").CriticResult[]
+                                }
                               />
-                            </div>
-                            <div className="px-2.5 py-1.5 text-[10px] text-foreground/60">
-                              {imageAttachment.name}
-                            </div>
-                          </div>
-                        ) : null}
-                        {isUser ? (
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                            {message.content}
-                          </p>
-                        ) : (
-                          <MarkdownRenderer content={message.content} />
-                        )}
-                        {!isUser &&
-                          Array.isArray(
-                            (message.metadata as Record<string, unknown> | undefined)
-                              ?.criticResults
-                          ) && (
-                            <CriticAnnotations
-                              results={
+                            )}
+                          {!isUser && shouldRenderDistribution(message.metadata) && (
+                            <AgentTaskCards
+                              sessionId={sessionId}
+                              intent={
                                 (message.metadata as Record<string, unknown>)
-                                  .criticResults as import("@/types/chat").CriticResult[]
+                                  ?.intent as import("@/types/decomposition").Intent | undefined
                               }
                             />
                           )}
-                        {!isUser && shouldRenderDistribution(message.metadata) && (
-                          <AgentTaskCards
-                            sessionId={sessionId}
-                            intent={
-                              (message.metadata as Record<string, unknown>)
-                                ?.intent as import("@/types/decomposition").Intent | undefined
-                            }
-                          />
-                        )}
-                        {!isUser &&
-                          shouldRenderJourney(message.metadata) &&
-                          latestAssistantMessageId === message.id && (
-                            <JourneyConnectorCard
-                              sessionId={sessionId}
-                              onStepOpen={(step) => {
-                                addMessage(
-                                  createMessage(
-                                    sessionId,
-                                    "system",
-                                    `Etapa aberta: ${step.label}. Revise essa fase e volte ao chat para continuar a proxima conexao.`,
-                                    {
-                                      journeyStep: true,
-                                    }
-                                  )
-                                );
-                                persistSnapshotQuietly();
-                              }}
-                            />
-                          )}
-                        <span className="mt-2 block text-[10px] text-foreground/35">
-                          {formatMessageTime(message.createdAt)}
-                        </span>
+                          {!isUser &&
+                            shouldRenderJourney(message.metadata) &&
+                            latestAssistantMessageId === message.id && (
+                              <JourneyConnectorCard
+                                sessionId={sessionId}
+                                onStepOpen={(step) => {
+                                  addMessage(
+                                    createMessage(
+                                      sessionId,
+                                      "system",
+                                      `Etapa aberta: ${step.label}. Revise essa fase e volte ao chat para continuar a proxima conexao.`,
+                                      {
+                                        journeyStep: true,
+                                      }
+                                    )
+                                  );
+                                  persistSnapshotQuietly();
+                                }}
+                              />
+                            )}
+                          <span className="mt-2 block text-[10px] text-foreground/35">
+                            {formatMessageTime(message.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {isSending && streamingContent !== null && streamingContent.length > 0 && (
+                    <div className="flex w-full animate-message-in justify-start">
+                      <div className="group relative max-w-[94%] rounded-[20px] border border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 px-5 py-4 text-white/90 shadow-sm shadow-black/20 backdrop-blur-md sm:max-w-[85%]">
+                        <MarkdownRenderer content={streamingContent} />
+                        <span className="mt-2 inline-block h-[18px] w-1.5 animate-pulse rounded-full bg-neon-cyan/70" />
                       </div>
                     </div>
-                  );
-                })}
+                  )}
 
-                {isSending && streamingContent !== null && streamingContent.length > 0 && (
-                  <div className="flex w-full animate-message-in justify-start">
-                    <div className="group relative max-w-[94%] rounded-[20px] border border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 px-5 py-4 text-white/90 shadow-sm shadow-black/20 backdrop-blur-md sm:max-w-[85%]">
-                      <MarkdownRenderer content={streamingContent} />
-                      <span className="mt-2 inline-block h-[18px] w-1.5 animate-pulse rounded-full bg-neon-cyan/70" />
-                    </div>
-                  </div>
-                )}
-
-                {isSending && streamingContent === null && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[94%] rounded-[20px] border border-white/[0.08] bg-black/40 px-5 py-4 backdrop-blur-md sm:max-w-[85%]">
-                      <div className="inline-flex items-center gap-2.5 text-[13px] text-white/60">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
-                        Processando e delegando em tempo real...
+                  {isSending && streamingContent === null && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[94%] rounded-[20px] border border-white/[0.08] bg-black/40 px-5 py-4 backdrop-blur-md sm:max-w-[85%]">
+                        <div className="inline-flex items-center gap-2.5 text-[13px] text-white/60">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
+                          Processando e delegando em tempo real...
+                        </div>
+                        <AgentTaskCards sessionId={sessionId} />
                       </div>
-                      <AgentTaskCards sessionId={sessionId} />
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {showLiveRuntimeBubble && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[94%] rounded-2xl border border-foreground/[0.09] bg-black/28 px-4 py-3 sm:max-w-[88%]">
-                      <div className="inline-flex items-center gap-2 text-xs text-foreground/65">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
-                        Distribuicao em execucao...
+                  {showLiveRuntimeBubble && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[94%] rounded-2xl border border-foreground/[0.09] bg-black/28 px-4 py-3 sm:max-w-[88%]">
+                        <div className="inline-flex items-center gap-2 text-xs text-foreground/65">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
+                          Distribuicao em execucao...
+                        </div>
+                        <AgentTaskCards sessionId={sessionId} />
                       </div>
-                      <AgentTaskCards sessionId={sessionId} />
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+
+            <form
+              className="border-t border-foreground/[0.07] p-3 md:p-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void sendMessage();
+              }}
+            >
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/34">
+                  Continuar operacao
+                </p>
+                <span className="text-[11px] text-foreground/34">
+                  {showLiveRuntimeBubble
+                    ? `${STAGE_LABELS[stage] ?? stage} · ${Math.round(liveProgress)}%`
+                    : "Runtime em espera"}
+                </span>
               </div>
-            )}
 
-            <div ref={bottomRef} />
+              <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2">
+                <AIVoiceInput
+                  onStop={(dur) => {
+                    if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
+                  }}
+                />
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Descreva a proxima decisao, analise ou execucao..."
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/40 outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isSending}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.10] bg-foreground/[0.08] px-2.5 py-1.5 text-xs font-medium text-foreground/82 transition-colors hover:border-foreground/[0.16] hover:bg-foreground/[0.12] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Enviar</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <aside className="hidden xl:flex xl:flex-col xl:gap-4">
+          <div className="rounded-[28px] border border-white/[0.08] bg-black/34 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-3xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
+                  Panorama da sessao
+                </p>
+                <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white">
+                  Continuidade visivel
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-white/48">
+                  Acompanhe progresso, agentes e proximos pontos de apoio sem sair da sessao.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2.5 text-white/70">
+                <Workflow className="h-4.5 w-4.5" />
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
+                  Mensagens
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-white">
+                  {sessionMessages.length}
+                </p>
+                <p className="text-[11px] text-white/42">Historico desta sessao</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
+                    Agentes
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-white">{sessionAgentCount}</p>
+                  <p className="text-[11px] text-white/42">Atores acionados na sessao</p>
+                </div>
+                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
+                    Progresso
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {Math.round(liveProgress)}%
+                  </p>
+                  <p className="text-[11px] text-white/42">
+                    {sessionGroupCount} grupo{sessionGroupCount === 1 ? "" : "s"} ativo{sessionGroupCount === 1 ? "" : "s"} na sessao
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-2">
+              <Link
+                href="/dashboard/calendar"
+                className="inline-flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  Ver agenda
+                </div>
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/dashboard/workspaces"
+                className="inline-flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+              >
+                <div className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  Abrir workspace
+                </div>
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
-          <form
-            className="border-t border-foreground/[0.07] p-3 md:p-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void sendMessage();
-            }}
-          >
-            <div className="mb-2 flex items-center justify-between">
-              {/* Runtime context strip */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:pb-0">
-                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
-                  <Brain className="h-3.5 w-3.5 text-neon-purple" />
-                  {currentWorkspaceName
-                    ? `Workspace: ${currentWorkspaceName}`
-                    : "Workspace geral"}
-                </div>
-                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
-                  <Zap className="h-3.5 w-3.5 text-neon-orange" />
-                  Skills modulares
-                </div>
-                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
-                  <Sparkles className="h-3.5 w-3.5 text-neon-cyan" />
-                  Providers e modelos
-                </div>
-                <div className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-foreground/[0.08] bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-foreground/75">
-                  <Wrench className="h-3.5 w-3.5 text-foreground/50" />
-                  Ferramentas MCP por workspace
-                </div>
-              </div>
-
-              <ChatControlsMenu
-                workspaceName={currentWorkspaceName}
-                currentSessionId={sessionId}
-              />
-            </div>
-
-            <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2">
-              <AIVoiceInput
-                onStop={(dur) => {
-                  if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
-                }}
-              />
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Digite sua mensagem..."
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/40 outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || isSending}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.10] bg-foreground/[0.08] px-2.5 py-1.5 text-xs font-medium text-foreground/82 transition-colors hover:border-foreground/[0.16] hover:bg-foreground/[0.12] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3"
-              >
-                <Send className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Enviar</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
+          <CalendarWidget variant="panel" />
+        </aside>
+      </div>
     </div>
   );
 }
