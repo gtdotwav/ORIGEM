@@ -48,7 +48,7 @@ export function ChatControlsMenu({
         (provider) => provider.name === ecosystemConfig.provider
       );
 
-      return `${meta?.displayName ?? ecosystemConfig.provider} · ${ecosystemConfig.model}`;
+      return `${meta?.displayName ?? ecosystemConfig.provider} / ${ecosystemConfig.model}`;
     }
 
     if (providers.length === 0) {
@@ -66,16 +66,16 @@ export function ChatControlsMenu({
             data-tour="chat-controls"
             type="button"
             className={cn(
-              "inline-flex items-center gap-2 rounded-2xl border border-white/[0.06] bg-black/40 px-3 py-2 text-left backdrop-blur-xl transition-all duration-300 hover:border-white/[0.15] hover:bg-white/[0.04]",
+              "inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 py-2 text-left backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05]",
               className
             )}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.02] text-white/50">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(208,186,143,0.14)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]">
               <SlidersHorizontal className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">
               <p className="text-[12px] font-medium text-white/90">Runtime</p>
-              <p className="truncate text-[10.5px] font-medium text-white/40">
+              <p className="truncate text-[10.5px] font-medium text-white/42">
                 {providerSummary}
               </p>
             </div>
@@ -90,7 +90,7 @@ export function ChatControlsMenu({
         <PopoverContent
           align="end"
           sideOffset={10}
-          className="w-[360px] rounded-[24px] border-white/10 bg-black/60 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-3xl"
+          className="w-[360px] rounded-[28px] border-white/10 bg-[linear-gradient(180deg,rgba(14,14,15,0.94),rgba(8,8,9,0.98))] p-3 shadow-[0_30px_100px_-40px_rgba(0,0,0,0.96)] backdrop-blur-3xl"
         >
           <div className="space-y-3">
             <div className="rounded-2xl border border-white/[0.06] bg-black/40 px-3 py-2.5">
@@ -147,7 +147,7 @@ export function ChatControlsMenu({
                     Ferramentas do workspace
                   </p>
                   <p className="text-[10px] text-white/35">
-                    MCP, dados e integrações usados pelo chat.
+                    MCP, dados e integracoes usados pelo chat.
                   </p>
                 </div>
                 <PlugZap className="h-4 w-4 text-neon-cyan" />

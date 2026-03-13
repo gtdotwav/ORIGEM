@@ -124,34 +124,40 @@ const EXPLORE_ENTRIES: NavItem[] = [
 
 const TONE_STYLES: Record<DockTone, { active: string; idle: string; dot: string }> = {
   cyan: {
-    active: "border-cyan-400/22 bg-cyan-400/10 text-cyan-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-cyan-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
   green: {
-    active: "border-green-400/22 bg-green-400/10 text-green-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-green-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
   purple: {
-    active: "border-purple-400/22 bg-purple-400/10 text-purple-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-purple-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
   pink: {
-    active: "border-pink-400/22 bg-pink-400/10 text-pink-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-pink-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
   orange: {
-    active: "border-orange-400/22 bg-orange-400/10 text-orange-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-orange-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
   blue: {
-    active: "border-blue-400/22 bg-blue-400/10 text-blue-100",
-    idle: "text-white/58 hover:border-white/14 hover:bg-white/[0.05] hover:text-white",
-    dot: "bg-blue-300",
+    active:
+      "border-[rgba(208,186,143,0.24)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-white",
+    idle: "text-white/56 hover:border-white/[0.10] hover:bg-white/[0.04] hover:text-white",
+    dot: "bg-[#d7c29b]",
   },
 };
 
@@ -181,11 +187,11 @@ function DockLink({
       href={entry.href}
       onClick={onSelect}
       className={cn(
-        "group inline-flex h-10 items-center gap-2 rounded-2xl border border-transparent px-3 text-sm font-medium transition-all duration-300",
+        "group inline-flex h-10 items-center gap-2 rounded-full border border-transparent px-3.5 text-sm font-medium transition-all duration-300",
         isActive ? tone.active : tone.idle
       )}
     >
-      <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-white/[0.06] bg-black/20">
+      <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/[0.05] bg-black/24">
         <Icon className="h-3.5 w-3.5" />
       </div>
       <span className="hidden sm:inline">{entry.label}</span>
@@ -209,56 +215,44 @@ export function FloatingNav() {
         <div className="pointer-events-auto absolute right-3 top-3 hidden items-center gap-2 lg:flex md:right-6 md:top-6">
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/74 backdrop-blur-md transition-all hover:border-white/[0.16] hover:bg-white/[0.07] hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(208,186,143,0.16)] bg-[linear-gradient(180deg,rgba(208,186,143,0.10),rgba(208,186,143,0.04))] px-3.5 py-2 text-[11px] font-medium text-[#ead7b1] backdrop-blur-md transition-all hover:border-[rgba(208,186,143,0.28)] hover:text-white"
           >
-            Assinar
+            Upgrade
           </Link>
           <button
             data-tour="theme-toggle"
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="relative inline-flex h-9 w-14 items-center rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md transition-all"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] text-white/72 backdrop-blur-md transition-all hover:border-white/[0.14] hover:text-white"
             aria-label="Alternar tema"
           >
-            <span
-              className={cn(
-                "absolute flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                isDark ? "left-[26px]" : "left-[3px]"
-              )}
-            >
-              {isDark ? (
-                <Moon className="h-3.5 w-3.5 text-neutral-900" />
-              ) : (
-                <Monitor className="h-3.5 w-3.5 text-neutral-500" />
-              )}
-            </span>
+            {isDark ? <Moon className="h-3.5 w-3.5" /> : <Monitor className="h-3.5 w-3.5" />}
           </button>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/62 backdrop-blur-md transition-all hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] text-white/62 backdrop-blur-md transition-all hover:border-white/[0.14] hover:text-white"
           >
             <LogOut className="h-3.5 w-3.5" />
-            Sair
           </button>
         </div>
       ) : null}
 
       <div className="flex w-full justify-center">
-        <div className="pointer-events-auto flex max-w-[calc(100vw-1rem)] items-center gap-2 rounded-[28px] border border-white/[0.08] bg-card/78 px-2 py-2 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.65)] backdrop-blur-3xl">
+        <div className="pointer-events-auto flex max-w-[calc(100vw-1rem)] items-center gap-2 rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(17,17,18,0.78),rgba(7,7,8,0.96))] px-2 py-2 shadow-[0_30px_120px_-40px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-3xl">
           <Link
             href="/dashboard"
-            className="flex h-11 items-center gap-2 rounded-[20px] border border-white/[0.06] bg-white/[0.03] px-3 text-white/78 transition-all hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-white"
+            className="flex h-11 items-center gap-2 rounded-full border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-3.5 text-white/78 transition-all hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white"
           >
             <Image
               src="/logo.png"
               alt="ORIGEM"
               width={28}
               height={28}
-              className="pointer-events-none drop-shadow-[0_0_18px_rgba(255,255,255,0.18)]"
+              className="pointer-events-none drop-shadow-[0_0_22px_rgba(232,214,177,0.16)]"
             />
-            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.24em] text-white/38 md:inline">
-              ORIGEM OS
+            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.28em] text-[#cbb486]/55 md:inline">
+              ORIGEM
             </span>
           </Link>
 
@@ -273,9 +267,9 @@ export function FloatingNav() {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 text-sm font-medium text-white/70 transition-all hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 text-sm font-medium text-white/70 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
                 >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-white/[0.06] bg-black/20">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/[0.05] bg-black/24">
                     <Sparkles className="h-3.5 w-3.5" />
                   </div>
                   <span className="hidden sm:inline">Explorar</span>
@@ -289,7 +283,7 @@ export function FloatingNav() {
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/32">
-                      Explorar superfícies
+                      Explorar superficies
                     </p>
                     <p className="mt-1 text-sm text-white/70">
                       Camadas complementares da operacao, sem tirar o foco do comando central.
@@ -334,9 +328,9 @@ export function FloatingNav() {
                   <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-3 lg:hidden">
                     <Link
                       href="/pricing"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/74 transition-all hover:border-white/[0.16] hover:bg-white/[0.07] hover:text-white"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(208,186,143,0.16)] bg-[linear-gradient(180deg,rgba(208,186,143,0.10),rgba(208,186,143,0.04))] px-3 py-2 text-xs font-medium text-[#ead7b1] transition-all hover:border-[rgba(208,186,143,0.28)] hover:text-white"
                     >
-                      Assinar
+                      Upgrade
                     </Link>
                     <button
                       data-tour="theme-toggle"
@@ -345,7 +339,7 @@ export function FloatingNav() {
                       className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/68 transition-all hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
                     >
                       {isDark ? <Moon className="h-3.5 w-3.5" /> : <Monitor className="h-3.5 w-3.5" />}
-                      {isDark ? "Tema claro" : "Tema escuro"}
+                      {isDark ? "Claro" : "Escuro"}
                     </button>
                     <button
                       type="button"
