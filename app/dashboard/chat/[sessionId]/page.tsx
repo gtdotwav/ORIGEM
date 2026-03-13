@@ -12,7 +12,6 @@ import {
   Blocks,
   CalendarDays,
   FolderKanban,
-  Workflow,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
@@ -356,64 +355,59 @@ export default function ChatPage() {
   const showLiveRuntimeBubble = Boolean(runtime?.isRunning) && !isSending;
 
   if (!mounted) {
-    return <div className="mx-auto min-h-[calc(100vh-130px)] w-full max-w-7xl px-4 pb-[8.5rem] pt-2 md:px-6 md:pb-6 md:pt-4" />;
+    return <div className="mx-auto min-h-[calc(100vh-130px)] w-full max-w-6xl px-4 pb-[8.5rem] pt-2 md:px-6 md:pb-6 md:pt-4" />;
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-7xl flex-col px-4 pb-[8.5rem] pt-2 md:h-[calc(100vh-130px)] md:px-6 md:pb-6 md:pt-4">
-
-      <div className="relative mb-3 overflow-hidden rounded-[34px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.10),transparent_30%),linear-gradient(180deg,rgba(15,15,16,0.95),rgba(7,7,8,0.99))] p-4 shadow-[0_34px_120px_-46px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl md:mb-4 md:p-5">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.28)] to-transparent" />
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)]">
-              <Image src="/logo.png" alt="ORIGEM" width={20} height={20} className="opacity-85" />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/34">
-                Sessao ativa
-              </p>
-              <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] text-foreground/92">
-                {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
-              </h1>
-              <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-foreground/42">
-                Contexto, runtime, ferramentas e execucao seguem alinhados na mesma superficie.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <ChatControlsMenu
-              workspaceName={currentWorkspaceName}
-              currentSessionId={sessionId}
-            />
-            <ChatSessionMenu
-              sessionId={sessionId}
-              stageLabel={STAGE_LABELS[stage] ?? stage}
-              progress={liveProgress}
-              workspaceName={currentWorkspaceName}
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,rgba(244,234,212,1),rgba(216,196,160,1))] transition-all duration-300"
-            style={{ width: `${liveProgress}%` }}
-          />
-        </div>
-
-        <WorkspaceReadinessStrip
-          workspaceId={currentWorkspaceId ?? null}
-          workspaceName={currentWorkspaceName}
-          compact
-          className="mt-4"
-        />
-      </div>
-
-      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <section className="min-h-[28rem] flex-1 rounded-[30px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(14,14,15,0.92),rgba(8,8,9,0.98))] shadow-[0_34px_120px_-48px_rgba(0,0,0,0.96),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl md:min-h-0 md:rounded-[34px]">
+    <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-7xl flex-col px-4 pb-[8.5rem] pt-16 md:px-6 md:pb-8 md:pt-20">
+      <div className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-4">
+        <section className="min-h-[32rem] flex-1 overflow-hidden rounded-[28px] border border-white/[0.05] bg-[linear-gradient(180deg,rgba(11,11,12,0.82),rgba(4,4,5,0.92))] shadow-[0_28px_100px_-54px_rgba(0,0,0,0.96),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl md:min-h-0 md:rounded-[30px]">
           <div className="flex h-full min-h-0 flex-col">
+            <div className="border-b border-white/[0.05] px-4 py-4 md:px-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)]">
+                      <Image src="/logo.png" alt="ORIGEM" width={16} height={16} className="opacity-85" />
+                    </div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground/32">
+                      Sessao ativa
+                    </p>
+                  </div>
+                  <h1 className="mt-3 line-clamp-2 text-[1.3rem] font-semibold tracking-[-0.05em] text-foreground/92 md:text-[1.45rem]">
+                    {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
+                  </h1>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <ChatControlsMenu
+                    workspaceName={currentWorkspaceName}
+                    currentSessionId={sessionId}
+                  />
+                  <ChatSessionMenu
+                    sessionId={sessionId}
+                    stageLabel={STAGE_LABELS[stage] ?? stage}
+                    progress={liveProgress}
+                    workspaceName={currentWorkspaceName}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/52">
+                  <span>{STAGE_LABELS[stage] ?? stage}</span>
+                  <span className="h-1 w-1 rounded-full bg-[#ead7b1]" />
+                  <span>{Math.round(liveProgress)}%</span>
+                </div>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,rgba(244,234,212,1),rgba(216,196,160,1))] transition-all duration-300"
+                    style={{ width: `${liveProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
               {sessionMessages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -612,7 +606,7 @@ export default function ChatPage() {
                 </p>
                 <span className="text-[11px] text-foreground/34">
                   {showLiveRuntimeBubble
-                  ? `${STAGE_LABELS[stage] ?? stage} / ${Math.round(liveProgress)}%`
+                    ? `${STAGE_LABELS[stage] ?? stage} / ${Math.round(liveProgress)}%`
                     : "Runtime em espera"}
                 </span>
               </div>
@@ -642,86 +636,67 @@ export default function ChatPage() {
             </form>
           </div>
         </section>
+      </div>
 
-        <aside className="hidden xl:flex xl:flex-col xl:gap-4">
-          <div className="relative overflow-hidden rounded-[32px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.09),transparent_32%),linear-gradient(180deg,rgba(14,14,15,0.95),rgba(8,8,9,0.98))] p-5 shadow-[0_34px_100px_-44px_rgba(0,0,0,0.94),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-3xl">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.24)] to-transparent" />
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
-                  Panorama da sessao
-                </p>
-                <h2 className="mt-2 text-[1.5rem] font-semibold tracking-[-0.05em] text-white">
-                  Continuidade visivel
-                </h2>
-                <p className="mt-2 text-sm leading-7 text-white/48">
-                  Acompanhe progresso, agentes e proximos pontos de apoio sem sair da sessao.
-                </p>
-              </div>
-              <div className="rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] p-3 text-[#ead7b1]">
-                <Workflow className="h-5 w-5" />
-              </div>
+      <div className="mx-auto mt-4 w-full max-w-4xl">
+        <WorkspaceReadinessStrip
+          workspaceId={currentWorkspaceId ?? null}
+          workspaceName={currentWorkspaceName}
+          compact
+        />
+
+        <section className="mt-4 rounded-[26px] border border-white/[0.05] bg-[linear-gradient(180deg,rgba(11,11,12,0.74),rgba(4,4,5,0.84))] p-4 shadow-[0_24px_84px_-52px_rgba(0,0,0,0.94),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-2xl md:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/30">
+                Apoio da sessao
+              </p>
+              <h2 className="mt-2 text-[1.1rem] font-semibold tracking-[-0.05em] text-white">
+                Tudo abaixo da conversa.
+              </h2>
             </div>
 
-            <div className="mt-5 grid gap-3">
-              <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
-                  Mensagens
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-white">
-                  {sessionMessages.length}
-                </p>
-                <p className="text-[11px] text-white/42">Historico desta sessao</p>
+            <div className="grid gap-2 text-right sm:grid-cols-3">
+              <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">Mensagens</p>
+                <p className="mt-1 text-xl font-semibold text-white">{sessionMessages.length}</p>
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
-                    Agentes
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{sessionAgentCount}</p>
-                  <p className="text-[11px] text-white/42">Atores acionados na sessao</p>
-                </div>
-                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
-                    Progresso
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {Math.round(liveProgress)}%
-                  </p>
-                  <p className="text-[11px] text-white/42">
-                    {sessionGroupCount} grupo{sessionGroupCount === 1 ? "" : "s"} ativo{sessionGroupCount === 1 ? "" : "s"} na sessao
-                  </p>
-                </div>
+              <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">Agentes</p>
+                <p className="mt-1 text-xl font-semibold text-white">{sessionAgentCount}</p>
               </div>
-            </div>
-
-            <div className="mt-5 grid gap-2">
-              <Link
-                href="/dashboard/calendar"
-                className="inline-flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
-              >
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  Ver agenda
-                </div>
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/dashboard/workspaces"
-                className="inline-flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
-              >
-                <div className="flex items-center gap-2">
-                  <FolderKanban className="h-4 w-4" />
-                  Abrir workspace
-                </div>
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
+              <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">Progresso</p>
+                <p className="mt-1 text-xl font-semibold text-white">{Math.round(liveProgress)}%</p>
+              </div>
             </div>
           </div>
 
-          <CalendarWidget variant="panel" />
-        </aside>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <Link
+              href="/dashboard/calendar"
+              className="inline-flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-3 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+            >
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                Ver agenda
+              </div>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/dashboard/workspaces"
+              className="inline-flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-3 text-sm text-white/70 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+            >
+              <div className="flex items-center gap-2">
+                <FolderKanban className="h-4 w-4" />
+                Abrir workspace
+              </div>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+
+        <CalendarWidget className="mt-4" variant="panel" />
       </div>
     </div>
   );

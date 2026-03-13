@@ -186,7 +186,7 @@ export function WorkspaceReadinessStrip({
           <Link
             key={card.label}
             href={card.href}
-            className="group relative overflow-hidden rounded-[28px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-4 py-4 shadow-[0_18px_70px_-34px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 hover:border-white/[0.12] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.016))]"
+            className="group relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.008))] px-3.5 py-3.5 shadow-[0_18px_48px_-36px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/[0.12] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.012))]"
           >
             <div
               className={cn(
@@ -194,27 +194,27 @@ export function WorkspaceReadinessStrip({
                 card.accent
               )}
             />
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/32">
-                  {card.label}
-                </p>
-                <p className="mt-2 text-[15px] font-semibold leading-snug text-white/92">
-                  {card.value}
-                </p>
-              </div>
+            <div className="flex items-start gap-3">
               <div
                 className={cn(
-                  "rounded-full border p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 group-hover:scale-[1.02]",
+                  "rounded-full border p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 group-hover:scale-[1.02]",
                   card.iconAccent
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/30">
+                  {card.label}
+                </p>
+                <p className="mt-1.5 text-[14px] font-semibold leading-snug tracking-[-0.03em] text-white/92">
+                  {card.value}
+                </p>
+                <p className="mt-2 text-[11px] leading-relaxed text-white/38">
+                  {card.helper}
+                </p>
               </div>
             </div>
-            <p className="mt-3 max-w-[18rem] text-[11px] leading-relaxed text-white/44">
-              {card.helper}
-            </p>
           </Link>
         );
       })}

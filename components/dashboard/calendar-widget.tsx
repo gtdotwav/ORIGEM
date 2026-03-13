@@ -76,17 +76,18 @@ export function CalendarWidget({
       )}
     >
       <div className="relative overflow-hidden rounded-[34px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.08),transparent_30%),linear-gradient(180deg,rgba(16,16,17,0.92),rgba(8,8,9,0.98))] shadow-[0_28px_110px_-40px_rgba(0,0,0,0.92),inset_0_1px_0_rgba(255,255,255,0.05)]">
+        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:112px_112px]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.28)] to-transparent" />
 
-        <div className="flex items-center justify-between border-b border-white/[0.05] px-5 py-4">
+        <div className="relative flex items-center justify-between border-b border-white/[0.05] px-4 py-3.5">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]">
               <CalendarIcon className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/30">
-                Agenda
-              </p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
+                  Agenda
+                </p>
               <h2 className="mt-1 text-sm font-semibold text-white/88">
                 {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
               </h2>
@@ -96,13 +97,13 @@ export function CalendarWidget({
           <Link
             href="/dashboard/calendar"
             title="Abrir calendario completo"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/34 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white/80"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/34 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white/80"
           >
             <Maximize2 className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto border-b border-white/[0.04] px-5 py-4 scrollbar-none">
+        <div className="relative flex gap-2 overflow-x-auto border-b border-white/[0.04] px-4 py-3.5 scrollbar-none">
           {days.map((day) => {
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentToday = isSameDay(day, today);
@@ -160,7 +161,7 @@ export function CalendarWidget({
           })}
         </div>
 
-        <div className="min-h-[184px] bg-[linear-gradient(180deg,rgba(255,255,255,0.012),rgba(0,0,0,0.04))] p-5">
+        <div className="relative min-h-[184px] bg-[linear-gradient(180deg,rgba(255,255,255,0.012),rgba(0,0,0,0.04))] p-4">
           <AnimatePresence mode="popLayout">
             {selectedEvents.length === 0 ? (
               <motion.div

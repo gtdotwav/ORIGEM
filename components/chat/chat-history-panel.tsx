@@ -56,7 +56,8 @@ export function ChatHistoryPanel({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -16, scale: 0.98 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6.3rem)] z-[60] md:inset-x-auto md:bottom-auto md:left-12 md:top-1/2 md:-translate-y-1/2"
+            className="fixed inset-x-3 z-[60] md:inset-x-auto md:bottom-auto md:left-12 md:top-1/2 md:-translate-y-1/2"
+            style={{ bottom: "calc(env(safe-area-inset-bottom) + 6.3rem)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Outer glow */}

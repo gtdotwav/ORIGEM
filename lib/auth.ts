@@ -20,6 +20,17 @@ const hasGoogle =
   Boolean(process.env.AUTH_GOOGLE_SECRET?.trim());
 
 export const authEnabled = hasAuthSecret;
+export const previewAccessEnabled =
+  process.env.VERCEL_ENV === "preview" ||
+  process.env.ORIGEM_PREVIEW_ACCESS === "1";
+
+const PREVIEW_ACCESS_USER = {
+  id: "preview-guest",
+  email: "preview@origem.local",
+  name: "Preview Access",
+  role: "member" as const,
+  providers: ["credentials"] as AuthIdentityProvider[],
+};
 
 /** Which providers are available — used by the login page */
 export const enabledProviders = {
@@ -45,10 +56,21 @@ const providers = authEnabled
           password: { label: "Senha", type: "password" },
         },
         async authorize(credentials, request) {
+          const credentialInput = (credentials ?? null) as Record<string, unknown> | null;
+
+          if (
+            previewAccessEnabled &&
+            credentialInput &&
+            typeof credentialInput.previewAccess === "string" &&
+            credentialInput.previewAccess === "1"
+          ) {
+            return PREVIEW_ACCESS_USER;
+          }
+
           const email =
-            typeof credentials?.email === "string" ? credentials.email.trim() : "";
+            typeof credentialInput?.email === "string" ? credentialInput.email.trim() : "";
           const password =
-            typeof credentials?.password === "string" ? credentials.password : "";
+            typeof credentialInput?.password === "string" ? credentialInput.password : "";
 
           if (!email || !password) {
             return null;

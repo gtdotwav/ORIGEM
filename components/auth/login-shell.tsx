@@ -22,8 +22,12 @@ import { cn } from "@/lib/utils";
 
 type LoginMode = "sign-in" | "sign-up";
 
+const PREVIEW_EMAIL = "preview@origem.local";
+const PREVIEW_PASSWORD = "preview-access";
+
 interface LoginShellProps {
   authReady: boolean;
+  previewAccessAvailable: boolean;
   callbackUrl: string;
   bootstrap: boolean;
   registrationOpen: boolean;
@@ -115,6 +119,7 @@ function PasswordField({
 
 export function LoginShell({
   authReady,
+  previewAccessAvailable,
   callbackUrl,
   bootstrap,
   registrationOpen,
@@ -256,6 +261,35 @@ export function LoginShell({
     void signIn(provider, { redirectTo: callbackUrl });
   }
 
+  function handlePreviewAccess() {
+    setError(null);
+    setPendingAction("preview-access");
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          const result = await signIn("credentials", {
+            redirect: false,
+            redirectTo: callbackUrl,
+            email: PREVIEW_EMAIL,
+            password: PREVIEW_PASSWORD,
+            previewAccess: "1",
+          });
+
+          if (result?.error) {
+            setError("Nao foi possivel abrir o modo preview agora.");
+            return;
+          }
+
+          router.push(result?.url ?? callbackUrl);
+          router.refresh();
+        } finally {
+          setPendingAction(null);
+        }
+      })();
+    });
+  }
+
   if (!authReady) {
     return (
       <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-5 shadow-[0_32px_120px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-7">
@@ -309,6 +343,36 @@ export function LoginShell({
         {error ? (
           <div className="rounded-[20px] border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/72">
             {error}
+          </div>
+        ) : null}
+
+        {previewAccessAvailable ? (
+          <div className="rounded-[22px] border border-[rgba(208,186,143,0.18)] bg-[linear-gradient(180deg,rgba(208,186,143,0.09),rgba(208,186,143,0.03))] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#e0cfad]/72">
+                  Preview deployment
+                </p>
+                <p className="mt-2 max-w-md text-sm leading-6 text-white/60">
+                  Entre direto no ambiente de preview para revisar o produto sem usar credenciais reais.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                onClick={handlePreviewAccess}
+                className="h-11 rounded-[14px] border-[rgba(208,186,143,0.18)] bg-black/20 px-4 text-white hover:border-[rgba(208,186,143,0.3)] hover:bg-[rgba(208,186,143,0.08)]"
+              >
+                {pendingAction === "preview-access" ? (
+                  <Spinner className="h-4 w-4" />
+                ) : (
+                  <ShieldCheck className="h-4 w-4" />
+                )}
+                Entrar no preview
+              </Button>
+            </div>
           </div>
         ) : null}
 

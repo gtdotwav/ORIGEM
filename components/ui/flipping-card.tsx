@@ -17,21 +17,13 @@ export function FlippingCard({
   width = 350,
 }: FlippingCardProps) {
   return (
-    <div
-      className="group/flipping-card [perspective:1000px]"
-      style={
-        {
-          "--height": `${height}px`,
-          "--width": `${width}px`,
-        } as React.CSSProperties
-      }
-    >
+    <div className="group/flipping-card [perspective:1000px]">
       <div
         className={cn(
           "relative rounded-xl border border-border bg-card shadow-lg transition-all duration-700 [transform-style:preserve-3d] group-hover/flipping-card:[transform:rotateY(180deg)]",
-          "h-[var(--height)] w-[var(--width)]",
           className
         )}
+        style={{ height, width }}
       >
         {/* Front Face */}
         <div className="absolute inset-0 h-full w-full rounded-[inherit] bg-card text-foreground [transform-style:preserve-3d] [backface-visibility:hidden] [transform:rotateY(0deg)]">

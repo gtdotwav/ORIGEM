@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { LoginShell } from "@/components/auth/login-shell";
 import { PublicAmbient } from "@/components/public/public-ambient";
-import { auth, authEnabled, enabledProviders } from "@/lib/auth";
+import { auth, authEnabled, enabledProviders, previewAccessEnabled } from "@/lib/auth";
 import { getAuthSetupState } from "@/lib/server/auth/service";
 
 function sanitizeCallbackUrl(input?: string) {
@@ -79,12 +79,18 @@ export default async function LoginPage({
                 <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/40">
                   OAuth opcional
                 </span>
+                {authEnabled && previewAccessEnabled ? (
+                  <span className="rounded-full border border-[rgba(208,186,143,0.18)] bg-[rgba(208,186,143,0.06)] px-3 py-1.5 text-[11px] text-[#e0cfad]/72">
+                    Preview sem credenciais
+                  </span>
+                ) : null}
               </div>
             </div>
 
             <div className="mx-auto mt-10 w-full max-w-xl">
               <LoginShell
                 authReady={authEnabled}
+                previewAccessAvailable={authEnabled && previewAccessEnabled}
                 callbackUrl={callbackUrl}
                 bootstrap={setupState.bootstrap}
                 registrationOpen={setupState.registrationOpen}
