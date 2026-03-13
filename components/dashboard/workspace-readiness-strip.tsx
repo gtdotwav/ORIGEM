@@ -9,14 +9,14 @@ import {
   PlugZap,
   Workflow,
 } from "lucide-react";
-import { useConfiguredProviders } from "@/hooks/use-configured-providers";
 import { PROVIDER_CATALOG } from "@/config/providers";
+import { useConfiguredProviders } from "@/hooks/use-configured-providers";
+import { cn } from "@/lib/utils";
 import { useChatSettingsStore } from "@/stores/chat-settings-store";
 import { useCalendarStore, toDateKey } from "@/stores/calendar-store";
 import { useMCPStore } from "@/stores/mcp-store";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { cn } from "@/lib/utils";
 
 interface WorkspaceReadinessStripProps {
   workspaceId?: string | null;
@@ -31,7 +31,8 @@ interface ReadinessCard {
   value: string;
   helper: string;
   icon: React.ComponentType<{ className?: string }>;
-  tone: string;
+  accent: string;
+  iconAccent: string;
 }
 
 export function WorkspaceReadinessStrip({
@@ -64,7 +65,7 @@ export function WorkspaceReadinessStrip({
         (provider) => provider.name === ecosystemConfig.provider
       );
 
-      return `${meta?.displayName ?? ecosystemConfig.provider} · ${ecosystemConfig.model}`;
+      return `${meta?.displayName ?? ecosystemConfig.provider} / ${ecosystemConfig.model}`;
     }
 
     if (providers.length === 0) {
@@ -79,9 +80,7 @@ export function WorkspaceReadinessStrip({
       return [];
     }
 
-    return connectors.filter(
-      (connector) => connector.workspaceId === effectiveWorkspaceId
-    );
+    return connectors.filter((connector) => connector.workspaceId === effectiveWorkspaceId);
   }, [connectors, effectiveWorkspaceId]);
 
   const connectedConnectors = workspaceConnectors.filter(
@@ -99,14 +98,15 @@ export function WorkspaceReadinessStrip({
     {
       href: "/dashboard/workspaces",
       label: "Contexto",
-      value: effectiveWorkspaceName ?? "Global",
+      value: effectiveWorkspaceName ?? "Contexto global",
       helper:
         effectiveWorkspaceId && workspaceConnectors.length > 0
           ? `${workspaceConnectors.length} conector${workspaceConnectors.length > 1 ? "es" : ""} instalado${workspaceConnectors.length > 1 ? "s" : ""}`
-          : "Sem filtro de workspace",
+          : "Memoria aberta para toda a operacao",
       icon: FolderKanban,
-      tone:
-        "border-white/[0.08] bg-white/[0.03] hover:border-white/[0.16] hover:bg-white/[0.05]",
+      accent: "from-[rgba(208,186,143,0.18)] via-[rgba(208,186,143,0.05)] to-transparent",
+      iconAccent:
+        "border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]",
     },
     {
       href: "/dashboard/settings/providers",
@@ -114,11 +114,12 @@ export function WorkspaceReadinessStrip({
       value: providerSummary,
       helper:
         ecosystemConfig.provider && ecosystemConfig.model
-          ? "Roteamento definido"
-          : "Auto, tier ou manual",
+          ? "Roteamento definido para esta sessao"
+          : "Auto, tier ou modelo manual",
       icon: Orbit,
-      tone:
-        "border-cyan-400/20 bg-cyan-400/8 hover:border-cyan-400/35 hover:bg-cyan-400/12",
+      accent: "from-[rgba(153,176,199,0.16)] via-[rgba(153,176,199,0.05)] to-transparent",
+      iconAccent:
+        "border-[rgba(153,176,199,0.16)] bg-[rgba(153,176,199,0.08)] text-[#d8e3ef]",
     },
     {
       href: "/dashboard/workspaces",
@@ -130,10 +131,11 @@ export function WorkspaceReadinessStrip({
       helper:
         connectedConnectors.length > 0
           ? `${connectedConnectors.length} MCP conectado${connectedConnectors.length > 1 ? "s" : ""}`
-          : "Conecte MCP ao workspace",
+          : "Conecte dados e MCP ao workspace",
       icon: PlugZap,
-      tone:
-        "border-orange-400/20 bg-orange-400/8 hover:border-orange-400/35 hover:bg-orange-400/12",
+      accent: "from-[rgba(177,152,216,0.16)] via-[rgba(177,152,216,0.05)] to-transparent",
+      iconAccent:
+        "border-[rgba(177,152,216,0.16)] bg-[rgba(177,152,216,0.08)] text-[#dfd4f2]",
     },
     {
       href: "/dashboard/calendar",
@@ -144,11 +146,12 @@ export function WorkspaceReadinessStrip({
           : "Dia livre",
       helper:
         todayEvents.length > 0
-          ? "Planejamento ja refletido no calendario"
-          : "Transforme prompts em agenda",
+          ? "Planejamento refletido no calendario"
+          : "Transforme prompts em blocos operacionais",
       icon: CalendarClock,
-      tone:
-        "border-green-400/20 bg-green-400/8 hover:border-green-400/35 hover:bg-green-400/12",
+      accent: "from-[rgba(138,168,145,0.16)] via-[rgba(138,168,145,0.05)] to-transparent",
+      iconAccent:
+        "border-[rgba(138,168,145,0.16)] bg-[rgba(138,168,145,0.08)] text-[#d3e5d6]",
     },
     {
       href: "/dashboard/control",
@@ -162,16 +165,17 @@ export function WorkspaceReadinessStrip({
           ? "Historico pronto para continuidade"
           : "Abra uma sessao para iniciar a trilha",
       icon: Workflow,
-      tone:
-        "border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] hover:border-white/[0.16] hover:bg-white/[0.05]",
+      accent: "from-[rgba(255,255,255,0.12)] via-[rgba(255,255,255,0.04)] to-transparent",
+      iconAccent:
+        "border-white/[0.10] bg-white/[0.04] text-white/78",
     },
   ];
 
   return (
     <div
       className={cn(
-        "grid gap-2",
-        compact ? "sm:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-2 xl:grid-cols-4",
+        "grid gap-3",
+        compact ? "sm:grid-cols-2 xl:grid-cols-5" : "md:grid-cols-2 xl:grid-cols-5",
         className
       )}
     >
@@ -182,31 +186,38 @@ export function WorkspaceReadinessStrip({
           <Link
             key={card.label}
             href={card.href}
-            className={cn(
-              "group rounded-[22px] border px-4 py-3 backdrop-blur-xl transition-all duration-300",
-              card.tone
-            )}
+            className="group relative overflow-hidden rounded-[28px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-4 py-4 shadow-[0_18px_70px_-34px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 hover:border-white/[0.12] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.016))]"
           >
+            <div
+              className={cn(
+                "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r opacity-80 transition-opacity group-hover:opacity-100",
+                card.accent
+              )}
+            />
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/32">
                   {card.label}
                 </p>
-                <p className="mt-1.5 text-sm font-semibold leading-snug text-white/90">
+                <p className="mt-2 text-[15px] font-semibold leading-snug text-white/92">
                   {card.value}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/8 bg-black/20 p-2 text-white/58 transition-colors group-hover:text-white">
+              <div
+                className={cn(
+                  "rounded-full border p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 group-hover:scale-[1.02]",
+                  card.iconAccent
+                )}
+              >
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 text-[11px] leading-relaxed text-white/42">
+            <p className="mt-3 max-w-[18rem] text-[11px] leading-relaxed text-white/44">
               {card.helper}
             </p>
           </Link>
         );
       })}
-
     </div>
   );
 }

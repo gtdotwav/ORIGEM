@@ -362,21 +362,22 @@ export default function ChatPage() {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-130px)] w-full max-w-7xl flex-col px-4 pb-[8.5rem] pt-2 md:h-[calc(100vh-130px)] md:px-6 md:pb-6 md:pt-4">
 
-      <div className="mb-3 rounded-[28px] border border-foreground/[0.08] bg-card/74 p-4 shadow-2xl backdrop-blur-xl md:mb-4 md:p-5">
+      <div className="relative mb-3 overflow-hidden rounded-[34px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.10),transparent_30%),linear-gradient(180deg,rgba(15,15,16,0.95),rgba(7,7,8,0.99))] p-4 shadow-[0_34px_120px_-46px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl md:mb-4 md:p-5">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.28)] to-transparent" />
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)]">
               <Image src="/logo.png" alt="ORIGEM" width={20} height={20} className="opacity-85" />
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-foreground/42">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/34">
                 Sessao ativa
               </p>
-              <h1 className="text-lg font-semibold text-foreground/92">
+              <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] text-foreground/92">
                 {currentSession?.title ?? `Sessao ${sessionId?.slice(0, 8)}`}
               </h1>
-              <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-foreground/40">
-                A mesma sessao segue com contexto, runtime, ferramentas e execucao visiveis no topo.
+              <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-foreground/42">
+                Contexto, runtime, ferramentas e execucao seguem alinhados na mesma superficie.
               </p>
             </div>
           </div>
@@ -395,9 +396,9 @@ export default function ChatPage() {
           </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
           <div
-            className="h-full rounded-full bg-foreground/[0.72] transition-all duration-300"
+            className="h-full rounded-full bg-[linear-gradient(90deg,rgba(244,234,212,1),rgba(216,196,160,1))] transition-all duration-300"
             style={{ width: `${liveProgress}%` }}
           />
         </div>
@@ -411,7 +412,7 @@ export default function ChatPage() {
       </div>
 
       <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <section className="min-h-[28rem] flex-1 rounded-[24px] border border-foreground/[0.08] bg-card/72 shadow-2xl backdrop-blur-xl md:min-h-0 md:rounded-[28px]">
+        <section className="min-h-[28rem] flex-1 rounded-[30px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(14,14,15,0.92),rgba(8,8,9,0.98))] shadow-[0_34px_120px_-48px_rgba(0,0,0,0.96),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl md:min-h-0 md:rounded-[34px]">
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6">
               {sessionMessages.length === 0 ? (
@@ -468,8 +469,8 @@ export default function ChatPage() {
                           className={cn(
                             "group relative max-w-[94%] rounded-[20px] border px-5 py-4 sm:max-w-[85%] shadow-sm backdrop-blur-md transition-all",
                             isUser
-                              ? "border-neon-cyan/25 bg-gradient-to-br from-neon-cyan/[0.08] to-neon-cyan/[0.02] text-neon-cyan/95 shadow-neon-cyan/5"
-                              : "border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 text-white/90 shadow-black/20"
+                              ? "border-[rgba(208,186,143,0.18)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] text-[#f4ead4] shadow-[0_16px_34px_-24px_rgba(208,186,143,0.55)]"
+                              : "border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] text-white/90 shadow-black/20"
                           )}
                         >
                           {!isUser && (
@@ -562,16 +563,16 @@ export default function ChatPage() {
 
                   {isSending && streamingContent !== null && streamingContent.length > 0 && (
                     <div className="flex w-full animate-message-in justify-start">
-                      <div className="group relative max-w-[94%] rounded-[20px] border border-white/[0.08] bg-gradient-to-br from-black/40 to-[oklch(0.12_0_0)]/60 px-5 py-4 text-white/90 shadow-sm shadow-black/20 backdrop-blur-md sm:max-w-[85%]">
+                      <div className="group relative max-w-[94%] rounded-[20px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-5 py-4 text-white/90 shadow-sm shadow-black/20 backdrop-blur-md sm:max-w-[85%]">
                         <MarkdownRenderer content={streamingContent} />
-                        <span className="mt-2 inline-block h-[18px] w-1.5 animate-pulse rounded-full bg-neon-cyan/70" />
+                        <span className="mt-2 inline-block h-[18px] w-1.5 animate-pulse rounded-full bg-[#e9d8b2]/70" />
                       </div>
                     </div>
                   )}
 
                   {isSending && streamingContent === null && (
                     <div className="flex justify-start">
-                      <div className="max-w-[94%] rounded-[20px] border border-white/[0.08] bg-black/40 px-5 py-4 backdrop-blur-md sm:max-w-[85%]">
+                      <div className="max-w-[94%] rounded-[20px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] px-5 py-4 backdrop-blur-md sm:max-w-[85%]">
                         <div className="inline-flex items-center gap-2.5 text-[13px] text-white/60">
                           <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
                           Processando e delegando em tempo real...
@@ -583,7 +584,7 @@ export default function ChatPage() {
 
                   {showLiveRuntimeBubble && (
                     <div className="flex justify-start">
-                      <div className="max-w-[94%] rounded-2xl border border-foreground/[0.09] bg-black/28 px-4 py-3 sm:max-w-[88%]">
+                      <div className="max-w-[94%] rounded-2xl border border-white/[0.07] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] px-4 py-3 sm:max-w-[88%]">
                         <div className="inline-flex items-center gap-2 text-xs text-foreground/65">
                           <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground/72" />
                           Distribuicao em execucao...
@@ -599,7 +600,7 @@ export default function ChatPage() {
             </div>
 
             <form
-              className="border-t border-foreground/[0.07] p-3 md:p-4"
+              className="border-t border-white/[0.06] p-3 md:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 void sendMessage();
@@ -611,12 +612,12 @@ export default function ChatPage() {
                 </p>
                 <span className="text-[11px] text-foreground/34">
                   {showLiveRuntimeBubble
-                    ? `${STAGE_LABELS[stage] ?? stage} · ${Math.round(liveProgress)}%`
+                  ? `${STAGE_LABELS[stage] ?? stage} / ${Math.round(liveProgress)}%`
                     : "Runtime em espera"}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl border border-foreground/[0.08] bg-black/30 p-2">
+              <div className="flex items-center gap-2 rounded-[20px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-2">
                 <AIVoiceInput
                   onStop={(dur) => {
                     if (dur > 0) setInput((prev) => `[Audio: ${dur}s] ${prev}`);
@@ -632,7 +633,7 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled={!input.trim() || isSending}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/[0.10] bg-foreground/[0.08] px-2.5 py-1.5 text-xs font-medium text-foreground/82 transition-colors hover:border-foreground/[0.16] hover:bg-foreground/[0.12] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(208,186,143,0.2)] bg-[linear-gradient(180deg,#f4ead4,#d8c4a0)] px-3 py-2 text-xs font-medium text-black transition-colors hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Send className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Enviar</span>
@@ -643,21 +644,22 @@ export default function ChatPage() {
         </section>
 
         <aside className="hidden xl:flex xl:flex-col xl:gap-4">
-          <div className="rounded-[28px] border border-white/[0.08] bg-black/34 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-3xl">
+          <div className="relative overflow-hidden rounded-[32px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.09),transparent_32%),linear-gradient(180deg,rgba(14,14,15,0.95),rgba(8,8,9,0.98))] p-5 shadow-[0_34px_100px_-44px_rgba(0,0,0,0.94),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-3xl">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.24)] to-transparent" />
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
                   Panorama da sessao
                 </p>
-                <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white">
+                <h2 className="mt-2 text-[1.5rem] font-semibold tracking-[-0.05em] text-white">
                   Continuidade visivel
                 </h2>
                 <p className="mt-2 text-sm leading-7 text-white/48">
                   Acompanhe progresso, agentes e proximos pontos de apoio sem sair da sessao.
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2.5 text-white/70">
-                <Workflow className="h-4.5 w-4.5" />
+              <div className="rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] p-3 text-[#ead7b1]">
+                <Workflow className="h-5 w-5" />
               </div>
             </div>
 

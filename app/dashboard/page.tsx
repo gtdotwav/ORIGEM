@@ -12,12 +12,11 @@ import {
   Blocks as SparklesIcon,
   Paperclip,
   ArrowUp,
-  LayoutDashboard,
-  Layers,
   Plug,
   Presentation,
   Search,
   Workflow,
+  ArrowUpRight,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
@@ -54,52 +53,52 @@ interface ImageAttachmentMetadata {
 
 const COMMAND_SURFACES = [
   {
+    eyebrow: "Radar",
     title: "Pesquisa ao vivo",
-    description: "Busque sinais, posts, noticias e leve tudo para o chat com contexto.",
-    cta: "Abrir pesquisa",
+    description:
+      "Leia sinais culturais, mercado e social com o mesmo contexto do comando principal.",
     href: "/dashboard/feed",
     icon: Search,
-    tone: "border-cyan-400/20 bg-cyan-400/8 hover:border-cyan-400/35 hover:bg-cyan-400/12",
+    accent:
+      "from-[rgba(208,186,143,0.20)] via-[rgba(208,186,143,0.06)] to-transparent",
+    iconTone:
+      "border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]",
   },
   {
+    eyebrow: "Agenda",
     title: "Planejar semana",
-    description: "Transforme objetivos em agenda, blocos de execucao e convites do calendario.",
-    cta: "Abrir calendario",
+    description:
+      "Converta direcao em blocos, ritmo e convites sem quebrar a linha de execucao.",
     href: "/dashboard/calendar",
     icon: CalendarDays,
-    tone: "border-green-400/20 bg-green-400/8 hover:border-green-400/35 hover:bg-green-400/12",
+    accent:
+      "from-[rgba(149,179,155,0.20)] via-[rgba(149,179,155,0.06)] to-transparent",
+    iconTone:
+      "border-[rgba(149,179,155,0.16)] bg-[rgba(149,179,155,0.08)] text-[#d8e6db]",
   },
   {
+    eyebrow: "Build",
     title: "Construir interface",
-    description: "Abra o editor com IA para transformar direcao em codigo, layout e componentes.",
-    cta: "Abrir code",
+    description:
+      "Leve a mesma direcao do comando para codigo, layout e sistema sem recomecar o raciocinio.",
     href: "/dashboard/code",
     icon: Code2,
-    tone: "border-blue-400/20 bg-blue-400/8 hover:border-blue-400/35 hover:bg-blue-400/12",
+    accent:
+      "from-[rgba(144,168,198,0.20)] via-[rgba(144,168,198,0.06)] to-transparent",
+    iconTone:
+      "border-[rgba(144,168,198,0.16)] bg-[rgba(144,168,198,0.08)] text-[#d9e4f0]",
   },
   {
+    eyebrow: "Delivery",
     title: "Gerar apresentacao",
-    description: "Converta estrategia, pesquisa e execucao em slides objetivos e prontos para usar.",
-    cta: "Abrir slides",
+    description:
+      "Transforme estrategia, pesquisa e execucao em material final com acabamento e coerencia.",
     href: "/dashboard/apps/slides",
     icon: Presentation,
-    tone: "border-purple-400/20 bg-purple-400/8 hover:border-purple-400/35 hover:bg-purple-400/12",
-  },
-  {
-    title: "Organizar workspaces",
-    description: "Separe memoria, projetos, arquivos e conectores por operacao real.",
-    cta: "Ver workspaces",
-    href: "/dashboard/workspaces",
-    icon: FolderKanban,
-    tone: "border-white/[0.10] bg-white/[0.03] hover:border-white/[0.18] hover:bg-white/[0.05]",
-  },
-  {
-    title: "Conectar ferramentas",
-    description: "Ative providers, MCPs e runtime para o sistema trabalhar com dados reais.",
-    cta: "Abrir providers",
-    href: "/dashboard/settings/providers",
-    icon: Plug,
-    tone: "border-orange-400/20 bg-orange-400/8 hover:border-orange-400/35 hover:bg-orange-400/12",
+    accent:
+      "from-[rgba(179,159,217,0.20)] via-[rgba(179,159,217,0.06)] to-transparent",
+    iconTone:
+      "border-[rgba(179,159,217,0.16)] bg-[rgba(179,159,217,0.08)] text-[#e2d8f3]",
   },
 ] as const;
 
@@ -253,64 +252,64 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-14 pt-24 md:px-6 md:pb-16 md:pt-28">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_360px]">
+    <div className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 pb-14 pt-24 md:px-6 md:pb-16 md:pt-28">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_340px]">
         <div className="space-y-6">
           <motion.section
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-[34px] border border-white/[0.08] bg-black/42 p-5 shadow-[0_40px_120px_rgba(0,0,0,0.72)] backdrop-blur-3xl md:p-6"
+            className="relative overflow-hidden rounded-[42px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_24%),linear-gradient(180deg,rgba(15,15,16,0.95),rgba(7,7,8,0.99))] p-6 shadow-[0_55px_160px_-50px_rgba(0,0,0,0.96),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-3xl md:p-7"
           >
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="max-w-2xl">
-                <div className="mb-2 flex items-center gap-2">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.3)] to-transparent" />
+
+            <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="max-w-3xl">
+                <div className="mb-3 flex items-center gap-2.5">
                   <Image
                     src="/logo.png"
                     alt="ORIGEM"
-                    width={20}
-                    height={20}
-                    className="pointer-events-none opacity-85"
+                    width={22}
+                    height={22}
+                    className="pointer-events-none opacity-90 drop-shadow-[0_0_22px_rgba(234,215,177,0.18)]"
                   />
-                  <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
-                    Centro de comando
+                  <span className="rounded-full border border-[rgba(208,186,143,0.14)] bg-[rgba(208,186,143,0.06)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-[#d5c19a]/70">
+                    Atelier operacional
                   </span>
                 </div>
 
-                <h1 className="text-2xl font-semibold tracking-[-0.05em] text-white sm:text-[2rem]">
-                  Decida, pesquise e execute com o sistema inteiro a vista.
+                <h1 className="max-w-4xl text-[clamp(2.8rem,5vw,5.35rem)] font-semibold leading-[0.94] tracking-[-0.07em] text-white">
+                  Operacao com direcao,
+                  <br className="hidden lg:block" /> contexto e acabamento.
                 </h1>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-white/50">
-                  Chat, runtime, agenda e ferramentas ficam prontos no mesmo fluxo para
-                  reduzir troca de contexto e acelerar a execucao real.
+                <p className="mt-5 max-w-2xl text-[15px] leading-8 text-white/50 md:text-base">
+                  Chat, runtime, agenda e ferramentas integrados para manter ritmo,
+                  contexto e continuidade do primeiro comando ao output final.
                 </p>
               </div>
 
-              <ChatControlsMenu workspaceName={activeWsName} className="shrink-0" />
+              <ChatControlsMenu
+                workspaceName={activeWsName}
+                className="shrink-0 rounded-full border-[rgba(208,186,143,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]"
+              />
             </div>
 
-            <WorkspaceReadinessStrip
-              workspaceId={activeWorkspaceId}
-              workspaceName={activeWsName}
-              className="mt-5"
-            />
-
             <div
-              className="mt-5 overflow-hidden rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 md:p-5"
+              className="mt-8 overflow-hidden rounded-[34px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6"
               data-tour="chat-input"
             >
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/34">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
                     Nova sessao
                   </p>
-                  <p className="mt-1 text-sm text-white/70">
-                    Descreva o que precisa ser decidido, pesquisado, construido ou executado.
+                  <p className="mt-1.5 text-sm text-white/72">
+                    Escreva com clareza o que precisa ser decidido, pesquisado, desenhado ou executado.
                   </p>
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1.5 text-[11px] text-white/48">
-                  <Compass className="h-3.5 w-3.5 text-neon-cyan" />
-                  {activeWsName ? `Foco em ${activeWsName}` : "Contexto global"}
+                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(208,186,143,0.12)] bg-[rgba(208,186,143,0.06)] px-3 py-1.5 text-[11px] text-[#d9c7a5]/70">
+                  <Compass className="h-3.5 w-3.5" />
+                  {activeWsName ? activeWsName : "Contexto global"}
                 </div>
               </div>
 
@@ -318,9 +317,9 @@ export default function DashboardPage() {
                 ref={textareaRef}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Descreva a meta, anexe uma imagem ou peça um plano de execucao."
+                placeholder="Descreva a meta, anexe uma imagem ou peca um plano de execucao."
                 rows={1}
-                className="block min-h-[112px] w-full resize-none border-none bg-transparent px-0 py-0 text-[17px] font-medium leading-relaxed text-white/92 caret-neon-cyan placeholder:text-white/26 outline-none ring-0 transition-all selection:bg-white/18 md:text-[18px]"
+                className="block min-h-[128px] w-full resize-none border-none bg-transparent px-0 py-0 text-[20px] font-medium leading-relaxed tracking-[-0.03em] text-white/92 caret-[#e9d8b2] placeholder:text-white/22 outline-none ring-0 transition-all selection:bg-white/18 md:text-[22px]"
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
@@ -329,12 +328,12 @@ export default function DashboardPage() {
                 }}
               />
 
-              <div className="mt-4 flex items-center gap-2 border-t border-white/[0.05] pt-4">
+              <div className="mt-5 flex items-center gap-2 border-t border-white/[0.05] pt-4">
                 <button
                   type="button"
                   onClick={openImagePicker}
                   disabled={sending || uploadingImage}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/42 transition-colors hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white disabled:opacity-30"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.02] text-white/42 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:opacity-30"
                   aria-label="Anexar imagem"
                   title="Anexar imagem"
                 >
@@ -349,9 +348,9 @@ export default function DashboardPage() {
                   type="button"
                   onClick={() => setIdeasOpen((value) => !value)}
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
+                    "flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
                     ideasOpen
-                      ? "border-white/[0.16] bg-white/[0.08] text-white/78"
+                      ? "border-[rgba(208,186,143,0.18)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]"
                       : "border-white/[0.06] bg-white/[0.02] text-white/42 hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
                   )}
                   aria-label="Gerar ideias"
@@ -364,7 +363,7 @@ export default function DashboardPage() {
 
                 {!hasInput ? (
                   <span className="hidden text-[11px] text-white/34 sm:inline">
-                    Enter envia. Shift + Enter quebra linha.
+                    Enter envia. Shift + Enter quebra a linha.
                   </span>
                 ) : null}
 
@@ -373,9 +372,9 @@ export default function DashboardPage() {
                   onClick={() => void startSessionFromHome()}
                   disabled={!hasInput || sending || uploadingImage}
                   className={cn(
-                    "inline-flex h-11 items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition-all duration-300",
+                    "inline-flex h-11 items-center gap-2 rounded-full px-[18px] text-sm font-semibold transition-all duration-300",
                     hasInput && !sending
-                      ? "bg-white text-black shadow-[0_0_28px_rgba(255,255,255,0.34)] hover:bg-white/92"
+                      ? "border border-[rgba(208,186,143,0.2)] bg-[linear-gradient(180deg,#f4ead4,#d8c4a0)] text-black shadow-[0_16px_40px_-20px_rgba(208,186,143,0.6)] hover:brightness-[1.03]"
                       : "bg-white/[0.06] text-white/25"
                   )}
                 >
@@ -423,9 +422,15 @@ export default function DashboardPage() {
                 ) : null}
               </AnimatePresence>
             </div>
+
+            <WorkspaceReadinessStrip
+              workspaceId={activeWorkspaceId}
+              workspaceName={activeWsName}
+              className="mt-6"
+            />
           </motion.section>
 
-          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <section className="grid gap-4 lg:grid-cols-2">
             {COMMAND_SURFACES.map((surface) => {
               const Icon = surface.icon;
 
@@ -434,31 +439,39 @@ export default function DashboardPage() {
                   key={surface.title}
                   type="button"
                   onClick={() => router.push(surface.href)}
-                  className={cn(
-                    "group rounded-[28px] border p-5 text-left backdrop-blur-2xl transition-all duration-300",
-                    surface.tone
-                  )}
+                  className="group relative overflow-hidden rounded-[34px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.012))] p-6 text-left shadow-[0_24px_90px_-44px_rgba(0,0,0,0.92),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.018))]"
                 >
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r opacity-80 transition-opacity group-hover:opacity-100",
+                      surface.accent
+                    )}
+                  />
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
-                        Superficie
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
+                        {surface.eyebrow}
                       </p>
-                      <h2 className="mt-3 text-lg font-semibold tracking-[-0.03em] text-white">
+                      <h2 className="mt-3 text-[1.6rem] font-semibold tracking-[-0.05em] text-white">
                         {surface.title}
                       </h2>
                     </div>
-                    <div className="rounded-2xl border border-white/[0.08] bg-black/20 p-2.5 text-white/72 transition-transform duration-300 group-hover:scale-105">
-                      <Icon className="h-4.5 w-4.5" />
+                    <div
+                      className={cn(
+                        "rounded-full border p-3 text-white/72 transition-transform duration-300 group-hover:scale-105",
+                        surface.iconTone
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
                   </div>
 
-                  <p className="mt-3 text-sm leading-7 text-white/48">
+                  <p className="mt-4 max-w-[34rem] text-sm leading-7 text-white/50">
                     {surface.description}
                   </p>
 
-                  <div className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-medium text-white/72">
-                    {surface.cta}
+                  <div className="mt-6 inline-flex items-center gap-1.5 text-[12px] font-medium text-white/76">
+                    Abrir superficie
                     <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </div>
                 </button>
@@ -468,58 +481,84 @@ export default function DashboardPage() {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-[30px] border border-white/[0.08] bg-black/34 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-3xl">
+          <div className="relative overflow-hidden rounded-[34px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.09),transparent_32%),linear-gradient(180deg,rgba(14,14,15,0.95),rgba(8,8,9,0.98))] p-5 shadow-[0_34px_100px_-44px_rgba(0,0,0,0.94),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-3xl">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.24)] to-transparent" />
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
-                  Panorama
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
+                  Atelier
                 </p>
-                <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white">
-                  Operacao pronta para girar
+                <h2 className="mt-2 text-[1.8rem] font-semibold tracking-[-0.05em] text-white">
+                  Um panorama sob controle.
                 </h2>
-                <p className="mt-2 text-sm leading-7 text-white/48">
-                  Veja o que esta ativo, continue sessoes com contexto e abra as superfícies
-                  certas sem quebrar a linha de raciocinio.
+                <p className="mt-3 text-sm leading-7 text-white/46">
+                  Workspace, historico e runtime continuam legiveis sem poluir a composicao.
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2.5 text-white/70">
-                <Workflow className="h-4.5 w-4.5" />
+              <div className="rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] p-3 text-[#ead7b1]">
+                <Workflow className="h-5 w-5" />
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
-                  Sessoes
+            <div className="mt-6 grid gap-3">
+              <div className="rounded-[28px] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-4 py-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-white/30">
+                  Workspace em foco
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-white">{sessions.length}</p>
-                <p className="text-[11px] text-white/42">Historico pronto para continuidade</p>
+                <p className="mt-2 text-xl font-semibold text-white">
+                  {activeWsName ?? "Contexto global"}
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/42">
+                  {activeWsName
+                    ? "A operacao segue filtrada por este workspace."
+                    : "Nenhum filtro fechado; a memoria da operacao esta aberta."}
+                </p>
               </div>
-              <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/34">
-                  Workspaces
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-white">{activeWorkspaceCount}</p>
-                <p className="text-[11px] text-white/42">Contextos ativos para filtrar a operacao</p>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-[24px] border border-white/[0.06] bg-white/[0.02] px-4 py-3.5">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/30">
+                    Sessoes
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-white">
+                    {sessions.length}
+                  </p>
+                  <p className="text-[11px] text-white/40">Historico pronto para continuidade</p>
+                </div>
+                <div className="rounded-[24px] border border-white/[0.06] bg-white/[0.02] px-4 py-3.5">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/30">
+                    Workspaces
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-white">
+                    {activeWorkspaceCount}
+                  </p>
+                  <p className="text-[11px] text-white/40">Contextos vivos para a operacao</p>
+                </div>
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-2">
+            <div className="mt-6 grid gap-2.5">
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/control")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-white/68 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+                onClick={() => router.push("/dashboard/workspaces")}
+                className="inline-flex items-center justify-between rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 py-3 text-[12px] font-medium text-white/72 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                Ver operacao
+                <span className="inline-flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  Organizar workspaces
+                </span>
+                <ArrowUpRight className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/apps")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-white/68 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+                onClick={() => router.push("/dashboard/settings/providers")}
+                className="inline-flex items-center justify-between rounded-full border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-3.5 py-3 text-[12px] font-medium text-white/72 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
               >
-                <Layers className="h-3.5 w-3.5" />
-                Abrir superficies
+                <span className="inline-flex items-center gap-2">
+                  <Plug className="h-4 w-4" />
+                  Ajustar runtime e providers
+                </span>
+                <ArrowUpRight className="h-4 w-4" />
               </button>
             </div>
           </div>

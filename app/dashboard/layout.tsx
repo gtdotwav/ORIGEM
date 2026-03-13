@@ -17,6 +17,10 @@ export default function DashboardLayout({
   const isSpaceCanvas = pathname.startsWith("/dashboard/spaces/");
   const isCodeIDE = pathname === "/dashboard/code";
   const isFullscreen = isSpaceCanvas || isCodeIDE;
+  const showWorkspaceSwitcher =
+    !isFullscreen &&
+    pathname !== "/dashboard" &&
+    !pathname.startsWith("/dashboard/chat/");
 
   return (
     <main className="isolate relative flex min-h-screen flex-col bg-background">
@@ -25,7 +29,7 @@ export default function DashboardLayout({
 
       {/* Floating nav — hidden inside Spaces canvas */}
       {!isFullscreen && <FloatingNav />}
-      {!isFullscreen && (
+      {showWorkspaceSwitcher && (
         <div className="pointer-events-none absolute left-3 top-3 z-40 md:left-6 md:top-6">
           <div className="pointer-events-auto hidden xl:block">
             <WorkspaceSwitcher />

@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
-import { format, addDays, startOfToday, isSameDay } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
+import { addDays, format, isSameDay, startOfToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { motion, AnimatePresence } from "motion/react";
-import { Calendar as CalendarIcon, Clock, Maximize2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Calendar as CalendarIcon, Clock3, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCalendarStore, toDateKey } from "@/stores/calendar-store";
+import { toDateKey, useCalendarStore } from "@/stores/calendar-store";
+
+const EVENT_STYLES = {
+  agent:
+    "border-[rgba(177,152,216,0.16)] bg-[rgba(177,152,216,0.06)] before:bg-[rgba(217,201,246,0.9)]",
+  context:
+    "border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.06)] before:bg-[rgba(236,219,183,0.92)]",
+  default:
+    "border-white/[0.06] bg-white/[0.025] before:bg-white/28",
+} as const;
 
 export function CalendarWidget({
   variant = "standalone",
@@ -18,7 +27,7 @@ export function CalendarWidget({
 }) {
   const events = useCalendarStore((s) => s.events);
   const [mounted, setMounted] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -26,16 +35,17 @@ export function CalendarWidget({
   const today = startOfToday();
   const [selectedDate, setSelectedDate] = useState<Date>(today);
 
-  // Generate a week of days starting from yesterday
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, i) => addDays(today, i - 1));
-  }, [today]);
+  const days = useMemo(
+    () => Array.from({ length: 7 }).map((_, i) => addDays(today, i - 1)),
+    [today]
+  );
 
   const selectedEvents = useMemo(() => {
     if (!mounted) return [];
+
     const dateKey = toDateKey(selectedDate);
     const dayEvents = events[dateKey] || [];
-    
+
     return [...dayEvents].sort((a, b) => {
       if (!a.time && b.time) return -1;
       if (a.time && !b.time) return 1;
@@ -50,7 +60,7 @@ export function CalendarWidget({
     return (
       <div
         className={cn(
-          "h-40 rounded-3xl border border-white/[0.04] bg-white/[0.01]",
+          "h-48 rounded-[32px] border border-white/[0.05] bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))]",
           isPanel ? "w-full" : "mx-auto mt-8 w-full max-w-[720px]",
           className
         )}
@@ -65,127 +75,148 @@ export function CalendarWidget({
         className
       )}
     >
-      <div className="overflow-hidden rounded-[28px] border border-white/[0.04] bg-black/40 shadow-xl backdrop-blur-3xl md:rounded-[32px]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-4">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4 text-neon-cyan" />
-            <h2 className="text-[13px] font-semibold text-foreground/80">Agenda Inteligente</h2>
-            <span className="ml-2 rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-foreground/40 hidden sm:inline-block">
-              {format(selectedDate, "MMMM", { locale: ptBR })}
-            </span>
+      <div className="relative overflow-hidden rounded-[34px] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(208,186,143,0.08),transparent_30%),linear-gradient(180deg,rgba(16,16,17,0.92),rgba(8,8,9,0.98))] shadow-[0_28px_110px_-40px_rgba(0,0,0,0.92),inset_0_1px_0_rgba(255,255,255,0.05)]">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(208,186,143,0.28)] to-transparent" />
+
+        <div className="flex items-center justify-between border-b border-white/[0.05] px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(208,186,143,0.16)] bg-[rgba(208,186,143,0.08)] text-[#ead7b1]">
+              <CalendarIcon className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/30">
+                Agenda
+              </p>
+              <h2 className="mt-1 text-sm font-semibold text-white/88">
+                {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
+              </h2>
+            </div>
           </div>
+
           <Link
             href="/dashboard/calendar"
             title="Abrir calendario completo"
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/30 transition-colors hover:bg-white/[0.06] hover:text-foreground/70"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-white/34 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white/80"
           >
             <Maximize2 className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        {/* Horizontal Calendar Strip */}
-        <div className="flex gap-2 overflow-x-auto border-b border-white/[0.02] bg-white/[0.01] px-5 py-4 scrollbar-none">
+        <div className="flex gap-2 overflow-x-auto border-b border-white/[0.04] px-5 py-4 scrollbar-none">
           {days.map((day) => {
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentToday = isSameDay(day, today);
-            
             const dayKey = toDateKey(day);
             const dayEvents = events[dayKey] || [];
-            
+
             return (
               <button
                 key={day.toString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  "relative flex min-w-[54px] flex-col items-center justify-center rounded-[16px] border px-2 py-3 transition-all",
+                  "relative flex min-w-[62px] flex-col items-center justify-center rounded-[22px] border px-3 py-3.5 transition-all duration-300",
                   isSelected
-                    ? "border-neon-cyan/30 bg-neon-cyan/10 shadow-[0_0_15px_rgba(0,255,255,0.15)]"
-                    : "border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.08]"
+                    ? "border-[rgba(208,186,143,0.26)] bg-[linear-gradient(180deg,rgba(208,186,143,0.12),rgba(208,186,143,0.04))] shadow-[0_18px_34px_-20px_rgba(208,186,143,0.5)]"
+                    : "border-white/[0.05] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.045]"
                 )}
               >
-                <span className={cn(
-                  "mb-1 text-[9px] font-medium uppercase tracking-widest",
-                  isSelected ? "text-neon-cyan" : "text-foreground/40"
-                )}>
-                  {format(day, "eeeee", { locale: ptBR }).substring(0, 3)}
+                <span
+                  className={cn(
+                    "mb-1 text-[9px] font-semibold uppercase tracking-[0.22em]",
+                    isSelected
+                      ? "text-[#ead7b1]"
+                      : isCurrentToday
+                        ? "text-white/70"
+                        : "text-white/34"
+                  )}
+                >
+                  {format(day, "EEEEE", { locale: ptBR }).substring(0, 1)}
                 </span>
-                <span className={cn(
-                  "text-lg font-semibold",
-                  isSelected ? "text-white" : "text-foreground/80",
-                  isCurrentToday && !isSelected && "text-neon-cyan/70"
-                )}>
+                <span
+                  className={cn(
+                    "text-lg font-semibold",
+                    isSelected ? "text-white" : "text-white/78"
+                  )}
+                >
                   {format(day, "d")}
                 </span>
-                
-                {dayEvents.length > 0 && (
-                  <div className="absolute bottom-[6px] flex gap-0.5">
-                    {dayEvents.slice(0, 3).map((_, i) => (
-                      <span key={i} className={cn("h-1 w-1 rounded-full", isSelected ? "bg-neon-cyan" : "bg-foreground/30")} />
+                {dayEvents.length > 0 ? (
+                  <div className="mt-2 flex gap-1">
+                    {dayEvents.slice(0, 3).map((_, index) => (
+                      <span
+                        key={index}
+                        className={cn(
+                          "h-1 w-1 rounded-full",
+                          isSelected ? "bg-[#ead7b1]" : "bg-white/30"
+                        )}
+                      />
                     ))}
                   </div>
+                ) : (
+                  <div className="mt-2 h-1 w-1 rounded-full bg-transparent" />
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* Daily Schedule */}
-        <div className="bg-black/20 p-5 min-h-[140px]">
+        <div className="min-h-[184px] bg-[linear-gradient(180deg,rgba(255,255,255,0.012),rgba(0,0,0,0.04))] p-5">
           <AnimatePresence mode="popLayout">
             {selectedEvents.length === 0 ? (
               <motion.div
                 key="empty"
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex h-full flex-col items-center justify-center py-4 text-center"
+                exit={{ opacity: 0, scale: 0.96 }}
+                className="flex h-full flex-col items-center justify-center py-6 text-center"
               >
-                <div className="mb-3 rounded-full border border-white/[0.04] bg-white/[0.02] p-2.5">
-                  <Clock className="h-4 w-4 text-foreground/30" />
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-white/42">
+                  <Clock3 className="h-4 w-4" />
                 </div>
-                <p className="text-[12px] font-medium text-foreground/40">
-                  Agenda livre para criar.
+                <p className="text-sm font-medium text-white/70">Sem blocos neste dia.</p>
+                <p className="mt-1 max-w-[18rem] text-[12px] leading-relaxed text-white/42">
+                  Use o calendario para transformar uma decisao em agenda real.
                 </p>
-                <Link
-                  href="/dashboard/calendar"
-                  className="mt-3 inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-white/68 transition-colors hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
-                >
-                  Abrir calendario
-                </Link>
               </motion.div>
             ) : (
-              <div className="space-y-2">
-                {selectedEvents.map((evt) => (
-                  <motion.div
-                    key={evt.id}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className={cn(
-                      "group flex items-center gap-3 rounded-[14px] border px-3 py-2.5 transition-colors",
-                      evt.type === "agent" ? "border-neon-purple/20 bg-neon-purple/5 hover:bg-neon-purple/10" :
-                      evt.type === "context" ? "border-neon-pink/20 bg-neon-pink/5 hover:bg-neon-pink/10" :
-                      "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04]"
-                    )}
-                  >
-                    <div className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-xl bg-black/60 shadow-inner">
-                      <span className="text-[10px] font-bold text-foreground/70">
-                        {evt.time || "--"}
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1 pl-1">
-                      <p className="truncate text-[13px] font-medium text-foreground/90">
-                        {evt.title}
-                      </p>
-                      {evt.description && (
-                        <p className="truncate text-[11px] text-foreground/40">
-                          {evt.description}
-                        </p>
+              <div className="space-y-2.5">
+                {selectedEvents.map((event) => {
+                  const style =
+                    event.type === "agent"
+                      ? EVENT_STYLES.agent
+                      : event.type === "context"
+                        ? EVENT_STYLES.context
+                        : EVENT_STYLES.default;
+
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      className={cn(
+                        "relative overflow-hidden rounded-[20px] border pl-4 pr-3 py-3 transition-colors before:absolute before:bottom-4 before:left-0 before:top-4 before:w-px",
+                        style
                       )}
-                    </div>
-                  </motion.div>
-                ))}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 min-w-10 items-center justify-center rounded-full border border-white/[0.06] bg-black/24 px-2 text-[10px] font-semibold text-white/72">
+                          {event.time || "--"}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-semibold text-white/88">
+                            {event.title}
+                          </p>
+                          {event.description ? (
+                            <p className="mt-1 text-[11px] leading-relaxed text-white/46">
+                              {event.description}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </AnimatePresence>
